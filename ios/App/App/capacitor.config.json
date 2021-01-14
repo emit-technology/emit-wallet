@@ -1,0 +1,17 @@
+{
+  "appId": "technology.emit.wallet",
+  "appName": "EMIT Wallet",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "androidSplashResourceName": "splash",
+      "splashFullScreen": false,
+      "splashImmersive": true
+    }
+  },
+  "cordova": {}
+}

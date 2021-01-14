@@ -1,0 +1,42 @@
+.text-small{
+    font-size: 14px;
+}
+
+.text-bold{
+    font-weight: 600;
+}
+
+.text-small-x2{
+    font-size: 12px;
+}
+
+.info-amount{
+    font-size: 14px;
+    font-weight: 500;
+    background-color: rgba(119,131,143,.1);
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.word-break{
+    word-break: break-all;
+    word-wrap: normal;
+}
+
+.text-padding-normal{
+    padding: 12px 5px;
+}
+
+.info-label{
+    font-weight: 800;
+}
+
+.info-block{
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.info-block-span{
+    /*background-color: #3ab9fe;*/
+}

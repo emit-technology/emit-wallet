@@ -1,0 +1,8 @@
+.logo-bg-sharp{
+    height: 20vh;
+    background-image: url('../img/EMIT.png');
+    background-size: 160px;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    opacity: 0.1;
+}

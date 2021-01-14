@@ -1,0 +1,28 @@
+.address-wrap-tunnel{
+    word-break: break-all;
+    padding: 15px 5px;
+    font-size: 14px;
+    color: #333333;
+    font-weight:500;
+}
+
+.icon-coin{
+    border: 1px solid #ddd;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.cross-item{
+    background-color: #fff;
+    padding: 15px 0;
+    border-radius: 15px;
+}
+
+.cross-item-border{
+    border: 1px solid #ddd;
+    /*background-color: #6370ff;*/
+    /*color: #fff;*/
+    padding: 15px;
+}

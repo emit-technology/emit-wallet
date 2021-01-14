@@ -1,0 +1,29 @@
+.address-wrap{
+    word-break: break-all;
+    padding: 5px;
+    color: #333333;
+}
+
+.icon-coin{
+    border: 1px solid #ddd;
+}
+
+.address-list-head{
+    border-radius: 5px;
+}
+
+.coin-chain-eth{
+    position: absolute;
+    left: 15px;
+    font-size: 50%;
+    bottom: 0;
+    font-weight: 600;
+}
+
+.coin-chain-sero{
+    position: absolute;
+    left: 25px;
+    font-size: 50%;
+    bottom: 0;
+    font-weight: 600;
+}

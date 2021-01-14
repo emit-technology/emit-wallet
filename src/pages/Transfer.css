@@ -1,0 +1,25 @@
+.form-padding{
+    padding: 10px 0;
+}
+
+.form-fee-text{
+    font-size: 12px;
+    color: #8c8c8c;
+}
+
+.form-amount{
+    font-size: 32px;
+}
+
+.form-address{
+    font-size: 14px;
+}
+
+.form-button-div{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    padding: 5px;
+    z-index: 999;
+    background-color: #fff;
+}

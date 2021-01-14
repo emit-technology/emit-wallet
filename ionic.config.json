@@ -1,0 +1,7 @@
+{
+  "name": "EMIT Wallet",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">EMIT Wallet</string>
+    <string name="title_activity_main">EMIT Wallet</string>
+    <string name="package_name">technology.emit.wallet</string>
+    <string name="custom_url_scheme">technology.emit.wallet</string>
+</resources>

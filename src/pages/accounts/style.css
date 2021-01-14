@@ -1,0 +1,67 @@
+.button-bottom {
+    bottom: 0;
+    position: fixed;
+    width: 100%;
+    padding: 5px;
+}
+
+.grid-col{
+    height: 60px;
+    padding: 12px;
+    font-weight: 500;
+}
+
+.border-bottom{
+    border-bottom: 1px solid #ddd;
+}
+.border-left{
+    border-left: 1px solid #ddd;
+}
+.border-top {
+    border-top: 1px solid #ddd;
+}
+.border-right{
+    border-right: 1px solid #ddd;
+}
+
+ul{
+    padding-inline-start: 20px !important;
+}
+
+.col-num{
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0 8px 0;
+    font-size: 10px;
+    color: #8c8c8c;
+}
+
+.grid-c{
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    background: #f7f7f7;
+}
+
+.confirm{
+    min-height: 25vh;
+    background-color: #f7f7f7;
+    width: 100%;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    padding: 15px;
+}
+
+.confirm-word-div{
+    padding: 20px;
+}
+
+.password-tips{
+    font-size: 12px;
+    padding: 0 0 0px 20px;
+    color: #3dc2ff;
+}
+
+.import-segment{
+    padding: 15px 30px;
+}
