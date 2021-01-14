@@ -62,7 +62,7 @@ checkBrowsers(paths.appPath, isInteractive)
     // Merge with the public folder
     copyPublicFolder();
     // Start the webpack build
-    return build(previousFileSizes);
+    return build(previousFileSizes)
   })
   .then(
     ({ stats, previousFileSizes, warnings }) => {
@@ -193,7 +193,7 @@ function build(previousFileSizes) {
         );
         return reject(new Error(messages.warnings.join('\n\n')));
       }
-
+      copyDocsFolder();
       return resolve({
         stats,
         previousFileSizes,
@@ -205,6 +205,13 @@ function build(previousFileSizes) {
 
 function copyPublicFolder() {
   fs.copySync(paths.appPublic, paths.appBuild, {
+    dereference: true,
+    filter: file => file !== paths.appHtml,
+  });
+}
+
+function copyDocsFolder() {
+  fs.copySync(paths.appBuild, paths.appDocs, {
     dereference: true,
     filter: file => file !== paths.appHtml,
   });
