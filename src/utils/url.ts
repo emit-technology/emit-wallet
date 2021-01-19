@@ -44,6 +44,8 @@ class Url {
 
     private scan = "scan";
 
+    private swapWEth = "swap/eth";
+
     constructor() {
     }
 
@@ -145,10 +147,17 @@ class Url {
 
     aboutUs(){
         this.goTo([this.base,this.settings.about].join("/"),this.path_settings());
+        return
     }
 
     qrScan(pre:string){
         this.goTo([this.base,this.scan].join("/"),[this.base].join("/"));
+        return
+    }
+
+    swapEth(op:string){
+        this.goTo([this.base,this.swapWEth,op].join("/"),[this.base].join("/"))
+        return
     }
 
 }

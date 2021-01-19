@@ -103,24 +103,16 @@ class RPC {
             }else if(tx.chain == ChainType.ETH){
                 //sign
                 // tx.chainId = 1337;
-                // @ts-ignore
-                tx.nonce = await this.post("eth_getTransactionCount",[tx.from,"pending"]);
+                if(!tx.nonce){
+                    // @ts-ignore
+                    tx.nonce = await this.post("eth_getTransactionCount",[tx.from,"pending"]);
+                }
                 console.log("eth commit tx>>>",tx)
                 const signEthRet = await walletWorker.signTx(accountId,password,ChainType.ETH, tx,CHAIN_PARAMS)
                 console.log(signEthRet,"signEthRet>>")
                 //commitTx
                 hash = await this.post("eth_commitTx",["0x"+signEthRet,tx])
             }
-            // switch (tx.chain){
-            //     case ChainType.SERO:
-            //
-            //         break;
-            //     case ChainType.ETH:
-            //
-            //         break
-            //     default:
-            //         break
-            // }
             return Promise.resolve(hash);
         }else{
             return Promise.reject("Account not exist!")

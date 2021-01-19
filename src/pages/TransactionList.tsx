@@ -168,7 +168,7 @@ class TransactionList extends React.Component<any, any>{
                                     <p  className="text-small">{utils.formatDate(record.timestamp*1000)}</p>
                                 </IonLabel>
                                 <IonText slot="end" className="text-small" color={color}>
-                                    <IonChip color={color}>{prefix}{utils.fromValue(value,utils.getCyDecimal(cy,ChainType[chain])).toString(10)}</IonChip>
+                                    <IonChip color={color}>{prefix}{utils.fromValue(value,utils.getCyDecimal(cyName,ChainType[chain])).toString(10)}</IonChip>
                                 </IonText>
                             </IonItem>
                         }):""

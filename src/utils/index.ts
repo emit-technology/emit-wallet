@@ -18,7 +18,9 @@
 
 import BigNumber from 'bignumber.js'
 import {BRIDGE_CURRENCY, BRIDGE_RESOURCE_ID, DECIMAL_CURRENCY, GAS_DEFAULT, GAS_PRICE_UNIT} from "../config"
-import {ChainType} from "../types";
+import {ChainType, GasPriceLevel} from "../types";
+import {Plugins} from "@capacitor/core";
+import rpc from "../rpc";
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = require("base-x")(BASE58);
@@ -44,7 +46,7 @@ export function arrayToObject(arr:Array<any>){
     return ret
 }
 
-export function fromValue(value:string | BigNumber | number, decimal:number):BigNumber{
+export function fromValue(value:string | BigNumber | number | undefined, decimal:number):BigNumber{
     if (!value){
         return new BigNumber(0)
     }
@@ -133,6 +135,36 @@ export function getCrossEventStatus(status:string){
     }
 }
 
+export function getExplorerTxUrl(chain:ChainType,hash:string){
+    if (chain == ChainType.ETH){
+        if(new Date().getTimezoneOffset() / 60 == -8){
+            return `https://cn.etherscan.com/tx/${hash}`
+        }else {
+            return `https://etherscan.com/tx/${hash}`
+        }
+    }else if(chain == ChainType.SERO){
+        return `https://explorer.sero.cash/txsInfo.html?hash=${hash}`
+    }else if(chain == ChainType.TRON){
+        return `https://tronscan.io/#/transaction/${hash}`
+    }
+    return `https://etherscan.com/tx/${hash}`
+}
+
+export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
+    if (chain == ChainType.ETH){
+        if(new Date().getTimezoneOffset() / 60 == -8){
+            return `https://cn.etherscan.com/block/${num}`
+        }else {
+            return `https://etherscan.com/block/${num}`
+        }
+    }else if(chain == ChainType.SERO){
+        return `https://explorer.sero.cash/blockInfo.html?hash=${hash}`
+    }else if(chain == ChainType.TRON){
+        return `https://tronscan.io/#/block/${num}`
+    }
+    return `https://etherscan.com/block/${hash}`
+}
+
 /**
  * Determine the mobile operating system.
  * This function returns one of 'iOS', 'Android', 'Windows Phone', or 'unknown'.
@@ -162,4 +194,24 @@ export function getMobileOperatingSystem() {
 
 export function IsAPP(){
     return getMobileOperatingSystem() == "iOS" || getMobileOperatingSystem() == "Android";
+}
+
+export async function defaultGasPrice(chain:ChainType){
+    let defaultGasPrice;
+    let data: GasPriceLevel = {};
+    if (chain == ChainType.ETH) {
+        // @ts-ignore
+        data = await rpc.post("eth_gasTracker", [])
+    } else if (chain == ChainType.SERO) {
+        data = {
+            AvgGasPrice: {
+                gasPrice: "1",
+                second: 15,
+            }
+        }
+    } else if (chain == ChainType.TRON) {
+        //TODO
+    }
+    defaultGasPrice = data.AvgGasPrice ? data.AvgGasPrice?.gasPrice : "1"
+    return defaultGasPrice;
 }

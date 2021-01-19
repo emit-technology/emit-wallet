@@ -74,6 +74,7 @@ import './theme/variables.css';
 import selfStorage from "./utils/storage";
 
 import i18n from "./locales/i18n"
+import ExchangeWETH from "./pages/ExchangeWETH";
 
 const App: React.FC = () => (
     <IonApp>
@@ -93,6 +94,7 @@ const App: React.FC = () => (
             <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
             <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
             <Route path="/scan" component={Scan} exact={true}/>
+            <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
             <Route path="/" render={() => {
                 const viewedSlide = selfStorage.getItem('viewedSlide');
                 if (!viewedSlide) {

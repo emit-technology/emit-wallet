@@ -46,6 +46,8 @@ import EthToken from "../contract/erc20/eth";
 import * as config from "../config";
 import i18n from "../locales/i18n";
 import GasFeeProxy, {TokenRate} from "../contract/gasFeeProxy";
+import ConfirmTransaction from "../components/ConfirmTransaction";
+import GasPriceActionSheet from "../components/GasPriceActionSheet";
 
 
 class Transfer extends React.Component<any, any> {
@@ -61,11 +63,9 @@ class Transfer extends React.Component<any, any> {
         balance:{},
         showAlert:false,
         showActionSheet:false,
-        gasTracker:{},
-        gasPriceLevel: {},
-        gasPrice:1,
-        gas:21000,
-        showProgress:false
+        gasPrice:"",
+        showProgress:false,
+        tx:{}
     }
 
     componentDidMount() {
@@ -73,7 +73,6 @@ class Transfer extends React.Component<any, any> {
             to:this.props.match.params.to
         })
         this.init().then(()=>{
-            this.getGasEstimate().then().catch();
         }).catch();
     }
 
@@ -86,6 +85,7 @@ class Transfer extends React.Component<any, any> {
             const balance = await rpc.getBalance(chainId, account.addresses[chainId]);
             const realCy = utils.getCyName(cy, chainName);
 
+            const defaultGasPrice = await utils.defaultGasPrice(chainId);
             this.setState({
                 feeCy:chainId == ChainType.SERO && cy !== ChainType[ChainType.SERO] ? realCy : chainName,
                 cy: cy,
@@ -93,7 +93,7 @@ class Transfer extends React.Component<any, any> {
                 account: account,
                 realCy: realCy,
                 balance:balance,
-                gas:utils.toHex(utils.defaultGas(chainId)),
+                gasPrice:defaultGasPrice,
             })
         } else {
             // window.location.href = "#/"
@@ -101,77 +101,13 @@ class Transfer extends React.Component<any, any> {
         }
     }
 
-    convertFee = async (fee:any)=>{
-        const {chain,realCy,cy} = this.state;
-        if(chain == ChainType.SERO && cy !== "SERO"){
-            const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
-            const feeRate:TokenRate  = await gasFeeProxy.tokenRate();
-            return utils.fromValue(
-                feeRate.feeAmount.multipliedBy(utils.toValue(fee,18)).dividedBy(feeRate.seroAmount),
-                utils.getCyDecimal(cy,ChainType[chain])
-            ).toFixed(6,2)
-        }
-        return fee;
-    }
-
-    getGasEstimate = async ()=>{
-        const {chain,gasPrice} = this.state;
-        if(chain == ChainType.SERO){
-            this.setFee("1",utils.defaultGas(chain)).then((rest)=>{
-                this.setState({
-                    gas: utils.defaultGas(chain),
-                    // gasPriceLevel:data && data,
-                    gasPrice: 1,
-                    fee: rest
-                })
-            })
-
-        }else{
-            const data:any = await rpc.post("eth_gasTracker",[])
-            if(new BigNumber(gasPrice).toNumber() == 1){
-                this.setFee(data && data.AvgGasPrice.gasPrice).then((rest)=>{
-                    this.setState({
-                        gasPriceLevel:data && data,
-                        gasPrice:data && data.AvgGasPrice.gasPrice,
-                        fee:rest
-                    })
-                })
-            }else{
-                this.setState({
-                    gasPriceLevel:data && data,
-                })
-            }
-
-        }
-    }
-
-    check = ()=>{
-        const {to, amount, fee, chain,gasPrice,cy,gas, account, realCy,balance} = this.state;
+    check = async ()=>{
+        const {to, amount,chain,account,realCy,gasPrice,cy,balance,gas} = this.state;
         if (!to) {
             this.setShowToast(true,"","To is required!")
             return;
         }else{
 
-        }
-        if (!amount) {
-            this.setShowToast(true,"","Amount is required!")
-            return;
-        }
-        this.setShowAlert(true);
-    }
-
-    confirm = async (password:string) => {
-        const {to, amount, fee, chain,gasPrice,cy,gas, account, realCy,balance} = this.state;
-        if(!password){
-            this.setShowToast(true,"","Input password!")
-            setTimeout(()=>{
-                this.setShowAlert(true)
-            },500)
-            return;
-        }
-        if (!to) {
-            this.setShowToast(true,"","To is required!")
-            return;
         }
         if (!amount) {
             this.setShowToast(true,"","Amount is required!")
@@ -190,7 +126,8 @@ class Transfer extends React.Component<any, any> {
             cy: realCy,
             gasPrice: "0x"+new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: chain,
-            amount: "0x0"
+            amount: "0x0",
+            feeCy:ChainType[ChainType.ETH]
         }
         //ETH ERC20
         if(chain == ChainType.ETH){
@@ -205,15 +142,17 @@ class Transfer extends React.Component<any, any> {
                 tx.gas = gas;
                 tx.value = value;
             }
+            tx.feeCy = ChainType[ChainType.ETH];
         }else if(chain == ChainType.SERO){
             if(realCy !== ChainType[ChainType.SERO]){
                 const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
                 const tokenRate = await gasFeeProxy.tokenRate()
-                console.log("tokenRate>>> ",tokenRate);
+                console.log("tokenRate>>> ",tokenRate.feeAmount.toString(10),tokenRate.seroAmount.toString(10));
                 tx.value = utils.toHex(utils.toValue(amount,utils.getCyDecimal(cy,ChainType[chain])));
                 tx.data = await gasFeeProxy.transfer(to);
                 tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
                 tx.gas = await gasFeeProxy.estimateGas(tx)
+                console.log(tx.gas,"gas")
                 tx.amount = "0x0";
                 tx.feeCy = realCy;
                 if(tx.gas && tx.gasPrice){
@@ -224,23 +163,31 @@ class Transfer extends React.Component<any, any> {
             }else{
                 tx.gas = gas;
                 tx.value = value;
+                tx.feeCy = "SERO";
             }
         }
-        this.setShowProgress(true);
-        rpc.commitTx(tx, password).then(hash => {
-            this.setShowToast(true,"success","Commit Successfully!")
-            setTimeout(()=>{
-                // window.location.href = `#/transaction/info/${chain}/${hash}`
-                url.transactionInfo(chain,hash,cy);
-            },1500)
-            this.setShowProgress(false);
-            console.log("page rpc commitTx hash", hash);
-        }).catch((e:any)=>{
-            this.setShowProgress(false);
-            const err = typeof e === "string"?e:e.message;
-            this.setShowToast(true,"",err)
-            console.error(e);
+        this.setState({
+            tx:tx,
+            showAlert:true
         })
+    }
+
+    confirm = async (hash:string) => {
+        const {chain,cy} = this.state;
+        let intervalId:any = 0;
+        intervalId = setInterval(()=>{
+            rpc.getTxInfo(chain,hash).then((rest)=>{
+                if(rest){
+                    this.setShowToast(true,"success","Commit Successfully!")
+                    clearInterval(intervalId);
+                    url.transactionInfo(chain,hash,cy);
+                    this.setShowProgress(false);
+                }
+            }).catch(e=>{
+                console.error(e)
+            })
+        },1000)
+        this.setShowAlert(false)
     }
 
     setShowToast = (f:boolean,color?:string,m?:string) =>{
@@ -258,79 +205,13 @@ class Transfer extends React.Component<any, any> {
     }
 
     setShowActionSheet = (f: boolean) => {
-        if(f){
-            this.getGasEstimate().then(()=>{
-                this.setState({
-                    showActionSheet: f
-                })
-            }).catch();
-        }else{
-            this.setState({
-                showActionSheet: f
-            })
-        }
-    }
-
-
-    setFee = async (gasPrice:string,gas?:any)=>{
-        const {cy,chain,realCy,account} = this.state;
-        if(!gas) gas = 21000;
-        if(chain == ChainType.SERO && cy!==ChainType[ChainType.SERO]){
-            const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
-            const tx:any = {};
-            tx.value = utils.toHex(utils.toValue("1",utils.getCyDecimal(cy,ChainType[chain])));
-            tx.data = await gasFeeProxy.transfer(account.addresses[chain]);
-            tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
-            gas = await gasFeeProxy.estimateGas(tx)
-        }
-        let fee = gasPrice ?utils.fromValue(new BigNumber(gasPrice).multipliedBy(1e9).multipliedBy(gas),18).toString(10):0;
-        return await this.convertFee(fee)
+        this.setState({
+            showActionSheet: f
+        })
     }
 
     sort(a:any,b:any){
         return new BigNumber(a.gasPrice).comparedTo(new BigNumber(b.gasPrice))
-    }
-
-    renderSheetOptions = ():Array<any> =>{
-        const {gasPriceLevel,gasPrice} = this.state;
-
-        const options:Array<any> = [];
-        const keys = Object.keys(gasPriceLevel);
-        const arr:Array<any> = [];
-        const trimKey:any = [];
-        for(let key of keys){
-            const gasTracker = gasPriceLevel[key];
-            if(trimKey.indexOf(gasTracker.gasPrice) == -1){
-                trimKey.push(gasTracker.gasPrice)
-                arr.push(gasTracker);
-            }
-        }
-        arr.sort(this.sort);
-        const desc = [i18n.t("slow"), i18n.t("general"), i18n.t("fast"), i18n.t("fastest")];
-        for(let i=arr.length-1;i>=0;i--){
-            const a = arr[i];
-            options.push({
-                text: `${desc[i]},${a.gasPrice}GWei , ${Math.floor(a.second/60)}m ${a.second%60}s`,
-                role: gasPrice === a.gasPrice?"selected":"",
-                handler: () => {
-                    this.setFee(a.gasPrice).then((rest)=>{
-                        this.setState({
-                            gasPrice:a.gasPrice,
-                            fee:rest
-                        })
-                    })
-                }
-            })
-        }
-        options.push({
-            text: i18n.t("cancel"),
-            role: 'cancel',
-            icon: trash,
-            handler: () => {
-
-            }
-        })
-        return options;
     }
 
     setShowProgress = (f:boolean)=>{
@@ -339,8 +220,17 @@ class Transfer extends React.Component<any, any> {
         })
     }
 
+    setGasPrice=(v:string)=>{
+        this.setState(
+            {
+                gasPrice:v,
+                showActionSheet:false
+            }
+        )
+    }
+
     render() {
-        const {cy, chain, account, realCy, showProgress,fee,gas,gasPrice, to, amount,feeCy,showToast,toastMessage,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
+        const {cy, chain, account, realCy, showProgress,fee,gas,gasPrice,tx, to, amount,feeCy,showToast,toastMessage,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
 
         return <IonPage>
             <IonContent fullscreen>
@@ -370,7 +260,9 @@ class Transfer extends React.Component<any, any> {
                     </IonItem>
                     <IonItem mode="ios" className="form-padding">
                         <IonLabel position="stacked">{i18n.t("amount")}
-                            <IonText className="ion-float-right" color="medium">{utils.fromValue(balance[realCy],utils.getCyDecimal(cy,ChainType[chain])).toString(10)} {`${cy}(${realCy})`}</IonText>
+                            <IonText className="ion-float-right" color="medium">
+                                {utils.fromValue(balance[realCy],utils.getCyDecimal(cy,ChainType[chain])).toString(10)} {`${cy}(${realCy})`}
+                            </IonText>
                         </IonLabel>
                         <IonInput onIonChange={(e: any) => {
                             this.setState({
@@ -379,21 +271,21 @@ class Transfer extends React.Component<any, any> {
                         }} value={amount} className="form-amount" type="number" placeholder="0"/>
                     </IonItem>
                     <IonItem mode="ios" lines="none" className="form-padding" onClick={()=>{
-                        chain == ChainType.ETH && this.setShowActionSheet(true);
+                        this.setShowActionSheet(true);
                     }}>
-                        <IonLabel position="stacked">{i18n.t("minerFee")}</IonLabel>
-                        <div slot="end">
-                            {fee} {feeCy}<br/>
-                            <IonText color="medium" className="form-fee-text">
-                            (Gas:{new BigNumber(gas).toString(10)} * GasPrice:{gasPrice} {utils.gasUnit(chain)})
+                        <IonLabel position="stacked">{i18n.t("gasPrice")}</IonLabel>
+                        <IonText slot="end">
+                            {gasPrice} {utils.gasUnit(chain)}
                         </IonText>
-                        </div>
                         {chain == ChainType.ETH && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
                     </IonItem>
                 </IonList>
                 <div className="form-button-div">
                     <IonButton mode="ios" expand="block" disabled={showProgress || !to || !amount} onClick={() => {
-                        this.check();
+                        this.check().catch(e=>{
+                            const err = typeof e === "string"?e:e.message;
+                            this.setShowToast(true,"danger",err);
+                        });
                     }}>{showProgress&&<IonSpinner name="bubbles" />}{i18n.t("confirm")}</IonButton>
                 </div>
             </IonContent>
@@ -406,56 +298,10 @@ class Transfer extends React.Component<any, any> {
                 duration={1500}
                 mode="ios"
             />
-            <IonAlert
-                mode="ios"
-                isOpen={showAlert}
-                onDidDismiss={() => this.setShowAlert(false)}
-                cssClass='my-custom-class'
-                header={i18n.t("transfer")}
-                inputs={[
-                    {
-                        name: 'password',
-                        type: 'password',
-                        placeholder: i18n.t("password"),
-                        cssClass: 'specialClass',
-                        attributes: {
-                            autofocus: 'autofocus'
-                        }
-                    }
-                ]}
-                buttons={[
-                    {
-                        text: i18n.t("cancel"),
-                        role: 'cancel',
-                        cssClass: 'secondary',
-                        handler: () => {
-                            console.log('Confirm Cancel');
-                        }
-                    },
-                    {
-                        text: i18n.t("ok"),
-                        handler: (e) => {
-                            console.log('Confirm Ok',e);
-                            this.setShowAlert(false)
-                            this.confirm(e["password"]).catch(e=>{
-                                const err = typeof e === "string"?e:e.message;
-                                this.setShowToast(true,"danger",err)
-                            });
 
-                        }
-                    }
-                ]}
-            />
+            <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 
-            <IonActionSheet
-                mode="ios"
-                isOpen={showActionSheet}
-                onDidDismiss={() => this.setShowActionSheet(false)}
-                cssClass='my-custom-class'
-                buttons={this.renderSheetOptions()}
-            >
-            </IonActionSheet>
-
+            <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f)=>this.setShowProgress(f)} onCancel={()=>this.setShowAlert(false)} onOK={this.confirm}/>
         </IonPage>;
     }
 }

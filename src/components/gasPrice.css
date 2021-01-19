@@ -1,0 +1,29 @@
+.gas-price-modal{
+    --min-height:50vh;
+    --height:auto;
+    /*--height:auto;*/
+    --border-radius:15px 25px 0 0;
+
+}
+
+.confirm-transaction-modal{
+    --min-height:80vh;
+    --height:auto;
+    --border-radius:15px 25px 0 0;
+}
+
+.gas-price-modal .modal-wrapper{
+    position: absolute;
+    bottom: 0;
+}
+
+.confirm-transaction-modal .modal-wrapper{
+    position: absolute;
+    bottom: 0;
+}
+
+.work-break{
+    word-break: break-all;
+    max-height: 100px;
+    overflow-y: scroll;
+}

@@ -19,35 +19,33 @@
 export const CONTRACT_ADDRESS: any = {
     ERC20: {
         ETH: {
-            USDT: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-            eSERO: "0x944854f404c7C0dF9780651D9B29947C89D8fD19"
-        },
-        SERO: {
-            USDT: "3RVjrSqPxVMAHQjANzFEeh5LRfVW7x6Z1MTtDwmb99A6J8uBkYfiHsGkxtThewogGxDEaEsTdZoZDbAKduSN1bc1"
+            USDT: "0x793359af58fa92e0beb08f37e509071c42dcc32c",
+            eSERO: "0xe462e7697F2fb33DE4eb46665D4E7D29DA647816",
+            WBTC: "0x50395D1b70d8a73eF350AEbFE6278a212B018Ade",
+            WETH: "0xE69B7b16AD568BDF11924C0b471176553e9AD1aF"
         }
     },
     CROSS: {
         ETH: {
-            BRIDGE: "0xefb47ee694e48ca6a2f8a0c4f00b9578d5db647b",
-            HANDLE: "0x1382ed0b7c587f7912dfc4a96df8d34c65fe77be",
-            FEE: "0x4a6119e5abf0b191b5df50c95f9925f4acbe5692",
+            BRIDGE: "0xC7c287200D0952d4f591509463fD5203C7D88F56",
+            HANDLE: "0xB47E605e2daAfBD2A3F44216c47033FE71c96A2F",
+            FEE: "0x622eC769d63465eE56E5a994826E323080C56B39",
         },
         SERO: {
-            BRIDGE: "52xsiJFa4ip3KaUJ84KJNcSFSuhNuc5dkrfxtR1UTXvyAHcc6wztfz1QctRgfp4jBNQd7c66k7qzr2mBtehcnjrT",
-            HANDLE: "45q6GtTuaeMgkdMWgE225recGEPYjL5W9bCBT83s3DZpxSvuca9rDWTET6W4fiAzckX8nJGn6rz6YXAGWZ2Bk4yZ",
-            FEE: "jkfGY4tN9EaJaAT9tc3uKjYLH3tSaTz2zCGwcorabRatJRBrDtFdwz6ASDDnCsWyxFxW6x7RVuVmPhFLxGsRa3u",
+            BRIDGE: "tCWmQ5NbUxm2y7HxZaKrfd3KzaLehyTFHPdqq5vPdj4rFHig23kNxNG7Y3Dk2ST3YS1D9GoUtaNskR3xsDobTbz",
+            HANDLE: "2HwsEHQEDTt68r3TB6Q4hCZGprafiwxjvhj31zVJNTbStUogNeLKeXcVWAiGq4zDSqP2qibJLdeHr7YJZkovgs52",
+            FEE: "4sgmyfwsd4DL5b1e2YHjrseFCnHsk1LTBdLJh5husqpyugRkSkNDW4FGXze4fWb3SwFGzT5o1rC8FUN2DQmL7iHU",
         }
-    },
+    }
 }
 
 export const CHAIN_PARAMS:any = {
     baseChain:"mainnet",
     customer:{
-        name:"mainnet",
-        networkId: 1,
-        chainId: 1,
+        networkId: 15,
+        chainId: 1337,
     },
-    hardfork:"byzantium"
+    hardfork:"petersburg"
 }
 
 export const GAS_DEFAULT: any = {
@@ -63,7 +61,9 @@ export const GAS_PRICE_UNIT: any = {
 export const TOKEN_DESC: any = {
     SERO: "Super Zero",
     ETH: "Ethereum",
-    USDT: "Tether"
+    USDT: "Tether",
+    WBTC:"Wrapped BTC",
+    WETH: "Wrapped ETH"
 }
 
 export const DECIMAL_CURRENCY: any = {
@@ -75,13 +75,16 @@ export const DECIMAL_CURRENCY: any = {
         EUSDT: 6,
         EWETH: 18,
         USDT: 6,
-        ETH: 18
+        ETH: 18,
+        EWBTC: 8,
     },
     ETH: {
         SERO: 18,
         eSERO: 18,
         USDT: 6,
-        ETH: 18
+        ETH: 18,
+        WBTC:8,
+        WETH:18
     }
 }
 
@@ -123,16 +126,42 @@ export const BRIDGE_CURRENCY: any = {
             CY_TYPE: ""
         }
 
-    }
+    },
+    WBTC :{
+        ETH: {
+            CY: "WBTC",
+            CY_TYPE: "ERC20"
+        },
+        SERO: {
+            CY: "EWBTC",
+            CY_TYPE: "SRC20"
+        }
+
+    },
+    WETH :{
+        ETH: {
+            CY: "WETH",
+            CY_TYPE: "ERC20"
+        },
+        SERO: {
+            CY: "EWETH",
+            CY_TYPE: "SRC20"
+        }
+
+    },
 }
 
 export const BRIDGE_RESOURCE_ID: any = {
-    SERO: "0x0000000000000000000000000000000000000000000000000000005345524f02",
-    USDT: "0x0000000000000000000000dac17f958d2ee523a2206206994597c13d831ec701"
+    SERO: "0x0000000000000000000000fa083db782e41b5a93a9de81aaefc92d2708052800",
+    USDT: "0x000000000000000000000021605f71845f372A9ed84253d2D024B7B10999f400",
+    WBTC: "0x000000000000000000000050395D1b70d8a73eF350AEbFE6278a212B018Ade01",
+    WETH: "0x0000000000000000000000E69B7b16AD568BDF11924C0b471176553e9AD1aF01"
 }
 
-export const EMIT_HOST:string = "https://node-account.emit.technology";
+export const EMIT_HOST: string = "http://127.0.0.1:7655/"
 
 export const GAS_FEE_PROXY_ADDRESS:any = {
-    EUSDT:"2ybhTPwVXLKtA7PGLeL2rzQPctq1j86MxdNemrTSbHwT4yvkoF4L1jLQ1rNtYsoRUsiuvWkiLqi2Hpek8Kzq8uKS"
+    EUSDT:"3zV9TNcWPKtLLhSksxX6bWKmYto3sz7j1xWWEDgEXheaVcHKX2qfm5A5Q69i4n15cQRjELmJbepFbPYEEjbxXvRz",
+    EWBTC:"5oCMi6xww5MowNsKzZ7VHjmzyvUxAbjqifGaisQmMrgvZ7jEbY14PhjRbNt6EULHwMNwc7CbmAEjQ7JeM3DQDA4c",
+    EWETH:"MhcfrgchQc8wZZoY2NGPsLUV4JNgR43WVriC2L4R5kc9eXumtZcRKA6AvG9goXLSr48hFn52BAr16nQ6yVJruXk",
 }

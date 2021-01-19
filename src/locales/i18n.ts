@@ -118,15 +118,16 @@ Plugins.Device.getLanguageCode().then(d=>{
     }else if(langCode.toLowerCase().indexOf("zh")>-1){
         langCode = "zh_TW"
     }
-    const lang = localStorage.getItem("language");
+    let lang = localStorage.getItem("language");
     if(!lang){
-        i18n.changeLanguage(langCode,()=>{
-            console.log("change language")
-        }).catch(e=>{
-            console.error(e)
-        })
-        localStorage.setItem("language", langCode);
+        lang = langCode;
+        localStorage.setItem("language", lang);
     }
+    i18n.changeLanguage(lang,()=>{
+        console.log("change language")
+    }).catch(e=>{
+        console.error(e)
+    })
 })
 
 

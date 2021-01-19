@@ -18,8 +18,14 @@
 
 import React from 'react';
 import {
+    IonAlert,
     IonAvatar,
     IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonCol,
     IonContent,
     IonHeader,
     IonIcon,
@@ -28,30 +34,28 @@ import {
     IonLabel,
     IonList,
     IonListHeader,
-    IonPage, IonCard, IonCardSubtitle, IonCardTitle, IonCardContent,
+    IonPage,
+    IonRow,
     IonText,
     IonTitle,
-    IonToolbar, IonAlert
+    IonToolbar
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
-import {
-    chevronForwardOutline, linkOutline, qrCodeSharp, scanOutline,
-} from 'ionicons/icons'
+import {chevronForwardOutline, linkOutline, qrCodeSharp, scanOutline,} from 'ionicons/icons'
 
-import {BRIDGE_CURRENCY, TOKEN_DESC} from "../config"
+import {BRIDGE_CURRENCY, CONTRACT_ADDRESS, TOKEN_DESC} from "../config"
 
 import walletWorker from "../worker/walletWorker";
-import {AccountModel, ChainType} from "../types";
+import {AccountModel, ChainType, Transaction} from "../types";
 import rpc from "../rpc";
 import selfStorage from "../utils/storage";
 import url from "../utils/url";
 import BigNumber from "bignumber.js";
-import {
-    Plugins,
-} from '@capacitor/core';
+import {Plugins,} from '@capacitor/core';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
+import WETH from "../contract/weth";
 
 const {StatusBar,Device} = Plugins;
 
@@ -65,6 +69,8 @@ interface State {
     version:any
     deviceInfo:any
     scanText:string
+    showWithdrawEthAlert:boolean,
+    showDepositEthAlert:boolean
 }
 
 class Wallet extends React.Component<State, any> {
@@ -78,7 +84,9 @@ class Wallet extends React.Component<State, any> {
         showVersionAlert:false,
         version:{},
         deviceInfo:{},
-        scanText:""
+        scanText:"",
+        showWithdrawEthAlert:false,
+        showDepositEthAlert:false
     }
 
     componentDidMount() {
@@ -159,9 +167,9 @@ class Wallet extends React.Component<State, any> {
                 for (let chain of chains) {
                     const currency = utils.getCyName(cy, chain);
                     if (chain === "SERO") {
-                        assets[cy][chain] = utils.fromValue(seroBalance[currency], utils.getCyDecimal(cy, chain)).toString(10);
+                        assets[cy][chain] = utils.fromValue(seroBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     } else if (chain === "ETH") {
-                        assets[cy][chain] = utils.fromValue(ethBalance[currency], utils.getCyDecimal(cy, chain)).toString(10);
+                        assets[cy][chain] = utils.fromValue(ethBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     }
                 }
             }
@@ -211,7 +219,7 @@ class Wallet extends React.Component<State, any> {
                 const currency = utils.getCyName(cy, chain);
                 total = new BigNumber(value).plus(total)
                 item.push(
-                    <IonItem mode="ios" lines="none" style={{marginBottom:"5px"}}>
+                    <IonItem mode="ios" lines="none" style={{marginBottom:"5px"}} >
                         <IonAvatar slot="start" onClick={() => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
                             url.transactionList(cy, chain);
@@ -244,15 +252,33 @@ class Wallet extends React.Component<State, any> {
                         }}/>
                     </IonItem>
                 )
+                if(currency == "WETH"){
+                    item.push(
+                        <IonItem mode="ios">
+                            <IonRow style={{textAlign:"center",width:"100%"}}>
+                                <IonCol size="6">
+                                    <IonButton size="small" expand="block" fill="outline" onClick={()=>{
+                                        url.swapEth("withdraw")
+                                    }}>Withdraw</IonButton>
+                                </IonCol>
+                                <IonCol size="6">
+                                    <IonButton size="small" expand="block" onClick={()=>{
+                                        url.swapEth("deposit")
+                                    }}>Deposit</IonButton>
+                                </IonCol>
+                            </IonRow>
+                        </IonItem>
+                    )
+                }
             }
 
-            itemGroup.push(<IonCard mode="ios" onClick={(e) => {
-                coinShow[cy] = !coinShow[cy];
-                this.setState({
-                    coinHidden: coinShow
-                })
-            }}>
-                <IonItem lines="none" style={{margin: "10px 0 0"}}>
+            itemGroup.push(<IonCard mode="ios">
+                <IonItem lines="none" style={{margin: "10px 0 0"}} onClick={(e) => {
+                    coinShow[cy] = !coinShow[cy];
+                    this.setState({
+                        coinHidden: coinShow
+                    })
+                }}>
                     <IonAvatar slot="start">
                         <img src={require(`../img/${cy}.png`)}/>
                     </IonAvatar>
@@ -415,7 +441,6 @@ class Wallet extends React.Component<State, any> {
                         }
                     ]}
                 />
-
             </IonPage>
         );
     }

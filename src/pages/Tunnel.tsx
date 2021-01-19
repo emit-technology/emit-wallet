@@ -58,6 +58,8 @@ import CrossFeeEth from "../contract/cross/eth/crossFee";
 import CrossFeeSERO from "../contract/cross/sero/crossFee";
 import i18n from "../locales/i18n";
 import GasFeeProxy, {TokenRate} from "../contract/gasFeeProxy";
+import GasPriceActionSheet from "../components/GasPriceActionSheet";
+import ConfirmTransaction from "../components/ConfirmTransaction";
 
 class Tunnel extends React.Component<any, any> {
 
@@ -96,97 +98,13 @@ class Tunnel extends React.Component<any, any> {
         const account = await walletWorker.accountInfo();
         const chain = utils.getChainIdByName(crossMode[0])
 
-        await this.getGasEstimate();
-
         const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")]);
         const rest: any = await ETH_COIN.allowance(account.addresses[ChainType.ETH], config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE);
         // const restBalance: any = await ETH_COIN.balanceOf(account.addresses[ChainType.ETH]);
         // console.log("allowance>>", rest,restBalance)
         let crossFee: any = "0";
         let tokenRate:TokenRate={seroAmount:new BigNumber(1),feeAmount:new BigNumber(1)};
-        if (chain == ChainType.ETH) {
 
-            if (new BigNumber(amount).toNumber() > 0) {
-                const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
-                const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
-
-                const crossFeeSero: CrossFeeSERO = new CrossFeeSERO(config.CONTRACT_ADDRESS.CROSS.SERO.FEE);
-                const decimalSERO = utils.getCyDecimal(targetCoin, ChainType[ChainType.SERO]);
-                const restSERO: any = await crossFeeSero.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
-                crossFee = utils.fromValue(restSERO, decimalSERO).toString(10);
-
-                if (new BigNumber(allowance).toNumber() == 0){
-                    const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")]);
-                    const data: any = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
-                    const tx: Transaction = {
-                        from: account.addresses && account.addresses[ChainType.ETH],
-                        to: config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")],
-                        value: "0x" + utils.toValue(0, decimal).toString(16),
-                        cy: "ETH",
-                        gasPrice: "0x" + new BigNumber(1).multipliedBy(1e9).toString(16),
-                        chain: ChainType.ETH,
-                        data: data,
-                        amount:"0x0"
-                    }
-                    const gas = await ETH_COIN.estimateGas(tx)
-                    this.setState({
-                        gas: gas,
-                    })
-                }else{
-                    const data: any = await ethCross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
-                        utils.bs58ToHex(account.addresses[utils.getChainIdByName(crossMode[1])]),
-                        utils.toValue(amount, decimal))
-
-                    ethCross.estimateGas({
-                        from: account.addresses[chain],
-                        to: config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE,
-                        data: data,
-                        value: "0x0"
-                    }).then(gas => {
-                        this.setState({
-                            gas: gas,
-                        })
-                    })
-                }
-            }
-        } else {
-            if (new BigNumber(amount).toNumber() > 0) {
-                const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
-                const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.SERO]);
-
-                const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
-                const decimalETH = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
-                const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
-                crossFee = utils.fromValue(restETH, decimalETH).toString(10);
-
-                const realCy = utils.getCyName(targetCoin,"SERO")
-                const tx:any = {
-                    from: account.addresses[chain],
-                    to: config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE,
-                    cy:utils.getCyName(targetCoin, crossMode[0]),
-                    value: utils.toHex(utils.toValue(amount, decimal))
-                }
-                if(realCy !== "SERO"){
-                    const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
-                    tokenRate = await gasFeeProxy.tokenRate();
-                    tx.data = await gasFeeProxy.depositFT(ChainId.ETH, utils.getResourceId(targetCoin), account.addresses[utils.getChainIdByName(crossMode[1])]);
-                    tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
-                    gasFeeProxy.estimateGas(tx).then(gas => {
-                        this.setState({
-                            gas: gas
-                        })
-                    })
-                }else{
-                    tx.data = await seroCross.depositFT(ChainId.ETH, utils.getResourceId(targetCoin), account.addresses[utils.getChainIdByName(crossMode[1])])
-                    seroCross.estimateGas(tx).then(gas => {
-                        this.setState({
-                            gas: gas
-                        })
-                    })
-                }
-            }
-
-        }
         const balance = await rpc.getBalance(chain, account.addresses[chain])
         // const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
 
@@ -201,15 +119,19 @@ class Tunnel extends React.Component<any, any> {
         }
         let minValue:any = 0 ;
         let maxValue:any = 0;
+        const targetCoinName = utils.getCyName(targetCoin,ChainType[chain]);
         if (chain == ChainType.SERO) {
             const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
-            const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.SERO]);
+            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
             const rest = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            console.log("rest",rest[0].toNumber(),rest[1].toNumber(),)
             minValue = utils.fromValue(rest[0],decimal).toNumber();
             maxValue = utils.fromValue(rest[1],decimal).toNumber();
+            console.log("minValue>>>",minValue,maxValue)
         }else if(chain == ChainType.ETH){
             const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
-            const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
+            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.ETH]);
+
             const rest = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
             minValue = utils.fromValue(rest[0],decimal).toNumber();
             maxValue = utils.fromValue(rest[1],decimal).toNumber();
@@ -226,8 +148,6 @@ class Tunnel extends React.Component<any, any> {
             address: account.addresses[utils.getChainIdByName(crossMode[1])],
             feeCy:chain == ChainType.SERO && targetCoin !== ChainType[ChainType.SERO] ? utils.getCyName(targetCoin,"SERO") : ChainType[chain],
         })
-
-
     }
 
     setCrossMode = () => {
@@ -276,8 +196,8 @@ class Tunnel extends React.Component<any, any> {
         })
     }
 
-    approve = async (password: any, op: any) => {
-        let {crossMode, amount,gasPrice} = this.state;
+    approve = async (op: any) => {
+        let {amount,gasPrice} = this.state;
         if (!amount) {
             this.setShowToast(true, "warning", "Please Input Approve Amount")
             setTimeout(() => {
@@ -289,14 +209,6 @@ class Tunnel extends React.Component<any, any> {
         if (op == "cancel") {
             amount = 0;
         }
-        if (!password) {
-            this.setShowToast(true, "warning", "Please Input Password")
-            setTimeout(() => {
-                this.setApproveAlert(true)
-            }, 2100)
-            this.setShowProgress1(false);
-            return
-        }
         const {targetCoin} = this.state;
         const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
         const account = await walletWorker.accountInfo();
@@ -305,83 +217,31 @@ class Tunnel extends React.Component<any, any> {
         const tx: Transaction = {
             from: account.addresses && account.addresses[ChainType.ETH],
             to: config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")],
-            value: "0x" + utils.toValue(0, decimal).toString(16),
-            cy: "ETH",
+            value: "0x0",
+            cy: ChainType[ChainType.ETH],
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: ChainType.ETH,
             data: data,
             amount: "0x0",
+            feeCy:ChainType[ChainType.ETH]
         }
         tx.gas = await ETH_COIN.estimateGas(tx)
-        tx.amount = "0x"+new BigNumber(tx.gas?tx.gas:0).multipliedBy(tx.gasPrice?tx.gasPrice:0).toString(16)
+        // tx.amount = "0x"+new BigNumber(tx.gas?tx.gas:0).multipliedBy(tx.gasPrice?tx.gasPrice:0).toString(16)
 
-        rpc.commitTx(tx, password).then(hash => {
-            this.setShowProgress1(false);
-            // url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash,targetCoin);
-            this.setShowToast(true, "success", "Commit Successfully!");
-            setTimeout(() => {
-                url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, "ETH");
-            }, 1000)
-        }).catch((e: any) => {
-            this.setShowProgress1(false);
-            const err: any = typeof e === "string" ? e : e.message;
-            this.setShowToast(true, "danger", err);
-            console.error(e);
+        this.setState({
+            tx:tx,
+            passwordAlert:true
         })
     }
 
-    setFee(gasPrice: string, gas?: number) {
-        if (!gas) gas = 21000;
-        return gasPrice ? utils.fromValue(new BigNumber(gasPrice).multipliedBy(1e9).multipliedBy(gas), 18).toString(10) : 0
-    }
-
-    sort(a: any, b: any) {
-        return new BigNumber(a.gasPrice).comparedTo(new BigNumber(b.gasPrice))
-    }
-
     setShowActionSheet = (f: boolean) => {
-        if(f){
-            this.getGasEstimate().then(()=>{
-                this.setState({
-                    showActionSheet: f
-                })
-            }).catch();
-        }else{
-            this.setState({
-                showActionSheet: f
-            })
-        }
-    }
-
-    getGasEstimate = async ()=>{
-        const {gasPrice,crossMode} = this.state;
-        const chain = utils.getChainIdByName(crossMode[0])
-        if(chain == ChainType.SERO){
-            this.setState({
-                gas: utils.defaultGas(chain),
-                // gasPriceLevel:data && data,
-                gasPrice: 1,
-                fee: this.setFee("1",utils.defaultGas(chain))
-            })
-        }else{
-            const data:any = await rpc.post("eth_gasTracker",[])
-            if(new BigNumber(gasPrice).toNumber() == 1){
-                this.setState({
-                    gasPriceLevel:data && data,
-                    gasPrice:data && data.AvgGasPrice.gasPrice,
-                    fee:this.setFee(data && data.AvgGasPrice.gasPrice)
-                })
-            }else{
-                this.setState({
-                    gasPriceLevel:data && data,
-                })
-            }
-
-        }
+        this.setState({
+            showActionSheet: f
+        })
     }
 
 
-    transfer = async (password: any) => {
+    transfer = async () => {
         const {targetCoin, crossMode, address, amount,gasPrice} = this.state;
         const account = await walletWorker.accountInfo();
         const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
@@ -415,24 +275,19 @@ class Tunnel extends React.Component<any, any> {
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: ChainType.ETH,
             data: data,
-            amount: utils.toHex(utils.toValue(amount, decimal))
+            amount: utils.toHex(utils.toValue(amount, decimal)),
+            feeCy:ChainType[ChainType.ETH]
         }
 
         tx.gas = await ethCross.estimateGas(tx)
 
-        rpc.commitTx(tx, password).then(hash => {
-            this.setShowProgress(false);
-            console.log("page rpc commitTx hash", hash);
-            url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, targetCoin);
-        }).catch((e: any) => {
-            this.setShowProgress(false);
-            const err: any = typeof e === "string" ? e : e.message;
-            this.setShowToast(true, "danger", err);
-            console.error(e);
+        this.setState({
+            tx:tx,
+            passwordAlert:true
         })
     }
 
-    transferSero = async (password: any) => {
+    transferSero = async () => {
         const {targetCoin, crossMode, address, amount,gasPrice} = this.state;
         const account = await walletWorker.accountInfo();
         const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
@@ -464,7 +319,8 @@ class Tunnel extends React.Component<any, any> {
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: ChainType.SERO,
             data: data,
-            amount: "0x0"
+            amount: "0x0",
+            feeCy:ChainType[ChainType.SERO]
         }
         const realCy = utils.getCyName(targetCoin,"SERO");
         if(realCy !== ChainType[ChainType.SERO]){
@@ -484,15 +340,9 @@ class Tunnel extends React.Component<any, any> {
         }else{
             tx.gas = await seroCross.estimateGas(tx)
         }
-        rpc.commitTx(tx, password).then(hash => {
-            this.setShowProgress(false);
-            console.log("page rpc commitTx hash", hash);
-            url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, targetCoin);
-        }).catch((e: any) => {
-            this.setShowProgress(false);
-            const err: any = typeof e === "string" ? e : e.message;
-            this.setShowToast(true, "danger", err);
-            console.error(e);
+        this.setState({
+            tx:tx,
+            passwordAlert:true
         })
     }
 
@@ -525,7 +375,7 @@ class Tunnel extends React.Component<any, any> {
         })
     }
 
-    commit = (password: string) => {
+    commit = () => {
         const {crossMode, allowance, amount, targetCoin, balance, crossFee} = this.state;
         const fromChain = crossMode[0];
         if (!amount) {
@@ -552,16 +402,15 @@ class Tunnel extends React.Component<any, any> {
             }
         }
 
-        this.setShowProgress(true);
         if (fromChain === ChainType[ChainType.ETH]) {
-            this.transfer(password).then(() => {
+            this.transfer().then(() => {
             }).catch((e: any) => {
                 const err = typeof e == "string" ? e : e.message;
                 this.setShowToast(true, "danger", err);
                 this.setShowProgress(false);
             })
         } else if (fromChain === ChainType[ChainType.SERO]) {
-            this.transferSero(password).then(() => {
+            this.transferSero().then(() => {
 
             }).catch((e: any) => {
                 const err = typeof e == "string" ? e : e.message;
@@ -570,63 +419,36 @@ class Tunnel extends React.Component<any, any> {
         }
     }
 
-    renderSheetOptions = (): Array<any> => {
-        const {gasPriceLevel, gasPrice} = this.state;
-
-        const options: Array<any> = [];
-        const keys = Object.keys(gasPriceLevel);
-        const arr: Array<any> = [];
-        const trimKey:any = [];
-        for(let key of keys){
-            const gasTracker = gasPriceLevel[key];
-            if(trimKey.indexOf(gasTracker.gasPrice) == -1){
-                trimKey.push(gasTracker.gasPrice)
-                arr.push(gasTracker);
+    setGasPrice=(v:string)=>{
+        this.setState(
+            {
+                gasPrice:v,
+                showActionSheet:false
             }
-        }
-        arr.sort(this.sort);
-        const desc = [i18n.t("slow"), i18n.t("general"), i18n.t("fast"), i18n.t("fastest")];
-        for (let i = arr.length - 1; i >= 0; i--) {
-            const a = arr[i];
-            options.push({
-                text: `${desc[i]},${a.gasPrice}GWei , ${Math.floor(a.second / 60)}m ${a.second % 60}s`,
-                role: gasPrice === a.gasPrice ? "selected" : "",
-                handler: () => {
-                    this.setState({
-                        gasPrice: a.gasPrice,
-                        fee: this.setFee(a.gasPrice)
-                    })
-                }
-            })
-        }
-        options.push({
-            text: i18n.t("cancel"),
-            role: 'cancel',
-            handler: () => {
-
-            }
-        })
-        return options;
+        )
     }
 
-    convertFee = ()=>{
-        const {tokenRate,gasPrice,gas,crossMode,targetCoin,amount} = this.state;
-        if(!tokenRate){
-            return 0;
-        }
+    confirm = async (hash:string) => {
+        const {crossMode,targetCoin} = this.state;
         const chain = utils.getChainIdByName(crossMode[0]);
-        const decimal = chain == ChainType.SERO && targetCoin !== ChainType[ChainType.SERO] && tokenRate.seroAmount.toNumber()!=1  ? utils.getCyDecimal(targetCoin,"SERO") : 18
-        const ret = utils.fromValue(
-            tokenRate.feeAmount.multipliedBy(
-                new BigNumber(gas).multipliedBy(new BigNumber(gasPrice).multipliedBy(1e9))
-            ).dividedBy(tokenRate.seroAmount),
-            decimal
-        );
-        return decimal>6 || tokenRate.seroAmount.toNumber()==1 ?ret.toString(10):ret.toFixed(6,2)
+        let intervalId:any = 0;
+        intervalId = setInterval(()=>{
+            rpc.getTxInfo(chain,hash).then(rest => {
+                if(rest){
+                    clearInterval(intervalId)
+                    this.setShowProgress(false);
+                    url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, targetCoin);
+                }
+            }).catch((e: any) => {
+                console.error(e);
+            })
+        },1000)
+        this.showPasswordAlert(false)
     }
+
 
     render() {
-        const {targetCoin, gas, gasPrice,feeCy, color, tokenRate,showActionSheet, approveAlert, minValue,maxValue, crossFee, address, amount, showProgress, cancelAlert, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {targetCoin, gas, gasPrice,feeCy, color, tokenRate,tx,showActionSheet, approveAlert, minValue,maxValue, crossFee, address, amount, showProgress, cancelAlert, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
         let amountValue: any = new BigNumber(amount).toNumber() > 0 ? amount : allowance;
         if (new BigNumber(amountValue).toNumber() == 0) {
@@ -705,8 +527,8 @@ class Tunnel extends React.Component<any, any> {
 
                                 <IonItem mode="ios" lines="none">
                                     <IonLabel mode="ios" color="medium">{i18n.t("balance")}</IonLabel>
-                                    <IonBadge mode="ios"
-                                              color="light">{utils.fromValue(balance[realCy], utils.getCyDecimal(targetCoin, crossMode[0])).toString(10)} {realCy}</IonBadge>
+                                    <IonBadge mode="ios" color="light">{utils.fromValue(balance[realCy],
+                                        utils.getCyDecimal(utils.getCyName(targetCoin,crossMode[0]), crossMode[0])).toString(10)} {realCy}</IonBadge>
                                 </IonItem>
 
                                 {
@@ -733,19 +555,29 @@ class Tunnel extends React.Component<any, any> {
                                 }
                             </IonCol>
                         </IonRow>
-                        <IonItem mode="ios" lines="none" className="form-padding" onClick={() => {
-                            chain == ChainType.ETH && this.setShowActionSheet(true);
+                        <IonItem mode="ios" lines="none" className="form-padding" onClick={()=>{
+                            this.setShowActionSheet(true);
                         }}>
-                            <IonLabel position="stacked">{i18n.t("minerFee")}</IonLabel>
-                            <div slot="end">
-                                {this.convertFee()} {feeCy}<br/>
-                                <IonText color="medium" className="form-fee-text">
-                                    ({i18n.t("gas")}:{new BigNumber(gas).toString(10)} * {i18n.t("gasPrice")}:{gasPrice} {utils.gasUnit(chain)})
-                                </IonText>
-                            </div>
-                            {chain == ChainType.ETH &&
-                            <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
+                            <IonLabel position="stacked">{i18n.t("gasPrice")}</IonLabel>
+                            <IonText slot="end">
+                                {gasPrice} {utils.gasUnit(chain)}
+                            </IonText>
+                            {chain == ChainType.ETH && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
                         </IonItem>
+
+                        {/*<IonItem mode="ios" lines="none" className="form-padding" onClick={() => {*/}
+                        {/*    chain == ChainType.ETH && this.setShowActionSheet(true);*/}
+                        {/*}}>*/}
+                        {/*    <IonLabel position="stacked">{i18n.t("minerFee")}</IonLabel>*/}
+                        {/*    <div slot="end">*/}
+                        {/*        {this.convertFee()} {feeCy}<br/>*/}
+                        {/*        <IonText color="medium" className="form-fee-text">*/}
+                        {/*            ({i18n.t("gas")}:{new BigNumber(gas).toString(10)} * {i18n.t("gasPrice")}:{gasPrice} {utils.gasUnit(chain)})*/}
+                        {/*        </IonText>*/}
+                        {/*    </div>*/}
+                        {/*    {chain == ChainType.ETH &&*/}
+                        {/*    <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}*/}
+                        {/*</IonItem>*/}
 
                         <IonRow>
                             <IonCol>
@@ -757,184 +589,41 @@ class Tunnel extends React.Component<any, any> {
                                                     {utils.needApproved(utils.getChainIdByName(crossMode[0]))
                                                     && new BigNumber(allowance).toNumber() > 0 ?
                                                         <IonButton mode="ios" expand="block" fill="outline"
-                                                                   disabled={showProgress1} onClick={() => {
-                                                            this.setCancelAlert(true)
-                                                        }}>{showProgress1 && <IonSpinner name="bubbles"/>}
+                                                                   disabled={showProgress} onClick={() => {
+                                                            this.approve("cancel").catch(e=>{
+
+                                                            })
+                                                        }}>
                                                         {i18n.t("cancelApprove")}</IonButton>
                                                         :
                                                         <IonButton mode="ios" expand="block" fill="outline"
                                                                    disabled={showProgress1} onClick={() => {
-                                                            this.setApproveAlert(true)
-                                                        }}>{showProgress1 &&
-                                                        <IonSpinner name="bubbles"/>}{i18n.t("approve")}</IonButton>}
+                                                            this.approve("approve").catch(e=>{
+
+                                                            })
+                                                        }}>{i18n.t("approve")}</IonButton>}
                                                 </IonCol>
                                                 <IonCol size="6">
                                                     <IonButton mode="ios" expand="block" color="primary"
                                                                disabled={showProgress || showProgress1 || !address || new BigNumber(allowance).toNumber() == 0}
                                                                onClick={() => {
-                                                                   this.showPasswordAlert(true)
-                                                               }}>{showProgress &&
-                                                    <IonSpinner name="bubbles"/>}{i18n.t("confirm")}</IonButton>
+                                                                   this.commit()
+                                                               }}>{i18n.t("confirm")}</IonButton>
                                                 </IonCol>
                                             </IonRow>
                                         </IonGrid>
                                         :
                                         <IonButton mode="ios" expand="block" color="primary"
-                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH" && new BigNumber(allowance).toNumber() == 0}
+                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH"
+                                                   && new BigNumber(allowance).toNumber() == 0}
                                                    onClick={() => {
-                                                       this.showPasswordAlert(true)
-                                                   }}>{showProgress && <IonSpinner name="bubbles"/>}{i18n.t("confirm")}</IonButton>
+                                                       this.commit()
+                                                   }}>{i18n.t("confirm")}</IonButton>
                                 }
                             </IonCol>
                         </IonRow>
-
-                        {/*<p/>*/}
-                        {/*<IonRow className="cross-item cross-item-border">*/}
-                        {/*    <IonCol size="12">*/}
-                        {/*        1. You need approve to cross contract first.<br/>*/}
-                        {/*        2. and then use approve amount to confirm.<br/>*/}
-                        {/*        3. min 0.1 USDT.<br/>*/}
-                        {/*        4. at least need 30 minutes.<br/>*/}
-                        {/*    </IonCol>*/}
-                        {/*</IonRow>*/}
                     </IonGrid>
-
-
-                    <IonAlert
-                        mode="ios"
-                        isOpen={passwordAlert}
-                        onDidDismiss={() => this.showPasswordAlert(false)}
-                        cssClass='my-custom-class'
-                        header={'Cross Transfer'}
-                        inputs={[
-                            {
-                                name: 'password',
-                                type: 'password',
-                                placeholder: i18n.t("password"),
-                                cssClass: 'specialClass',
-                                attributes: {
-                                    autofocus: 'autofocus'
-                                }
-                            }
-                        ]}
-                        buttons={[
-                            {
-                                text: i18n.t("cancel"),
-                                role: 'cancel',
-                                cssClass: 'secondary',
-                                handler: () => {
-                                    console.log('Confirm Cancel');
-                                }
-                            }, {
-                                text: 'Ok',
-                                handler: (e: any) => {
-                                    console.log('Confirm Ok', e);
-                                    this.showPasswordAlert(false)
-                                    this.commit(e["password"]);
-
-                                }
-                            }
-                        ]}
-                    />
-
-                    <IonAlert
-                        mode="ios"
-                        isOpen={approveAlert}
-                        onDidDismiss={() => this.setApproveAlert(false)}
-                        cssClass='my-custom-class'
-                        header={i18n.t("approve")}
-                        subHeader={`You will Approve ${amount} ${utils.getCyName(targetCoin,crossMode[0])}(ERC20) to Cross Contract`}
-                        inputs={[
-                            {
-                                name: 'password',
-                                type: 'password',
-                                placeholder: i18n.t("password"),
-                                cssClass: 'specialClass',
-                                attributes: {
-                                    autofocus: 'autofocus'
-                                }
-                            }
-                        ]}
-                        buttons={[
-                            {
-                                text: i18n.t("cancel"),
-                                role: 'cancel',
-                                cssClass: 'secondary',
-                                handler: () => {
-                                    this.setShowProgress1(false);
-                                    console.log('Confirm Cancel');
-                                }
-                            }, {
-                                text: i18n.t("ok"),
-                                handler: (e: any) => {
-                                    if (new BigNumber(amount).toNumber() == 0) {
-                                        this.setShowToast(true, "warning", "Please Input Value");
-                                        return
-                                    }
-                                    this.setApproveAlert(false)
-                                    this.setShowProgress1(true);
-                                    this.approve(e["password"], "approve").then(() => {
-                                    }).catch((e: any) => {
-                                        this.setShowProgress1(false);
-                                        const err: any = typeof e === "string" ? e : e.message;
-                                        this.setShowToast(true, "danger", err);
-                                    })
-                                }
-                            }
-                        ]}
-                    />
-
-                    <IonAlert
-                        mode="ios"
-                        isOpen={cancelAlert}
-                        onDidDismiss={() => this.setCancelAlert(false)}
-                        cssClass='my-custom-class'
-                        header={i18n.t("cancelApprove")}
-                        inputs={[
-                            {
-                                name: 'password',
-                                type: 'password',
-                                placeholder: i18n.t("password"),
-                                attributes: {
-                                    autofocus: 'autofocus'
-                                }
-                            }
-                        ]}
-                        buttons={[
-                            {
-                                text: i18n.t("cancel"),
-                                role: 'cancel',
-                                cssClass: 'secondary',
-                                handler: () => {
-                                    this.setShowProgress1(false);
-                                    console.log('Confirm Cancel');
-                                }
-                            }, {
-                                text: i18n.t("ok"),
-                                handler: (e: any) => {
-                                    console.log('Confirm Ok', e);
-                                    this.setCancelAlert(false)
-                                    this.setShowProgress1(true);
-                                    this.approve(e["password"], "cancel").then(() => {
-
-                                    }).catch((e: any) => {
-                                        this.setShowProgress1(false);
-                                        const err: any = typeof e === "string" ? e : e.message;
-                                        this.setShowToast(true, "danger", err);
-                                    })
-                                }
-                            }
-                        ]}
-                    />
                 </IonContent>
-                <IonActionSheet
-                    mode="ios"
-                    isOpen={showActionSheet}
-                    onDidDismiss={() => this.setShowActionSheet(false)}
-                    cssClass='my-custom-class'
-                    buttons={this.renderSheetOptions()}
-                >
-                </IonActionSheet>
                 <IonToast
                     mode="ios"
                     isOpen={showToast}
@@ -944,6 +633,11 @@ class Tunnel extends React.Component<any, any> {
                     message={toastMessage}
                     duration={1500}
                 />
+
+                <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
+
+                <ConfirmTransaction show={passwordAlert} transaction={tx} onProcess={(f)=>this.setShowProgress(f)} onCancel={()=>this.showPasswordAlert(false)} onOK={this.confirm}/>
+
             </IonPage>
         );
     }

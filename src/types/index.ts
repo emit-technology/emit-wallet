@@ -28,7 +28,8 @@ export interface AccountModel {
 export enum ChainType {
     _,
     SERO,
-    ETH
+    ETH,
+    TRON
 }
 
 export enum ChainId {
@@ -50,6 +51,19 @@ export interface Transaction {
     nonce?: string
     chainId?: any
     amount:any
-    feeCy?:string
+    feeCy:string
     feeValue?:string
+    input?:string
+}
+
+export interface GasPriceLevel {
+    SafeGasPrice?:costTime
+    ProposeGasPrice?:costTime
+    FastGasPrice?:costTime
+    AvgGasPrice?:costTime
+}
+
+export interface costTime{
+    gasPrice:string
+    second:number
 }

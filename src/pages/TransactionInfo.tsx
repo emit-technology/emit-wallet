@@ -18,6 +18,7 @@
 
 import * as React from 'react';
 import {
+    IonAlert,
     IonBadge,
     IonButton,
     IonContent,
@@ -26,21 +27,26 @@ import {
     IonItem,
     IonLabel,
     IonList,
+    IonModal,
     IonPage,
     IonRouterLink,
-    IonText, IonModal,
+    IonSpinner,
+    IonText,
     IonTitle,
-    IonToolbar, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonSpinner, IonToast
+    IonToast,
+    IonToolbar
 } from "@ionic/react";
 import copy from 'copy-to-clipboard';
 import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils";
 import rpc from "../rpc";
 import BigNumber from "bignumber.js";
-import {ChainType} from "../types";
+import {ChainType, Transaction} from "../types";
 import {chevronBack, copyOutline} from 'ionicons/icons';
 import url from "../utils/url";
 import i18n from "../locales/i18n";
+import {Plugins} from "@capacitor/core";
+
 class TransactionInfo extends React.Component<any, any> {
 
     state: any = {
@@ -141,8 +147,34 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
+    speedEthTx = async (gasPrice:any,password:string) =>{
+        const txHash = this.props.match.params.hash;
+        const rest:any = await rpc.post("eth_getTransactionByHash",[txHash]);
+        const tx:Transaction = {
+            from:rest.from,
+            to:rest.to,
+            cy:ChainType[ChainType.ETH],
+            amount:"0x0",
+            chain:ChainType.ETH,
+            feeCy:ChainType[ChainType.ETH]
+        };
+        tx.gas = rest.gas;
+        tx.gasPrice = utils.toHex(utils.toValue(gasPrice,9));
+        tx.input = rest.input;
+        tx.value = rest.value;
+        tx.nonce = rest.nonce;
+        const hash = await rpc.commitTx(tx,password);
+        return hash;
+    }
+
+    setShowSpeedAlert(f:boolean){
+        this.setState({
+            showSpeedAlert:f
+        })
+    }
+
     render() {
-        const {info, tokens, chain, address,events,showModal,showToast} = this.state;
+        const {info, tokens, chain, address,events,showModal,showToast,showSpeedAlert} = this.state;
         console.info("tokens", tokens)
         return <IonPage>
             <IonContent fullscreen>
@@ -155,13 +187,17 @@ class TransactionInfo extends React.Component<any, any> {
                 <IonList>
                     <IonItem  mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionHash")}:</IonLabel>
-                        <div className="text-small-x2 word-break text-padding-normal" onClick={() => {
-                            copy(info.txHash)
-                            copy(info.txHash)
-                            this.setShowToast(true)
-                        }} >
-                            {info.txHash}
-                            <IonIcon src={copyOutline} size="small" />
+                        <div className="text-small-x2 word-break text-padding-normal">
+                            <IonRouterLink onClick={()=>{
+                                Plugins.Browser.open({url:utils.getExplorerTxUrl(chain,info.txHash)}).catch(e=>{
+                                    console.log(e)
+                                })
+                            }}>{info.txHash}</IonRouterLink>
+                            <IonIcon src={copyOutline} size="small"  onClick={() => {
+                                copy(info.txHash)
+                                copy(info.txHash)
+                                this.setShowToast(true)
+                            }} />
                         </div>
                     </IonItem>
                     <IonItem  mode="ios">
@@ -174,11 +210,23 @@ class TransactionInfo extends React.Component<any, any> {
                             {info.num>0?<IonBadge color="success">{i18n.t("success")}</IonBadge>:
                                 <IonBadge color="warning">{i18n.t("pending")}</IonBadge>}
                         </div>
+                        <div slot="end">
+                            {
+                                chain == ChainType.ETH && info.num == 0 &&
+                                <IonButton size="small" slot="end" onClick={()=>{
+                                    this.setShowSpeedAlert(true);
+                                }}>Speed</IonButton>
+                            }
+                        </div>
                     </IonItem>
                     <IonItem  mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("block")}:</IonLabel>
                         <div className="text-small-x2 word-break text-padding-normal">
-                            <IonRouterLink className="info-block">{info.num}</IonRouterLink>
+                            <IonRouterLink className="info-block" onClick={()=>{
+                                Plugins.Browser.open({url:utils.getExplorerBlockUrl(chain,info.txHash,info.num)}).catch(e=>{
+                                    console.log(e)
+                                })
+                            }}>{info.num}</IonRouterLink>
                         </div>
                         <IonBadge color="light" slot="end">{ChainType[chain]} {i18n.t("chain")}</IonBadge>
                     </IonItem>
@@ -209,7 +257,7 @@ class TransactionInfo extends React.Component<any, any> {
                                 }} /></div>:
 
                                 info.toAddress && info.toAddress.map((addr: string) => {
-                                    if(addr !== info.fromAddress){
+                                    if(addr !== info.fromAddress || info.toAddress.length == 1){
                                         return <div style={{padding:"5px 0"}}>{addr}<IonIcon src={copyOutline} size="small" onClick={() => {
                                             copy(addr)
                                             copy(addr)
@@ -224,8 +272,9 @@ class TransactionInfo extends React.Component<any, any> {
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("value")}:</IonLabel>
                         <IonText>{
                             tokens && tokens.length > 0 && tokens.map((v: any) => {
+                                const symbol = new BigNumber(v.value).toNumber()>0?"+":""
                                 return <IonBadge color="light">
-                                    {utils.fromValue(v.value, utils.getCyDecimal(v.cy, ChainType[chain])).toString(10)} {v.cy}
+                                    {symbol}{utils.fromValue(v.value, utils.getCyDecimal(v.cy, ChainType[chain])).toString(10)} {v.cy}
                                 </IonBadge>
                             })
                         }</IonText>
@@ -286,6 +335,61 @@ class TransactionInfo extends React.Component<any, any> {
                     duration={1000}
                     mode="ios"
                 />
+
+                <IonAlert
+                    mode="ios"
+                    isOpen={showSpeedAlert}
+                    onDidDismiss={() => this.setShowSpeedAlert(false)}
+                    cssClass='my-custom-class'
+                    header={i18n.t("transfer")}
+                    inputs={[
+                        {
+                            name: 'gasPrice',
+                            type: 'text',
+                            value: new BigNumber(info.gasPrice).toString(10),
+                            attributes: {
+                                autofocus: 'autofocus'
+                            }
+                        },
+                        {
+                            name: 'password',
+                            type: 'password',
+                            placeholder: i18n.t("password"),
+                        }
+                    ]}
+                    buttons={[
+                        {
+                            text: i18n.t("cancel"),
+                            role: 'cancel',
+                            cssClass: 'secondary',
+                            handler: () => {
+                                console.log('Confirm Cancel');
+                            }
+                        },
+                        {
+                            text: i18n.t("ok"),
+                            handler: (e) => {
+                                console.log('Confirm Ok',e);
+                                this.setShowSpeedAlert(false)
+                                this.speedEthTx(e["gasPrice"],e["password"]).then((hash)=>{
+                                    let intervalId:any = 0;
+                                    intervalId = setInterval(()=>{
+                                        rpc.getTxInfo(chain,hash).then((rest)=>{
+                                            clearInterval(intervalId);
+                                            url.transactionInfo(chain,hash,"ETH");
+                                        }).catch(e=>{
+                                            console.error(e)
+                                        })
+                                    },1000)
+                                }).catch(e=>{
+                                    const err = typeof e === "string"?e:e.message;
+                                });
+
+                            }
+                        }
+                    ]}
+                />
+
             </IonContent>
         </IonPage>;
     }
