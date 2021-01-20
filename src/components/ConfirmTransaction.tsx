@@ -175,20 +175,26 @@ class ConfirmTransaction extends React.Component<Props, State>{
                         <IonLabel>Confirm Transaction</IonLabel>
                     </IonListHeader>
                     <IonItem>
-                        <IonLabel position="stacked" color="medium">From</IonLabel>
+                        <IonLabel position="stacked" color="medium">{i18n.t("from")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.from}</IonText>
                     </IonItem>
                     <IonItem>
-                        <IonLabel position="stacked" color="medium">To</IonLabel>
+                        <IonLabel position="stacked" color="medium">{i18n.t("to")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.to}</IonText>
                     </IonItem>
                     <IonItem>
-                        <IonLabel position="stacked" color="medium">Value</IonLabel>
+                        <IonLabel position="stacked" color="medium">{i18n.t("value")}</IonLabel>
                         <IonText slot="end">{transaction && utils.fromValue(value,
                             utils.getCyDecimal(transaction.cy,ChainType[transaction.chain])).toString(10)} {transaction?.cy}</IonText>
                     </IonItem>
+                    {transaction && transaction.nonce &&
                     <IonItem>
-                        <IonLabel position="stacked" color="medium">Fee</IonLabel>
+                        <IonLabel position="stacked" color="medium">Nonce</IonLabel>
+                        <IonText slot="end">{transaction && new BigNumber(transaction.nonce).toString(10)}</IonText>
+                    </IonItem>
+                    }
+                    <IonItem>
+                        <IonLabel position="stacked" color="medium">{i18n.t("minerFee")}</IonLabel>
                         <IonText slot="end">
                             {this.fee()} {transaction?.feeCy}<br/>
                             <IonText color="medium"  className="text-small">
@@ -200,8 +206,14 @@ class ConfirmTransaction extends React.Component<Props, State>{
                     </IonItem>
                     {transaction && transaction.data &&
                     <IonItem>
-                        <IonLabel position="stacked" color="medium">Data</IonLabel>
+                        <IonLabel position="stacked" color="medium">{i18n.t("data")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.data}</IonText>
+                    </IonItem>
+                    }
+                    {transaction && transaction.input &&
+                    <IonItem>
+                        <IonLabel position="stacked" color="medium">{i18n.t("input")}</IonLabel>
+                        <IonText className="work-break text-small">{transaction && transaction.input}</IonText>
                     </IonItem>
                     }
                 </IonList>
@@ -210,13 +222,13 @@ class ConfirmTransaction extends React.Component<Props, State>{
                         <IonButton expand="block" mode="ios" fill="outline" onClick={() => {
                             this.setShowActionShell(false)
                             this.props.onCancel()
-                        }}>Close</IonButton>
+                        }}>{i18n.t("cancel")}</IonButton>
                     </IonCol>
                     <IonCol size="8">
                         <IonButton mode="ios"  expand="block" onClick={() => {
                             // this.setShowActionShell(false)
                             this.setShowPasswordAlert(true)
-                        }}>OK</IonButton>
+                        }}>{i18n.t("ok")}</IonButton>
                     </IonCol>
                 </IonRow>
             </IonModal>
@@ -267,6 +279,7 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 ]}
             />
             <IonLoading
+                mode="ios"
                 isOpen={showLoading}
                 onDidDismiss={() => this.setShowLoading(false)}
                 message={'Please wait...'}

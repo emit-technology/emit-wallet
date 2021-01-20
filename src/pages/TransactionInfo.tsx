@@ -18,7 +18,6 @@
 
 import * as React from 'react';
 import {
-    IonAlert,
     IonBadge,
     IonButton,
     IonContent,
@@ -28,7 +27,7 @@ import {
     IonLabel,
     IonList,
     IonModal,
-    IonPage,
+    IonPage, IonProgressBar,
     IonRouterLink,
     IonSpinner,
     IonText,
@@ -46,6 +45,8 @@ import {chevronBack, copyOutline} from 'ionicons/icons';
 import url from "../utils/url";
 import i18n from "../locales/i18n";
 import {Plugins} from "@capacitor/core";
+import GasPriceActionSheet from "../components/GasPriceActionSheet";
+import ConfirmTransaction from "../components/ConfirmTransaction";
 
 class TransactionInfo extends React.Component<any, any> {
 
@@ -55,7 +56,9 @@ class TransactionInfo extends React.Component<any, any> {
         chain: ChainType._,
         address: "",
         events: {},
-        showToast:false
+        showToast:false,
+        showActionSheet:false
+
     }
 
     componentDidMount() {
@@ -141,13 +144,15 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
-    setShowToast =(f:boolean)=>{
+    setShowToast =(f:boolean,toastColor?:string,toastMsg?:string)=>{
         this.setState({
-            showToast:f
+            showToast:f,
+            toastColor:toastColor,
+            toastMsg:toastMsg
         })
     }
 
-    speedEthTx = async (gasPrice:any,password:string) =>{
+    speedEthTx = async (gasPrice:any) =>{
         const txHash = this.props.match.params.hash;
         const rest:any = await rpc.post("eth_getTransactionByHash",[txHash]);
         const tx:Transaction = {
@@ -163,8 +168,10 @@ class TransactionInfo extends React.Component<any, any> {
         tx.input = rest.input;
         tx.value = rest.value;
         tx.nonce = rest.nonce;
-        const hash = await rpc.commitTx(tx,password);
-        return hash;
+        this.setState({
+            tx:tx,
+            showSpeedAlert:true
+        })
     }
 
     setShowSpeedAlert(f:boolean){
@@ -173,8 +180,48 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
+    setShowProgress = (f:boolean)=>{
+        this.setState({
+            showProgress:f
+        })
+    }
+
+    setShowActionSheet = (f:boolean)=>{
+        this.setState({
+            showActionSheet:f
+        })
+    }
+
+    setGasPrice = (v:any)=>{
+        this.setState({
+            gasPrice:v
+        })
+
+        this.speedEthTx(v).catch(e=>{
+            console.error(e)
+        })
+    }
+
+    confirm = async (hash:string) => {
+        const {chain,cy} = this.state;
+        let intervalId:any = 0;
+        intervalId = setInterval(()=>{
+            rpc.getTxInfo(chain,hash).then((rest)=>{
+                if(rest){
+                    this.setShowToast(true,"success","Commit Successfully!")
+                    clearInterval(intervalId);
+                    url.transactionInfo(chain,hash,cy);
+                    this.setShowProgress(false);
+                }
+            }).catch(e=>{
+                console.error(e)
+            })
+        },1000)
+        this.setShowSpeedAlert(false)
+    }
+
     render() {
-        const {info, tokens, chain, address,events,showModal,showToast,showSpeedAlert} = this.state;
+        const {info, tokens, chain,tx,toastColor,toastMsg,showProgress, showActionSheet,gasPrice,events,showModal,showToast,showSpeedAlert} = this.state;
         console.info("tokens", tokens)
         return <IonPage>
             <IonContent fullscreen>
@@ -183,6 +230,7 @@ class TransactionInfo extends React.Component<any, any> {
                         <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
                         <IonTitle>Transaction Info</IonTitle>
                     </IonToolbar>
+                    {showProgress && <IonProgressBar type="indeterminate"/>}
                 </IonHeader>
                 <IonList>
                     <IonItem  mode="ios">
@@ -213,9 +261,9 @@ class TransactionInfo extends React.Component<any, any> {
                         <div slot="end">
                             {
                                 chain == ChainType.ETH && info.num == 0 &&
-                                <IonButton size="small" slot="end" onClick={()=>{
-                                    this.setShowSpeedAlert(true);
-                                }}>Speed</IonButton>
+                                <IonButton size="small" fill="outline" slot="end" onClick={()=>{
+                                    this.setShowActionSheet(true);
+                                }}>{i18n.t("speedUp")}</IonButton>
                             }
                         </div>
                     </IonItem>
@@ -327,68 +375,18 @@ class TransactionInfo extends React.Component<any, any> {
                 </IonModal>
 
                 <IonToast
-                    color="dark"
+                    color={toastColor?toastColor:"dark"}
                     position="top"
                     isOpen={showToast}
                     onDidDismiss={() => this.setShowToast(false)}
-                    message="Copied to clipboard!"
-                    duration={1000}
+                    message={toastMsg?toastMsg:"Copied to clipboard!"}
+                    duration={1500}
                     mode="ios"
                 />
 
-                <IonAlert
-                    mode="ios"
-                    isOpen={showSpeedAlert}
-                    onDidDismiss={() => this.setShowSpeedAlert(false)}
-                    cssClass='my-custom-class'
-                    header={i18n.t("transfer")}
-                    inputs={[
-                        {
-                            name: 'gasPrice',
-                            type: 'text',
-                            value: new BigNumber(info.gasPrice).toString(10),
-                            attributes: {
-                                autofocus: 'autofocus'
-                            }
-                        },
-                        {
-                            name: 'password',
-                            type: 'password',
-                            placeholder: i18n.t("password"),
-                        }
-                    ]}
-                    buttons={[
-                        {
-                            text: i18n.t("cancel"),
-                            role: 'cancel',
-                            cssClass: 'secondary',
-                            handler: () => {
-                                console.log('Confirm Cancel');
-                            }
-                        },
-                        {
-                            text: i18n.t("ok"),
-                            handler: (e) => {
-                                console.log('Confirm Ok',e);
-                                this.setShowSpeedAlert(false)
-                                this.speedEthTx(e["gasPrice"],e["password"]).then((hash)=>{
-                                    let intervalId:any = 0;
-                                    intervalId = setInterval(()=>{
-                                        rpc.getTxInfo(chain,hash).then((rest)=>{
-                                            clearInterval(intervalId);
-                                            url.transactionInfo(chain,hash,"ETH");
-                                        }).catch(e=>{
-                                            console.error(e)
-                                        })
-                                    },1000)
-                                }).catch(e=>{
-                                    const err = typeof e === "string"?e:e.message;
-                                });
+                <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 
-                            }
-                        }
-                    ]}
-                />
+                <ConfirmTransaction show={showSpeedAlert} transaction={tx} onProcess={(f)=>this.setShowProgress(f)} onCancel={()=>this.setShowSpeedAlert(false)} onOK={this.confirm}/>
 
             </IonContent>
         </IonPage>;

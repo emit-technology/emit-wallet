@@ -141,12 +141,14 @@ class GasPriceActionSheet extends React.Component<Props, State> {
                 <IonList>
                     <IonRadioGroup value={gasPrice} onIonChange={e => this.setGasPrice(e.detail.value)}>
                         <IonListHeader>
-                            <IonLabel>Select Gas Price</IonLabel>
+                            <IonLabel>{i18n.t('selectGasPrice')}</IonLabel>
                         </IonListHeader>
                         {this.radioItems()}
                     </IonRadioGroup>
+                    <IonListHeader>
+                        <IonLabel>{i18n.t('custom')}</IonLabel>
+                    </IonListHeader>
                     <IonItem>
-                        <IonLabel position="stacked">Customer</IonLabel>
                         <IonInput type="number" min="1" value={gasPrice} onIonChange={e => {
                             this.setGasPrice(e.detail.value)
                         }}/>
@@ -156,13 +158,13 @@ class GasPriceActionSheet extends React.Component<Props, State> {
                     <IonCol size="4">
                         <IonButton expand="block" fill="outline" onClick={() => {
                             this.props.onClose();
-                        }}>Close</IonButton>
+                        }}>{i18n.t("cancel")}</IonButton>
                     </IonCol>
                     <IonCol size="8">
                         <IonButton expand="block" onClick={() => {
                             this.props.onSelect(gasPrice)
                             this.props.onClose();
-                        }}>OK</IonButton>
+                        }}>{i18n.t("ok")}</IonButton>
                     </IonCol>
                 </IonRow>
             </IonModal>

@@ -32,7 +32,7 @@ import {
     IonRow,
     IonSpinner,
     IonText,
-    IonTitle,
+    IonTitle, IonToast,
     IonToolbar
 } from "@ionic/react";
 import {chevronBack, chevronForwardOutline} from "ionicons/icons";
@@ -49,157 +49,167 @@ import {CONTRACT_ADDRESS} from "../config";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 
-class ExchangeWETH extends React.Component<any, any>{
-    state:any = {
-        gasPrice:"1",
-        amount:"",
+class ExchangeWETH extends React.Component<any, any> {
+    state: any = {
+        gasPrice: "1",
+        amount: "",
         balance: {},
-        showWithdrawEthAlert:false,
-        showDepositEthAlert:false
+        showWithdrawEthAlert: false,
+        showDepositEthAlert: false
     }
 
-    constructor(props:any) {
+    constructor(props: any) {
         super(props);
     }
 
     componentDidMount() {
-        this.init().catch(e=>{
+        this.init().catch(e => {
             console.error(e)
         })
     }
 
-    init = async ()=>{
+    init = async () => {
         const op = this.props.match.params.op;
         const account = await walletWorker.accountInfo();
         const balance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
         this.setState({
-            balance:balance,
-            account:account,
-            op:op
+            balance: balance,
+            account: account,
+            op: op
         })
     }
 
-    operationWETH = async ()=>{
-        const {balance,account,amount,op} = this.state;
+    setShowToast = (f: boolean, color?: string, m?: string) => {
+        this.setState({
+            showToast: f,
+            toastMsg: m,
+            toastColor: color
+        })
+    }
+
+    operationWETH = async () => {
+        const {balance, account, amount, op} = this.state;
         if (!amount) {
-            Plugins.Toast.show({text:"Input Amount!"})
+            this.setShowToast(true, "warning", i18n.t("inputAmount"))
             return;
         }
-        let value:BigNumber = new BigNumber(0);
-        let data:any = "0x";
-        const weth:WETH = new WETH(CONTRACT_ADDRESS.ERC20.ETH.WETH)
+        let value: BigNumber = new BigNumber(0);
+        let data: any = "0x";
+        const weth: WETH = new WETH(CONTRACT_ADDRESS.ERC20.ETH.WETH)
         const tx: Transaction = {
             from: account.addresses && account.addresses[ChainType.ETH],
             to: CONTRACT_ADDRESS.ERC20.ETH.WETH,
             cy: "WETH",
-            gasPrice: "0x"+new BigNumber(1).multipliedBy(1e9).toString(16),
+            gasPrice: "0x" + new BigNumber(1).multipliedBy(1e9).toString(16),
             chain: ChainType.ETH,
             amount: "0x0",
             value: "0x0",
-            data:data,
-            feeCy:"ETH",
+            data: data,
+            feeCy: "ETH",
         }
-        if(op == "deposit"){
-            value = utils.toValue(amount,18);
-            if(!balance["ETH"] || new BigNumber(balance["ETH"]).comparedTo(value) == -1){
-                Plugins.Toast.show({text:"Not enough ETH!"})
+        if (op == "deposit") {
+            value = utils.toValue(amount, 18);
+            if (!balance["ETH"] || new BigNumber(balance["ETH"]).comparedTo(value) == -1) {
+                this.setShowToast(true, "warning", "Not enough ETH!")
                 return;
             }
-            tx.cy ="ETH";
+            tx.cy = "ETH";
             data = await weth.deposit()
             tx.data = data;
-            tx.value=utils.toHex(value);
-        }else if(op == "withdraw"){
-            value = utils.toValue(amount,utils.getCyDecimal("WETH","ETH"));
-            if(new BigNumber(balance["WETH"]).comparedTo(new BigNumber(value)) == -1){
-                Plugins.Toast.show({text:"Not enough WETH!"})
+            tx.value = utils.toHex(value);
+        } else if (op == "withdraw") {
+            value = utils.toValue(amount, utils.getCyDecimal("WETH", "ETH"));
+            if (new BigNumber(balance["WETH"]).comparedTo(new BigNumber(value)) == -1) {
+                this.setShowToast(true, "warning", "Not enough WETH!")
                 return;
             }
-            tx.cy="WETH"
+            tx.cy = "WETH"
             data = await weth.withdraw(utils.toHex(value))
             tx.data = data;
-            tx.amount=utils.toHex(value);
+            tx.amount = utils.toHex(value);
         }
 
         this.setState({
-            showAlert:true,
-            tx:tx
+            showAlert: true,
+            tx: tx
         })
 
     }
 
     setShowActionSheet = (f: boolean) => {
-        console.log("showActionSheet>>>set:",f)
+        console.log("showActionSheet>>>set:", f)
         this.setState({
             showActionSheet: f
         })
     }
 
-    setGasPrice = (v:string)=>{
+    setGasPrice = (v: string) => {
         this.setState({
-            gasPrice:v
+            gasPrice: v
         })
     }
 
-    setShowAlert = (f:boolean) =>{
+    setShowAlert = (f: boolean) => {
         this.setState({
-            showAlert:f
+            showAlert: f
         })
     }
 
-    setShowProgress = (f:boolean) =>{
+    setShowProgress = (f: boolean) => {
         this.setState({
-            showProgress:f
+            showProgress: f
         })
     }
 
-    confirm = async (hash:string) => {
-        let intervalId:any = 0;
-        intervalId = setInterval(()=>{
-            rpc.getTxInfo(ChainType.ETH, hash).then((rest)=>{
-                if(rest){
+    confirm = async (hash: string) => {
+        let intervalId: any = 0;
+        intervalId = setInterval(() => {
+            rpc.getTxInfo(ChainType.ETH, hash).then((rest) => {
+                if (rest) {
                     clearInterval(intervalId);
-                    url.transactionInfo(ChainType.ETH, hash,"WETH");
+                    url.transactionInfo(ChainType.ETH, hash, "WETH");
                     this.setShowProgress(false);
                 }
-            }).catch(e=>{
+            }).catch(e => {
                 console.error(e)
             })
-        },1000)
+        }, 1000)
         this.setShowAlert(false)
     }
 
     render() {
-        const {balance,amount,showProgress,fee,feeCy,gas,gasPrice,showActionSheet,showAlert,tx,op} = this.state;
-        console.log("showActionSheet",showActionSheet)
+        const {balance, amount, showProgress, showToast, toastMsg, toastColor, gasPrice, showActionSheet, showAlert, tx, op} = this.state;
+        console.log("showActionSheet", showActionSheet)
         return <>
             <IonPage>
                 <IonContent fullscreen color="light">
                     <IonHeader>
                         <IonToolbar mode="ios" color="primary">
-                            <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                            <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                                url.back()
+                            }}/>
                             <IonTitle>{i18n.t(op)} WETH</IonTitle>
                         </IonToolbar>
                         {showProgress && <IonProgressBar type="indeterminate"/>}
                     </IonHeader>
                     <IonList>
                         <IonItem mode="ios" className="form-padding" lines="none">
-                            <IonLabel color="medium" position="stacked">ETH Balance</IonLabel>
-                            <IonText>{utils.fromValue(balance["ETH"],utils.getCyDecimal("ETH",ChainType[ChainType.ETH])).toString(10)} ETH</IonText>
+                            <IonLabel color="medium" position="stacked">ETH {i18n.t("balance")}</IonLabel>
+                            <IonText>{utils.fromValue(balance["ETH"], utils.getCyDecimal("ETH", ChainType[ChainType.ETH])).toString(10)} ETH</IonText>
                         </IonItem>
                         <IonItem mode="ios" className="form-padding" lines="none">
-                            <IonLabel color="medium" position="stacked">WETH Balance</IonLabel>
-                            <IonText>{utils.fromValue(balance["WETH"],utils.getCyDecimal("WETH",ChainType[ChainType.ETH])).toString(10)} WETH</IonText>
+                            <IonLabel color="medium" position="stacked">WETH {i18n.t("balance")}</IonLabel>
+                            <IonText>{utils.fromValue(balance["WETH"], utils.getCyDecimal("WETH", ChainType[ChainType.ETH])).toString(10)} WETH</IonText>
                         </IonItem>
                         <IonItem mode="ios" className="form-padding" lines="none">
-                            <IonLabel color="medium" position="stacked">Amount</IonLabel>
+                            <IonLabel color="medium" position="stacked">{i18n.t("amount")}</IonLabel>
                             <IonInput autofocus onIonChange={(e: any) => {
                                 this.setState({
                                     amount: e.target.value
                                 })
                             }} value={amount} className="form-amount" type="number" placeholder="0"/>
                         </IonItem>
-                        <IonItem mode="ios" lines="none" className="form-padding" onClick={()=>{
+                        <IonItem mode="ios" lines="none" className="form-padding" onClick={() => {
                             this.setShowActionSheet(true);
                         }}>
                             <IonLabel position="stacked">{i18n.t("gasPrice")}</IonLabel>
@@ -214,16 +224,28 @@ class ExchangeWETH extends React.Component<any, any>{
                             <IonButton mode="ios" expand="block" color="primary"
                                        disabled={showProgress}
                                        onClick={() => {
-                                           this.operationWETH().catch(e=>{
+                                           this.operationWETH().catch(e => {
                                                console.log(e)
                                            })
                                        }}>{showProgress &&
                             <IonSpinner name="bubbles"/>}{i18n.t(op)}</IonButton>
                         </IonCol>
                     </IonRow>
-                    <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)} onSelect={this.setGasPrice} show={showActionSheet} value={gasPrice} chain={ChainType.ETH}/>
 
-                    <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f)=>this.setShowProgress(f)} onCancel={()=>this.setShowAlert(false)} onOK={this.confirm}/>
+                    <IonToast
+                        color={!toastColor ? "warning" : toastColor}
+                        position="top"
+                        isOpen={showToast}
+                        onDidDismiss={() => this.setShowToast(false)}
+                        message={toastMsg}
+                        duration={1500}
+                        mode="ios"
+                    />
+                    <GasPriceActionSheet onClose={() => this.setShowActionSheet(false)} onSelect={this.setGasPrice}
+                                         show={showActionSheet} value={gasPrice} chain={ChainType.ETH}/>
+
+                    <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => this.setShowProgress(f)}
+                                        onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>
 
                 </IonContent>
             </IonPage>

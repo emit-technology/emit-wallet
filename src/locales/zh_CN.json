@@ -37,7 +37,7 @@
   "amount": "金额",
   "minerFee": "矿工费",
   "gas": "Gas",
-  "gasPrice": "矿工费",
+  "gasPrice": "Gas价格",
   "slow": "慢",
   "general": "一般",
   "fast": "快",
@@ -92,5 +92,15 @@
   },
   "min": "最小",
   "address": "Address",
-  "language": "简体中文"
+  "language": "简体中文",
+
+  "withdraw": "Withdraw",
+  "selectGasPrice": "Select Gas Price",
+  "custom": "Custom",
+  "input": "Input",
+  "select": "Select",
+  "inputAmount": "Please Input Amount!",
+  "confirmTransaction": "Confirm Transaction",
+  "speedUp": "Speed Up",
+  "data": "Data"
 }

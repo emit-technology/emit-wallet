@@ -291,7 +291,8 @@ class Tunnel extends React.Component<any, any> {
         const {targetCoin, crossMode, address, amount,gasPrice} = this.state;
         const account = await walletWorker.accountInfo();
         const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
-        const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.SERO]);
+        const targetCoinName = utils.getCyName(targetCoin,crossMode[0]);
+        const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
 
         // const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
         // const rest: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal),CrossType.IN);
@@ -414,6 +415,7 @@ class Tunnel extends React.Component<any, any> {
 
             }).catch((e: any) => {
                 const err = typeof e == "string" ? e : e.message;
+                this.setShowToast(true, "danger", err);
                 this.setShowProgress(false);
             })
         }

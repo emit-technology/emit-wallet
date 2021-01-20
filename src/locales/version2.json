@@ -1,0 +1,10 @@
+{
+  "withdraw": "Withdraw",
+  "selectGasPrice": "Gas Price",
+  "custom": "Custom",
+  "input": "Input",
+  "select": "Select",
+  "inputAmount": "Please Input Amount!",
+  "confirmTransaction": "Confirm Transaction",
+  "speedUp": "Speed Up"
+}
