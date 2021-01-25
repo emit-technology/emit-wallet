@@ -45,7 +45,9 @@ import * as config from '../config';
 import {BRIDGE_CURRENCY} from '../config';
 import walletWorker from "../worker/walletWorker";
 import EthToken from "../contract/erc20/eth";
+import TronToken from "../contract/erc20/tron";
 import EthCross from "../contract/cross/eth";
+import TronCross from "../contract/cross/tron";
 
 import SeroCross from "../contract/cross/sero";
 
@@ -60,6 +62,7 @@ import i18n from "../locales/i18n";
 import GasFeeProxy, {TokenRate} from "../contract/gasFeeProxy";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
+import tron from "../rpc/tron";
 
 class Tunnel extends React.Component<any, any> {
 
@@ -82,8 +85,13 @@ class Tunnel extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        const {crossMode} = this.state;
+        //const {crossMode} = this.state;
         const targetCoin = this.props.match.params.cy;
+        const crossMode:Array<string> = Object.keys(BRIDGE_CURRENCY[targetCoin])
+        console.log("crossMode>> ",crossMode);
+        this.setState({
+            crossMode:crossMode
+        })
         this.init(targetCoin, crossMode).then(() => {
 
         }).catch(e=>{
@@ -94,12 +102,21 @@ class Tunnel extends React.Component<any, any> {
     }
 
     init = async (targetCoin: string, crossMode: Array<string>) => {
-        const {amount,allowance} = this.state;
         const account = await walletWorker.accountInfo();
         const chain = utils.getChainIdByName(crossMode[0])
+        const realCy = utils.getCyName(targetCoin,crossMode[0]);
 
-        const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")]);
-        const rest: any = await ETH_COIN.allowance(account.addresses[ChainType.ETH], config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE);
+        let allowance= "0";
+        if(chain == ChainType.ETH){
+            const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
+            const rest: any = await ETH_COIN.allowance(account.addresses[chain], config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE);
+            allowance = utils.fromValue(rest, utils.getCyDecimal(realCy, ChainType[chain])).toString(10)
+        }else if (chain == ChainType.TRON){
+            const TRON_COIN :TronToken = new TronToken(config.CONTRACT_ADDRESS.ERC20.TRON[realCy])
+            const rest: any = await TRON_COIN.allowance(account.addresses[chain], config.CONTRACT_ADDRESS.CROSS.TRON.HANDLE);
+            console.log("tron allowance:",rest)
+            allowance = utils.fromValue(rest, utils.getCyDecimal(realCy, ChainType[chain])).toString(10)
+        }
         // const restBalance: any = await ETH_COIN.balanceOf(account.addresses[ChainType.ETH]);
         // console.log("allowance>>", rest,restBalance)
         let crossFee: any = "0";
@@ -107,7 +124,6 @@ class Tunnel extends React.Component<any, any> {
 
         const balance = await rpc.getBalance(chain, account.addresses[chain])
         // const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
-
         const crossTypeArr: Array<any> = [];
         const chains: any = Object.keys(BRIDGE_CURRENCY[targetCoin]);
         for (let chain of chains) {
@@ -117,37 +133,49 @@ class Tunnel extends React.Component<any, any> {
                 }
             }
         }
-        let minValue:any = 0 ;
-        let maxValue:any = 0;
         const targetCoinName = utils.getCyName(targetCoin,ChainType[chain]);
-        if (chain == ChainType.SERO) {
-            const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
-            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
-            const rest = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
-            console.log("rest",rest[0].toNumber(),rest[1].toNumber(),)
-            minValue = utils.fromValue(rest[0],decimal).toNumber();
-            maxValue = utils.fromValue(rest[1],decimal).toNumber();
-            console.log("minValue>>>",minValue,maxValue)
-        }else if(chain == ChainType.ETH){
-            const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
-            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.ETH]);
-
-            const rest = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
-            minValue = utils.fromValue(rest[0],decimal).toNumber();
-            maxValue = utils.fromValue(rest[1],decimal).toNumber();
-        }
+        const __ret = await this.getMinAndMaxValue(chain, targetCoinName, targetCoin);
 
         this.setState({
             tokenRate:tokenRate,
             crossFee: crossFee,
-            allowance: utils.fromValue(rest, utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH])).toString(10),
+            allowance: allowance,
             balance: balance,
             crossTypes: crossTypeArr,
-            minValue:minValue,
-            maxValue:maxValue,
+            minValue:__ret.minValue,
+            maxValue:__ret.maxValue,
             address: account.addresses[utils.getChainIdByName(crossMode[1])],
             feeCy:chain == ChainType.SERO && targetCoin !== ChainType[ChainType.SERO] ? utils.getCyName(targetCoin,"SERO") : ChainType[chain],
         })
+    }
+
+    private async getMinAndMaxValue(chain:ChainType, targetCoinName: string, targetCoin: string) {
+        let minValue:any = 0 ;
+        let maxValue:any = 0;
+        if (chain == ChainType.SERO) {
+            const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
+            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
+            const rest = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            console.log("rest", rest[0].toNumber(), rest[1].toNumber(),)
+            minValue = utils.fromValue(rest[0], decimal).toNumber();
+            maxValue = utils.fromValue(rest[1], decimal).toNumber();
+            console.log("minValue>>>", minValue, maxValue)
+        } else if (chain == ChainType.ETH) {
+            const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
+            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.ETH]);
+
+            const rest = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            minValue = utils.fromValue(rest[0], decimal).toNumber();
+            maxValue = utils.fromValue(rest[1], decimal).toNumber();
+        } else if (chain == ChainType.TRON) {
+            const tronCross: TronCross = new TronCross(config.CONTRACT_ADDRESS.CROSS.TRON.BRIDGE);
+            const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.TRON]);
+            const rest:any = await tronCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            console.log(rest,"testsss")
+            minValue = utils.fromValue(rest.min.toString(10), decimal).toNumber();
+            maxValue = utils.fromValue(rest.max.toString(10), decimal).toNumber();
+        }
+        return {minValue, maxValue};
     }
 
     setCrossMode = () => {
@@ -197,7 +225,8 @@ class Tunnel extends React.Component<any, any> {
     }
 
     approve = async (op: any) => {
-        let {amount,gasPrice} = this.state;
+        let {amount,gasPrice,crossMode} = this.state;
+        const chain = utils.getChainIdByName(crossMode[0])
         if (!amount) {
             this.setShowToast(true, "warning", "Please Input Approve Amount")
             setTimeout(() => {
@@ -210,24 +239,31 @@ class Tunnel extends React.Component<any, any> {
             amount = 0;
         }
         const {targetCoin} = this.state;
-        const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
         const account = await walletWorker.accountInfo();
-        const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")]);
-        const data: any = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
-        const tx: Transaction = {
-            from: account.addresses && account.addresses[ChainType.ETH],
-            to: config.CONTRACT_ADDRESS.ERC20.ETH[utils.getCyName(targetCoin,"ETH")],
-            value: "0x0",
-            cy: ChainType[ChainType.ETH],
-            gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
-            chain: ChainType.ETH,
-            data: data,
-            amount: "0x0",
-            feeCy:ChainType[ChainType.ETH]
-        }
-        tx.gas = await ETH_COIN.estimateGas(tx)
-        // tx.amount = "0x"+new BigNumber(tx.gas?tx.gas:0).multipliedBy(tx.gasPrice?tx.gasPrice:0).toString(16)
+        const realCY = utils.getCyName(targetCoin,ChainType[chain]);
+        const decimal = utils.getCyDecimal(realCY, ChainType[chain]);
 
+        const tx: Transaction = {
+            from: account.addresses && account.addresses[chain],
+            to: config.CONTRACT_ADDRESS.ERC20[ChainType[chain]][realCY],
+            value: "0x0",
+            cy: ChainType[chain],
+            gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
+            chain: chain,
+            amount: utils.toValue(amount, decimal),
+            feeCy:ChainType[chain]
+        }
+        console.log("approve,tx:",tx)
+        if(chain == ChainType.ETH){
+            const ETH_COIN: EthToken = new EthToken(tx.to);
+            tx.data = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
+            tx.gas = await ETH_COIN.estimateGas(tx)
+        }else if(chain == ChainType.TRON){
+            const tronToken:  TronToken= new TronToken(tx.to);
+            tx.data = await tronToken.approve(config.CONTRACT_ADDRESS.CROSS.TRON.HANDLE, utils.toValue(amount, decimal),tx.from)
+            tx.value = tx.amount;
+            tx.cy = realCY;
+        }
         this.setState({
             tx:tx,
             passwordAlert:true
@@ -244,42 +280,45 @@ class Tunnel extends React.Component<any, any> {
     transfer = async () => {
         const {targetCoin, crossMode, address, amount,gasPrice} = this.state;
         const account = await walletWorker.accountInfo();
-        const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
-        const decimal = utils.getCyDecimal(targetCoin, ChainType[ChainType.ETH]);
 
-        // const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
-        // const crossFee: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
-
-        let rest:any = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
-        const minValue = utils.fromValue(rest[0],decimal).toNumber();
-        const maxValue = utils.fromValue(rest[1],decimal).toNumber();
-        if(minValue>new BigNumber(amount).toNumber()){
+        const chain = utils.getChainIdByName(crossMode[0]);
+        const realCy = utils.getCyName(targetCoin,crossMode[0]);
+        const decimal = utils.getCyDecimal(realCy, ChainType[chain]);
+        const __ret:any = this.getMinAndMaxValue(chain,realCy,targetCoin)
+        if(__ret.minValue>new BigNumber(amount).toNumber()){
             this.setShowProgress(false);
-            this.setShowToast(true,"warning",`The Min cross amount is ${minValue} ${targetCoin}`)
+            this.setShowToast(true,"warning",`The Min cross amount is ${__ret.minValue} ${targetCoin}`)
             return
         }
-        if(maxValue<new BigNumber(amount).toNumber()){
+        if(__ret.maxValue<new BigNumber(amount).toNumber()){
             this.setShowProgress(false);
-            this.setShowToast(true,"warning",`The Max cross amount is ${maxValue} ${targetCoin}`)
+            this.setShowToast(true,"warning",`The Max cross amount is ${__ret.maxValue} ${targetCoin}`)
             return
         }
-        const data: any = await ethCross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
-            utils.bs58ToHex(address),
-            utils.toValue(amount, decimal))
 
+        const from = account.addresses && account.addresses[chain];
         const tx: Transaction = {
-            from: account.addresses && account.addresses[ChainType.ETH],
-            to: config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE,
+            from: from,
+            to: config.CONTRACT_ADDRESS.CROSS[crossMode[0]].BRIDGE,
             value: "0x0",
-            cy: utils.getCyName(targetCoin,crossMode[0]),
+            cy: realCy,
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
-            chain: ChainType.ETH,
-            data: data,
+            chain: chain,
             amount: utils.toHex(utils.toValue(amount, decimal)),
-            feeCy:ChainType[ChainType.ETH]
+            feeCy:ChainType[chain]
         }
-
-        tx.gas = await ethCross.estimateGas(tx)
+        if(chain == ChainType.TRON){
+            const cross: TronCross = new TronCross(config.CONTRACT_ADDRESS.CROSS.TRON.BRIDGE);
+            tx.data = await cross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
+                utils.bs58ToHex(address),
+                utils.toValue(amount, decimal),from)
+        }else if (chain == ChainType.ETH){
+            const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE);
+            tx.data = await ethCross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
+                utils.bs58ToHex(address),
+                utils.toValue(amount, decimal))
+            tx.gas = await ethCross.estimateGas(tx)
+        }
 
         this.setState({
             tx:tx,
@@ -294,9 +333,6 @@ class Tunnel extends React.Component<any, any> {
         const targetCoinName = utils.getCyName(targetCoin,crossMode[0]);
         const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
 
-        // const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
-        // const rest: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal),CrossType.IN);
-        // const crossFee = utils.fromValue(rest[0], decimal).toString(10);
         const restValue:any = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
         const minValue = utils.fromValue(restValue[0],decimal).toNumber();
         const maxValue = utils.fromValue(restValue[1],decimal).toNumber();
@@ -310,7 +346,8 @@ class Tunnel extends React.Component<any, any> {
             this.setShowToast(true,"warning",`The Max cross amount is ${maxValue} ${targetCoin}`)
             return
         }
-        const data: any = await seroCross.depositFT(ChainId.ETH, utils.getResourceId(targetCoin),address)
+        const toAddress = "0x"+tron.tronWeb.address.toHex(address);
+        const data: any = await seroCross.depositFT(ChainId.TRON, utils.getResourceId(targetCoin),toAddress)
 
         const tx: Transaction = {
             from: account.addresses && account.addresses[ChainType.SERO],
@@ -328,7 +365,7 @@ class Tunnel extends React.Component<any, any> {
             const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
             const tokenRate = await gasFeeProxy.tokenRate()
             tx.value = utils.toHex(utils.toValue(amount,decimal));
-            tx.data = await gasFeeProxy.depositFT(ChainId.ETH, utils.getResourceId(targetCoin), address);
+            tx.data = await gasFeeProxy.depositFT(ChainId.TRON, utils.getResourceId(targetCoin), toAddress);
             tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
             tx.gas = await gasFeeProxy.estimateGas(tx)
             tx.amount = "0x0";
@@ -377,43 +414,37 @@ class Tunnel extends React.Component<any, any> {
     }
 
     commit = () => {
-        const {crossMode, allowance, amount, targetCoin, balance, crossFee} = this.state;
+        const {crossMode, allowance, amount, targetCoin, balance} = this.state;
         const fromChain = crossMode[0];
+        const chain = utils.getChainIdByName(fromChain);
+        const realCy = utils.getCyName(targetCoin, fromChain);
         if (!amount) {
             this.setShowToast(true, "warning", "Please Input Amount!");
             return
         } else {
-            if (utils.needApproved(utils.getChainIdByName(crossMode[0])) && new BigNumber(amount).toNumber() > new BigNumber(allowance).toNumber()) {
+            if (utils.needApproved(chain) && new BigNumber(amount).toNumber() > new BigNumber(allowance).toNumber()) {
                 this.setShowToast(true, "warning", "Approved balance is not enough to transfer,please approve first!");
                 return
             }
         }
-        const realCy = utils.getCyName(targetCoin, crossMode[0]);
-        if (crossMode[0] == "ETH") {
-            const _balance = utils.fromValue(balance[realCy], utils.getCyDecimal(targetCoin, crossMode[0]));
-            if (new BigNumber(amount).toNumber() > _balance.toNumber()) {
-                this.setShowToast(true, "warning", `Not enough ${realCy} to transfer!`);
-                return;
-            }
-        } else {
-            const _balance = utils.fromValue(balance[realCy], utils.getCyDecimal(targetCoin, crossMode[0]));
-            if (new BigNumber(amount).toNumber() > _balance.toNumber()) {
-                this.setShowToast(true, "warning", `Not enough ${realCy} to transfer!`);
-                return;
-            }
+        const _balance = utils.fromValue(balance[realCy], utils.getCyDecimal(realCy, fromChain));
+        if (new BigNumber(amount).toNumber() > _balance.toNumber()) {
+            this.setShowToast(true, "warning", `Not enough ${realCy} to transfer!`);
+            return;
         }
 
-        if (fromChain === ChainType[ChainType.ETH]) {
-            this.transfer().then(() => {
+        if (chain == ChainType.SERO) {
+            this.transferSero().then(() => {
             }).catch((e: any) => {
+                console.error(e)
                 const err = typeof e == "string" ? e : e.message;
                 this.setShowToast(true, "danger", err);
                 this.setShowProgress(false);
             })
-        } else if (fromChain === ChainType[ChainType.SERO]) {
-            this.transferSero().then(() => {
-
+        }else {
+            this.transfer().then(() => {
             }).catch((e: any) => {
+                console.error(e)
                 const err = typeof e == "string" ? e : e.message;
                 this.setShowToast(true, "danger", err);
                 this.setShowProgress(false);
@@ -530,7 +561,7 @@ class Tunnel extends React.Component<any, any> {
                                 <IonItem mode="ios" lines="none">
                                     <IonLabel mode="ios" color="medium">{i18n.t("balance")}</IonLabel>
                                     <IonBadge mode="ios" color="light">{utils.fromValue(balance[realCy],
-                                        utils.getCyDecimal(utils.getCyName(targetCoin,crossMode[0]), crossMode[0])).toString(10)} {realCy}</IonBadge>
+                                        utils.getCyDecimal(realCy, crossMode[0])).toString(10)} {realCy}</IonBadge>
                                 </IonItem>
 
                                 {
@@ -593,7 +624,9 @@ class Tunnel extends React.Component<any, any> {
                                                         <IonButton mode="ios" expand="block" fill="outline"
                                                                    disabled={showProgress} onClick={() => {
                                                             this.approve("cancel").catch(e=>{
-
+                                                                const err = typeof e == "string"?e:e.message;
+                                                                this.setShowToast(true,"waring",err)
+                                                                console.error(e)
                                                             })
                                                         }}>
                                                         {i18n.t("cancelApprove")}</IonButton>
@@ -601,7 +634,9 @@ class Tunnel extends React.Component<any, any> {
                                                         <IonButton mode="ios" expand="block" fill="outline"
                                                                    disabled={showProgress1} onClick={() => {
                                                             this.approve("approve").catch(e=>{
-
+                                                                const err = typeof e == "string"?e:e.message;
+                                                                this.setShowToast(true,"waring",err)
+                                                                console.error(e)
                                                             })
                                                         }}>{i18n.t("approve")}</IonButton>}
                                                 </IonCol>

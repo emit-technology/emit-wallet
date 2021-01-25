@@ -47,6 +47,7 @@ import i18n from "../locales/i18n";
 import {Plugins} from "@capacitor/core";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
+import tron from "../rpc/tron";
 
 class TransactionInfo extends React.Component<any, any> {
 
@@ -71,10 +72,36 @@ class TransactionInfo extends React.Component<any, any> {
 
         const txHash = this.props.match.params.hash;
         const chain = this.props.match.params.chain;
+        const tmpRecord:any = sessionStorage.getItem(txHash);
+
         console.log("ChainType[chain]", ChainType[chain])
+
         const address = account.addresses[chain];
         const rest: any = await rpc.getTxInfo(chain, txHash)
-        const records: Array<any> = rest.records;
+        let info:any = {};
+        if(chain == ChainType.TRON){
+            let record = JSON.parse(tmpRecord);
+            if(!record){
+                record = await tron.getTxInfo(txHash)
+                sessionStorage.setItem(txHash,JSON.stringify(record))
+            }
+            if(record){
+                info.records = [record];
+                info.fromAddress=record.from;
+                info.toAddress = [record.to];
+            }
+            info.timestamp =  rest.blockTimeStamp?rest.blockTimeStamp/1000:Math.floor(rest.raw_data?rest.raw_data.timestamp:0/1000);
+            info.txHash = txHash;
+            info.num = rest.blockNumber?rest.blockNumber:0;
+            if(rest.receipt){
+                info.energy_usage=rest.receipt.energy_usage;
+                info.energy_usage_total=rest.receipt.energy_usage_total;
+                info.net_usage=rest.receipt.net_usage;
+            }
+        }else{
+            info = rest;
+        }
+        const records: Array<any> = info.records;
         const amountMap: Map<string, BigNumber> = new Map<string, BigNumber>();
         console.log(records,"records")
         for (let r of records) {
@@ -97,12 +124,12 @@ class TransactionInfo extends React.Component<any, any> {
             tokens.push({cy: next.value[0], value: v.amount})
             next = entry.next();
         }
-        console.debug("rest", rest)
-        const events = await this.getEvent(chain,rest.txHash);
+        console.log("rest", info)
+        const events = await this.getEvent(chain,info.txHash);
         this.setState({
             address: address,
             chain: chain,
-            info: rest,
+            info: info,
             tokens: tokens,
             events:events
         })
@@ -222,7 +249,7 @@ class TransactionInfo extends React.Component<any, any> {
 
     render() {
         const {info, tokens, chain,tx,toastColor,toastMsg,showProgress, showActionSheet,gasPrice,events,showModal,showToast,showSpeedAlert} = this.state;
-        console.info("tokens", tokens)
+        console.info("info>>> ", info)
         return <IonPage>
             <IonContent fullscreen>
                 <IonHeader>
@@ -327,16 +354,32 @@ class TransactionInfo extends React.Component<any, any> {
                             })
                         }</IonText>
                     </IonItem>
-                    <IonItem lines="none" mode="ios">
-                        <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionFee")}:</IonLabel>
-                        <IonText className={"text-small"}>
+                    {
+                        // info.energy_usage=rest.energy_usage;
+                        // info.energy_usage_total=rest.energy_usage_total;
+                        // info.net_usage=rest.net_usage;
+
+                        ChainType.TRON == chain?<IonItem lines="none" mode="ios">
+                                <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionFee")}:</IonLabel>
+                                <IonText className={"text-small"}>
+                                    <IonText>ENERGY: {info.energy_usage}</IonText><br/>
+                                    <IonText>NET: {info.net_usage}</IonText><br/>
+                                </IonText>
+                            </IonItem>
+                            :
+                        <IonItem lines="none" mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionFee")}:</IonLabel>
+                            <IonText className={"text-small"}>
                             {info.fee && utils.fromValue(info.fee, utils.getCyDecimal(info.feeCy, ChainType[chain])).toString(10)} {info.feeCy}
                             <div>
-                                <IonText color="medium">{utils.fromValue(info.gasUsed?info.gasUsed:info.gas, 0).toString(10)}({i18n.t("gas")})
-                                    * {utils.fromValue(info.gasPrice, 9).toString(10)} {utils.gasUnit(chain)}</IonText>
+                            <IonText color="medium">{utils.fromValue(info.gasUsed?info.gasUsed:info.gas, 0).toString(10)}({i18n.t("gas")})
+                            * {utils.fromValue(info.gasPrice, 9).toString(10)} {utils.gasUnit(chain)}</IonText>
                             </div>
-                        </IonText>
-                    </IonItem>
+                            </IonText>
+                        </IonItem>
+                    }
+
+
                 </IonList>
 
                 <IonModal isOpen={showModal} mode="ios" swipeToClose={true} >

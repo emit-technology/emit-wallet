@@ -91,6 +91,7 @@ class Sero extends SeroContract implements Cross{
     }
 
     depositFT = async (destinationChainID: number, resourceID: string, recipient: string): Promise<any> => {
+        console.log([destinationChainID,resourceID,recipient])
         return this.contract.packData("depositFT", [destinationChainID,resourceID,recipient], true)
     }
 

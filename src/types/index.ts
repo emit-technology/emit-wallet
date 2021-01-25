@@ -35,7 +35,8 @@ export enum ChainType {
 export enum ChainId {
     _,
     ETH,
-    SERO
+    SERO,
+    TRON
 }
 
 export interface Transaction {

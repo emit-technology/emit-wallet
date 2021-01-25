@@ -23,6 +23,9 @@ export const CONTRACT_ADDRESS: any = {
             eSERO: "0xe462e7697F2fb33DE4eb46665D4E7D29DA647816",
             WBTC: "0x50395D1b70d8a73eF350AEbFE6278a212B018Ade",
             WETH: "0xE69B7b16AD568BDF11924C0b471176553e9AD1aF"
+        },
+        TRON: {
+            USDT: "TCUnjCxPqwE2SB9vRo8oNwDZx9b7DxAkbv",
         }
     },
     CROSS: {
@@ -30,6 +33,11 @@ export const CONTRACT_ADDRESS: any = {
             BRIDGE: "0xC7c287200D0952d4f591509463fD5203C7D88F56",
             HANDLE: "0xB47E605e2daAfBD2A3F44216c47033FE71c96A2F",
             FEE: "0x622eC769d63465eE56E5a994826E323080C56B39",
+        },
+        TRON: {
+            BRIDGE: "TNstBgWNyCMxnkbZzCe3eAyiYiuY45sPTi",
+            HANDLE: "TDrooxL5EgHRJR6rMU24oEQYrGGbXmGJRL",
+            FEE: "TP2qWxhgDhA6RkFgqMqYQjQLVePxBgLppC",
         },
         SERO: {
             BRIDGE: "tCWmQ5NbUxm2y7HxZaKrfd3KzaLehyTFHPdqq5vPdj4rFHig23kNxNG7Y3Dk2ST3YS1D9GoUtaNskR3xsDobTbz",
@@ -63,7 +71,9 @@ export const TOKEN_DESC: any = {
     ETH: "Ethereum",
     USDT: "Tether",
     WBTC:"Wrapped BTC",
-    WETH: "Wrapped ETH"
+    WETH: "Wrapped ETH",
+    TUSDT: "TRON USDT",
+    TRX: "TRON NETWORK"
 }
 
 export const DECIMAL_CURRENCY: any = {
@@ -77,6 +87,7 @@ export const DECIMAL_CURRENCY: any = {
         USDT: 6,
         ETH: 18,
         EWBTC: 8,
+        TUSDT:6,
     },
     ETH: {
         SERO: 18,
@@ -85,6 +96,10 @@ export const DECIMAL_CURRENCY: any = {
         ETH: 18,
         WBTC:8,
         WETH:18
+    },
+    TRON:{
+        TRX:6,
+        USDT:6
     }
 }
 
@@ -106,6 +121,12 @@ export const BRIDGE_CURRENCY: any = {
         //     CY_TYPE:"SRC20"
         // }
     },
+    TRX: {
+        TRON: {
+            CY: "TRX",
+            CY_TYPE: ""
+        }
+    },
     USDT: {
         ETH: {
             CY: "USDT",
@@ -113,6 +134,16 @@ export const BRIDGE_CURRENCY: any = {
         },
         SERO: {
             CY: "EUSDT",
+            CY_TYPE: "SRC20"
+        }
+    },
+    TUSDT: {
+        TRON: {
+            CY: "USDT",
+            CY_TYPE: "TRC20"
+        },
+        SERO: {
+            CY: "TUSDT",
             CY_TYPE: "SRC20"
         }
     },
@@ -155,13 +186,21 @@ export const BRIDGE_RESOURCE_ID: any = {
     SERO: "0x0000000000000000000000fa083db782e41b5a93a9de81aaefc92d2708052800",
     USDT: "0x000000000000000000000021605f71845f372A9ed84253d2D024B7B10999f400",
     WBTC: "0x000000000000000000000050395D1b70d8a73eF350AEbFE6278a212B018Ade01",
-    WETH: "0x0000000000000000000000E69B7b16AD568BDF11924C0b471176553e9AD1aF01"
+    WETH: "0x0000000000000000000000E69B7b16AD568BDF11924C0b471176553e9AD1aF01",
+    TUSDT:"0x000000000000000000000040655D1b70d8a73eF350AEbFE6278a212B018Ade03"
 }
 
-export const EMIT_HOST: string = "http://127.0.0.1:7655/"
+export const EMIT_HOST: string = "http://127.0.0.1:7655/";
 
 export const GAS_FEE_PROXY_ADDRESS:any = {
     EUSDT:"3zV9TNcWPKtLLhSksxX6bWKmYto3sz7j1xWWEDgEXheaVcHKX2qfm5A5Q69i4n15cQRjELmJbepFbPYEEjbxXvRz",
     EWBTC:"5oCMi6xww5MowNsKzZ7VHjmzyvUxAbjqifGaisQmMrgvZ7jEbY14PhjRbNt6EULHwMNwc7CbmAEjQ7JeM3DQDA4c",
     EWETH:"MhcfrgchQc8wZZoY2NGPsLUV4JNgR43WVriC2L4R5kc9eXumtZcRKA6AvG9goXLSr48hFn52BAr16nQ6yVJruXk",
+    TUSDT:"4KVmCu9nkdhNYa3n4Yz4DVUHZyJmbGKqMB4gmRExhbQDibLLEWUkHaY25DJjLes2h9SVmPUk9E4gLzRmKzptFSSy",
+}
+
+export const TRON_API_HOST = {
+    fullNode:"https://api.shasta.trongrid.io/",
+    solidityNode:"https://api.shasta.trongrid.io",
+    eventServer:"https://api.shasta.trongrid.io"
 }

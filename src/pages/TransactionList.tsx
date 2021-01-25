@@ -22,12 +22,26 @@ import {
     IonButtons,
     IonContent,
     IonHeader,
-    IonList,IonChip,
-    IonItem,IonSegment,IonSegmentButton,
+    IonList,
+    IonChip,
+    IonItem,
+    IonSegment,
+    IonSegmentButton,
     IonPage,
-    IonTitle,IonRefresher,IonRefresherContent,
-    IonToolbar,IonSpinner,
-    IonIcon,IonAvatar,IonLabel,IonButton,IonText,IonSearchbar,IonInfiniteScroll,IonInfiniteScrollContent
+    IonTitle,
+    IonRefresher,
+    IonRefresherContent,
+    IonToolbar,
+    IonSpinner,
+    IonIcon,
+    IonAvatar,
+    IonLabel,
+    IonButton,
+    IonText,
+    IonSearchbar,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+    IonLoading
 } from "@ionic/react";
 import { RefresherEventDetail } from '@ionic/core';
 import {
@@ -55,12 +69,17 @@ class TransactionList extends React.Component<any, any>{
         records:[],
         pageSize:15,
         pageNo:1,
-        searchText:''
+        searchText:'',
+        showLoading:true
     }
 
     componentDidMount() {
-
-        this.init().catch()
+        this.init().then(()=>{
+            this.setShowLoading(false)
+        }).catch((e)=>{
+            console.error(e)
+            this.setShowLoading(false)
+        })
     }
 
     init = async () =>{
@@ -120,8 +139,16 @@ class TransactionList extends React.Component<any, any>{
         })
     }
 
+    setShowLoading = (f:boolean)=>{
+        this.setState({
+            showLoading:f
+        })
+    }
+
     render() {
-        const {cy,chain,address,records,cyName,searchText} = this.state;
+
+        const {cy,chain,address,records,cyName,searchText,showLoading} = this.state;
+        console.log(records,"records>>")
         return <IonPage>
             <IonHeader>
                 <IonToolbar mode="ios" color="primary">
@@ -144,16 +171,20 @@ class TransactionList extends React.Component<any, any>{
                         records && records.length>0 ? records.map((record:any)=>{
                             let value = new BigNumber(record.amount);
 
-                            const color = record.num == 0 ?"warning":value.toNumber()>0 ?"primary":"secondary";
-                            const icon = record.num == 0 ? reloadCircleOutline:value.toNumber()>0?arrowRedoOutline:arrowUndoOutline;
+                            const color = record.num == 0 && chain != ChainType.TRON?"warning":value.toNumber()>0 ?"primary":"secondary";
+                            const icon = record.num == 0 && chain != ChainType.TRON? reloadCircleOutline:value.toNumber()>0 ?arrowRedoOutline:arrowUndoOutline;
                             const prefix = value.toNumber()>0?"+":"";
                             console.debug("record>>",record)
                             return <IonItem mode="ios" onClick={()=>{
                                 // window.location.href = `#/transaction/info/${chain}/${record.txHash}`
+                                // Use temp storage
+                                if(ChainType.TRON){
+                                    sessionStorage.setItem(record.txHash,JSON.stringify(record));
+                                }
                                 url.transactionInfo(chain,record.txHash,cy);
                             }}>
                                 {
-                                    record.num == 0 ?
+                                    record.num == 0 && chain != ChainType.TRON?
                                         <IonSpinner name="bubbles" slot="start"/> : <IonAvatar slot="start">
                                     <IonIcon src={icon} size="large" color={color}/>
                                 </IonAvatar>
@@ -164,7 +195,9 @@ class TransactionList extends React.Component<any, any>{
                                             {utils.ellipsisStr(record.txHash)}
                                         </IonText>
                                     </h2>
-                                    <p style={{margin:"5px 0"}}><IonText color="dark">{i18n.t("block")}: <b>{record.num>0?record.num:"PENDING"}</b></IonText></p>
+                                    <p style={{margin:"5px 0"}}>{
+                                        chain != ChainType.TRON && <IonText color="dark">{i18n.t("block")}: <b>{record.num>0?record.num:"PENDING"}</b></IonText>
+                                    }</p>
                                     <p  className="text-small">{utils.formatDate(record.timestamp*1000)}</p>
                                 </IonLabel>
                                 <IonText slot="end" className="text-small" color={color}>
@@ -185,6 +218,13 @@ class TransactionList extends React.Component<any, any>{
                     >
                     </IonInfiniteScrollContent>
                 </IonInfiniteScroll>
+                <IonLoading
+                    mode="ios"
+                    isOpen={showLoading}
+                    onDidDismiss={() => this.setShowLoading(false)}
+                    message={'Please wait...'}
+                    duration={60000}
+                />
             </IonContent>
         </IonPage>;
     }

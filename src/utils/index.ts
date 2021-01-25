@@ -73,7 +73,7 @@ export function getCyDecimal(cy:string,chainName:string):number{
 }
 
 export function needApproved(chain:ChainType){
-    if(ChainType.ETH == chain){
+    if(ChainType.ETH == chain || ChainType.TRON == chain){
         return true
     }
     return false;
@@ -84,7 +84,12 @@ export function getResourceId(cy:string){
 }
 
 export function getCyName(cy:string,chain:string):string{
-    return BRIDGE_CURRENCY[cy][chain]["CY"];
+    try{
+        return BRIDGE_CURRENCY[cy][chain]["CY"];
+    }catch (e){
+        console.log(e)
+    }
+    return ""
 }
 
 export function getChainIdByName(chain:string):any{
@@ -145,7 +150,7 @@ export function getExplorerTxUrl(chain:ChainType,hash:string){
     }else if(chain == ChainType.SERO){
         return `https://explorer.sero.cash/txsInfo.html?hash=${hash}`
     }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/transaction/${hash}`
+        return `https://shasta.tronscan.io/#/transaction/${hash}`
     }
     return `https://etherscan.com/tx/${hash}`
 }
@@ -160,7 +165,7 @@ export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
     }else if(chain == ChainType.SERO){
         return `https://explorer.sero.cash/blockInfo.html?hash=${hash}`
     }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/block/${num}`
+        return `https://shasta.tronscan.io/#/block/${num}`
     }
     return `https://etherscan.com/block/${hash}`
 }

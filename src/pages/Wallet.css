@@ -27,3 +27,11 @@
     bottom: 0;
     font-weight: 600;
 }
+
+.coin-chain-tron{
+    position: absolute;
+    left: 25px;
+    font-size: 50%;
+    bottom: 0;
+    font-weight: 600;
+}

@@ -44,10 +44,10 @@ import * as utils from '../utils';
 import './Wallet.css';
 import {chevronForwardOutline, linkOutline, qrCodeSharp, scanOutline,} from 'ionicons/icons'
 
-import {BRIDGE_CURRENCY, CONTRACT_ADDRESS, TOKEN_DESC} from "../config"
+import {BRIDGE_CURRENCY, TOKEN_DESC} from "../config"
 
 import walletWorker from "../worker/walletWorker";
-import {AccountModel, ChainType, Transaction} from "../types";
+import {AccountModel, ChainType} from "../types";
 import rpc from "../rpc";
 import selfStorage from "../utils/storage";
 import url from "../utils/url";
@@ -70,7 +70,9 @@ interface State {
     deviceInfo:any
     scanText:string
     showWithdrawEthAlert:boolean,
-    showDepositEthAlert:boolean
+    showDepositEthAlert:boolean,
+    activeChainAlert:boolean,
+    selectChainType:ChainType
 }
 
 class Wallet extends React.Component<State, any> {
@@ -86,7 +88,9 @@ class Wallet extends React.Component<State, any> {
         deviceInfo:{},
         scanText:"",
         showWithdrawEthAlert:false,
-        showDepositEthAlert:false
+        showDepositEthAlert:false,
+        activeChainAlert:false,
+        selectChainType:ChainType._
     }
 
     componentDidMount() {
@@ -103,6 +107,8 @@ class Wallet extends React.Component<State, any> {
                     if (chain === "SERO") {
                         assets[cy][chain] = "0";
                     } else if (chain === "ETH") {
+                        assets[cy][chain] = "0";
+                    } else if (chain === "TRON") {
                         assets[cy][chain] = "0";
                     }
                 }
@@ -161,6 +167,7 @@ class Wallet extends React.Component<State, any> {
         if (account && account.addresses && account.addresses[2]) {
             const seroBalance = await rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO])
             const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
+            const tronBalance = await rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON])
             for (let cy of currencies) {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
@@ -170,6 +177,8 @@ class Wallet extends React.Component<State, any> {
                         assets[cy][chain] = utils.fromValue(seroBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     } else if (chain === "ETH") {
                         assets[cy][chain] = utils.fromValue(ethBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
+                    } else if (chain === "TRON") {
+                        assets[cy][chain] = utils.fromValue(tronBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     }
                 }
             }
@@ -280,14 +289,14 @@ class Wallet extends React.Component<State, any> {
                     })
                 }}>
                     <IonAvatar slot="start">
-                        <img src={require(`../img/${cy}.png`)}/>
+                        <img src={require(`../img/${cy}.png`)} style={{borderRadius:"unset"}}/>
                     </IonAvatar>
                     <IonCardTitle slot="start">
                         {cy}
                         <IonCardSubtitle>{TOKEN_DESC[cy]}</IonCardSubtitle>
                     </IonCardTitle>
                     <IonLabel className="text-bold">{parseFloat(total.toFixed(3, 1)).toLocaleString()}</IonLabel>
-                    {cy != "ETH" && <IonButton size="small" slot="end" mode="ios" onClick={() => {
+                    {cy != "ETH" && cy != "TRX" && <IonButton size="small" slot="end" mode="ios" onClick={() => {
                         url.tunnel(cy)
                     }} style={{float: "right"}}>{i18n.t("cross")}</IonButton>}
                 </IonItem>
@@ -339,8 +348,26 @@ class Wallet extends React.Component<State, any> {
         })
     }
 
+    showActiveChainAlert = (f:boolean,chain?:ChainType)=>{
+        this.setState({
+            activeChainAlert:f,
+            selectChainType:chain
+        })
+    }
+
+    activeChain = async (password:string)=>{
+        const {account,selectChainType} = this.state;
+        if(account && account.accountId){
+            await walletWorker.genNewWallet(account.accountId,password,selectChainType)
+            const rest = await walletWorker.accountInfoAsync();
+            this.setState({
+                account:rest
+            })
+        }
+    }
+
     render() {
-        const {account,scanText, showAlert, chain,showVersionAlert,version,deviceInfo} = this.state;
+        const {account,scanText, showAlert, chain,showVersionAlert,version,deviceInfo,activeChainAlert} = this.state;
 
         return (
             <IonPage>
@@ -384,6 +411,24 @@ class Wallet extends React.Component<State, any> {
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
+                        <IonItem mode="ios" lines="none" onClick={() => {
+                            if((account.addresses && account.addresses[ChainType.TRON])){
+                                url.receive(account.addresses && account.addresses[ChainType.TRON])
+                            }
+                        }}>
+                            <IonAvatar slot="start" style={{opacity:!(account.addresses && account.addresses[ChainType.TRON])?0.3:1}}>
+                                <img src={require(`../img/TRON.png`)} style={{borderRadius:"unset"}}/>
+                            </IonAvatar>
+                            <IonLabel className="address-wrap" mode="ios" style={{opacity:!(account.addresses && account.addresses[ChainType.TRON])?0.3:1}}>
+                                <IonText>{account.addresses && account.addresses[ChainType.TRON] && utils.ellipsisStr(account.addresses[ChainType.TRON])}</IonText>
+                                <p><IonText color="medium">{ChainType[ChainType.TRON]} {i18n.t("chain")}</IonText></p>
+                            </IonLabel>
+                            {
+                                !(account.addresses && account.addresses[ChainType.TRON])?<IonButton fill="outline" onClick={()=>{
+                                    this.showActiveChainAlert(true,ChainType.TRON);
+                                }}>Active</IonButton>: <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
+                            }
+                        </IonItem>
                     </IonList>
 
                     {this.renderAssets()}
@@ -391,6 +436,7 @@ class Wallet extends React.Component<State, any> {
                 </IonContent>
 
                 <IonAlert
+                    mode="ios"
                     isOpen={showAlert}
                     onDidDismiss={() => this.setShowAlert(false)}
                     header={"Select Token"}
@@ -437,6 +483,37 @@ class Wallet extends React.Component<State, any> {
                                 }else if (deviceInfo.platform == "android"){
                                     Plugins.Browser.open({url:version.androidUrl}).catch()
                                 }
+                            }
+                        }
+                    ]}
+                />
+
+                <IonAlert
+                    mode="ios"
+                    isOpen={activeChainAlert}
+                    onDidDismiss={() => this.showActiveChainAlert(false)}
+                    header={"Active Chain"}
+                    inputs={[
+                        {
+                            name:"password",
+                            type:"password"
+                        }
+                    ]}
+                    buttons={[
+                        {
+                            text: i18n.t("cancel"),
+                            role: 'cancel',
+                            cssClass: 'secondary',
+                            handler: () => {
+                                console.log('Confirm Cancel');
+                            }
+                        },
+                        {
+                            text: i18n.t("ok"),
+                            handler: (e) => {
+                                this.activeChain(e["password"]).catch((e)=>{
+                                    console.error(e)
+                                })
                             }
                         }
                     ]}

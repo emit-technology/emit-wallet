@@ -131,13 +131,26 @@ class WalletWorker {
         })
     }
 
+    accountInfoAsync = async ():Promise<any>=>{
+        const accountId = selfStorage.getItem("accountId");
+        return new Promise((resolve, reject) => {
+            service.accountInfo(accountId,function (data:any){
+                if(data.error){
+                    reject(data.error);
+                    console.log(data.error)
+                }else{
+                    selfStorage.setItem(accountId,data.result)
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+
     async accountInfo(accountId?:any):Promise<AccountModel>{
         if(!accountId){
             accountId = selfStorage.getItem("accountId");
         }
-        service.exportKeystore(accountId,function (r:any){
-            console.log(r,"meno..")
-        })
         return new Promise((resolve, reject)=>{
             if(accountId) {
                 const data:any = selfStorage.getItem(accountId);
@@ -162,6 +175,18 @@ class WalletWorker {
     async signTx(accountId:string,password:string,chainType:any,params:any,chainParams?:any){
         return new Promise((resolve, reject)=>{
             service.signTx(accountId,password,chainType,params,chainParams, function (data:any){
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+    async genNewWallet(accountId:string,password:string,chainType:ChainType){
+        return new Promise((resolve, reject) =>{
+            service.genNewWallet({accountId:accountId,password:password,chainType:chainType},function (data:any){
                 if(data.error){
                     reject(data.error);
                 }else{

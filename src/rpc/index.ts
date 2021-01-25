@@ -17,10 +17,14 @@
  */
 
 import axios from "axios";
-import {EMIT_HOST,CHAIN_PARAMS} from "../config"
+import * as config from "../config"
+import {CHAIN_PARAMS, EMIT_HOST} from "../config"
 import {ChainType, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
+import Tron from "../contract/erc20/tron";
+import BigNumber from "bignumber.js";
+import tron from "./tron";
 
 class RPC {
 
@@ -61,9 +65,16 @@ class RPC {
             rest = await this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address])
             selfStorage.setItem(key,rest);
         }else{
-            this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address]).then(balance=>{
-                selfStorage.setItem(key,balance);
-            })
+
+            if(chain == ChainType.TRON){
+                tron.getBalance(address).then((balance:any)=>{
+                    selfStorage.setItem(key,balance);
+                });
+            }else {
+                this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address]).then(balance=>{
+                    selfStorage.setItem(key,balance);
+                })
+            }
         }
         return rest;
     }
@@ -112,6 +123,10 @@ class RPC {
                 console.log(signEthRet,"signEthRet>>")
                 //commitTx
                 hash = await this.post("eth_commitTx",["0x"+signEthRet,tx])
+            }else if(tx.chain == ChainType.TRON){
+                const signEthRet = await walletWorker.signTx(accountId,password,ChainType.TRON, tx.data)
+                const rest:any = await this.post("tron_commitTx",[signEthRet,tx])
+                hash = rest.transaction.txID;
             }
             return Promise.resolve(hash);
         }else{

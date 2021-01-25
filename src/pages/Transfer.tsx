@@ -48,7 +48,9 @@ import i18n from "../locales/i18n";
 import GasFeeProxy, {TokenRate} from "../contract/gasFeeProxy";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
-
+import Tron from "../contract/erc20/tron";
+import {TRON_API_HOST} from "../config";
+import tron from "../rpc/tron";
 
 class Transfer extends React.Component<any, any> {
 
@@ -113,14 +115,14 @@ class Transfer extends React.Component<any, any> {
             this.setShowToast(true,"","Amount is required!")
             return;
         }
-        let value:string = utils.toHex(utils.toValue(amount,utils.getCyDecimal(cy,ChainType[chain])));
+        let value:string = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
 
         if(new BigNumber(balance[realCy]).comparedTo(new BigNumber(value)) == -1){
             this.setShowToast(true,"","Not enough balance!")
             return;
         }
 
-        const tx: Transaction = {
+        let tx: Transaction | any = {
             from: account.addresses && account.addresses[chain],
             to: to,
             cy: realCy,
@@ -164,6 +166,15 @@ class Transfer extends React.Component<any, any> {
                 tx.gas = gas;
                 tx.value = value;
                 tx.feeCy = "SERO";
+            }
+        }else if(chain == ChainType.TRON){
+            tx.feeCy = ChainType[ChainType.TRON];
+            tx.value=value;
+            if(tx.cy !== "TRX"){
+                const TRC20_USDT = new Tron(config.CONTRACT_ADDRESS.ERC20.TRON.USDT)
+                tx.data = await TRC20_USDT.transfer(tx.to,new BigNumber(tx.value?tx.value:"0"),tx.from)
+            }else{
+                tx.data = await tron.transfer(tx.to,new BigNumber(tx.value?tx.value:"0").toNumber(),tx.from)
             }
         }
         this.setState({
@@ -230,7 +241,7 @@ class Transfer extends React.Component<any, any> {
     }
 
     render() {
-        const {cy, chain, account, realCy, showProgress,fee,gas,gasPrice,tx, to, amount,feeCy,showToast,toastMessage,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
+        const {cy, chain, account, realCy, showProgress,gasPrice,tx, to, amount,showToast,toastMessage,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
 
         return <IonPage>
             <IonContent fullscreen>
@@ -261,7 +272,7 @@ class Transfer extends React.Component<any, any> {
                     <IonItem mode="ios" className="form-padding">
                         <IonLabel position="stacked">{i18n.t("amount")}
                             <IonText className="ion-float-right" color="medium">
-                                {utils.fromValue(balance[realCy],utils.getCyDecimal(cy,ChainType[chain])).toString(10)} {`${cy}(${realCy})`}
+                                {utils.fromValue(balance[realCy],utils.getCyDecimal(realCy,ChainType[chain])).toString(10)} {`${cy}(${realCy})`}
                             </IonText>
                         </IonLabel>
                         <IonInput onIonChange={(e: any) => {
@@ -270,15 +281,17 @@ class Transfer extends React.Component<any, any> {
                             })
                         }} value={amount} className="form-amount" type="number" placeholder="0"/>
                     </IonItem>
-                    <IonItem mode="ios" lines="none" className="form-padding" onClick={()=>{
-                        this.setShowActionSheet(true);
-                    }}>
-                        <IonLabel position="stacked">{i18n.t("gasPrice")}</IonLabel>
-                        <IonText slot="end">
-                            {gasPrice} {utils.gasUnit(chain)}
-                        </IonText>
-                        {chain == ChainType.ETH && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
-                    </IonItem>
+                    {
+                        chain != ChainType.TRON && <IonItem mode="ios" lines="none" className="form-padding" onClick={()=>{
+                            this.setShowActionSheet(true);
+                        }}>
+                            <IonLabel position="stacked">{i18n.t("gasPrice")}</IonLabel>
+                            <IonText slot="end">
+                                {gasPrice} {utils.gasUnit(chain)}
+                            </IonText>
+                            {chain == ChainType.ETH && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
+                        </IonItem>
+                    }
                 </IonList>
                 <div className="form-button-div">
                     <IonButton mode="ios" expand="block" disabled={showProgress || !to || !amount} onClick={() => {

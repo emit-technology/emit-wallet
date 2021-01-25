@@ -20,10 +20,12 @@ import {ChainType, Transaction} from "../types";
 import {
     IonAlert,
     IonButton,
-    IonCol,IonLoading,
+    IonCol,
     IonItem,
     IonLabel,
-    IonList, IonListHeader,
+    IonList,
+    IonListHeader,
+    IonLoading,
     IonModal,
     IonRow,
     IonText,
@@ -34,6 +36,9 @@ import * as utils from "../utils"
 import BigNumber from "bignumber.js";
 import i18n from "../locales/i18n";
 import "./gasPrice.css"
+import Tron from "../contract/erc20/tron";
+import * as config from "../config";
+import tron from "../rpc/tron";
 
 interface State{
     transaction?:Transaction
@@ -90,6 +95,7 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 tx.gas =  tx.data?await rpc.post("sero_estimateGas",[tx]):utils.defaultGas(ChainType.SERO);
             }else if(tx.chain == ChainType.TRON){
                 //TODO
+
             }
             this.setState({
                 transaction:tx,
@@ -204,7 +210,7 @@ class ConfirmTransaction extends React.Component<Props, State>{
                             </IonText>
                         </IonText>
                     </IonItem>
-                    {transaction && transaction.data &&
+                    {transaction && transaction.data && transaction.chain!= ChainType.TRON &&
                     <IonItem>
                         <IonLabel position="stacked" color="medium">{i18n.t("data")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.data}</IonText>
