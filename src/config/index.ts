@@ -35,14 +35,14 @@ export const CONTRACT_ADDRESS: any = {
             FEE: "0x622eC769d63465eE56E5a994826E323080C56B39",
         },
         TRON: {
-            BRIDGE: "TNstBgWNyCMxnkbZzCe3eAyiYiuY45sPTi",
-            HANDLE: "TDrooxL5EgHRJR6rMU24oEQYrGGbXmGJRL",
+            BRIDGE: "TAongUaLfhatu89hZAxgkinS57zfViBYMj",
+            HANDLE: "TSg3up7xpeKTMSBs7PVwxrynuxQXJknqc4",
             FEE: "TP2qWxhgDhA6RkFgqMqYQjQLVePxBgLppC",
         },
         SERO: {
-            BRIDGE: "tCWmQ5NbUxm2y7HxZaKrfd3KzaLehyTFHPdqq5vPdj4rFHig23kNxNG7Y3Dk2ST3YS1D9GoUtaNskR3xsDobTbz",
-            HANDLE: "2HwsEHQEDTt68r3TB6Q4hCZGprafiwxjvhj31zVJNTbStUogNeLKeXcVWAiGq4zDSqP2qibJLdeHr7YJZkovgs52",
-            FEE: "4sgmyfwsd4DL5b1e2YHjrseFCnHsk1LTBdLJh5husqpyugRkSkNDW4FGXze4fWb3SwFGzT5o1rC8FUN2DQmL7iHU",
+            BRIDGE: "5Pnnu6DNrgctaoNPRfKUww3KroYFFaeGLTZphJMGbP6EHtejuRcVT86jMwgBeWtiiDujnmrQpPhdzGhwzaWxj49b",
+            HANDLE: "5Z2jSbr7jXBX31qKbNneaFD4NLkv6EwLqVnUsrw5KAQzdFJZHyndq9eZs3Su2LLVC1NsVpB545XDrFm1NoKwgHn8",
+            FEE: "2s4Zz4xE9sMPZfMbxDCFhoaiJ6cdzbTwKhr9MYe5MPXoapjuR8mwigf3eLHzFQs7YJihwVypyJpp1VCwyKja6cVB",
         }
     }
 }
@@ -190,7 +190,8 @@ export const BRIDGE_RESOURCE_ID: any = {
     TUSDT:"0x000000000000000000000040655D1b70d8a73eF350AEbFE6278a212B018Ade03"
 }
 
-export const EMIT_HOST: string = "http://127.0.0.1:7655/";
+// export const EMIT_HOST: string = "http://127.0.0.1:7655/";
+export const EMIT_HOST: string = "https://alpha-node.ririniannian.com/"
 
 export const GAS_FEE_PROXY_ADDRESS:any = {
     EUSDT:"3zV9TNcWPKtLLhSksxX6bWKmYto3sz7j1xWWEDgEXheaVcHKX2qfm5A5Q69i4n15cQRjELmJbepFbPYEEjbxXvRz",

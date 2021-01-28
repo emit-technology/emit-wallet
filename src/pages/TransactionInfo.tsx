@@ -27,7 +27,8 @@ import {
     IonLabel,
     IonList,
     IonModal,
-    IonPage, IonProgressBar,
+    IonPage,
+    IonProgressBar,
     IonRouterLink,
     IonSpinner,
     IonText,
@@ -48,6 +49,7 @@ import {Plugins} from "@capacitor/core";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import tron from "../rpc/tron";
+import {BRIDGE_RESOURCE_ID} from "../config";
 
 class TransactionInfo extends React.Component<any, any> {
 
@@ -57,8 +59,8 @@ class TransactionInfo extends React.Component<any, any> {
         chain: ChainType._,
         address: "",
         events: {},
-        showToast:false,
-        showActionSheet:false
+        showToast: false,
+        showActionSheet: false
 
     }
 
@@ -72,38 +74,38 @@ class TransactionInfo extends React.Component<any, any> {
 
         const txHash = this.props.match.params.hash;
         const chain = this.props.match.params.chain;
-        const tmpRecord:any = sessionStorage.getItem(txHash);
+        const tmpRecord: any = sessionStorage.getItem(txHash);
 
         console.log("ChainType[chain]", ChainType[chain])
 
         const address = account.addresses[chain];
         const rest: any = await rpc.getTxInfo(chain, txHash)
-        let info:any = {};
-        if(chain == ChainType.TRON){
+        let info: any = {};
+        if (chain == ChainType.TRON) {
             let record = JSON.parse(tmpRecord);
-            if(!record){
+            if (!record) {
                 record = await tron.getTxInfo(txHash)
-                sessionStorage.setItem(txHash,JSON.stringify(record))
+                sessionStorage.setItem(txHash, JSON.stringify(record))
             }
-            if(record){
+            if (record) {
                 info.records = [record];
-                info.fromAddress=record.from;
+                info.fromAddress = record.from;
                 info.toAddress = [record.to];
             }
-            info.timestamp =  rest.blockTimeStamp?rest.blockTimeStamp/1000:Math.floor(rest.raw_data?rest.raw_data.timestamp:0/1000);
+            info.timestamp = rest.blockTimeStamp ? rest.blockTimeStamp / 1000 : Math.floor(rest.raw_data ? rest.raw_data.timestamp : 0 / 1000);
             info.txHash = txHash;
-            info.num = rest.blockNumber?rest.blockNumber:0;
-            if(rest.receipt){
-                info.energy_usage=rest.receipt.energy_usage;
-                info.energy_usage_total=rest.receipt.energy_usage_total;
-                info.net_usage=rest.receipt.net_usage;
+            info.num = rest.blockNumber ? rest.blockNumber : 0;
+            if (rest.receipt) {
+                info.energy_usage = rest.receipt.energy_usage;
+                info.energy_usage_total = rest.receipt.energy_usage_total;
+                info.net_usage = rest.receipt.net_usage;
             }
-        }else{
+        } else {
             info = rest;
         }
         const records: Array<any> = info.records;
         const amountMap: Map<string, BigNumber> = new Map<string, BigNumber>();
-        console.log(records,"records")
+        console.log(records, "records")
         for (let r of records) {
             if (r.address == address) {
                 if (amountMap.has(r.currency)) {
@@ -115,7 +117,7 @@ class TransactionInfo extends React.Component<any, any> {
                 }
             }
         }
-        console.log(amountMap,"amountMap")
+        console.log(amountMap, "amountMap")
         const tokens: Array<any> = [];
         const entry = amountMap.entries();
         let next = entry.next();
@@ -125,229 +127,239 @@ class TransactionInfo extends React.Component<any, any> {
             next = entry.next();
         }
         console.log("rest", info)
-        const events = await this.getEvent(chain,info.txHash);
+        const events = await this.getEvent(chain, info.txHash);
         this.setState({
             address: address,
             chain: chain,
             info: info,
             tokens: tokens,
-            events:events
+            events: events
         })
     }
 
-    getEvent = async (chain:ChainType,txHash:string)=>{
-        const result:any = {};
+    getEvent = async (chain: ChainType, txHash: string) => {
+        const result: any = {};
         let events = [];
-        events = await rpc.getEvents(chain,txHash,"")
-        if(events && events.length>0){
-            let c = ChainType.ETH == chain?ChainType.SERO:ChainType.ETH;
-            const target = await rpc.getEvents(c,"",events[0].event.depositNonce)
+        events = await rpc.getEvents(chain, txHash, "", "", "")
+        if (events && events.length > 0) {
+            let c = ChainType.ETH == chain ? ChainType.SERO : ChainType.ETH;
+            //txHash: string,depositNonce: string,originChainID:string,resourceID:string
+            const resourceId = chain == ChainType.TRON ? ("0x" + events[0].event.resourceID) : events[0].event.resourceID;
+            if (resourceId.toLowerCase() == BRIDGE_RESOURCE_ID.TUSDT.toLowerCase()) {
+                c = ChainType.TRON == chain ? ChainType.SERO : ChainType.TRON;
+            }
+            console.log("chain:", c)
+            const target = await rpc.getEvents(c, "", events[0].event.depositNonce, "", c == ChainType.TRON ? resourceId.slice(2) : resourceId)
             events = events.concat(target)
-            // events.sort((a:any,b:any)=>{
-            //     const aStatus = a.eventName == 3?0:parseInt(a.event.status);
-            //     const bStatus = b.eventName == 3?0:parseInt(b.event.status);
-            //     return aStatus - bStatus;
-            // })
         }
-        for(let e of events){
-            const state = e.eventName == 3?"0":e.event.status
+        console.log("events>>", events)
+
+        for (let e of events) {
+            const ev = e.eventName == "Deposit" ? 3 : e.eventName == "ProposalEvent" ? 4 : e.eventName
+            const state = ev == 3 ? "0" : e.event.status
             result[state] = e;
         }
         return result;
     }
 
-    setShowModal = (f:boolean)=>{
-        const {chain,info} = this.state;
-        if(f){
-            this.getEvent(chain,info.txHash).then((event)=>{
+    setShowModal = (f: boolean) => {
+        const {chain, info} = this.state;
+        if (f) {
+            this.getEvent(chain, info.txHash).then((event) => {
                 this.setState({
-                    showModal:f,
-                    events:event
+                    showModal: f,
+                    events: event
                 })
             })
         }
         this.setState({
-            showModal:f,
+            showModal: f,
         })
     }
 
-    setShowToast =(f:boolean,toastColor?:string,toastMsg?:string)=>{
+    setShowToast = (f: boolean, toastColor?: string, toastMsg?: string) => {
         this.setState({
-            showToast:f,
-            toastColor:toastColor,
-            toastMsg:toastMsg
+            showToast: f,
+            toastColor: toastColor,
+            toastMsg: toastMsg
         })
     }
 
-    speedEthTx = async (gasPrice:any) =>{
+    speedEthTx = async (gasPrice: any) => {
         const txHash = this.props.match.params.hash;
-        const rest:any = await rpc.post("eth_getTransactionByHash",[txHash]);
-        const tx:Transaction = {
-            from:rest.from,
-            to:rest.to,
-            cy:ChainType[ChainType.ETH],
-            amount:"0x0",
-            chain:ChainType.ETH,
-            feeCy:ChainType[ChainType.ETH]
+        const rest: any = await rpc.post("eth_getTransactionByHash", [txHash]);
+        const tx: Transaction = {
+            from: rest.from,
+            to: rest.to,
+            cy: ChainType[ChainType.ETH],
+            amount: "0x0",
+            chain: ChainType.ETH,
+            feeCy: ChainType[ChainType.ETH]
         };
         tx.gas = rest.gas;
-        tx.gasPrice = utils.toHex(utils.toValue(gasPrice,9));
+        tx.gasPrice = utils.toHex(utils.toValue(gasPrice, 9));
         tx.input = rest.input;
         tx.value = rest.value;
         tx.nonce = rest.nonce;
         this.setState({
-            tx:tx,
-            showSpeedAlert:true
+            tx: tx,
+            showSpeedAlert: true
         })
     }
 
-    setShowSpeedAlert(f:boolean){
+    setShowSpeedAlert(f: boolean) {
         this.setState({
-            showSpeedAlert:f
+            showSpeedAlert: f
         })
     }
 
-    setShowProgress = (f:boolean)=>{
+    setShowProgress = (f: boolean) => {
         this.setState({
-            showProgress:f
+            showProgress: f
         })
     }
 
-    setShowActionSheet = (f:boolean)=>{
+    setShowActionSheet = (f: boolean) => {
         this.setState({
-            showActionSheet:f
+            showActionSheet: f
         })
     }
 
-    setGasPrice = (v:any)=>{
+    setGasPrice = (v: any) => {
         this.setState({
-            gasPrice:v
+            gasPrice: v
         })
 
-        this.speedEthTx(v).catch(e=>{
+        this.speedEthTx(v).catch(e => {
             console.error(e)
         })
     }
 
-    confirm = async (hash:string) => {
-        const {chain,cy} = this.state;
-        let intervalId:any = 0;
-        intervalId = setInterval(()=>{
-            rpc.getTxInfo(chain,hash).then((rest)=>{
-                if(rest){
-                    this.setShowToast(true,"success","Commit Successfully!")
+    confirm = async (hash: string) => {
+        const {chain, cy} = this.state;
+        let intervalId: any = 0;
+        intervalId = setInterval(() => {
+            rpc.getTxInfo(chain, hash).then((rest) => {
+                if (rest) {
+                    this.setShowToast(true, "success", "Commit Successfully!")
                     clearInterval(intervalId);
-                    url.transactionInfo(chain,hash,cy);
+                    url.transactionInfo(chain, hash, cy);
                     this.setShowProgress(false);
                 }
-            }).catch(e=>{
+            }).catch(e => {
                 console.error(e)
             })
-        },1000)
+        }, 1000)
         this.setShowSpeedAlert(false)
     }
 
     render() {
-        const {info, tokens, chain,tx,toastColor,toastMsg,showProgress, showActionSheet,gasPrice,events,showModal,showToast,showSpeedAlert} = this.state;
-        console.info("info>>> ", info)
+        const {info, tokens, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert} = this.state;
         return <IonPage>
             <IonContent fullscreen>
                 <IonHeader>
                     <IonToolbar mode="ios" color="primary">
-                        <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                        <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                            url.back()
+                        }}/>
                         <IonTitle>Transaction Info</IonTitle>
                     </IonToolbar>
                     {showProgress && <IonProgressBar type="indeterminate"/>}
                 </IonHeader>
                 <IonList>
-                    <IonItem  mode="ios">
-                        <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionHash")}:</IonLabel>
+                    <IonItem mode="ios">
+                        <IonLabel color="dark" className="info-label"
+                                  position="stacked">{i18n.t("transactionHash")}:</IonLabel>
                         <div className="text-small-x2 word-break text-padding-normal">
-                            <IonRouterLink onClick={()=>{
-                                Plugins.Browser.open({url:utils.getExplorerTxUrl(chain,info.txHash)}).catch(e=>{
+                            <IonRouterLink onClick={() => {
+                                Plugins.Browser.open({url: utils.getExplorerTxUrl(chain, info.txHash)}).catch(e => {
                                     console.log(e)
                                 })
                             }}>{info.txHash}</IonRouterLink>
-                            <IonIcon src={copyOutline} size="small"  onClick={() => {
+                            <IonIcon src={copyOutline} size="small" onClick={() => {
                                 copy(info.txHash)
                                 copy(info.txHash)
                                 this.setShowToast(true)
-                            }} />
+                            }}/>
                         </div>
                     </IonItem>
-                    <IonItem  mode="ios">
+                    <IonItem mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("status")}:</IonLabel>
-                        {events && events["0"] && <IonButton size="small" fill="outline" slot="end" onClick={()=>{
+                        {events && events["0"] && <IonButton size="small" fill="outline" slot="end" onClick={() => {
                             this.setShowModal(true)
                         }}
                         >{i18n.t("viewCrossInfo")}</IonButton>}
                         <div className="text-small-x2 word-break text-padding-normal">
-                            {info.num>0?<IonBadge color="success">{i18n.t("success")}</IonBadge>:
+                            {info.num > 0 ? <IonBadge color="success">{i18n.t("success")}</IonBadge> :
                                 <IonBadge color="warning">{i18n.t("pending")}</IonBadge>}
                         </div>
                         <div slot="end">
                             {
                                 chain == ChainType.ETH && info.num == 0 &&
-                                <IonButton size="small" fill="outline" slot="end" onClick={()=>{
+                                <IonButton size="small" fill="outline" slot="end" onClick={() => {
                                     this.setShowActionSheet(true);
                                 }}>{i18n.t("speedUp")}</IonButton>
                             }
                         </div>
                     </IonItem>
-                    <IonItem  mode="ios">
+                    <IonItem mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("block")}:</IonLabel>
                         <div className="text-small-x2 word-break text-padding-normal">
-                            <IonRouterLink className="info-block" onClick={()=>{
-                                Plugins.Browser.open({url:utils.getExplorerBlockUrl(chain,info.txHash,info.num)}).catch(e=>{
+                            <IonRouterLink className="info-block" onClick={() => {
+                                Plugins.Browser.open({url: utils.getExplorerBlockUrl(chain, info.txHash, info.num)}).catch(e => {
                                     console.log(e)
                                 })
                             }}>{info.num}</IonRouterLink>
                         </div>
                         <IonBadge color="light" slot="end">{ChainType[chain]} {i18n.t("chain")}</IonBadge>
                     </IonItem>
-                    <IonItem  mode="ios">
-                        <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("timestamp")}:</IonLabel>
+                    <IonItem mode="ios">
+                        <IonLabel color="dark" className="info-label"
+                                  position="stacked">{i18n.t("timestamp")}:</IonLabel>
                         <div className="text-small-x2 word-break text-padding-normal">
-                            {new Date(info.timestamp*1000).toString()}
+                            {new Date(info.timestamp * 1000).toString()}
                         </div>
                     </IonItem>
-                    <IonItem  mode="ios" onClick={() => {
+                    <IonItem mode="ios" onClick={() => {
                         copy(info.fromAddress)
                         copy(info.fromAddress)
                         this.setShowToast(true)
-                    }} >
+                    }}>
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("from")}:</IonLabel>
                         <div className="text-small-x2 word-break text-padding-normal">
                             {info.fromAddress}
                             <IonIcon src={copyOutline} size="small"/>
                         </div>
                     </IonItem>
-                    <IonItem  mode="ios">
+                    <IonItem mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("to")}:</IonLabel>
-                        <div className="text-small-x2 word-break text-padding-normal" style={{maxHeight:"20vh",overflowY:"scroll"}}>{
-                            info.contractAddress ?<div>{info.contractAddress}<IonIcon src={copyOutline} size="small" onClick={() => {
+                        <div className="text-small-x2 word-break text-padding-normal"
+                             style={{maxHeight: "20vh", overflowY: "scroll"}}>{
+                            info.contractAddress ?
+                                <div>{info.contractAddress}<IonIcon src={copyOutline} size="small" onClick={() => {
                                     copy(info.contractAddress)
                                     copy(info.contractAddress)
                                     this.setShowToast(true)
-                                }} /></div>:
+                                }}/></div> :
 
                                 info.toAddress && info.toAddress.map((addr: string) => {
-                                    if(addr !== info.fromAddress || info.toAddress.length == 1){
-                                        return <div style={{padding:"5px 0"}}>{addr}<IonIcon src={copyOutline} size="small" onClick={() => {
-                                            copy(addr)
-                                            copy(addr)
-                                            this.setShowToast(true)
-                                        }} /></div>
-                                        }
+                                    if (addr !== info.fromAddress || info.toAddress.length == 1) {
+                                        return <div style={{padding: "5px 0"}}>{addr}<IonIcon src={copyOutline} size="small"
+                                                                                              onClick={() => {
+                                                                                                  copy(addr)
+                                                                                                  copy(addr)
+                                                                                                  this.setShowToast(true)
+                                                                                              }}/></div>
+                                    }
                                     return ""
                                 })
                         }</div>
                     </IonItem>
-                    <IonItem  mode="ios">
+                    <IonItem mode="ios">
                         <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("value")}:</IonLabel>
                         <IonText>{
                             tokens && tokens.length > 0 && tokens.map((v: any) => {
-                                const symbol = new BigNumber(v.value).toNumber()>0?"+":""
+                                const symbol = new BigNumber(v.value).toNumber() > 0 ? "+" : ""
                                 return <IonBadge color="light">
                                     {symbol}{utils.fromValue(v.value, utils.getCyDecimal(v.cy, ChainType[chain])).toString(10)} {v.cy}
                                 </IonBadge>
@@ -359,30 +371,33 @@ class TransactionInfo extends React.Component<any, any> {
                         // info.energy_usage_total=rest.energy_usage_total;
                         // info.net_usage=rest.net_usage;
 
-                        ChainType.TRON == chain?<IonItem lines="none" mode="ios">
-                                <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionFee")}:</IonLabel>
+                        ChainType.TRON == chain ? <IonItem lines="none" mode="ios">
+                                <IonLabel color="dark" className="info-label"
+                                          position="stacked">{i18n.t("transactionFee")}:</IonLabel>
                                 <IonText className={"text-small"}>
                                     <IonText>ENERGY: {info.energy_usage}</IonText><br/>
                                     <IonText>NET: {info.net_usage}</IonText><br/>
                                 </IonText>
                             </IonItem>
                             :
-                        <IonItem lines="none" mode="ios">
-                            <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("transactionFee")}:</IonLabel>
-                            <IonText className={"text-small"}>
-                            {info.fee && utils.fromValue(info.fee, utils.getCyDecimal(info.feeCy, ChainType[chain])).toString(10)} {info.feeCy}
-                            <div>
-                            <IonText color="medium">{utils.fromValue(info.gasUsed?info.gasUsed:info.gas, 0).toString(10)}({i18n.t("gas")})
-                            * {utils.fromValue(info.gasPrice, 9).toString(10)} {utils.gasUnit(chain)}</IonText>
-                            </div>
-                            </IonText>
-                        </IonItem>
+                            <IonItem lines="none" mode="ios">
+                                <IonLabel color="dark" className="info-label"
+                                          position="stacked">{i18n.t("transactionFee")}:</IonLabel>
+                                <IonText className={"text-small"}>
+                                    {info.fee && utils.fromValue(info.fee, utils.getCyDecimal(info.feeCy, ChainType[chain])).toString(10)} {info.feeCy}
+                                    <div>
+                                        <IonText
+                                            color="medium">{utils.fromValue(info.gasUsed ? info.gasUsed : info.gas, 0).toString(10)}({i18n.t("gas")})
+                                            * {utils.fromValue(info.gasPrice, 9).toString(10)} {utils.gasUnit(chain)}</IonText>
+                                    </div>
+                                </IonText>
+                            </IonItem>
                     }
 
 
                 </IonList>
 
-                <IonModal isOpen={showModal} mode="ios" swipeToClose={true} >
+                <IonModal isOpen={showModal} mode="ios" swipeToClose={true}>
                     <IonList mode="ios">
                         <IonItem>
                             <IonLabel>{i18n.t("deposit")}</IonLabel>
@@ -390,19 +405,21 @@ class TransactionInfo extends React.Component<any, any> {
                         </IonItem>
                         <IonItem>
                             <IonLabel>{i18n.t("approve")}</IonLabel>
-                            <IonText>{ events["1"] ?
-                                <IonBadge color="success">{i18n.t("success")}</IonBadge> : events["4"]?
-                                    <IonBadge color="danger">{i18n.t("failed")}</IonBadge>: events["3"]?
-                                        <IonBadge color="success">{i18n.t("success")}</IonBadge>:<IonSpinner name="bubbles" />
+                            <IonText>{events["1"] ?
+                                <IonBadge color="success">{i18n.t("success")}</IonBadge> : events["4"] ?
+                                    <IonBadge color="danger">{i18n.t("failed")}</IonBadge> : events["3"] ?
+                                        <IonBadge color="success">{i18n.t("success")}</IonBadge> :
+                                        <IonSpinner name="bubbles"/>
                             }</IonText>
                         </IonItem>
                         <IonItem>
                             <IonLabel>{i18n.t("validate")}</IonLabel>
                             <IonText>
-                                { events["2"] ?
-                                    <IonBadge color="success">{i18n.t("success")}</IonBadge> : events["4"]?
-                                        <IonBadge color="danger">{i18n.t("failed")}</IonBadge>: events["3"]?
-                                            <IonBadge color="success">{i18n.t("success")}</IonBadge>:<IonSpinner name="bubbles" />
+                                {events["2"] ?
+                                    <IonBadge color="success">{i18n.t("success")}</IonBadge> : events["4"] ?
+                                        <IonBadge color="danger">{i18n.t("failed")}</IonBadge> : events["3"] ?
+                                            <IonBadge color="success">{i18n.t("success")}</IonBadge> :
+                                            <IonSpinner name="bubbles"/>
                                 }
                             </IonText>
                         </IonItem>
@@ -410,7 +427,8 @@ class TransactionInfo extends React.Component<any, any> {
                             <IonLabel>{i18n.t("execute")}</IonLabel>
                             <IonText>
                                 {events["3"] ? <IonBadge color="success">{i18n.t("success")}</IonBadge> :
-                                    events["4"]?<IonBadge color="danger">{i18n.t("failed")}</IonBadge>:<IonSpinner name="bubbles" />}
+                                    events["4"] ? <IonBadge color="danger">{i18n.t("failed")}</IonBadge> :
+                                        <IonSpinner name="bubbles"/>}
                             </IonText>
                         </IonItem>
                     </IonList>
@@ -418,18 +436,20 @@ class TransactionInfo extends React.Component<any, any> {
                 </IonModal>
 
                 <IonToast
-                    color={toastColor?toastColor:"dark"}
+                    color={toastColor ? toastColor : "dark"}
                     position="top"
                     isOpen={showToast}
                     onDidDismiss={() => this.setShowToast(false)}
-                    message={toastMsg?toastMsg:"Copied to clipboard!"}
+                    message={toastMsg ? toastMsg : "Copied to clipboard!"}
                     duration={1500}
                     mode="ios"
                 />
 
-                <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
+                <GasPriceActionSheet onClose={() => this.setShowActionSheet(false)} show={showActionSheet}
+                                     onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 
-                <ConfirmTransaction show={showSpeedAlert} transaction={tx} onProcess={(f)=>this.setShowProgress(f)} onCancel={()=>this.setShowSpeedAlert(false)} onOK={this.confirm}/>
+                <ConfirmTransaction show={showSpeedAlert} transaction={tx} onProcess={(f) => this.setShowProgress(f)}
+                                    onCancel={() => this.setShowSpeedAlert(false)} onOK={this.confirm}/>
 
             </IonContent>
         </IonPage>;

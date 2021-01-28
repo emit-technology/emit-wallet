@@ -52,6 +52,7 @@ import Tunnel from "./pages/Tunnel";
 import About from "./pages/settings/About";
 import Slides from "./pages/Slides";
 import Scan from "./pages/Scan";
+import TronFrozenBalance from "./pages/TronFrozenBalance";
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -94,7 +95,9 @@ const App: React.FC = () => (
             <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
             <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
             <Route path="/scan" component={Scan} exact={true}/>
+            <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
             <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
+
             <Route path="/" render={() => {
                 const viewedSlide = selfStorage.getItem('viewedSlide');
                 if (!viewedSlide) {

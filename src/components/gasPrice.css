@@ -27,3 +27,12 @@
     max-height: 100px;
     overflow-y: scroll;
 }
+
+.net-progress{
+    height: 10px;
+    --progress-background: repeating-linear-gradient(90deg, #76ab61, #76ab61 2px, #ddd 2px, #ddd 4px);
+}
+
+.net-div{
+    padding: 5px 15px;
+}

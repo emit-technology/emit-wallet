@@ -1,5 +1,6 @@
 import EthContract from "../../EthContract";
 import BigNumber from "bignumber.js";
+import tron from "../../../rpc/tron";
 
 const ABI_FEE = [
     {
@@ -28,14 +29,20 @@ const ABI_FEE = [
     }
 ]
 
-class CrossFee extends EthContract {
+class CrossFee {
+
+    address:string;
 
     constructor(address:string) {
-        super(address,ABI_FEE);
+        // super(address,ABI_FEE);
+        this.address = address;
     }
 
     estimateFee = async (resourceId: string, inputAmount: BigNumber): Promise<string> => {
-        return await this.contract.methods.estimateFee(resourceId,"0x"+inputAmount.toString(16)).call()
+        const instance = await tron.tronWeb.contract().at(this.address);
+        const res = await instance.estimateFee(resourceId,inputAmount.toNumber()).call();
+        console.log(res.fee.toString(10),"estimateFee")
+        return res.fee.toString(10)
     }
 
 }

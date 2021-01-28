@@ -98,20 +98,25 @@ class TransactionList extends React.Component<any, any>{
             chain:chain,
             address:address,
             records:rest.data,
+            meta:rest.meta,
         })
     }
 
     loadMore = async (event:any) =>{
-        const {pageSize,pageNo,chain,address,cy,records,cyName,searchText} = this.state;
-        const rest:any = await rpc.getTransactions(chain,address,cyName,searchText,pageSize,pageNo+1)
-        if(rest && rest.total>0){
-            if(rest.data.length == 0){
-                event.target.disabled = true;
-            }else{
-                this.setState({
-                    pageNo:pageNo+1,
-                    records:records.concat(rest.data)
-                })
+        const {pageSize,pageNo,chain,address,cy,records,cyName,searchText,meta} = this.state;
+        if(!meta || meta&&meta.fingerprint){
+            const rest:any = await rpc.getTransactions(chain,address,cyName,searchText,pageSize,pageNo+1,meta&&meta.fingerprint)
+            if(rest && rest.total>0){
+                if(rest.data.length == 0){
+                    event.target.disabled = true;
+
+                }else{
+                    this.setState({
+                        pageNo:pageNo+1,
+                        records:records.concat(rest.data),
+                        meta:rest.meta,
+                    })
+                }
             }
         }
         event.target.complete();

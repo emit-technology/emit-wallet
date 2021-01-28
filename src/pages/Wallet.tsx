@@ -33,12 +33,13 @@ import {
     IonItemGroup,
     IonLabel,
     IonList,
-    IonListHeader,
+    IonListHeader, IonLoading,
     IonPage,
     IonRow,
     IonText,
-    IonTitle,
-    IonToolbar
+    IonTitle, IonToast,
+    IonToolbar,
+    IonBadge
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
@@ -56,6 +57,7 @@ import {Plugins,} from '@capacitor/core';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
 import WETH from "../contract/weth";
+import tron from "../rpc/tron";
 
 const {StatusBar,Device} = Plugins;
 
@@ -72,7 +74,11 @@ interface State {
     showWithdrawEthAlert:boolean,
     showDepositEthAlert:boolean,
     activeChainAlert:boolean,
-    selectChainType:ChainType
+    showLoading:boolean,
+    selectChainType:ChainType,
+    toastColor:string
+    toastMsg:string
+    showToast:boolean
 }
 
 class Wallet extends React.Component<State, any> {
@@ -90,7 +96,11 @@ class Wallet extends React.Component<State, any> {
         showWithdrawEthAlert:false,
         showDepositEthAlert:false,
         activeChainAlert:false,
-        selectChainType:ChainType._
+        showLoading:false,
+        selectChainType:ChainType._,
+        toastColor:"warning",
+        toastMsg:"",
+        showToast:false,
     }
 
     componentDidMount() {
@@ -167,7 +177,7 @@ class Wallet extends React.Component<State, any> {
         if (account && account.addresses && account.addresses[2]) {
             const seroBalance = await rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO])
             const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
-            const tronBalance = await rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON])
+            const tronBalance:any = account.addresses[ChainType.TRON]?await rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON]):{}
             for (let cy of currencies) {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
@@ -178,7 +188,11 @@ class Wallet extends React.Component<State, any> {
                     } else if (chain === "ETH") {
                         assets[cy][chain] = utils.fromValue(ethBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     } else if (chain === "TRON") {
-                        assets[cy][chain] = utils.fromValue(tronBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
+                        if(currency=="TRX"){
+                            assets[cy][chain] = utils.fromValue(tronBalance["TRX"],6).plus(utils.fromValue(tronBalance["TRX_FROZEN"],6)).toNumber()
+                        }else{
+                            assets[cy][chain] = utils.fromValue(tronBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
+                        }
                     }
                 }
             }
@@ -213,8 +227,16 @@ class Wallet extends React.Component<State, any> {
         }
     };
 
+    setShowToast = (f:boolean,color?:string,m?:string) =>{
+        this.setState({
+            showToast:f,
+            toastMsg:m,
+            toastColor:color
+        })
+    }
+
     renderAssets = () => {
-        const {assets, coinShow} = this.state;
+        const {assets, coinShow,account} = this.state;
         const assetsKeys = Object.keys(assets);
         const itemGroup: Array<any> = [];
 
@@ -223,10 +245,15 @@ class Wallet extends React.Component<State, any> {
             const tokenKeys = Object.keys(tokens);
             const item: Array<any> = [];
             let total: BigNumber = new BigNumber(0)
+
+            if(!(account.addresses && account.addresses[ChainType.TRON]) && ["TRX","TUSDT"].indexOf(cy)>-1){
+                continue;
+            }
             for (let chain of tokenKeys) {
                 const value = new BigNumber(tokens[chain]);
                 const currency = utils.getCyName(cy, chain);
                 total = new BigNumber(value).plus(total)
+
                 item.push(
                     <IonItem mode="ios" lines="none" style={{marginBottom:"5px"}} >
                         <IonAvatar slot="start" onClick={() => {
@@ -246,8 +273,8 @@ class Wallet extends React.Component<State, any> {
                         }}>
                             {/*<IonText>{parseFloat(value.toFixed(3, 1)).toLocaleString()}</IonText>*/}
                             <IonText>{value.toString(10)}</IonText>
-                            <p><IonText
-                                color="medium">{currency}{utils.getCyType(chain, cy) && `(${utils.getCyType(chain, cy)})`}</IonText>
+                            <p>
+                                <IonText color="medium">{currency}{utils.getCyType(chain, cy) && `(${utils.getCyType(chain, cy)})`}</IonText>
                             </p>
                         </IonLabel>
                         <IonButton slot="end" mode="ios" size="small" onClick={() => {
@@ -274,6 +301,26 @@ class Wallet extends React.Component<State, any> {
                                     <IonButton size="small" expand="block" onClick={()=>{
                                         url.swapEth("deposit")
                                     }}>Deposit</IonButton>
+                                </IonCol>
+                            </IonRow>
+                        </IonItem>
+                    )
+                }
+                if(currency == "TRX"){
+                    item.push(
+                        <IonItem mode="ios" lines="none">
+                            <IonRow style={{textAlign:"center",width:"100%"}}>
+                                <IonCol size="6">
+                                    <IonLabel>Available</IonLabel>
+                                </IonCol>
+                                <IonCol size="6">
+                                    <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX"],6).toNumber()}</IonText>
+                                </IonCol>
+                                <IonCol size="6">
+                                    <IonLabel>Frozen</IonLabel>
+                                </IonCol>
+                                <IonCol size="6">
+                                    <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX_FROZEN"],6).toNumber()}</IonText>
                                 </IonCol>
                             </IonRow>
                         </IonItem>
@@ -366,8 +413,14 @@ class Wallet extends React.Component<State, any> {
         }
     }
 
+    setShowLoading = (f:boolean)=>{
+        this.setState({
+            showLoading:f
+        })
+    }
+
     render() {
-        const {account,scanText, showAlert, chain,showVersionAlert,version,deviceInfo,activeChainAlert} = this.state;
+        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,activeChainAlert,toastColor,toastMsg,showToast} = this.state;
 
         return (
             <IonPage>
@@ -511,12 +564,35 @@ class Wallet extends React.Component<State, any> {
                         {
                             text: i18n.t("ok"),
                             handler: (e) => {
-                                this.activeChain(e["password"]).catch((e)=>{
-                                    console.error(e)
+                                this.setShowLoading(true)
+                                this.activeChain(e["password"]).then(()=>{
+                                    this.setShowToast(true,"success","Active successfully!");
+                                    this.setShowLoading(false)
+                                }).catch((e)=>{
+                                    const err = typeof e=="string"?e:e.message;
+                                    this.setShowLoading(false)
+                                    this.setShowToast(true,"danger",err);
                                 })
                             }
                         }
                     ]}
+                />
+                <IonToast
+                    color={!toastColor?"warning":toastColor}
+                    position="top"
+                    isOpen={showToast}
+                    onDidDismiss={() => this.setShowToast(false)}
+                    message={toastMsg}
+                    duration={1500}
+                    mode="ios"
+                />
+
+                <IonLoading
+                    mode="ios"
+                    isOpen={showLoading}
+                    onDidDismiss={() => this.setShowLoading(false)}
+                    message={'Please wait...'}
+                    duration={60000}
                 />
             </IonPage>
         );

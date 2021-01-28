@@ -29,7 +29,8 @@ import {
     IonModal,
     IonRow,
     IonText,
-    IonToast
+    IonToast,
+    IonProgressBar, IonIcon
 } from "@ionic/react";
 import rpc from "../rpc";
 import * as utils from "../utils"
@@ -39,6 +40,8 @@ import "./gasPrice.css"
 import Tron from "../contract/erc20/tron";
 import * as config from "../config";
 import tron from "../rpc/tron";
+import {chevronForwardOutline} from "ionicons/icons";
+import url from "../utils/url";
 
 interface State{
     transaction?:Transaction
@@ -48,6 +51,7 @@ interface State{
     toastColor:string
     toastMsg:string
     showLoading:boolean
+    accountResource:any
 }
 
 interface Props {
@@ -67,7 +71,8 @@ class ConfirmTransaction extends React.Component<Props, State>{
         showToast:false,
         toastColor:"warning",
         toastMsg:"",
-        showLoading:false
+        showLoading:false,
+        accountResource:{}
     }
 
     constructor(props:Props) {
@@ -94,7 +99,6 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 // @ts-ignore
                 tx.gas =  tx.data?await rpc.post("sero_estimateGas",[tx]):utils.defaultGas(ChainType.SERO);
             }else if(tx.chain == ChainType.TRON){
-                //TODO
 
             }
             this.setState({
@@ -168,15 +172,17 @@ class ConfirmTransaction extends React.Component<Props, State>{
     }
 
     render() {
-        const {transaction,showLoading,showActionSheet,showPasswordAlert,showToast,toastMsg,toastColor} = this.state;
+        const {transaction,showLoading,showActionSheet,showPasswordAlert,showToast,toastMsg,toastColor,accountResource} = this.state;
         const value = utils.fromValue(transaction&&transaction.value,0).toNumber()==0?
             transaction&&transaction.amount:transaction&&transaction.value
+
+        console.log("accountResource>>",accountResource)
         return <>
             <IonModal
                 isOpen={showActionSheet}
                 cssClass="confirm-transaction-modal"
                 onDidDismiss={() => this.setShowActionShell(false)}>
-                <IonList>
+                <IonList style={{overflowY:"scroll"}}>
                     <IonListHeader>
                         <IonLabel>Confirm Transaction</IonLabel>
                     </IonListHeader>
@@ -199,17 +205,20 @@ class ConfirmTransaction extends React.Component<Props, State>{
                         <IonText slot="end">{transaction && new BigNumber(transaction.nonce).toString(10)}</IonText>
                     </IonItem>
                     }
-                    <IonItem>
-                        <IonLabel position="stacked" color="medium">{i18n.t("minerFee")}</IonLabel>
-                        <IonText slot="end">
-                            {this.fee()} {transaction?.feeCy}<br/>
-                            <IonText color="medium"  className="text-small">
-                                Gas: {transaction && utils.fromValue(transaction.gas,0).toString(10)} x
-                            {transaction && utils.fromValue(transaction.gasPrice,9).toString(10)}
-                            {utils.gasUnit(transaction?transaction.chain:2)}
+                    {
+                        transaction?.chain != ChainType.TRON &&
+                        <IonItem>
+                            <IonLabel position="stacked" color="medium">{i18n.t("minerFee")}</IonLabel>
+                            <IonText slot="end">
+                                {this.fee()} {transaction?.feeCy}<br/>
+                                <IonText color="medium"  className="text-small">
+                                    Gas: {transaction && utils.fromValue(transaction.gas,0).toString(10)} x
+                                    {transaction && utils.fromValue(transaction.gasPrice,9).toString(10)}
+                                    {utils.gasUnit(transaction?transaction.chain:2)}
+                                </IonText>
                             </IonText>
-                        </IonText>
-                    </IonItem>
+                        </IonItem>
+                    }
                     {transaction && transaction.data && transaction.chain!= ChainType.TRON &&
                     <IonItem>
                         <IonLabel position="stacked" color="medium">{i18n.t("data")}</IonLabel>

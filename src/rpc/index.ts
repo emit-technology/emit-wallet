@@ -43,7 +43,6 @@ class RPC {
             method: method,
             params: params,
         };
-        console.log(data,"post")
         return new Promise((resolve, reject) => {
             axios.post(this.host, data).then((resp: any) => {
                 if (resp.data.error) {
@@ -52,35 +51,36 @@ class RPC {
                     resolve(resp.data.result);
                 }
             }).catch((e: any) => {
-                console.log("rpc post err: ",e)
+                console.error("rpc post err: ",e)
                 reject(e)
             })
         })
     }
 
-    getBalance = async (chain: ChainType, address: string,cy?:string) => {
+    getBalance = async (chain: ChainType, address: string,localOnly?:boolean) => {
         const key = ["balance",chain].join("_");
         let rest: any = selfStorage.getItem(key);
         if(!rest){
             rest = await this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address])
             selfStorage.setItem(key,rest);
         }else{
-
-            if(chain == ChainType.TRON){
-                tron.getBalance(address).then((balance:any)=>{
-                    selfStorage.setItem(key,balance);
-                });
-            }else {
-                this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address]).then(balance=>{
-                    selfStorage.setItem(key,balance);
-                })
+            if(!localOnly){
+                if(chain == ChainType.TRON){
+                    tron.getBalance(address).then((balance:any)=>{
+                        selfStorage.setItem(key,balance);
+                    });
+                }else {
+                    this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address]).then(balance=>{
+                        selfStorage.setItem(key,balance);
+                    })
+                }
             }
         }
         return rest;
     }
 
-    getTransactions = async (chain: ChainType, address: string,cy:string,hash:string,pageSize:number,pageNo:number) =>{
-        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getTransactions"].join("_"), [address,cy,hash,pageSize,pageNo])
+    getTransactions = async (chain: ChainType, address: string,cy:string,hash:string,pageSize:number,pageNo:number,fingerprint?:string) =>{
+        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getTransactions"].join("_"), [address,cy,hash,pageSize,pageNo,fingerprint])
         return rest;
     }
 
@@ -89,24 +89,20 @@ class RPC {
         return rest;
     }
 
-    getEvents = async (chain: ChainType,txHash:string,depositNonce:string) =>{
-        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getEvents"].join("_"), [txHash,depositNonce])
+    getEvents = async (chain: ChainType,txHash: string,depositNonce: string,originChainID:string,resourceID:string) =>{
+        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getEvents"].join("_"), [txHash,depositNonce,originChainID,resourceID])
         return rest;
     }
 
     commitTx = async (tx: Transaction,password:string) => {
         const accountId:string|null = selfStorage.getItem("accountId");
         if(accountId){
-            console.log(tx,"commitTx")
             let hash:any = "" ;
-            console.log(tx.chain == ChainType.SERO, tx.chain == ChainType.ETH)
             if(tx.chain == ChainType.SERO){
                 //gen tx params
                 const txParams: any = await this.post("sero_genParams", [tx]);
-                console.log(txParams,"txParams");
                 //sign
                 const signSeroRet:any = await walletWorker.signTx(accountId,password,ChainType.SERO, txParams)
-                console.log(signSeroRet,"signSeroRet");
                 //commitTx
                 await this.post("sero_commitTx",[signSeroRet,tx])
                 hash = signSeroRet.Hash;
@@ -118,15 +114,13 @@ class RPC {
                     // @ts-ignore
                     tx.nonce = await this.post("eth_getTransactionCount",[tx.from,"pending"]);
                 }
-                console.log("eth commit tx>>>",tx)
                 const signEthRet = await walletWorker.signTx(accountId,password,ChainType.ETH, tx,CHAIN_PARAMS)
-                console.log(signEthRet,"signEthRet>>")
                 //commitTx
                 hash = await this.post("eth_commitTx",["0x"+signEthRet,tx])
             }else if(tx.chain == ChainType.TRON){
                 const signEthRet = await walletWorker.signTx(accountId,password,ChainType.TRON, tx.data)
                 const rest:any = await this.post("tron_commitTx",[signEthRet,tx])
-                hash = rest.transaction.txID;
+                hash = rest.txid;
             }
             return Promise.resolve(hash);
         }else{

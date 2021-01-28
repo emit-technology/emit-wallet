@@ -96,7 +96,6 @@ class Eth extends EthContract implements Cross{
     }
 
     depositFT(destinationChainID: number, resourceID: string, recipient: string, amount: BigNumber): Promise<any> {
-        console.log("params>",destinationChainID,resourceID,recipient,"0x"+amount.toString(16))
         return this.contract.methods.depositFT(destinationChainID,resourceID,recipient,"0x"+amount.toString(16)).encodeABI()
     }
 
@@ -106,7 +105,6 @@ class Eth extends EthContract implements Cross{
 
     resourceIDToLimit = async (resourceId: string): Promise<Array<BigNumber>> => {
         const rest = await this.contract.methods.resourceIDToLimit(resourceId).call()
-        console.log(rest,"resourceIDToLimit")
         return [new BigNumber(rest[0]),new BigNumber(rest[1])]
     }
 

@@ -160,6 +160,11 @@ class Url {
         return
     }
 
+    frozenTronBalance(){
+        this.goTo([this.base,"tron/frozen"].join("/"),[this.base].join("/"))
+        return
+    }
+
 }
 
 const url = new Url();

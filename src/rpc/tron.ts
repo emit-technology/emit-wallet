@@ -1,5 +1,7 @@
 import {TRON_API_HOST,CONTRACT_ADDRESS} from "../config";
 import BigNumber from "bignumber.js";
+import {ChainType} from "../types";
+import selfStorage from "../utils/storage";
 
 /**
  * Copyright 2020 EMIT Foundation.
@@ -42,7 +44,6 @@ class Tron{
     getTxInfo = async (txId:string):Promise<any>=>{
         const record:any = {};
         const tx = await this.tronWeb.trx.getTransaction(txId)
-        console.log("tx>>",tx)
         // const info = await this.tronWeb.trx.getTransactionInfo(txId)
         const c = tx.raw_data.contract[0];
         if("TransferContract" == c.type){
@@ -65,15 +66,43 @@ class Tron{
         return record;
     }
 
+    getAccountResources = async (address:string)=>{
+        const resource = await this.tronWeb.trx.getAccountResources(address);
+        return resource;
+    }
+
+    getBalanceLocal = ()=>{
+        const key = ["balance",ChainType.TRON].join("_");
+        return selfStorage.getItem(key);
+    }
+
     getBalance = async (address:string)=>{
-        const rest:any = await this.tronWeb.trx.getAccount(address);
-        console.log("TRX balance: ",rest)
-        const balance:any = {};
-        balance["TRX"] = rest.balance;
-        let instance = await this.tronWeb.contract().at(CONTRACT_ADDRESS.ERC20.TRON.USDT);
-        let balanceUSDT = await instance.balanceOf(address).call();
-        balance["USDT"] = new BigNumber(balanceUSDT._hex).toString(10);
-        return Promise.resolve(balance);
+        try{
+            const rest:any = await this.tronWeb.trx.getAccount(address);
+            const balance:any = {};
+            const frozen = this.calFrozenBalance(rest);
+            balance["TRX"] = rest.balance;
+            balance["TRX_FROZEN"] = frozen;
+            let instance = await this.tronWeb.contract().at(CONTRACT_ADDRESS.ERC20.TRON.USDT);
+            let balanceUSDT = await instance.balanceOf(address).call();
+            balance["USDT"] = new BigNumber(balanceUSDT._hex).toString(10);
+            return Promise.resolve(balance);
+        }catch (e){
+            return Promise.reject(e)
+        }
+    }
+
+    calFrozenBalance = (data:any)=>{
+        let total = 0;
+        if(data.account_resource && data.account_resource.frozen_balance_for_energy){
+            total += data.account_resource.frozen_balance_for_energy.frozen_balance;
+        }
+        if(data.frozen && data.frozen.length>0){
+            for(let d of data.frozen){
+                total += d.frozen_balance;
+            }
+        }
+        return total;
     }
 
 }

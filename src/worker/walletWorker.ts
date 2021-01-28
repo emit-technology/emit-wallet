@@ -34,10 +34,8 @@ class WalletWorker {
             avatar:avatar,
             name:name,
         }
-        console.log("importMnemonic...",params)
         return new Promise((resolve, reject)=>{
             service.importMnemonic(params, function (data: any) {
-                console.log("importMnemonic data...",data)
                 if(data.error){
                     reject(data.error);
                 }else{
@@ -56,10 +54,8 @@ class WalletWorker {
             avatar:avatar,
             name:name,
         }
-        console.log("importPrivateKeu...",params)
         return new Promise((resolve, reject)=>{
             service.importPrivateKey(params, function (data: any) {
-                console.log("importPrivateKeu data...",data)
                 if(data.error){
                     reject(data.error);
                 }else{
@@ -73,7 +69,6 @@ class WalletWorker {
     async generateMnemonic(){
         return new Promise((resolve, reject)=>{
             service.generateMnemonic(function (data:any){
-                console.log("data>",data);
                 if(data.error){
                     reject(data.error);
                 }else{
