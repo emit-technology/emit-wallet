@@ -73,7 +73,8 @@ class Tron{
 
     getBalanceLocal = ()=>{
         const key = ["balance",ChainType.TRON].join("_");
-        return selfStorage.getItem(key);
+        const data = selfStorage.getItem(key);
+        return data?data:{}
     }
 
     getBalance = async (address:string)=>{

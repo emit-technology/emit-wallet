@@ -206,7 +206,7 @@ class TronFrozenBalance extends React.Component<any, any> {
                         </IonToolbar>
                         {showProgress && <IonProgressBar type="indeterminate"/>}
                     </IonHeader>
-                    <IonCard>
+                    <IonCard mode="ios">
                         <IonCardContent>
                             <TronAccountResource accountResource={accountResource}/>
                         </IonCardContent>
@@ -218,34 +218,34 @@ class TronFrozenBalance extends React.Component<any, any> {
                                 this.setOp(e.detail.value)
                             }}>
                                 <IonSegmentButton value="Freeze">
-                                    <IonLabel>Freeze</IonLabel>
+                                    <IonLabel>{i18n.t("freeze")}</IonLabel>
                                 </IonSegmentButton>
                                 <IonSegmentButton value="UnFreeze">
-                                    <IonLabel>UnFreeze</IonLabel>
+                                    <IonLabel>{i18n.t("unFreeze")}</IonLabel>
                                 </IonSegmentButton>
                             </IonSegment>
                         </IonCol>
                         <IonCol size="2"></IonCol>
                     </IonRow>
-                    <IonCard>
+                    <IonCard mode="ios">
                         <IonCardContent>
                             <IonList>
                                 <IonItem>
                                     <IonLabel>Resource</IonLabel>
                                     <IonSelect interface="action-sheet" value={resource} placeholder="Resource Type"
                                                onIonChange={e => this.setResource(e.detail.value)}>
-                                        <IonSelectOption value="BANDWIDTH">Bandwidth</IonSelectOption>
-                                        <IonSelectOption value="ENERGY">Energy</IonSelectOption>
+                                        <IonSelectOption value="BANDWIDTH">{i18n.t("bandwidth")}</IonSelectOption>
+                                        <IonSelectOption value="ENERGY">{i18n.t("energy")}</IonSelectOption>
                                     </IonSelect>
                                 </IonItem>
                                 <IonItem>
-                                    <IonLabel position="stacked">Receiver</IonLabel>
+                                    <IonLabel position="stacked">{i18n.t("receiver")}</IonLabel>
                                     <IonText className="text-small-x2">
                                         {account && account.addresses[ChainType.TRON]}
                                     </IonText>
                                 </IonItem>
                                 <IonItem>
-                                    <IonLabel position="floating">{op} Amount</IonLabel>
+                                    <IonLabel position="floating">{op} {i18n.t("amount")}</IonLabel>
                                     <IonInput type="number" readonly={op !== "Freeze"} value={amount} onIonChange={(e => {
                                         this.setState({
                                             amount: e.detail.value
@@ -255,7 +255,7 @@ class TronFrozenBalance extends React.Component<any, any> {
                             </IonList>
                         </IonCardContent>
                     </IonCard>
-                    <IonButton expand="block" color={op == "Freeze" ? "primary" : "danger"} onClick={() => {
+                    <IonButton mode="ios" expand="block" color={op == "Freeze" ? "primary" : "danger"} onClick={() => {
                         this.commit().catch(e => {
                             console.error(e)
                             const err = typeof e == "string" ? e : e.message;

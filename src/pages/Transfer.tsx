@@ -279,7 +279,7 @@ class Transfer extends React.Component<any, any> {
                     <IonItem mode="ios" className="form-padding">
                         <IonLabel position="stacked">{i18n.t("amount")}
                             <IonText className="ion-float-right" color="medium">
-                                {utils.fromValue(balance[realCy],utils.getCyDecimal(realCy,ChainType[chain])).toString(10)} {`${cy}(${realCy})`}
+                                {utils.fromValue(balance[realCy],utils.getCyDecimal(realCy,ChainType[chain])).toString(10)} {realCy}
                             </IonText>
                         </IonLabel>
                         <IonInput onIonChange={(e: any) => {

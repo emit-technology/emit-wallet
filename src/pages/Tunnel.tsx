@@ -81,7 +81,8 @@ class Tunnel extends React.Component<any, any> {
         gasPriceLevel: {},
         gasPrice: 1,
         gas: 21000,
-        minValue:0
+        minValue:0,
+        initAllowanceAmount:true
     }
 
     componentDidMount() {
@@ -105,6 +106,8 @@ class Tunnel extends React.Component<any, any> {
         const account = await walletWorker.accountInfo();
         const chain = utils.getChainIdByName(crossMode[0])
         const realCy = utils.getCyName(targetCoin,crossMode[0]);
+
+        console.log("crossMode:::",crossMode,targetCoin,chain);
 
         let allowance= "0";
         if(chain == ChainType.ETH){
@@ -152,6 +155,7 @@ class Tunnel extends React.Component<any, any> {
 
 
         this.setState({
+            gasPrice: await utils.defaultGasPrice(chain),
             tokenRate:tokenRate,
             allowance: allowance,
             balance: balance,
@@ -187,7 +191,7 @@ class Tunnel extends React.Component<any, any> {
             const rest = utils.fromValue(restTron, decimalTarget).toString(10);
             console.log("crossFee TRON",restTron,rest);
             return rest;
-        }else if (targetCoin == ChainType.ETH){
+        }else if (targetChain == ChainType.ETH){
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
             const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
@@ -329,7 +333,8 @@ class Tunnel extends React.Component<any, any> {
         const chain = utils.getChainIdByName(crossMode[0]);
         const realCy = utils.getCyName(targetCoin,crossMode[0]);
         const decimal = utils.getCyDecimal(realCy, ChainType[chain]);
-        const __ret:any = this.getMinAndMaxValue(chain,realCy,targetCoin)
+        const __ret:any = await this.getMinAndMaxValue(chain,realCy,targetCoin)
+        console.log("__ret::: ",__ret)
         if(__ret.minValue>new BigNumber(amount).toNumber()){
             this.setShowProgress(false);
             this.setShowToast(true,"warning",`The Min cross amount is ${__ret.minValue} ${targetCoin}`)
@@ -527,15 +532,17 @@ class Tunnel extends React.Component<any, any> {
     }
 
     render() {
-        const {targetCoin, gas, gasPrice,feeCy, color, tokenRate,tx,showActionSheet, approveAlert,accountResource, minValue,maxValue, crossFee, address, amount, showProgress, cancelAlert, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {targetCoin, gasPrice, color,initAllowanceAmount, tx,showActionSheet, accountResource, minValue,maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
-        let amountValue: any = new BigNumber(amount).toNumber() > 0 ? amount : allowance;
-        if (new BigNumber(amountValue).toNumber() == 0) {
-            amountValue = ""
-        }
+        let amountValue: any = initAllowanceAmount?allowance:amount;
+        // if(new BigNumber(amountValue).toNumber() == 0){
+        //     amountValue = "";
+        // }
+
         const chain = utils.getChainIdByName(crossMode[0]);
         const realCy = utils.getCyName(targetCoin, crossMode[0])
         const targetRealCy = utils.getCyName(targetCoin, crossMode[1])
+
         return (
             <IonPage>
                 <IonContent fullscreen color="light">
@@ -555,7 +562,7 @@ class Tunnel extends React.Component<any, any> {
                                 <IonItem mode="ios">
                                     <IonLabel position="stacked" color="dark">{i18n.t("from")} {crossMode[0]} {i18n.t("chain")}  </IonLabel>
                                     <IonInput autofocus style={{fontSize:"32px"}} type="number" value={amountValue} placeholder={amount} onIonChange={(e) => {
-                                        this.setState({amount: e.detail.value});
+                                        this.setState({amount: e.detail.value,initAllowanceAmount:false});
                                         this.init(targetCoin, crossMode).catch()
                                     }}/>
                                 </IonItem>

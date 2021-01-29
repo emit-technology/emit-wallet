@@ -375,8 +375,8 @@ class TransactionInfo extends React.Component<any, any> {
                                 <IonLabel color="dark" className="info-label"
                                           position="stacked">{i18n.t("transactionFee")}:</IonLabel>
                                 <IonText className={"text-small"}>
-                                    <IonText>ENERGY: {info.energy_usage}</IonText><br/>
-                                    <IonText>NET: {info.net_usage}</IonText><br/>
+                                    <IonText>{i18n.t("energy")}: {info.energy_usage}</IonText><br/>
+                                    <IonText>{i18n.t("bandwidth")}: {info.net_usage}</IonText><br/>
                                 </IonText>
                             </IonItem>
                             :

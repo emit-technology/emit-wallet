@@ -21,7 +21,6 @@ class Tron implements Cross{
             {type:'bytes',value:recipient},
             {type:'uint256',value:amount.toString(10)},
         ]
-        console.error(this.address,from,parameter,"depositFT")
         const transaction = await tron.tronWeb.transactionBuilder.triggerSmartContract(this.address, "depositFT(uint8,bytes32,bytes,uint256)", {},
             parameter,tron.tronWeb.address.toHex(from));
         if(transaction.result.result){

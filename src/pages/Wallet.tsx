@@ -217,6 +217,8 @@ class Wallet extends React.Component<State, any> {
             })
             if (data.text && data.text.indexOf("0x") == 0) {
                 this.setShowAlert(true, "ETH")
+            } else if (tron.tronWeb.isAddress(data.text)) {
+                this.setShowAlert(true, "TRON")
             } else if (data.text && data.text.indexOf("http") == 0) {
                 Plugins.Browser.open({url: data.text}).catch(e => {
                     console.log(e)
@@ -311,13 +313,13 @@ class Wallet extends React.Component<State, any> {
                         <IonItem mode="ios" lines="none">
                             <IonRow style={{textAlign:"center",width:"100%"}}>
                                 <IonCol size="6">
-                                    <IonLabel>Available</IonLabel>
+                                    <IonLabel>{i18n.t("available")}</IonLabel>
                                 </IonCol>
                                 <IonCol size="6">
                                     <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX"],6).toNumber()}</IonText>
                                 </IonCol>
                                 <IonCol size="6">
-                                    <IonLabel>Frozen</IonLabel>
+                                    <IonLabel>{i18n.t("frozen")}</IonLabel>
                                 </IonCol>
                                 <IonCol size="6">
                                     <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX_FROZEN"],6).toNumber()}</IonText>
@@ -339,7 +341,7 @@ class Wallet extends React.Component<State, any> {
                         <img src={require(`../img/${cy}.png`)} style={{borderRadius:"unset"}}/>
                     </IonAvatar>
                     <IonCardTitle slot="start">
-                        {cy}
+                        {utils.getCyDisplayName(cy)}
                         <IonCardSubtitle>{TOKEN_DESC[cy]}</IonCardSubtitle>
                     </IonCardTitle>
                     <IonLabel className="text-bold">{parseFloat(total.toFixed(3, 1)).toLocaleString()}</IonLabel>
@@ -380,7 +382,7 @@ class Wallet extends React.Component<State, any> {
                 items.push({
                     name: cy,
                     type: 'radio',
-                    label: cy,
+                    label: utils.getCyDisplayName(cy),
                     value: cy,
                     checked: items.length == 0
                 })
@@ -479,7 +481,7 @@ class Wallet extends React.Component<State, any> {
                             {
                                 !(account.addresses && account.addresses[ChainType.TRON])?<IonButton fill="outline" onClick={()=>{
                                     this.showActiveChainAlert(true,ChainType.TRON);
-                                }}>Active</IonButton>: <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
+                                }}>{i18n.t("active")}</IonButton>: <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                             }
                         </IonItem>
                     </IonList>
@@ -549,7 +551,8 @@ class Wallet extends React.Component<State, any> {
                     inputs={[
                         {
                             name:"password",
-                            type:"password"
+                            type:"password",
+                            placeholder:"Password"
                         }
                     ]}
                     buttons={[

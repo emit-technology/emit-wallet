@@ -92,5 +92,20 @@
   },
   "min": "Min",
   "address": "Address",
-  "language": "English"
+  "language": "English",
+
+  "available": "Available",
+  "frozen": "Frozen",
+  "bandwidth": "Bandwidth",
+  "energy": "Energy",
+  "frozenBalance": "Freeze Balance",
+  "resource": "Resource",
+  "receiver": "Receiver",
+  "freeze": "Freeze",
+  "unFreeze": "UnFreeze",
+  "selectGasPrice": "Select Gas Price",
+  "custom": "Custom Input",
+  "active": "Active",
+  "speedUp": "Speed Up",
+  "withdraw": "Withdraw"
 }

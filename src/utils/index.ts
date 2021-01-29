@@ -17,7 +17,14 @@
  */
 
 import BigNumber from 'bignumber.js'
-import {BRIDGE_CURRENCY, BRIDGE_RESOURCE_ID, DECIMAL_CURRENCY, GAS_DEFAULT, GAS_PRICE_UNIT} from "../config"
+import {
+    BRIDGE_CURRENCY,
+    BRIDGE_RESOURCE_ID,
+    DECIMAL_CURRENCY,
+    DISPLAY_NAME,
+    GAS_DEFAULT,
+    GAS_PRICE_UNIT
+} from "../config"
 import {ChainType, GasPriceLevel} from "../types";
 import {Plugins} from "@capacitor/core";
 import rpc from "../rpc";
@@ -125,6 +132,14 @@ export function getCyType(chain:string,cy:string){
     return BRIDGE_CURRENCY[cy][chain]["CY_TYPE"];
 }
 
+export function getCyDisplayName(key:string){
+    if(DISPLAY_NAME[key]){
+        return DISPLAY_NAME[key]
+    }else {
+        return key;
+    }
+}
+
 export function getCrossEventStatus(status:string){
     //{Inactive, Active, Passed, Executed, Cancelled}
     if(status == "1"){
@@ -207,6 +222,7 @@ export async function defaultGasPrice(chain:ChainType){
     if (chain == ChainType.ETH) {
         // @ts-ignore
         data = await rpc.post("eth_gasTracker", [])
+        console.log("data::: ",data)
     } else if (chain == ChainType.SERO) {
         data = {
             AvgGasPrice: {
