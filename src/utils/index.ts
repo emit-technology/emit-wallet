@@ -165,7 +165,7 @@ export function getExplorerTxUrl(chain:ChainType,hash:string){
     }else if(chain == ChainType.SERO){
         return `https://explorer.sero.cash/txsInfo.html?hash=${hash}`
     }else if(chain == ChainType.TRON){
-        return `https://shasta.tronscan.io/#/transaction/${hash}`
+        return `https://tronscan.io/#/transaction/${hash}`
     }
     return `https://etherscan.com/tx/${hash}`
 }
@@ -180,7 +180,7 @@ export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
     }else if(chain == ChainType.SERO){
         return `https://explorer.sero.cash/blockInfo.html?hash=${hash}`
     }else if(chain == ChainType.TRON){
-        return `https://shasta.tronscan.io/#/block/${num}`
+        return `https://tronscan.io/#/block/${num}`
     }
     return `https://etherscan.com/block/${hash}`
 }
