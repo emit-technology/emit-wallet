@@ -92,5 +92,20 @@
   },
   "min": "Min",
   "address": "Address",
-  "language": "Español"
+  "language": "Español",
+
+  "available": "Disponible",
+  "frozen": "Congelado",
+  "bandwidth": "Ancho de banda",
+  "energy": "Energía",
+  "frozenBalance": "Balance de congelación",
+  "resource": "Recursos",
+  "receiver": "Receptor",
+  "freeze": "Congelar",
+  "unFreeze": "Descongelar",
+  "selectGasPrice": "Seleccione el precio del gas",
+  "custom": "Entrada personalizada",
+  "active": "Activo",
+  "speedUp": "Acelerar",
+  "withdraw": "Retirar"
 }

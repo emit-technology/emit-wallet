@@ -94,13 +94,18 @@
   "address": "Address",
   "language": "简体中文",
 
-  "withdraw": "Withdraw",
-  "selectGasPrice": "Select Gas Price",
-  "custom": "Custom",
-  "input": "Input",
-  "select": "Select",
-  "inputAmount": "Please Input Amount!",
-  "confirmTransaction": "Confirm Transaction",
-  "speedUp": "Speed Up",
-  "data": "Data"
+  "available": "可用",
+  "frozen": "冻结",
+  "bandwidth": "带宽",
+  "energy": "能量",
+  "frozenBalance": "冻结余额",
+  "resource": "资源",
+  "receiver": "接收器",
+  "freeze": "冻结",
+  "unFreeze": "解冻",
+  "selectGasPrice": "选择Gas价格",
+  "custom": "自定义输入",
+  "active": "激活",
+  "speedUp": "加速",
+  "withdraw": "提现"
 }

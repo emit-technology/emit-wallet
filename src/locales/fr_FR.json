@@ -92,5 +92,20 @@
   },
   "min": "Min",
   "address": "Address",
-  "language": "Français"
+  "language": "Français",
+
+  "available": "Disponible à l'adresse suivante :",
+  "frozen": "Gelé",
+  "bandwidth": "Bande passante",
+  "energy": "Énergie",
+  "frozenBalance": "Geler le solde",
+  "resource": "Ressource",
+  "receiver": "Récepteur",
+  "freeze": "Geler",
+  "unFreeze": "UnFreeze",
+  "selectGasPrice": "Sélectionnez le prix du gaz",
+  "custom": "Saisie personnalisée",
+  "active": "Actif",
+  "speedUp": "Accélérer",
+  "withdraw": "Retrait"
 }

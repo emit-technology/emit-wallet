@@ -128,7 +128,9 @@ class TransactionInfo extends React.Component<any, any> {
         }
         console.log("rest", info)
         const events = await this.getEvent(chain, info.txHash);
+        const gasPrice = await utils.defaultGasPrice(chain);
         this.setState({
+            gasPrice:gasPrice,
             address: address,
             chain: chain,
             info: info,

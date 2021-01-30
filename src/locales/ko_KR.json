@@ -92,5 +92,20 @@
   },
   "min": "Min",
   "address": "Address",
-  "language": "한국어"
+  "language": "한국어",
+
+  "available": "유효한",
+  "frozen": "겨울 왕국",
+  "bandwidth": "대역폭",
+  "energy": "에너지",
+  "frozenBalance": "잔액 동결",
+  "resource": "자원",
+  "receiver": "리시버",
+  "freeze": "얼다",
+  "unFreeze": "녹이다",
+  "selectGasPrice": "가스 가격 선택",
+  "custom": "맞춤 입력",
+  "active": "유효한",
+  "speedUp": "속력을 올리다",
+  "withdraw": "현금 을 인출 하 다"
 }

@@ -92,5 +92,20 @@
   },
   "min": "Min",
   "address": "Address",
-  "language": "русский"
+  "language": "русский",
+
+  "available": "Имеется в наличии",
+  "frozen": "Замороженный",
+  "bandwidth": "Пропускная способность",
+  "energy": "Энергия",
+  "frozenBalance": "Заморозить баланс",
+  "resource": "Ресурс",
+  "receiver": "Получатель",
+  "freeze": "Заморозить",
+  "unFreeze": "Разморозить",
+  "selectGasPrice": "Выберите цену на газ",
+  "custom": "Пользовательский ввод",
+  "active": "Активный",
+  "speedUp": "Ускориться",
+  "withdraw": "Изымать"
 }

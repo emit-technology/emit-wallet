@@ -20,7 +20,6 @@ import {
     IonButton,
     IonCol,
     IonContent,
-    IonGrid,
     IonHeader,
     IonIcon,
     IonInput,
@@ -32,7 +31,8 @@ import {
     IonRow,
     IonSpinner,
     IonText,
-    IonTitle, IonToast,
+    IonTitle,
+    IonToast,
     IonToolbar
 } from "@ionic/react";
 import {chevronBack, chevronForwardOutline} from "ionicons/icons";
@@ -43,7 +43,6 @@ import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils"
 import BigNumber from "bignumber.js";
-import {Plugins} from "@capacitor/core";
 import WETH from "../contract/weth";
 import {CONTRACT_ADDRESS} from "../config";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
@@ -71,8 +70,10 @@ class ExchangeWETH extends React.Component<any, any> {
     init = async () => {
         const op = this.props.match.params.op;
         const account = await walletWorker.accountInfo();
+        const gasPrice = await utils.defaultGasPrice(ChainType.ETH);
         const balance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
         this.setState({
+            gasPrice:gasPrice,
             balance: balance,
             account: account,
             op: op

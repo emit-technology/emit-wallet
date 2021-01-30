@@ -92,5 +92,20 @@
   },
   "min": "ミン",
   "address": "Address",
-  "language": "日本語"
+  "language": "日本語",
+
+  "available": "利用可能",
+  "frozen": "凍結",
+  "bandwidth": "帯域幅",
+  "energy": "エネルギー",
+  "frozenBalance": "フリーズバランス",
+  "resource": "リソース",
+  "receiver": "受信機",
+  "freeze": "凍結",
+  "unFreeze": "凍結解除",
+  "selectGasPrice": "ガス料金の選択",
+  "custom": "カスタム入力",
+  "active": "アクティブ",
+  "speedUp": "スピードアップ",
+  "withdraw": "現金で出す"
 }

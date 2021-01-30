@@ -92,5 +92,20 @@
   },
   "min": "최소",
   "address": "Address",
-  "language": "Nederlands"
+  "language": "Nederlands",
+
+  "available": "Beschikbaar",
+  "frozen": "Bevroren",
+  "bandwidth": "Bandbreedte",
+  "energy": "Energie",
+  "frozenBalance": "Bevries Balans",
+  "resource": "Hulpbron",
+  "receiver": "Ontvanger",
+  "freeze": "Bevriezen",
+  "unFreeze": "UnFreeze",
+  "selectGasPrice": "Selecteer Gas Prijs",
+  "custom": "Aangepaste invoer",
+  "active": "Actief",
+  "speedUp": "Versnellen",
+  "withdraw": "Intrekken"
 }

@@ -92,5 +92,20 @@
   },
   "min": "最小",
   "address": "Address",
-  "language": "繁體中文"
+  "language": "繁體中文",
+
+  "available": "可用的",
+  "frozen": "凍結",
+  "bandwidth": "帶寬",
+  "energy": "能量",
+  "frozenBalance": "凍結餘額",
+  "resource": "資源資源",
+  "receiver": "接收者",
+  "freeze": "凍結",
+  "unFreeze": "解凍",
+  "selectGasPrice": "選擇Gas價格",
+  "custom": "自定義輸入",
+  "active": "活性",
+  "speedUp": "加速",
+  "withdraw": "提款"
 }

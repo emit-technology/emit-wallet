@@ -142,7 +142,9 @@ class Wallet extends React.Component<State, any> {
         sessionStorage.setItem("initInterValId", initInterValId);
 
         setTimeout(()=>{
-            this.checkVersion().catch()
+            this.checkVersion().catch(e=>{
+                console.log(e,"checkVersion>>.")
+            })
         },1000)
     }
 
