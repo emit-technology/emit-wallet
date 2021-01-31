@@ -89,9 +89,9 @@ class ExchangeWETH extends React.Component<any, any> {
     }
 
     operationWETH = async () => {
-        const {balance, account, amount, op} = this.state;
+        const {balance, account, amount, op,gasPrice} = this.state;
         if (!amount) {
-            this.setShowToast(true, "warning", i18n.t("inputAmount"))
+            this.setShowToast(true, "warning", i18n.t("input")+i18n.t("amount"))
             return;
         }
         let value: BigNumber = new BigNumber(0);
@@ -101,7 +101,7 @@ class ExchangeWETH extends React.Component<any, any> {
             from: account.addresses && account.addresses[ChainType.ETH],
             to: CONTRACT_ADDRESS.ERC20.ETH.WETH,
             cy: "WETH",
-            gasPrice: "0x" + new BigNumber(1).multipliedBy(1e9).toString(16),
+            gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: ChainType.ETH,
             amount: "0x0",
             value: "0x0",
@@ -226,7 +226,8 @@ class ExchangeWETH extends React.Component<any, any> {
                                        disabled={showProgress}
                                        onClick={() => {
                                            this.operationWETH().catch(e => {
-                                               console.log(e)
+                                               const err = typeof e == "string"?e:e.message;
+                                               this.setShowToast(true,"danger",err)
                                            })
                                        }}>{showProgress &&
                             <IonSpinner name="bubbles"/>}{i18n.t(op)}</IonButton>

@@ -49,7 +49,7 @@ import {Plugins} from "@capacitor/core";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import tron from "../rpc/tron";
-import {BRIDGE_RESOURCE_ID} from "../config";
+import {BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS} from "../config";
 
 class TransactionInfo extends React.Component<any, any> {
 
@@ -189,11 +189,17 @@ class TransactionInfo extends React.Component<any, any> {
 
     speedEthTx = async (gasPrice: any) => {
         const txHash = this.props.match.params.hash;
+        const {info} = this.state;
         const rest: any = await rpc.post("eth_getTransactionByHash", [txHash]);
+        if(!rest){
+            this.setShowToast(true,"warning","Transaction not found!");
+            return
+        }
+
         const tx: Transaction = {
             from: rest.from,
             to: rest.to,
-            cy: ChainType[ChainType.ETH],
+            cy: info.cy?info.cy:utils.getEthCyByContractAddress(rest.to),
             amount: "0x0",
             chain: ChainType.ETH,
             feeCy: ChainType[ChainType.ETH]
@@ -238,18 +244,21 @@ class TransactionInfo extends React.Component<any, any> {
     }
 
     confirm = async (hash: string) => {
-        const {chain, cy} = this.state;
+        const {chain,tx} = this.state;
         let intervalId: any = 0;
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then((rest) => {
                 if (rest) {
                     this.setShowToast(true, "success", "Commit Successfully!")
                     clearInterval(intervalId);
-                    url.transactionInfo(chain, hash, cy);
                     this.setShowProgress(false);
+                    url.transactionList(tx.cy,"ETH")
+                    // url.transactionInfo(chain, hash, "ETH");
                 }
             }).catch(e => {
-                console.error(e)
+                const err = typeof e == "string"?e:e.message;
+                this.setShowToast(true, "danger", err)
+                // console.error(e)
             })
         }, 1000)
         this.setShowSpeedAlert(false)
@@ -300,6 +309,7 @@ class TransactionInfo extends React.Component<any, any> {
                                 chain == ChainType.ETH && info.num == 0 &&
                                 <IonButton size="small" fill="outline" slot="end" onClick={() => {
                                     this.setShowActionSheet(true);
+
                                 }}>{i18n.t("speedUp")}</IonButton>
                             }
                         </div>
