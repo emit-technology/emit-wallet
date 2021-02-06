@@ -338,7 +338,6 @@ class Settings extends React.Component<any, any>{
                             },{
                                 text: i18n.t("ok"),
                                 handler: (e:any) => {
-                                    console.log('Confirm Ok',e);
                                     if(!e["password"]){
                                         this.setShowToast(true,"warning","Please Input Password!")
                                         return ;
@@ -408,17 +407,19 @@ class Settings extends React.Component<any, any>{
                                 this.setShowPasswordAlert(true)
                                 console.log('Delete clicked');
                             }
-                        }, {
-                            text: i18n.t("exportPrivateKey"),
-                            icon: keyOutline,
-                            handler: () => {
-                                this.setState({
-                                    exportType:"privateKey"
-                                })
-                                this.setShowPasswordAlert(true)
-                                console.log('Share clicked');
-                            }
-                        }, {
+                        },
+                        //     {
+                        //     text: i18n.t("exportPrivateKey"),
+                        //     icon: keyOutline,
+                        //     handler: () => {
+                        //         this.setState({
+                        //             exportType:"privateKey"
+                        //         })
+                        //         this.setShowPasswordAlert(true)
+                        //         console.log('Share clicked');
+                        //     }
+                        // },
+                            {
                             text: i18n.t("cancel"),
                             role: "cancel",
                             handler: () => {
@@ -445,7 +446,6 @@ class Settings extends React.Component<any, any>{
                             {
                                 text: i18n.t("ok"),
                                 handler: (language) => {
-                                    console.log('Confirm Ok',language);
                                     localStorage.setItem("language",language);
                                     i18n.changeLanguage(language).then(()=>{
                                         window.location.reload();

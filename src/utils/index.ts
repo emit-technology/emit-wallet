@@ -187,16 +187,16 @@ export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
 
 
 export function getEthCyByContractAddress(address:string){
-    const keys1 = Object.keys(CONTRACT_ADDRESS.ERC20.ETH);
-    const keys2 = Object.keys(CONTRACT_ADDRESS.CROSS.ETH);
-    const keys = keys1.concat(keys2);
+    const keys = Object.keys(CONTRACT_ADDRESS.ERC20.ETH);
+    // const keys2 = Object.keys(CONTRACT_ADDRESS.CROSS.ETH);
+    // const keys = keys1.concat(keys2);
     for(let key of keys){
         if(CONTRACT_ADDRESS.ERC20.ETH[key] && CONTRACT_ADDRESS.ERC20.ETH[key].toLowerCase() == address.toLowerCase()){
             return key
         }
-        if(CONTRACT_ADDRESS.CROSS.ETH[key] && CONTRACT_ADDRESS.CROSS.ETH[key].toLowerCase() == address.toLowerCase()){
-            return key
-        }
+        // if(CONTRACT_ADDRESS.CROSS.ETH[key] && CONTRACT_ADDRESS.CROSS.ETH[key].toLowerCase() == address.toLowerCase()){
+        //     return key
+        // }
     }
     return "ETH"
 }
