@@ -189,7 +189,7 @@ class TransactionInfo extends React.Component<any, any> {
 
     speedEthTx = async (gasPrice: any) => {
         const txHash = this.props.match.params.hash;
-        const {info} = this.state;
+        const {info,opType} = this.state;
         const rest: any = await rpc.post("eth_getTransactionByHash", [txHash]);
         if(!rest){
             this.setShowToast(true,"warning","Transaction not found!");
@@ -209,6 +209,14 @@ class TransactionInfo extends React.Component<any, any> {
         tx.input = rest.input;
         tx.value = rest.value;
         tx.nonce = rest.nonce;
+
+        if(opType == "cancel"){
+            tx.input = "0x";
+            tx.value = "0x0";
+            tx.gas = "0x5208";
+            tx.to = tx.from;
+        }
+
         this.setState({
             tx: tx,
             showSpeedAlert: true
@@ -227,9 +235,10 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
-    setShowActionSheet = (f: boolean) => {
+    setShowActionSheet = (f: boolean,opType:string) => {
         this.setState({
-            showActionSheet: f
+            showActionSheet: f,
+            opType:opType
         })
     }
 
@@ -307,10 +316,16 @@ class TransactionInfo extends React.Component<any, any> {
                         <div slot="end">
                             {
                                 chain == ChainType.ETH && info.num == 0 &&
-                                <IonButton size="small" fill="outline" slot="end" onClick={() => {
-                                    this.setShowActionSheet(true);
+                                <>
+                                    <IonButton size="small" fill="outline" slot="end" onClick={() => {
+                                        this.setShowActionSheet(true,"speedup");
 
-                                }}>{i18n.t("speedUp")}</IonButton>
+                                    }}>{i18n.t("speedUp")}</IonButton>
+                                    <IonButton size="small" color="danger" fill="outline" slot="end" onClick={() => {
+                                        this.setShowActionSheet(true,"cancel");
+
+                                    }}>{i18n.t("cancel")}</IonButton>
+                                </>
                             }
                         </div>
                     </IonItem>
@@ -405,7 +420,16 @@ class TransactionInfo extends React.Component<any, any> {
                                 </IonText>
                             </IonItem>
                     }
-
+                    {
+                        ChainType.ETH == chain && <IonItem mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">Nonce:</IonLabel>
+                            <IonText>{
+                                <IonBadge color="light">
+                                    {info.nonce}
+                                </IonBadge>
+                            }</IonText>
+                        </IonItem>
+                    }
 
                 </IonList>
 
@@ -457,7 +481,7 @@ class TransactionInfo extends React.Component<any, any> {
                     mode="ios"
                 />
 
-                <GasPriceActionSheet onClose={() => this.setShowActionSheet(false)} show={showActionSheet}
+                <GasPriceActionSheet onClose={() => this.setShowActionSheet(false,"")} show={showActionSheet}
                                      onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 
                 <ConfirmTransaction show={showSpeedAlert} transaction={tx} onProcess={(f) => this.setShowProgress(f)}
