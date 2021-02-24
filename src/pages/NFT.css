@@ -1,0 +1,12 @@
+.elements{
+    height: 80px;
+    width: 80px;
+    border-radius: 25px;
+    border: #8c8c8c 1px solid;
+}
+
+.nfc-modal {
+    max-height: 100vh;
+    overflow-y: scroll;
+    padding-bottom: 45px;
+}

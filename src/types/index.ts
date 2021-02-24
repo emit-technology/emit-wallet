@@ -15,6 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
+import {TicketInfo} from "../../../emit-account/app/types/sero";
 
 export interface AccountModel {
     accountId?: string
@@ -51,20 +52,21 @@ export interface Transaction {
     chain: ChainType
     nonce?: string
     chainId?: any
-    amount:any
-    feeCy:string
-    feeValue?:string
-    input?:string
+    amount: any
+    feeCy: string
+    feeValue?: string
+    input?: string
+    tickets?: Array<TicketInfo>
 }
 
 export interface GasPriceLevel {
-    SafeGasPrice?:costTime
-    ProposeGasPrice?:costTime
-    FastGasPrice?:costTime
-    AvgGasPrice?:costTime
+    SafeGasPrice?: costTime
+    ProposeGasPrice?: costTime
+    FastGasPrice?: costTime
+    AvgGasPrice?: costTime
 }
 
-export interface costTime{
-    gasPrice:string
-    second:number
+export interface costTime {
+    gasPrice: string
+    second: number
 }

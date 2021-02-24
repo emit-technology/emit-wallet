@@ -33,6 +33,7 @@ import {
     square,
     triangle,
     gitCompareOutline,
+    sunnyOutline,
     walletOutline,
     appsOutline,
     settingsOutline
@@ -53,6 +54,7 @@ import About from "./pages/settings/About";
 import Slides from "./pages/Slides";
 import Scan from "./pages/Scan";
 import TronFrozenBalance from "./pages/TronFrozenBalance";
+import NFT from "./pages/NFT";
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -118,11 +120,16 @@ const App: React.FC = () => (
                             <Route path="/tabs/wallet" component={Wallet} exact={true}/>
                             <Route path="/tabs/epoch" component={Epoch} exact={true}/>
                             <Route path="/tabs/settings" component={Settings} exact={true}/>
+                            <Route path="/tabs/nft" component={NFT} exact={true}/>
                         </IonRouterOutlet>
                         <IonTabBar mode="ios" slot="bottom" selectedTab="wallet">
                             <IonTabButton tab="wallet" href="/tabs/wallet">
                                 <IonIcon icon={walletOutline}/>
                                 <IonLabel>{i18n.t("wallet")}</IonLabel>
+                            </IonTabButton>
+                            <IonTabButton tab="nft" href="/tabs/nft">
+                                <IonIcon icon={sunnyOutline}/>
+                                <IonLabel>{i18n.t("nft")}</IonLabel>
                             </IonTabButton>
                             <IonTabButton tab="epoch" href="/tabs/epoch">
                                 <IonIcon icon={appsOutline}/>
