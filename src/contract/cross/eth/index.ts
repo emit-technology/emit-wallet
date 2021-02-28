@@ -96,7 +96,6 @@ class Eth extends EthContract implements Cross{
     }
 
     depositFT(destinationChainID: number, resourceID: string, recipient: string, amount: BigNumber): Promise<any> {
-        console.log(destinationChainID,resourceID,recipient,"0x"+amount.toString(16),"depositFT>>>>")
         return this.contract.methods.depositFT(destinationChainID,resourceID,recipient,"0x"+amount.toString(16)).encodeABI()
     }
 

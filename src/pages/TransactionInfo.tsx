@@ -76,8 +76,6 @@ class TransactionInfo extends React.Component<any, any> {
         const chain = this.props.match.params.chain;
         const tmpRecord: any = sessionStorage.getItem(txHash);
 
-        console.log("ChainType[chain]", ChainType[chain])
-
         const address = account.addresses[chain];
         const rest: any = await rpc.getTxInfo(chain, txHash)
         let info: any = {};
@@ -105,7 +103,6 @@ class TransactionInfo extends React.Component<any, any> {
         }
         const records: Array<any> = info.records;
         const amountMap: Map<string, BigNumber> = new Map<string, BigNumber>();
-        console.log(records, "records")
         for (let r of records) {
             if (r.address == address) {
                 if (amountMap.has(r.currency)) {
@@ -117,7 +114,6 @@ class TransactionInfo extends React.Component<any, any> {
                 }
             }
         }
-        console.log(amountMap, "amountMap")
         const tokens: Array<any> = [];
         const entry = amountMap.entries();
         let next = entry.next();
@@ -126,7 +122,6 @@ class TransactionInfo extends React.Component<any, any> {
             tokens.push({cy: next.value[0], value: v.amount})
             next = entry.next();
         }
-        console.log("rest", info)
         const events = await this.getEvent(chain, info.txHash);
         const gasPrice = await utils.defaultGasPrice(chain);
         this.setState({
@@ -150,11 +145,9 @@ class TransactionInfo extends React.Component<any, any> {
             if (resourceId.toLowerCase() == BRIDGE_RESOURCE_ID.TUSDT.toLowerCase()) {
                 c = ChainType.TRON == chain ? ChainType.SERO : ChainType.TRON;
             }
-            console.log("chain:", c)
             const target = await rpc.getEvents(c, "", events[0].event.depositNonce, "", c == ChainType.TRON ? resourceId.slice(2) : resourceId)
             events = events.concat(target)
         }
-        console.log("events>>", events)
 
         for (let e of events) {
             const ev = e.eventName == "Deposit" ? 3 : e.eventName == "ProposalEvent" ? 4 : e.eventName

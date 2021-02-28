@@ -153,7 +153,6 @@ class TransactionList extends React.Component<any, any>{
     render() {
 
         const {cy,chain,address,records,cyName,searchText,showLoading} = this.state;
-        console.log(records,"records>>")
         return <IonPage>
             <IonHeader>
                 <IonToolbar mode="ios" color="primary">

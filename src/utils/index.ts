@@ -18,6 +18,7 @@
 
 import BigNumber from 'bignumber.js'
 import {
+    BRIDGE_NFT_RESOURCE_ID,
     BRIDGE_CURRENCY,
     BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
@@ -25,7 +26,7 @@ import {
     GAS_DEFAULT,
     GAS_PRICE_UNIT
 } from "../config"
-import {ChainType, GasPriceLevel} from "../types";
+import {ChainId, ChainType, GasPriceLevel} from "../types";
 import {Plugins} from "@capacitor/core";
 import rpc from "../rpc";
 
@@ -90,6 +91,10 @@ export function getResourceId(cy:string){
     return BRIDGE_RESOURCE_ID[cy];
 }
 
+export function getNFTResourceId(symbol:string){
+    return BRIDGE_NFT_RESOURCE_ID[symbol];
+}
+
 export function getCyName(cy:string,chain:string):string{
     try{
         return BRIDGE_CURRENCY[cy][chain]["CY"];
@@ -106,6 +111,15 @@ export function getChainIdByName(chain:string):any{
         }
     }
     return ChainType._
+}
+
+export function getDestinationChainIDByName(chain:string):any{
+    for(let key in ChainId){
+        if(ChainId[key] === chain){
+            return key;
+        }
+    }
+    return ChainId._
 }
 
 export function toHex(value:string | number | BigNumber){
@@ -250,4 +264,12 @@ export async function defaultGasPrice(chain:ChainType){
     }
     defaultGasPrice = data.AvgGasPrice ? data.AvgGasPrice?.gasPrice : "1"
     return defaultGasPrice;
+}
+
+export function getCategoryBySymbol(symbol:string,chain:string):string{
+    return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
+}
+
+export function getAddressBySymbol(symbol:string,chain:string):string{
+    return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][chain];
 }

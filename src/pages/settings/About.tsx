@@ -56,7 +56,6 @@ class About extends React.Component<any, any> {
 
     componentDidMount() {
         Plugins.Device.getInfo().then((rest: any) => {
-            console.log(rest, "rest")
             this.setState({
                 info: rest
             })

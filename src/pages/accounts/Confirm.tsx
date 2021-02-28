@@ -87,7 +87,6 @@ class Confirm extends React.Component<any, State> {
             if(accountId){
                 sessionStorage.removeItem("tmpMnemonic");
                 sessionStorage.removeItem("tmpAccount");
-                console.log("account>>",accountId);
                 selfStorage.setItem("accountId",accountId)
                 // window.location.href = "/#/"
                 // window.location.reload();

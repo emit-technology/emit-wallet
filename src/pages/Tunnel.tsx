@@ -89,7 +89,6 @@ class Tunnel extends React.Component<any, any> {
         //const {crossMode} = this.state;
         const targetCoin = this.props.match.params.cy;
         const crossMode:Array<string> = Object.keys(BRIDGE_CURRENCY[targetCoin])
-        console.log("crossMode>> ",crossMode);
         this.setState({
             crossMode:crossMode
         })
@@ -107,8 +106,6 @@ class Tunnel extends React.Component<any, any> {
         const chain = utils.getChainIdByName(crossMode[0])
         const realCy = utils.getCyName(targetCoin,crossMode[0]);
 
-        console.log("crossMode:::",crossMode,targetCoin,chain);
-
         let allowance= "0";
         if(chain == ChainType.ETH){
             const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
@@ -117,7 +114,6 @@ class Tunnel extends React.Component<any, any> {
         }else if (chain == ChainType.TRON){
             const TRON_COIN :TronToken = new TronToken(config.CONTRACT_ADDRESS.ERC20.TRON[realCy])
             const rest: any = await TRON_COIN.allowance(account.addresses[chain], config.CONTRACT_ADDRESS.CROSS.TRON.HANDLE);
-            console.log("tron allowance:",rest)
             allowance = utils.fromValue(rest, utils.getCyDecimal(realCy, ChainType[chain])).toString(10)
         }
         let tokenRate:TokenRate={seroAmount:new BigNumber(1),feeAmount:new BigNumber(1)};
@@ -148,7 +144,6 @@ class Tunnel extends React.Component<any, any> {
             this.setState({
                 crossFee: crossFee
             })
-            console.log(crossFee,crossMode,"crossFee>>>")
         }).catch(e=>{
             console.error(e)
         });
@@ -177,25 +172,21 @@ class Tunnel extends React.Component<any, any> {
         const targetChain = utils.getChainIdByName(crossMode[1])
         const realTargetCy = utils.getCyName(targetCoin,crossMode[1]);
         const decimalTarget = utils.getCyDecimal(realTargetCy, ChainType[targetChain]);
-        console.log(targetChain,realTargetCy,decimalTarget,"targetChain>>")
         if(targetChain == ChainType.SERO){
             const crossFeeSero: CrossFeeSERO = new CrossFeeSERO(config.CONTRACT_ADDRESS.CROSS.SERO.FEE);
             const restSERO: any = await crossFeeSero.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
             const rest = utils.fromValue(restSERO, decimalTarget).toString(10);
-            console.log("crossFee SERO",rest);
             return rest;
         }else if (targetChain == ChainType.TRON){
             const tronCrossFee: CrossFeeTRON = new CrossFeeTRON(config.CONTRACT_ADDRESS.CROSS.TRON.FEE);
 
             const restTron: any = await tronCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
             const rest = utils.fromValue(restTron, decimalTarget).toString(10);
-            console.log("crossFee TRON",restTron,rest);
             return rest;
         }else if (targetChain == ChainType.ETH){
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE);
             const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
-            console.log("crossFee ETH",rest);
             return rest;
         }
         return "0"
@@ -302,7 +293,6 @@ class Tunnel extends React.Component<any, any> {
             amount: utils.toValue(amount, decimal),
             feeCy:ChainType[chain]
         }
-        console.log("approve,tx:",tx)
         if(chain == ChainType.ETH){
             const ETH_COIN: EthToken = new EthToken(tx.to);
             tx.data = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
@@ -334,7 +324,6 @@ class Tunnel extends React.Component<any, any> {
         const realCy = utils.getCyName(targetCoin,crossMode[0]);
         const decimal = utils.getCyDecimal(realCy, ChainType[chain]);
         const __ret:any = await this.getMinAndMaxValue(chain,realCy,targetCoin)
-        console.log("__ret::: ",__ret)
         if(__ret.minValue>new BigNumber(amount).toNumber()){
             this.setShowProgress(false);
             this.setShowToast(true,"warning",`The Min cross amount is ${__ret.minValue} ${targetCoin}`)

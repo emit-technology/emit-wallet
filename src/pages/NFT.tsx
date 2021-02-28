@@ -28,6 +28,18 @@ class NFT extends React.Component<any, any> {
         this.init().catch(e => {
             console.error(e)
         })
+
+        let initInterValId: any = sessionStorage.getItem("initInterValIdNFT");
+        if (initInterValId) {
+            clearInterval(initInterValId)
+        }
+        initInterValId = setInterval(() => {
+            console.log("initInterValId NFT")
+            this.init().catch(e => {
+                console.log(e)
+            })
+        }, 15000)
+        sessionStorage.setItem("initInterValIdNFT", initInterValId);
     }
 
     init = async () => {
@@ -72,13 +84,12 @@ class NFT extends React.Component<any, any> {
 
     render() {
         const {wrapTicket} = this.state;
-        console.log("wrapTicket: ",wrapTicket);
         return <>
             <IonPage>
                 <IonContent fullscreen>
-                    <IonHeader mode="ios">
+                    <IonHeader mode="ios" collapse="condense">
                         <IonToolbar color="primary" mode="ios">
-                            <IonTitle>{i18n.t("nft")}</IonTitle>
+                            <IonTitle>{i18n.t("NFT")}</IonTitle>
                         </IonToolbar>
                     </IonHeader>
                     <NFCRender data={wrapTicket}/>

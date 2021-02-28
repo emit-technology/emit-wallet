@@ -1,3 +1,11 @@
 ion-slides {
     height: 90vh
 }
+
+.toolbar-icon{
+    width: 30px;
+}
+
+.toolbar-cust{
+    padding: 10px 0;
+}

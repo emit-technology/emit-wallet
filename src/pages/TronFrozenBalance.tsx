@@ -71,7 +71,6 @@ class TronFrozenBalance extends React.Component<any, any> {
         const address = account.addresses[ChainType.TRON];
         const rest = await tron.getAccountResources(address)
         const balance = await tron.tronWeb.trx.getAccount(address);
-        console.log("balance>>", balance)
         this.setState({
             accountResource: rest,
             account: account,

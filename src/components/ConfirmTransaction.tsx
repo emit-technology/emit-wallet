@@ -80,7 +80,6 @@ class ConfirmTransaction extends React.Component<Props, State>{
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-        console.log("componentDidUpdate",prevProps,this.props)
         if(prevProps.show !== this.props.show && this.props.show){
             this.init().catch((e)=>{
                 this.props.onCancel();
@@ -148,7 +147,6 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 return utils.fromValue(transaction.feeValue,utils.getCyDecimal(feeCy,ChainType[transaction.chain])).toString(10)
             }else {
                 if(transaction.gasPrice && transaction.gas){
-                    console.log("utils.getCyDecimal(feeCy,ChainType[transaction.chain])",utils.getCyDecimal(feeCy,ChainType[transaction.chain]))
                     return utils.fromValue(
                         new BigNumber(transaction.gasPrice).multipliedBy(new BigNumber(transaction.gas)),
                         utils.getCyDecimal(feeCy,ChainType[transaction.chain])).toString(10)
@@ -178,7 +176,6 @@ class ConfirmTransaction extends React.Component<Props, State>{
         const value = utils.fromValue(transaction&&transaction.value,0).toNumber()==0?
             transaction&&transaction.amount:transaction&&transaction.value
 
-        console.log("accountResource>>",accountResource)
         return <>
             <IonModal
                 isOpen={showActionSheet}

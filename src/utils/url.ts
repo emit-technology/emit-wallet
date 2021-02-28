@@ -32,7 +32,9 @@ class Url {
 
     private transaction = {
         tunnel:"tunnel",
+        tunnelNFT:"tunnel-nft",
         transfer: "transfer",
+        transferNft: "transfer-nft",
         list: "transaction/list",
         info: "transaction/info",
     }
@@ -41,6 +43,8 @@ class Url {
         setting: "tabs/settings",
         about:"manage/about",
     }
+
+    private nftTabs = "tabs/nft"
 
     private scan = "scan";
 
@@ -130,8 +134,17 @@ class Url {
         return
     }
 
+    transferNFT(category: string, chain: ChainType,value:string) {
+        this.goTo([this.base, this.transaction.transferNft, category, chain,value].join("/"), [this.base,this.nftTabs].join("/"))
+    }
+
     tunnel(cy: string) {
         this.goTo([this.base, this.transaction.tunnel, cy].join("/"), [this.base].join("/"));
+        return
+    }
+
+    tunnelNFT(symbol: string,chain:string,tokenId:string) {
+        this.goTo([this.base, this.transaction.tunnelNFT, symbol,chain,tokenId].join("/"), [this.base,this.nftTabs].join("/"))
         return
     }
 
