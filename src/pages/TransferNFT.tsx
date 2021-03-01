@@ -46,6 +46,9 @@ import ConfirmTransaction from "../components/ConfirmTransaction";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import Erc721 from "../contract/erc721/meta/eth";
 import Src721 from "../contract/erc721/meta/sero";
+import GasFeeProxyNFT from "../contract/gasFeeProxy/NFT";
+import SRC721CrossFee from "../contract/cross/sero/crossNFTFee";
+import {CONTRACT_ADDRESS, GAS_FEE_PROXY_ADDRESS, META_TEMP} from "../config";
 
 class TransferNFT extends React.Component<any, any> {
 
@@ -92,18 +95,13 @@ class TransferNFT extends React.Component<any, any> {
             }
 
             //TODO FOR TEST
-            metaData = {
-                "name": "Herbie Starbelly",
-                "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.",
-                "image": chainName == "SERO"?"http://localhost:8008/assets/img/insignia.png":"http://localhost:8008/assets/img/insignia.png",
-                "attributes": [{}]
-            }
+            metaData = META_TEMP.MEDAL
 
             const account = await walletWorker.accountInfo()
             const balance = await rpc.getBalance(chainId, account.addresses[chainId]);
             // const ticket = await rpc.getTicket(chainId, account.addresses[chainId]);
             const defaultGasPrice = await utils.defaultGasPrice(chainId);
-            const cy = chainId == ChainType.SERO ? "SERO" : ChainType[chainId];
+            const cy = chainId == ChainType.SERO ? "LIGHT" : ChainType[chainId];
             this.setState({
                 feeCy:cy,
                 cy: cy,
@@ -144,6 +142,7 @@ class TransferNFT extends React.Component<any, any> {
         const tokenId = this.props.match.params.value;
         const contractAddress = utils.getAddressBySymbol(symbol,chainName)
 
+        console.log("to>>>",to)
         //ETH ERC20
         if(chain == ChainType.ETH){
             const contract: Erc721 = new Erc721(contractAddress);
@@ -153,21 +152,27 @@ class TransferNFT extends React.Component<any, any> {
             tx.gas = await contract.estimateGas(tx)
             tx.feeCy = ChainType[ChainType.ETH];
         }else if(chain == ChainType.SERO){
-            // const contract: Src721 = new Src721(contractAddress);
-            // const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
-            // const tokenRate = await gasFeeProxy.tokenRate()
-            // console.log("tokenRate>>> ",tokenRate.feeAmount.toString(10),tokenRate.seroAmount.toString(10));
-            // tx.value = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
+            const feeCy = "LIGHT";
+            const gasFeeProxy: GasFeeProxyNFT = new GasFeeProxyNFT(GAS_FEE_PROXY_ADDRESS[feeCy]);
             tx.value = "0x0";
             tx.tickets=[{
                 Category:utils.getCategoryBySymbol(symbol,chainName),
                 Value:tokenId
             }]
-            // tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
-            // tx.gas = await gasFeeProxy.estimateGas(tx)
-            tx.gas = utils.defaultGas(chain);
+            tx.tkt = tokenId
+            tx.catg = utils.getCategoryBySymbol(symbol,chainName)
+            tx.cy = feeCy;
+            tx.to = GAS_FEE_PROXY_ADDRESS[feeCy];
+            tx.data = await gasFeeProxy.transfer(to)
             tx.amount = "0x0";
-            tx.feeCy = "SERO";
+            tx.feeCy = feeCy;
+            tx.gas = await gasFeeProxy.estimateGas(tx)
+            const tokenRate = await gasFeeProxy.tokenRate()
+            if(tx.gas && tx.gasPrice){
+                tx.feeValue = tokenRate.feeAmount.multipliedBy(
+                    new BigNumber(tx.gas).multipliedBy(new BigNumber(tx.gasPrice))
+                ).dividedBy(tokenRate.seroAmount).toFixed(0,2)
+            }
         }
         this.setState({
             tx:tx,
@@ -176,14 +181,14 @@ class TransferNFT extends React.Component<any, any> {
     }
 
     confirm = async (hash:string) => {
-        const {chain,cy} = this.state;
+        const {chain,feeCy} = this.state;
         let intervalId:any = 0;
         intervalId = setInterval(()=>{
             rpc.getTxInfo(chain,hash).then((rest)=>{
                 if(rest){
                     this.setShowToast(true,"success","Commit Successfully!")
                     clearInterval(intervalId);
-                    url.transactionInfo(chain,hash,cy);
+                    url.transactionInfo(chain,hash,feeCy);
                     this.setShowProgress(false);
                 }
             }).catch(e=>{
@@ -240,7 +245,7 @@ class TransferNFT extends React.Component<any, any> {
                 <IonHeader>
                     <IonToolbar mode="ios" color="primary">
                         <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
-                        <IonTitle>{realCy} {i18n.t("transfer")}</IonTitle>
+                        <IonTitle>NFT {i18n.t("transfer")}</IonTitle>
                     </IonToolbar>
                     {showProgress && <IonProgressBar type="indeterminate"/>}
                 </IonHeader>
@@ -266,9 +271,9 @@ class TransferNFT extends React.Component<any, any> {
                                     Token Id
                                 </IonItemDivider>
                                 <IonItem lines="none">
-                                    <small className="work-break">
-                                        {this.props.match.params.value}
-                                    </small>
+                                    <div className="work-break">
+                                        <small>{this.props.match.params.value}</small>
+                                    </div>
                                 </IonItem>
                             </IonList>
                         </IonCol>

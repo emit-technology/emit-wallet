@@ -64,14 +64,14 @@ const ABI_GAS_FEE_PROXY = [
     {
         "inputs": [
             {
-                "internalType": "string",
+                "internalType": "address",
                 "name": "to",
-                "type": "string"
+                "type": "address"
             }
         ],
         "name": "transfer",
         "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "payable",
         "type": "function"
     }
 ]

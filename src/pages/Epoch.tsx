@@ -43,7 +43,7 @@ const Epoch: React.FC = () => {
                         <IonTitle>Epoch</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonCard>
+                <IonCard mode="ios">
                     <IonCardHeader>
                         <IonCardTitle>
                             <IonLabel>
@@ -60,8 +60,8 @@ const Epoch: React.FC = () => {
                             <img src="./assets/img/chaos.png" style={{maxWidth:"unset",width:"100%"}}/>
                         </div>
                     </IonCardContent>
-                    <div>
-                        <IonChip color="warning">The scene is about to open, pay attention!</IonChip>
+                    <div className="text-center">
+                        <IonChip color="warning">This universe is about to be initialized</IonChip>
                     </div>
                 </IonCard>
             </IonContent>

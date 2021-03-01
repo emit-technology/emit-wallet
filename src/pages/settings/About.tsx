@@ -42,10 +42,10 @@ const items = [
     {name: "Community", url: "https://community.emit.technology", value: "https://community.emit.technology"},
     {name: "Github", url: "https://github.com/emit-technology", value: "https://github.com/emit-technology"},
     {name: "Telegram", url: "https://t.me/EMITCommunication", value: "https://t.me/EMITCommunication"},
-    {name: "Facebook", url: "https://www.facebook.com/EMIT.Tec", value: "https://www.facebook.com/EMIT.Tec"},
-    {name: "Twitter", url: "https://twitter.com/EMIT_Technology", value: "https://twitter.com/EMIT_Technology"},
-    {name: "Medium", url: "https://medium.com/@emittechnology", value: "https://medium.com/@emittechnology"},
-    {name: "Reddit", url: "https://www.reddit.com/user/emittechnology", value: "https://www.reddit.com/emittechnology"},
+    {name: "Facebook", url: "https://www.facebook.com/EMITProtocolc", value: "https://www.facebook.com/EMITProtocol"},
+    {name: "Twitter", url: "https://twitter.com/emit_protocol", value: "https://twitter.com/emit_protocol"},
+    {name: "Medium", url: "https://emitprotocol.medium.com", value: "https://emitprotocol.medium.com"},
+    {name: "Reddit", url: "https://www.reddit.com/r/CryptoEMIT", value: "https://www.reddit.com/r/CryptoEMIT"},
 ]
 
 class About extends React.Component<any, any> {

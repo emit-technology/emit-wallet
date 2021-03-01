@@ -84,19 +84,12 @@ class NFT extends React.Component<any, any> {
 
     render() {
         const {wrapTicket} = this.state;
-        return <>
-            <IonPage>
-                <IonContent fullscreen>
-                    <IonHeader mode="ios" collapse="condense">
-                        <IonToolbar color="primary" mode="ios">
-                            <IonTitle>{i18n.t("NFT")}</IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-                    <NFCRender data={wrapTicket}/>
+        return <IonPage>
+            <IonContent fullscreen>
+                <NFCRender data={wrapTicket}/>
 
-                </IonContent>
-            </IonPage>
-        </>;
+            </IonContent>
+        </IonPage>;
     }
 }
 

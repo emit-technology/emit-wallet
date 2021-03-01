@@ -39,7 +39,7 @@ import {
 import './Tunnel.css';
 import {ChainId, ChainType, Transaction} from "../types";
 import * as config from '../config';
-import {CONTRACT_ADDRESS} from '../config';
+import {CONTRACT_ADDRESS, META_TEMP, TOKEN_DESC} from '../config';
 import walletWorker from "../worker/walletWorker";
 import * as utils from '../utils'
 import BigNumber from "bignumber.js";
@@ -128,12 +128,7 @@ class TunnelNFT extends React.Component<any, any> {
         }
 
         //TODO FOR TEST
-        metaData = {
-            "name": "Herbie Starbelly",
-            "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.",
-            "image": chain == ChainType.SERO ? "http://localhost:8008/assets/img/insignia.png" : "http://localhost:8008/assets/img/insignia.png",
-            "attributes": [{}]
-        }
+        metaData = META_TEMP.MEDAL
 
         const rest: any = await this.getCrossFee()
 
@@ -368,7 +363,7 @@ class TunnelNFT extends React.Component<any, any> {
     }
 
     confirm = async (hash: string) => {
-        const {crossMode} = this.state;
+        const {crossMode,feeCy} = this.state;
         const chain = utils.getChainIdByName(crossMode[0]);
         let intervalId: any = 0;
         intervalId = setInterval(() => {
@@ -376,7 +371,7 @@ class TunnelNFT extends React.Component<any, any> {
                 if (rest) {
                     clearInterval(intervalId)
                     this.setShowProgress(false);
-                    url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, crossMode[0]);
+                    url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, feeCy);
                 }
             }).catch((e: any) => {
                 console.error(e);
@@ -386,7 +381,7 @@ class TunnelNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {targetCoin, metaData, gasPrice, color, initAllowanceAmount, tx, showActionSheet, accountResource, minValue, maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {feeCy, metaData, gasPrice, color, initAllowanceAmount, tx, showActionSheet, accountResource, minValue, maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
         let amountValue: any = initAllowanceAmount ? allowance : amount;
         // if(new BigNumber(amountValue).toNumber() == 0){
@@ -405,12 +400,13 @@ class TunnelNFT extends React.Component<any, any> {
                             <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
                                 url.back()
                             }}/>
-                            <IonTitle>{i18n.t("cross")}</IonTitle>
+                            <IonTitle>NFT {i18n.t("cross")}</IonTitle>
                         </IonToolbar>
                         {showProgress && <IonProgressBar type="indeterminate"/>}
                     </IonHeader>
-                    <IonChip color="warning">You are cross NFT from {crossMode[0]} chain
-                        to {crossMode[1]} chain</IonChip>
+                    <IonChip color="warning" style={{lineHeight:"1.5"}}>
+                        You are transferring NFT from the {TOKEN_DESC[crossMode[0]]} to the {TOKEN_DESC[crossMode[1]]}
+                        </IonChip>
                     <IonGrid>
                         <IonRow>
                             <IonCol size={"7"}>
@@ -432,9 +428,9 @@ class TunnelNFT extends React.Component<any, any> {
                                         Token Id
                                     </IonItemDivider>
                                     <IonItem lines="none">
-                                        <p className="work-break">
+                                        <div className="work-break">
                                             <small>{this.props.match.params.tokenId}</small>
-                                        </p>
+                                        </div>
                                     </IonItem>
                                 </IonList>
                             </IonCol>
@@ -448,7 +444,7 @@ class TunnelNFT extends React.Component<any, any> {
                                     <IonItem mode="ios" lines="none">
                                         <IonLabel mode="ios" color="medium">{i18n.t("crossFee")}</IonLabel>
                                         <IonBadge mode="ios"
-                                                  color="light">{crossFee} {ChainType[chain]}</IonBadge>
+                                                  color="light">{crossFee} {feeCy}</IonBadge>
                                     </IonItem>
                                 </div>
                             }
@@ -457,7 +453,7 @@ class TunnelNFT extends React.Component<any, any> {
                     <IonItem mode="ios" lines="none" onClick={() => {
                         this.setShowActionSheet(true);
                     }}>
-                        <IonLabel>{i18n.t("gasPrice")}</IonLabel>
+                        <IonLabel  color="medium">{i18n.t("gasPrice")}</IonLabel>
                         <IonText slot="end">
                             {gasPrice} {utils.gasUnit(chain)}
                         </IonText>

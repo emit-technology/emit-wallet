@@ -143,7 +143,7 @@ class Transfer extends React.Component<any, any> {
             if(realCy !== ChainType[ChainType.ETH]){
                 const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
                 tx.value = "0x0";
-                tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(cy,ChainType[chain])));
+                tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
                 tx.to = config.CONTRACT_ADDRESS.ERC20.ETH[realCy];
                 tx.gas = await ETH_COIN.estimateGas(tx)
                 tx.amount = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {
     IonCol,
-    IonContent,IonText,IonAvatar,IonSegment,IonSegmentButton,
-    IonImg,IonBadge,
+    IonContent, IonText, IonAvatar, IonSegment, IonSegmentButton,
+    IonImg, IonBadge,
     IonItem,
     IonItemGroup,
     IonItemDivider,
@@ -18,11 +18,13 @@ import {
     IonList,
     IonListHeader,
     IonRow,
-    IonHeader
+    IonHeader, IonToolbar, IonTitle
 } from "@ionic/react";
 import rpc from "../rpc";
 import * as utils from "../utils"
 import url from "../utils/url";
+import i18n from "../locales/i18n";
+import {META_TEMP} from "../config";
 
 interface Props {
     data: Array<any>
@@ -50,12 +52,7 @@ class NFCRender extends React.Component<Props, any> {
         const mateData:any = {};
         for(let d of data){
             //TODO for test
-            mateData[d.value]  = {
-                "name": "Herbie Starbelly",
-                "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.",
-                "image": d.chain=="SERO"?"http://localhost:8008/assets/img/insignia.png":"http://localhost:8008/assets/img/insignia.png",
-                "attributes": [{}]
-            }
+            mateData[d.value]  = META_TEMP.MEDAL
 
             //
             // if(!d.uri){
@@ -80,6 +77,11 @@ class NFCRender extends React.Component<Props, any> {
         const {data} = this.props;
         const {showModal,mateData,metaInfo} = this.state;
         return <>
+            <IonHeader mode="ios">
+                <IonToolbar color="primary" mode="ios">
+                    <IonTitle>{i18n.t("NFT")}</IonTitle>
+                </IonToolbar>
+            </IonHeader>
             <div style={{padding:"12px 12px 0"}}>
                 <IonSegment mode="ios" value="medal" onIonChange={e => console.log('Segment selected', e.detail.value)}>
                     <IonSegmentButton mode="ios" value="medal">
@@ -102,8 +104,8 @@ class NFCRender extends React.Component<Props, any> {
                                 {mateData && mateData[v.value] && <img src={mateData[v.value].image} /> }
                             </IonAvatar>
                             <IonLabel>
-                                <h2>{mateData && mateData[v.value] && mateData[v.value] .name}</h2>
-                                <h3>{v.chain} Chain</h3>
+                                <h2>{mateData && mateData[v.value] && mateData[v.value].name}</h2>
+                                <h3><IonBadge color="light" mode="md">{v.chain} Chain</IonBadge></h3>
                                 <p><IonText color="medium">Token Id: {v.value}</IonText></p>
                             </IonLabel>
                         </IonItem>
@@ -180,10 +182,12 @@ class NFCRender extends React.Component<Props, any> {
                 <div className="nfc-modal">
                     {
                         metaInfo && mateData && mateData[metaInfo.value] && <IonCard>
-                            <IonImg src={mateData[metaInfo.value].image}/>
+                            <div>
+                                <IonImg src={mateData[metaInfo.value].image}/>
+                            </div>
                             <IonCardHeader>
                                 <IonCardTitle>{mateData[metaInfo.value].name}
-                                <IonButton size="small" fill="outline" onClick={()=>{
+                                <IonButton size="small" onClick={()=>{
                                     url.tunnelNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)
                                 }}>CROSS</IonButton></IonCardTitle>
                                 <IonCardSubtitle>
@@ -193,6 +197,12 @@ class NFCRender extends React.Component<Props, any> {
 
                             <IonCardContent>
                                 <IonItemGroup>
+                                    <IonItemDivider mode="md">
+                                        <IonLabel>Token Id</IonLabel>
+                                    </IonItemDivider>
+                                    <IonItem lines="none">
+                                        <p className="work-break">{metaInfo && metaInfo.value}</p>
+                                    </IonItem>
                                     <IonItemDivider mode="md">
                                         <IonLabel>Description</IonLabel>
                                     </IonItemDivider>
@@ -205,27 +215,21 @@ class NFCRender extends React.Component<Props, any> {
                                     <IonItem lines="none">
                                         <p className="work-break">{metaInfo && utils.getAddressBySymbol(metaInfo.symbol,metaInfo.chain)}</p>
                                     </IonItem>
-                                    <IonItemDivider mode="md">
-                                        <IonLabel>Token Id</IonLabel>
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <p className="work-break">{metaInfo && metaInfo.value}</p>
-                                    </IonItem>
                                 </IonItemGroup>
                             </IonCardContent>
-
-
                         </IonCard>
                     }
                     <div style={{position:"fixed",bottom:"0",background:"#fff",padding:"15px",width:"100%"}}>
                         <IonRow>
                             <IonCol>
-                                <IonButton expand="block" fill="outline" onClick={() => this.showModal("",false)}>Close</IonButton>
+                                <IonButton expand="block" fill="outline" onClick={() => this.showModal("",false)}>
+                                    {i18n.t("close")}
+                                </IonButton>
                             </IonCol>
                             <IonCol>
-                                <IonButton expand="block" fill="outline" onClick={() => {
+                                <IonButton expand="block" onClick={() => {
                                     url.transferNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)
-                                }}>Transfer</IonButton>
+                                }}>{i18n.t("transfer")}</IonButton>
                             </IonCol>
                         </IonRow>
                     </div>
