@@ -142,7 +142,6 @@ class TransferNFT extends React.Component<any, any> {
         const tokenId = this.props.match.params.value;
         const contractAddress = utils.getAddressBySymbol(symbol,chainName)
 
-        console.log("to>>>",to)
         //ETH ERC20
         if(chain == ChainType.ETH){
             const contract: Erc721 = new Erc721(contractAddress);

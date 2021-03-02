@@ -47,7 +47,7 @@ const Epoch: React.FC = () => {
                     <IonCardHeader>
                         <IonCardTitle>
                             <IonLabel>
-                                Palot
+                                ORIGIN
                             </IonLabel>
                         </IonCardTitle>
 

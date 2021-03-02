@@ -34,11 +34,10 @@ class NFT extends React.Component<any, any> {
             clearInterval(initInterValId)
         }
         initInterValId = setInterval(() => {
-            console.log("initInterValId NFT")
             this.init().catch(e => {
                 console.log(e)
             })
-        }, 15000)
+        }, 10000)
         sessionStorage.setItem("initInterValIdNFT", initInterValId);
     }
 
