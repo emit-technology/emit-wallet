@@ -143,7 +143,7 @@ class Transfer extends React.Component<any, any> {
             if(realCy !== ChainType[ChainType.ETH]){
                 const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
                 tx.value = "0x0";
-                tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(cy,ChainType[chain])));
+                tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
                 tx.to = config.CONTRACT_ADDRESS.ERC20.ETH[realCy];
                 tx.gas = await ETH_COIN.estimateGas(tx)
                 tx.amount = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
@@ -156,12 +156,10 @@ class Transfer extends React.Component<any, any> {
             if(realCy !== ChainType[ChainType.SERO]){
                 const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
                 const tokenRate = await gasFeeProxy.tokenRate()
-                console.log("tokenRate>>> ",tokenRate.feeAmount.toString(10),tokenRate.seroAmount.toString(10));
                 tx.value = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
                 tx.data = await gasFeeProxy.transfer(to);
                 tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
                 tx.gas = await gasFeeProxy.estimateGas(tx)
-                console.log(tx.gas,"gas")
                 tx.amount = "0x0";
                 tx.feeCy = realCy;
                 if(tx.gas && tx.gasPrice){

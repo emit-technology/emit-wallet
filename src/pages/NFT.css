@@ -1,0 +1,19 @@
+.elements{
+    height: 80px;
+    width: 80px;
+    border-radius: 50%;
+    border: #ddd 1px solid;
+    margin-bottom: 15px;
+}
+
+.nfc-modal {
+    max-height: 100vh;
+    overflow-y: scroll;
+    padding-bottom: 45px;
+}
+
+.medal-avatar{
+    width: 55px;
+    height: 55px;
+    /*border: 1px solid #ddd;*/
+}

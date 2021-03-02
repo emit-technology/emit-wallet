@@ -51,20 +51,23 @@ export interface Transaction {
     chain: ChainType
     nonce?: string
     chainId?: any
-    amount:any
-    feeCy:string
-    feeValue?:string
-    input?:string
+    amount: any
+    feeCy: string
+    feeValue?: string
+    input?: string
+    tickets?: Array<any>
+    catg?:string
+    tkt?:string
 }
 
 export interface GasPriceLevel {
-    SafeGasPrice?:costTime
-    ProposeGasPrice?:costTime
-    FastGasPrice?:costTime
-    AvgGasPrice?:costTime
+    SafeGasPrice?: costTime
+    ProposeGasPrice?: costTime
+    FastGasPrice?: costTime
+    AvgGasPrice?: costTime
 }
 
-export interface costTime{
-    gasPrice:string
-    second:number
+export interface costTime {
+    gasPrice: string
+    second: number
 }

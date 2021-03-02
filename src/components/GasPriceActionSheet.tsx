@@ -54,7 +54,6 @@ class GasPriceActionSheet extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-        console.log("gasPrice componentDidUpdate",prevProps,this.props)
         if(prevProps.show !== this.props.show){
             this.init().catch()
         }

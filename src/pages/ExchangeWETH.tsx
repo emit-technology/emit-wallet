@@ -138,7 +138,6 @@ class ExchangeWETH extends React.Component<any, any> {
     }
 
     setShowActionSheet = (f: boolean) => {
-        console.log("showActionSheet>>>set:", f)
         this.setState({
             showActionSheet: f
         })
@@ -180,7 +179,6 @@ class ExchangeWETH extends React.Component<any, any> {
 
     render() {
         const {balance, amount, showProgress, showToast, toastMsg, toastColor, gasPrice, showActionSheet, showAlert, tx, op} = this.state;
-        console.log("showActionSheet", showActionSheet)
         return <>
             <IonPage>
                 <IonContent fullscreen color="light">

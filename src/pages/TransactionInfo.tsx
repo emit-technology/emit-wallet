@@ -33,6 +33,7 @@ import {
     IonSpinner,
     IonText,
     IonTitle,
+    IonItemDivider,
     IonToast,
     IonToolbar
 } from "@ionic/react";
@@ -50,6 +51,9 @@ import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import tron from "../rpc/tron";
 import {BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS} from "../config";
+import SRC721 from "../contract/erc721/meta/sero"
+import ERC721 from "../contract/erc721/meta/eth"
+import CrossNFT from "../contract/cross/eth/crossNFT";
 
 class TransactionInfo extends React.Component<any, any> {
 
@@ -66,7 +70,9 @@ class TransactionInfo extends React.Component<any, any> {
 
     componentDidMount() {
 
-        this.init().catch()
+        this.init().catch(e=>{
+            console.log(e)
+        })
     }
 
     init = async () => {
@@ -75,8 +81,6 @@ class TransactionInfo extends React.Component<any, any> {
         const txHash = this.props.match.params.hash;
         const chain = this.props.match.params.chain;
         const tmpRecord: any = sessionStorage.getItem(txHash);
-
-        console.log("ChainType[chain]", ChainType[chain])
 
         const address = account.addresses[chain];
         const rest: any = await rpc.getTxInfo(chain, txHash)
@@ -105,7 +109,6 @@ class TransactionInfo extends React.Component<any, any> {
         }
         const records: Array<any> = info.records;
         const amountMap: Map<string, BigNumber> = new Map<string, BigNumber>();
-        console.log(records, "records")
         for (let r of records) {
             if (r.address == address) {
                 if (amountMap.has(r.currency)) {
@@ -117,7 +120,6 @@ class TransactionInfo extends React.Component<any, any> {
                 }
             }
         }
-        console.log(amountMap, "amountMap")
         const tokens: Array<any> = [];
         const entry = amountMap.entries();
         let next = entry.next();
@@ -126,9 +128,9 @@ class TransactionInfo extends React.Component<any, any> {
             tokens.push({cy: next.value[0], value: v.amount})
             next = entry.next();
         }
-        console.log("rest", info)
         const events = await this.getEvent(chain, info.txHash);
         const gasPrice = await utils.defaultGasPrice(chain);
+
         this.setState({
             gasPrice:gasPrice,
             address: address,
@@ -136,6 +138,51 @@ class TransactionInfo extends React.Component<any, any> {
             info: info,
             tokens: tokens,
             events: events
+        })
+
+        const nft:any = {};
+        if(info.num){
+            //decode NFT
+            if(chain == ChainType.SERO){
+                if(info.contract && info.contract.Asset && info.contract.Asset.Tkt){
+                    const tkt = info.contract.Asset.Tkt;
+                    const category = utils.hexToCy(tkt.Category)
+                    const nftAddress = utils.getAddressByCategory(category,ChainType[chain]);
+                    if(nftAddress){
+                        const contract = new SRC721(nftAddress);
+                        const value = await contract.ticketId(tkt.Value)
+                        nft.category=category
+                        nft.tokenId = tkt.Value;
+                        nft.ticket=value[0];
+                        nft.address=nftAddress;
+                    }
+                }
+            }else if(chain == ChainType.ETH){
+                const rest:any = await this.getTransactionByHash(txHash);
+                if(utils.isNFTAddress(rest.to,ChainType[ChainType.ETH])){
+                    const contact = new ERC721(rest.to);
+                    const decodeResult = await contact.decodeTransferFromParams(rest.input);
+                    if(decodeResult){
+                        nft.ticket = decodeResult.tokenId;
+                        nft.address = rest.to;
+                    }
+                } else if(rest.to.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT.ETH.BRIDGE.toLowerCase()){
+                    const contact = new CrossNFT(rest.to);
+                    const decodeResult = await contact.decodeTransferFromParams(rest.input);
+                    const nftAddress = utils.getCrossTargetAddress(decodeResult.resourceID,decodeResult.destinationChainID)
+                    if(nftAddress){
+                        const contract = new SRC721(nftAddress);
+                        const value = await contract.ticket(decodeResult.amount)
+                        nft.tokenId = value[0];
+                        nft.ticket=decodeResult.amount;
+                        nft.address=nftAddress;
+                    }
+                }
+            }
+        }
+
+        this.setState({
+            nft:nft
         })
     }
 
@@ -150,11 +197,9 @@ class TransactionInfo extends React.Component<any, any> {
             if (resourceId.toLowerCase() == BRIDGE_RESOURCE_ID.TUSDT.toLowerCase()) {
                 c = ChainType.TRON == chain ? ChainType.SERO : ChainType.TRON;
             }
-            console.log("chain:", c)
             const target = await rpc.getEvents(c, "", events[0].event.depositNonce, "", c == ChainType.TRON ? resourceId.slice(2) : resourceId)
             events = events.concat(target)
         }
-        console.log("events>>", events)
 
         for (let e of events) {
             const ev = e.eventName == "Deposit" ? 3 : e.eventName == "ProposalEvent" ? 4 : e.eventName
@@ -187,15 +232,18 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
+    getTransactionByHash = async (txHash:string)=>{
+        return await rpc.post("eth_getTransactionByHash", [txHash]);
+    }
+
     speedEthTx = async (gasPrice: any) => {
         const txHash = this.props.match.params.hash;
         const {info,opType} = this.state;
-        const rest: any = await rpc.post("eth_getTransactionByHash", [txHash]);
+        const rest:any = await this.getTransactionByHash(txHash);
         if(!rest){
             this.setShowToast(true,"warning","Transaction not found!");
             return
         }
-
         const tx: Transaction = {
             from: rest.from,
             to: rest.to,
@@ -274,7 +322,7 @@ class TransactionInfo extends React.Component<any, any> {
     }
 
     render() {
-        const {info, tokens, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert} = this.state;
+        const {info, tokens,nft, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert} = this.state;
         return <IonPage>
             <IonContent fullscreen>
                 <IonHeader>
@@ -393,6 +441,16 @@ class TransactionInfo extends React.Component<any, any> {
                             })
                         }</IonText>
                     </IonItem>
+                    {
+                        nft && nft.address &&
+                        <IonItem mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">{i18n.t("NFT")}:</IonLabel>
+                            <div style={{width:"100%",padding:"0 12px"}} className="text-small">
+                                {nft.ticket && <p><b>ID:</b> {nft.ticket}</p>}
+                                {nft.tokenId && <p><b>Hash:</b> {nft.tokenId}</p>}
+                            </div>
+                        </IonItem>
+                    }
                     {
                         // info.energy_usage=rest.energy_usage;
                         // info.energy_usage_total=rest.energy_usage_total;

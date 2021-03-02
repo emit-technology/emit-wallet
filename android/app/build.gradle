@@ -6,8 +6,8 @@ android {
         applicationId "technology.emit.wallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 114
-        versionName "1.1.4"
+        versionCode 115
+        versionName "1.1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

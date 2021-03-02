@@ -18,6 +18,7 @@
 
 import BigNumber from 'bignumber.js'
 import {
+    BRIDGE_NFT_RESOURCE_ID,
     BRIDGE_CURRENCY,
     BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
@@ -25,9 +26,10 @@ import {
     GAS_DEFAULT,
     GAS_PRICE_UNIT
 } from "../config"
-import {ChainType, GasPriceLevel} from "../types";
-import {Plugins} from "@capacitor/core";
+import {ChainId, ChainType, GasPriceLevel} from "../types";
 import rpc from "../rpc";
+
+const utf8 = require("utf8");
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = require("base-x")(BASE58);
@@ -90,6 +92,20 @@ export function getResourceId(cy:string){
     return BRIDGE_RESOURCE_ID[cy];
 }
 
+export function getNFTResourceId(symbol:string){
+    return BRIDGE_NFT_RESOURCE_ID[symbol];
+}
+
+export function getCrossTargetAddress(resourceId:string,destinationChainID:any){
+    const keys = Object.keys(BRIDGE_NFT_RESOURCE_ID)
+    for(let k of keys){
+        if(BRIDGE_NFT_RESOURCE_ID[k] == resourceId){
+            return CONTRACT_ADDRESS.ERC721[k]["ADDRESS"][ChainId[destinationChainID]]
+        }
+    }
+    return ""
+}
+
 export function getCyName(cy:string,chain:string):string{
     try{
         return BRIDGE_CURRENCY[cy][chain]["CY"];
@@ -106,6 +122,15 @@ export function getChainIdByName(chain:string):any{
         }
     }
     return ChainType._
+}
+
+export function getDestinationChainIDByName(chain:string):any{
+    for(let key in ChainId){
+        if(ChainId[key] === chain){
+            return key;
+        }
+    }
+    return ChainId._
 }
 
 export function toHex(value:string | number | BigNumber){
@@ -237,7 +262,6 @@ export async function defaultGasPrice(chain:ChainType){
     if (chain == ChainType.ETH) {
         // @ts-ignore
         data = await rpc.post("eth_gasTracker", [])
-        console.log("data::: ",data)
     } else if (chain == ChainType.SERO) {
         data = {
             AvgGasPrice: {
@@ -250,4 +274,69 @@ export async function defaultGasPrice(chain:ChainType){
     }
     defaultGasPrice = data.AvgGasPrice ? data.AvgGasPrice?.gasPrice : "1"
     return defaultGasPrice;
+}
+
+export function getCategoryBySymbol(symbol:string,chain:string):string{
+    return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
+}
+
+export function getAddressBySymbol(symbol:string,chain:string):string{
+    return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][chain];
+}
+
+export function getAddressByCategory(category:string,chain:string):string{
+    const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
+    for(let k of keys){
+        const address = CONTRACT_ADDRESS.ERC721[k]["ADDRESS"];
+        const symbol = CONTRACT_ADDRESS.ERC721[k]["SYMBOL"];
+        if(symbol[chain]==category){
+            return address[chain]
+        }
+    }
+    return ""
+}
+
+export function isNFTAddress(add:string,chain:string):boolean{
+    const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
+    for(let k of keys){
+        const address = CONTRACT_ADDRESS.ERC721[k]["ADDRESS"];
+        // const symbol = CONTRACT_ADDRESS.ERC721[k]["SYMBOL"];
+        if(address[chain].toLowerCase()==add.toLowerCase()){
+            return true
+        }
+    }
+    return false
+}
+
+function hexToUtf8(hex: string): string {
+    let string = "";
+    let code = 0;
+    hex = hex.replace(/^0x/i, "");
+
+    // remove 00 padding from either side
+    hex = hex.replace(/^(?:00)*/, "");
+    hex = hex
+        .split("")
+        .reverse()
+        .join("");
+    hex = hex.replace(/^(?:00)*/, "");
+    hex = hex
+        .split("")
+        .reverse()
+        .join("");
+
+    const l = hex.length;
+
+    for (let i = 0; i < l; i += 2) {
+        code = parseInt(hex.substr(i, 2), 16);
+        // if (code !== 0) {
+        string += String.fromCharCode(code);
+        // }
+    }
+
+    return utf8.decode(string);
+}
+
+export function hexToCy(str:string){
+    return hexToUtf8(str).toUpperCase()
 }

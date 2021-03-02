@@ -33,7 +33,6 @@ class Scan extends React.Component<any, any>{
             formats: "QR_CODE",
             prompt: "Scan QR Code."
         });
-        console.log(`Barcode data: ${data.text}`);
     };
 
     render() {

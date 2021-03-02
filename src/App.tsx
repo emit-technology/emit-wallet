@@ -21,7 +21,7 @@ import {Redirect, Route, Switch} from 'react-router-dom';
 import {
     IonApp,
     IonIcon,
-    IonLabel,
+    IonLabel,IonImg,
     IonRouterOutlet,
     IonTabBar,
     IonTabButton,
@@ -33,6 +33,7 @@ import {
     square,
     triangle,
     gitCompareOutline,
+    sunnyOutline,
     walletOutline,
     appsOutline,
     settingsOutline
@@ -53,6 +54,7 @@ import About from "./pages/settings/About";
 import Slides from "./pages/Slides";
 import Scan from "./pages/Scan";
 import TronFrozenBalance from "./pages/TronFrozenBalance";
+import NFT from "./pages/NFT";
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -76,69 +78,110 @@ import selfStorage from "./utils/storage";
 
 import i18n from "./locales/i18n"
 import ExchangeWETH from "./pages/ExchangeWETH";
+import TransferNFT from "./pages/TransferNFT";
+import TunnelNFT from "./pages/TunnelNFT";
 
-const App: React.FC = () => (
-    <IonApp>
-        <IonReactHashRouter>
-            {/*<IonRouterOutlet>*/}
-            {/*  <Switch>*/}
-            <Route path="/slide" component={Slides} exact={true}/>
-            <Route path="/tunnel/:cy" component={Tunnel} exact={true}/>
-            <Route path="/manage/about" component={About} exact={true}/>
-            <Route path="/account/create" component={CreateAccount} exact={true}/>
-            <Route path="/account/backup" component={Backup} exact={true}/>
-            <Route path="/account/confirm" component={Confirm} exact={true}/>
-            <Route path="/account/import" component={ImportAccount} exact={true}/>
-            <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
-            <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
-            <Route path="/account/receive/:address" component={Receive} exact={true}/>
-            <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
-            <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
-            <Route path="/scan" component={Scan} exact={true}/>
-            <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
-            <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
 
-            <Route path="/" render={() => {
-                const viewedSlide = selfStorage.getItem('viewedSlide');
-                if (!viewedSlide) {
-                    return <Redirect to="/slide"/>
-                }
-                const accountId = selfStorage.getItem('accountId');
-                if (!accountId || accountId === "undefined") {
-                    return <Redirect to="/account/create"/>
-                }
-                return <Redirect to="/tabs/wallet"/>
-            }} exact={true}/>
-            {/*</Switch>*/}
-            <Route
-                path="/tabs"
-                render={() => (
-                    <IonTabs>
-                        <IonRouterOutlet>
-                            <Route path="/tabs/wallet" component={Wallet} exact={true}/>
-                            <Route path="/tabs/epoch" component={Epoch} exact={true}/>
-                            <Route path="/tabs/settings" component={Settings} exact={true}/>
-                        </IonRouterOutlet>
-                        <IonTabBar mode="ios" slot="bottom" selectedTab="wallet">
-                            <IonTabButton tab="wallet" href="/tabs/wallet">
-                                <IonIcon icon={walletOutline}/>
-                                <IonLabel>{i18n.t("wallet")}</IonLabel>
-                            </IonTabButton>
-                            <IonTabButton tab="epoch" href="/tabs/epoch">
-                                <IonIcon icon={appsOutline}/>
-                                <IonLabel>{i18n.t("epoch")}</IonLabel>
-                            </IonTabButton>
-                            <IonTabButton tab="settings" href="/tabs/settings">
-                                <IonIcon icon={settingsOutline}/>
-                                <IonLabel>{i18n.t("settings")}</IonLabel>
-                            </IonTabButton>
-                        </IonTabBar>
-                    </IonTabs>
-                )}
-            />
-            {/*</IonRouterOutlet>*/}
-        </IonReactHashRouter>
-    </IonApp>
-);
+let element = require("./img/icon/element_selected.png")
+let nft = require("./img/icon/NFT.png")
+let epoch = require("./img/icon/epoch.png")
+let setting = require("./img/icon/setting.png")
+
+
+
+class App extends React.Component<any,any>{
+
+    resetIcon = (v:any)=>{
+        this.setState({selected:v})
+        element = require("./img/icon/element.png")
+        nft = require("./img/icon/NFT.png")
+        epoch = require("./img/icon/epoch.png")
+        setting = require("./img/icon/setting.png")
+        if(v == "wallet"){
+            element = require("./img/icon/element_selected.png")
+        }else if(v == "nft"){
+            nft = require("./img/icon/NFT_selected.png")
+        }else if(v == "epoch"){
+            epoch = require("./img/icon/epoch_selected.png")
+        }else if(v == "settings"){
+            setting = require("./img/icon/setting_selected.png")
+        }
+    }
+
+    render() {
+        return (
+            <IonApp>
+                <IonReactHashRouter>
+                    {/*<IonRouterOutlet>*/}
+                    {/*  <Switch>*/}
+                    <Route path="/slide" component={Slides} exact={true}/>
+                    <Route path="/tunnel-nft/:symbol/:chain/:tokenId" component={TunnelNFT} exact={true}/>
+                    <Route path="/tunnel/:cy" component={Tunnel} exact={true}/>
+                    <Route path="/manage/about" component={About} exact={true}/>
+                    <Route path="/account/create" component={CreateAccount} exact={true}/>
+                    <Route path="/account/backup" component={Backup} exact={true}/>
+                    <Route path="/account/confirm" component={Confirm} exact={true}/>
+                    <Route path="/account/import" component={ImportAccount} exact={true}/>
+                    <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
+                    <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
+                    <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>
+                    <Route path="/account/receive/:address" component={Receive} exact={true}/>
+                    <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
+                    <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
+                    <Route path="/scan" component={Scan} exact={true}/>
+                    <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
+                    <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
+
+                    <Route path="/" render={() => {
+                        const viewedSlide = selfStorage.getItem('viewedSlide');
+                        if (!viewedSlide) {
+                            return <Redirect to="/slide"/>
+                        }
+                        const accountId = selfStorage.getItem('accountId');
+                        if (!accountId || accountId === "undefined") {
+                            return <Redirect to="/account/create"/>
+                        }
+                        return <Redirect to="/tabs/wallet"/>
+                    }} exact={true}/>
+                    {/*</Switch>*/}
+                    <Route
+                        path="/tabs"
+                        render={() => (
+                            <IonTabs onIonTabsDidChange={v=>{
+                                this.resetIcon(v.detail.tab);
+                            }}>
+                                <IonRouterOutlet>
+                                    <Route path="/tabs/wallet" component={Wallet} exact={true}/>
+                                    <Route path="/tabs/epoch" component={Epoch} exact={true}/>
+                                    <Route path="/tabs/settings" component={Settings} exact={true}/>
+                                    <Route path="/tabs/nft" component={NFT} exact={true}/>
+                                </IonRouterOutlet>
+                                <IonTabBar mode="ios" slot="bottom" selectedTab="wallet" className="toolbar-cust">
+                                    <IonTabButton tab="wallet" href="/tabs/wallet">
+                                        <IonImg src={element}  className="toolbar-icon"/>
+                                        <IonLabel className="text-small-x2">{i18n.t("wallet")}</IonLabel>
+                                    </IonTabButton>
+                                    <IonTabButton tab="nft" href="/tabs/nft">
+                                        <IonImg src={nft} className="toolbar-icon"/>
+                                        <IonLabel className="text-small-x2">{i18n.t("NFT")}</IonLabel>
+                                    </IonTabButton>
+                                    <IonTabButton tab="epoch" href="/tabs/epoch">
+                                        <IonImg src={epoch} className="toolbar-icon"/>
+                                        <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
+                                    </IonTabButton>
+                                    <IonTabButton tab="settings" href="/tabs/settings">
+                                        <IonImg src={setting} className="toolbar-icon"/>
+                                        <IonLabel className="text-small-x2">{i18n.t("settings")}</IonLabel>
+                                    </IonTabButton>
+                                </IonTabBar>
+                            </IonTabs>
+                        )}
+                    />
+                    {/*</IonRouterOutlet>*/}
+                </IonReactHashRouter>
+            </IonApp>
+        );
+    }
+}
 
 export default App;

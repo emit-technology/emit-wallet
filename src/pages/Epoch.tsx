@@ -18,11 +18,19 @@
 
 import React from 'react';
 import {
+    IonChip,
     IonContent,
     IonHeader,
     IonPage,
     IonTitle,
-    IonToolbar
+    IonToolbar,
+    IonCard,
+    IonCardTitle,
+    IonCardContent,
+    IonFooter,
+    IonLabel,
+    IonCardHeader,
+    IonCardSubtitle
 } from '@ionic/react';
 import './Epoch.css';
 
@@ -35,9 +43,27 @@ const Epoch: React.FC = () => {
                         <IonTitle>Epoch</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <div className="img-center">
-                    <img src="./assets/img/comesoon.png" style={{maxWidth:"unset",width:"90vw"}}/>
-                </div>
+                <IonCard mode="ios">
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <IonLabel>
+                                Palot
+                            </IonLabel>
+                        </IonCardTitle>
+
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <div style={{opacity:0.5}}>
+                            <img src="./assets/img/altar.png" style={{maxWidth:"unset",width:"100%"}}/>
+                        </div>
+                        <div style={{opacity:0.5}}>
+                            <img src="./assets/img/chaos.png" style={{maxWidth:"unset",width:"100%"}}/>
+                        </div>
+                    </IonCardContent>
+                    <div className="text-center">
+                        <IonChip color="warning">This universe is about to be initialized</IonChip>
+                    </div>
+                </IonCard>
             </IonContent>
         </IonPage>
     );

@@ -127,7 +127,7 @@ class Wallet extends React.Component<State, any> {
                 account: account,
                 assets:assets
             })
-        });
+        })
 
         this.init().then(() => {
         }).catch()
