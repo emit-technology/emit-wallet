@@ -428,7 +428,7 @@ class TunnelNFT extends React.Component<any, any> {
                                         Token Id
                                     </IonItemDivider>
                                     <IonItem lines="none">
-                                        <div className="work-break">
+                                        <div style={{width:"100%"}}>
                                             <small>{this.props.match.params.tokenId}</small>
                                         </div>
                                     </IonItem>

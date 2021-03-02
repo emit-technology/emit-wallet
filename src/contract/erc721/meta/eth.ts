@@ -1,5 +1,8 @@
 import EthContract from "../../EthContract";
 import Erc721 from "../index";
+import {EMIT_HOST} from "../../../config";
+const Web3 = require('web3');
+const web3 = new Web3(EMIT_HOST);
 
 const ABI = [
     {
@@ -407,6 +410,38 @@ class Eth extends EthContract implements Erc721 {
 
     safeTransferFromWithCallData(from: string, to: string, tokenId: string, data: string): Promise<string> {
         throw new Error("Method not implemented.");
+    }
+
+    decodeTransferFromParams = async (input:string):Promise<any>=>{
+        const abi = {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "internalType": "address",
+                    "name": "to",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "tokenId",
+                    "type": "uint256"
+                }
+            ],
+            "name": "transferFrom",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+        const signName = web3.eth.abi.encodeFunctionSignature(abi)
+        if(signName != input.slice(0,10)){
+            return ""
+        }
+        const rest = await web3.eth.abi.decodeParameters(abi["inputs"],"0x"+input.slice(10))
+        return rest;
     }
 
     /**

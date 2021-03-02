@@ -238,7 +238,7 @@ class TransferNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {metaData,cy, chain, account, realCy, showProgress,gasPrice,tx, to, amount,showToast,toastMessage,accountResource,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
+        const {metaData, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet} = this.state;
 
         return <IonPage>
             <IonContent fullscreen>
@@ -271,7 +271,7 @@ class TransferNFT extends React.Component<any, any> {
                                     Token Id
                                 </IonItemDivider>
                                 <IonItem lines="none">
-                                    <div className="work-break">
+                                    <div style={{width:"100%"}}>
                                         <small>{this.props.match.params.value}</small>
                                     </div>
                                 </IonItem>

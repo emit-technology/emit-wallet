@@ -20,19 +20,21 @@ import rpc from "../rpc";
 
 import {EMIT_HOST} from "../config"
 const Contract = require('web3-eth-contract');
+
 Contract.setProvider(EMIT_HOST);
 
 class EthContract{
 
     contract:any;
+    abi:any;
 
     constructor(address:string,abi:any) {
+        this.abi = abi;
         this.contract = new Contract(abi,address);
     }
 
     estimateGas = async (params:any):Promise<any>=>{
         return await rpc.post("eth_estimateGas",[params])
     }
-
 }
 export default EthContract;

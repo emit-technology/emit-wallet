@@ -30,6 +30,44 @@ const ABI = [
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "tktId",
+                "type": "uint256"
+            }
+        ],
+        "name": "ticket",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "tkt",
+                "type": "bytes32"
+            }
+        ],
+        "name": "ticketId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes32",
                 "name": "tkt",
                 "type": "bytes32"
@@ -87,6 +125,14 @@ class Sero extends SeroContract {
 
     totalSupply = async (): Promise<string> => {
         return await this.call("totalSupply", [], "")
+    }
+
+    ticketId = async (tokenId:string): Promise<any> => {
+        return await this.call("ticketId", [tokenId], "")
+    }
+
+    ticket = async (tokenId:number): Promise<any> => {
+        return await this.call("ticket", [tokenId], "")
     }
 
 }

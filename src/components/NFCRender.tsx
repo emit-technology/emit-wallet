@@ -183,7 +183,7 @@ class NFCRender extends React.Component<Props, any> {
                     {
                         metaInfo && mateData && mateData[metaInfo.value] && <IonCard>
                             <div>
-                                <IonImg src={mateData[metaInfo.value].image}/>
+                                <img src={mateData[metaInfo.value].image}/>
                             </div>
                             <IonCardHeader>
                                 <IonCardTitle>{mateData[metaInfo.value].name}
