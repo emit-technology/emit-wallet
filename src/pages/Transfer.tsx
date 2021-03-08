@@ -139,9 +139,10 @@ class Transfer extends React.Component<any, any> {
             feeCy:ChainType[ChainType.ETH]
         }
         //ETH ERC20
+        const defaultCy = utils.defaultCy(chain);
         if(chain == ChainType.ETH){
-            if(realCy !== ChainType[ChainType.ETH]){
-                const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
+            if(realCy !== defaultCy){
+                const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy],chain);
                 tx.value = "0x0";
                 tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
                 tx.to = config.CONTRACT_ADDRESS.ERC20.ETH[realCy];
@@ -151,9 +152,22 @@ class Transfer extends React.Component<any, any> {
                 tx.gas = gas;
                 tx.value = value;
             }
-            tx.feeCy = ChainType[ChainType.ETH];
+            tx.feeCy = defaultCy;
+        }else if(chain == ChainType.BSC){
+            if(realCy !== defaultCy){
+                const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.BSC[realCy],chain);
+                tx.value = "0x0";
+                tx.data = await ETH_COIN.transfer(to,utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
+                tx.to = config.CONTRACT_ADDRESS.ERC20.BSC[realCy];
+                tx.gas = await ETH_COIN.estimateGas(tx)
+                tx.amount = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
+            }else{
+                tx.gas = gas;
+                tx.value = value;
+            }
+            tx.feeCy = defaultCy;
         }else if(chain == ChainType.SERO){
-            if(realCy !== ChainType[ChainType.SERO]){
+            if(realCy !== utils.defaultCy(chain)){
                 const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
                 const tokenRate = await gasFeeProxy.tokenRate()
                 tx.value = utils.toHex(utils.toValue(amount,utils.getCyDecimal(realCy,ChainType[chain])));
@@ -170,10 +184,10 @@ class Transfer extends React.Component<any, any> {
             }else{
                 tx.gas = gas;
                 tx.value = value;
-                tx.feeCy = "SERO";
+                tx.feeCy = defaultCy;
             }
         }else if(chain == ChainType.TRON){
-            tx.feeCy = ChainType[ChainType.TRON];
+            tx.feeCy = defaultCy;
             tx.value=value;
             if(tx.cy !== "TRX"){
                 const TRC20_USDT = new Tron(config.CONTRACT_ADDRESS.ERC20.TRON.USDT)

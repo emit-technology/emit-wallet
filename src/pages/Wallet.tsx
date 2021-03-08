@@ -33,13 +33,14 @@ import {
     IonItemGroup,
     IonLabel,
     IonList,
-    IonListHeader, IonLoading,
+    IonListHeader,
+    IonLoading,
     IonPage,
     IonRow,
     IonText,
-    IonTitle, IonToast,
-    IonToolbar,
-    IonBadge
+    IonTitle,
+    IonToast,
+    IonToolbar
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
@@ -152,7 +153,7 @@ class Wallet extends React.Component<State, any> {
         const deviceInfo = await Device.getInfo();
         if(deviceInfo && deviceInfo.platform !=="web"){
             const skipVersion: any = selfStorage.getItem("skipVersion");
-            const remoteVersion:any = await rpc.post("eth_getAppVersion", ["latest",""])
+            const remoteVersion:any = await rpc.post("eth_getAppVersion", ["latest",""],ChainType.ETH)
 
             if (remoteVersion && remoteVersion.length>0) {
                 if (skipVersion && skipVersion.length > 0) {
@@ -180,6 +181,7 @@ class Wallet extends React.Component<State, any> {
             const seroBalance = await rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO])
             const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
             const tronBalance:any = account.addresses[ChainType.TRON]?await rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON]):{}
+            const bscBalance = await rpc.getBalance(ChainType.BSC, account.addresses[ChainType.BSC])
             for (let cy of currencies) {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
@@ -195,6 +197,8 @@ class Wallet extends React.Component<State, any> {
                         }else{
                             assets[cy][chain] = utils.fromValue(tronBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                         }
+                    } else if (chain === "BSC") {
+                        assets[cy][chain] = utils.fromValue(bscBalance[currency], utils.getCyDecimal(currency, chain)).toString(10);
                     }
                 }
             }
@@ -347,7 +351,7 @@ class Wallet extends React.Component<State, any> {
                         <IonCardSubtitle>{TOKEN_DESC[cy]}</IonCardSubtitle>
                     </IonCardTitle>
                     <IonLabel className="text-bold">{parseFloat(total.toFixed(3, 1)).toLocaleString()}</IonLabel>
-                    {cy != "ETH" && cy != "TRX" && <IonButton size="small" slot="end" mode="ios" onClick={() => {
+                    {utils.notCrossToken(cy) && <IonButton size="small" slot="end" mode="ios" onClick={() => {
                         url.tunnel(cy)
                     }} style={{float: "right"}}>{i18n.t("cross")}</IonButton>}
                 </IonItem>
@@ -452,7 +456,7 @@ class Wallet extends React.Component<State, any> {
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.ETH])}</IonText>
-                                <p><IonText color="medium">{ChainType[ChainType.ETH]} {i18n.t("chain")}</IonText></p>
+                                <p><IonText color="medium">Ethereum</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
@@ -464,7 +468,19 @@ class Wallet extends React.Component<State, any> {
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.SERO])}</IonText>
-                                <p><IonText color="medium">{ChainType[ChainType.SERO]} {i18n.t("chain")}</IonText></p>
+                                <p><IonText color="medium">Super Zero</IonText></p>
+                            </IonLabel>
+                            <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
+                        </IonItem>
+                        <IonItem mode="ios" lines="none" onClick={() => {
+                            url.receive(account.addresses && account.addresses[ChainType.BSC])
+                        }}>
+                            <IonAvatar slot="start">
+                                <img src={require(`../img/BNB.svg`)}/>
+                            </IonAvatar>
+                            <IonLabel className="address-wrap" mode="ios">
+                                <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.BSC])}</IonText>
+                                <p><IonText color="medium">Binance Smart Chain</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
@@ -478,7 +494,7 @@ class Wallet extends React.Component<State, any> {
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios" style={{opacity:!(account.addresses && account.addresses[ChainType.TRON])?0.3:1}}>
                                 <IonText>{account.addresses && account.addresses[ChainType.TRON] && utils.ellipsisStr(account.addresses[ChainType.TRON])}</IonText>
-                                <p><IonText color="medium">{ChainType[ChainType.TRON]} {i18n.t("chain")}</IonText></p>
+                                <p><IonText color="medium">Tron Network</IonText></p>
                             </IonLabel>
                             {
                                 !(account.addresses && account.addresses[ChainType.TRON])?<IonButton fill="outline" onClick={()=>{

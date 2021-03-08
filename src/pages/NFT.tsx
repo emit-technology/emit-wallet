@@ -1,16 +1,8 @@
 import * as React from 'react';
 import {
     IonContent,
-    IonHeader,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader,
     IonPage,
-    IonTitle, IonGrid, IonRow, IonCol,
-    IonToolbar
 } from "@ionic/react";
-import i18n from "../locales/i18n";
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
 import {ChainType} from "../types";

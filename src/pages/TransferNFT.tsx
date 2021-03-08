@@ -85,7 +85,7 @@ class TransferNFT extends React.Component<any, any> {
         if (category && chainId) {
             let metaData:any = {};
             if(chainId == ChainType.ETH){
-                const contract: Erc721 = new Erc721(contractAddress);
+                const contract: Erc721 = new Erc721(contractAddress,chainId);
                 const uri = await contract.tokenURI(tokenId)
                 metaData = await rpc.req(uri,{})
             }else if (chainId == ChainType.SERO){
@@ -144,7 +144,7 @@ class TransferNFT extends React.Component<any, any> {
 
         //ETH ERC20
         if(chain == ChainType.ETH){
-            const contract: Erc721 = new Erc721(contractAddress);
+            const contract: Erc721 = new Erc721(contractAddress,chain);
             tx.value = "0x0";
             tx.data = await contract.transferFrom(tx.from,to,tokenId);
             tx.to = contractAddress;

@@ -110,7 +110,7 @@ class TunnelNFT extends React.Component<any, any> {
         const contractAddress = utils.getAddressBySymbol(symbol, crossMode[0])
         let allowance = 0;
         if (chain == ChainType.ETH) {
-            const contract: Erc721 = new Erc721(contractAddress);
+            const contract: Erc721 = new Erc721(contractAddress,chain);
             const address = await contract.getApproved(tokenId);
             if (address.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT.ETH.HANDLE.toLowerCase()) {
                 allowance = 1;
@@ -118,7 +118,7 @@ class TunnelNFT extends React.Component<any, any> {
         }
         let metaData: any = {};
         if (chain == ChainType.ETH) {
-            const contract: Erc721 = new Erc721(contractAddress);
+            const contract: Erc721 = new Erc721(contractAddress,chain);
             const uri = await contract.tokenURI(tokenId)
             metaData = await rpc.req(uri, {})
         } else if (chain == ChainType.SERO) {
@@ -203,7 +203,7 @@ class TunnelNFT extends React.Component<any, any> {
             if (op == "cancel") {
                 approveTo = "0x0000000000000000000000000000000000000000";
             }
-            const contract: Erc721 = new Erc721(utils.getAddressBySymbol(symbol, crossMode[0]));
+            const contract: Erc721 = new Erc721(utils.getAddressBySymbol(symbol, crossMode[0]),fromChain);
             tx.data = await contract.approve(approveTo, tokenId)
             tx.gas = await contract.estimateGas(tx)
         }
@@ -219,7 +219,6 @@ class TunnelNFT extends React.Component<any, any> {
             showActionSheet: f
         })
     }
-
 
     transfer = async () => {
         const {crossMode, gasPrice} = this.state;

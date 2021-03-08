@@ -29,7 +29,8 @@ export enum ChainType {
     _,
     SERO,
     ETH,
-    TRON
+    TRON,
+    BSC
 }
 
 export enum ChainId {

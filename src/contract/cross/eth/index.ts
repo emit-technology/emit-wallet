@@ -1,6 +1,7 @@
 import {Cross} from "../index";
 import BigNumber from "bignumber.js";
 import EthContract from "../../EthContract";
+import {ChainType} from "../../../types";
 
 const ABI_CROSS = [
     {
@@ -92,7 +93,7 @@ const ABI_CROSS = [
 class Eth extends EthContract implements Cross{
 
     constructor(address:string) {
-        super(address,ABI_CROSS);
+        super(address,ABI_CROSS,ChainType.ETH);
     }
 
     depositFT(destinationChainID: number, resourceID: string, recipient: string, amount: BigNumber): Promise<any> {

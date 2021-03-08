@@ -1,5 +1,6 @@
 import EthContract from "../../EthContract";
 import BigNumber from "bignumber.js";
+import {ChainType} from "../../../types";
 
 const ABI_FEE = [
     {
@@ -31,7 +32,7 @@ const ABI_FEE = [
 class CrossFee extends EthContract {
 
     constructor(address:string) {
-        super(address,ABI_FEE);
+        super(address,ABI_FEE,ChainType.ETH);
     }
 
     estimateFee = async (resourceId: string, inputAmount: BigNumber): Promise<string> => {

@@ -108,7 +108,7 @@ class Tunnel extends React.Component<any, any> {
 
         let allowance= "0";
         if(chain == ChainType.ETH){
-            const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy]);
+            const ETH_COIN: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.ETH[realCy],chain);
             const rest: any = await ETH_COIN.allowance(account.addresses[chain], config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE);
             allowance = utils.fromValue(rest, utils.getCyDecimal(realCy, ChainType[chain])).toString(10)
         }else if (chain == ChainType.TRON){
@@ -294,7 +294,7 @@ class Tunnel extends React.Component<any, any> {
             feeCy:ChainType[chain]
         }
         if(chain == ChainType.ETH){
-            const ETH_COIN: EthToken = new EthToken(tx.to);
+            const ETH_COIN: EthToken = new EthToken(tx.to,chain);
             tx.data = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
             tx.gas = await ETH_COIN.estimateGas(tx)
         }else if(chain == ChainType.TRON){

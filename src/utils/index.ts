@@ -18,16 +18,19 @@
 
 import BigNumber from 'bignumber.js'
 import {
-    BRIDGE_NFT_RESOURCE_ID,
     BRIDGE_CURRENCY,
-    BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS,
+    BRIDGE_NFT_RESOURCE_ID,
+    BRIDGE_RESOURCE_ID,
+    CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
-    DISPLAY_NAME,
+    DISPLAY_NAME, EXPLORER_URL,
     GAS_DEFAULT,
-    GAS_PRICE_UNIT
+    GAS_PRICE_UNIT,
+    NOT_CROSS_TOKEN
 } from "../config"
 import {ChainId, ChainType, GasPriceLevel} from "../types";
 import rpc from "../rpc";
+import * as utils from "../utils"
 
 const utf8 = require("utf8");
 
@@ -183,33 +186,24 @@ export function getCrossEventStatus(status:string){
 export function getExplorerTxUrl(chain:ChainType,hash:string){
     if (chain == ChainType.ETH){
         if(new Date().getTimezoneOffset() / 60 == -8){
-            return `https://cn.etherscan.com/tx/${hash}`
+            return `${EXPLORER_URL.TRANSACTION.ETH.CN}${hash}`
         }else {
-            return `https://etherscan.com/tx/${hash}`
+            return `${EXPLORER_URL.TRANSACTION.ETH.EN}${hash}`
         }
-    }else if(chain == ChainType.SERO){
-        return `https://explorer.sero.cash/txsInfo.html?hash=${hash}`
-    }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/transaction/${hash}`
     }
-    return `https://etherscan.com/tx/${hash}`
+    return EXPLORER_URL.TRANSACTION[ChainType[chain]]+hash
 }
 
 export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
     if (chain == ChainType.ETH){
         if(new Date().getTimezoneOffset() / 60 == -8){
-            return `https://cn.etherscan.com/block/${num}`
+            return `${EXPLORER_URL.BLOCK.ETH.CN}${num}`
         }else {
-            return `https://etherscan.com/block/${num}`
+            return `${EXPLORER_URL.BLOCK.ETH.EN}${num}`
         }
-    }else if(chain == ChainType.SERO){
-        return `https://explorer.sero.cash/blockInfo.html?hash=${hash}`
-    }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/block/${num}`
     }
-    return `https://etherscan.com/block/${hash}`
+    return EXPLORER_URL.BLOCK[ChainType[chain]]+num
 }
-
 
 export function getEthCyByContractAddress(address:string){
     const keys = Object.keys(CONTRACT_ADDRESS.ERC20.ETH);
@@ -261,7 +255,16 @@ export async function defaultGasPrice(chain:ChainType){
     let data: GasPriceLevel = {};
     if (chain == ChainType.ETH) {
         // @ts-ignore
-        data = await rpc.post("eth_gasTracker", [])
+        data = await rpc.post("eth_gasTracker", [],chain)
+    } if (chain == ChainType.BSC) {
+        // @ts-ignore
+        const defaultGasPrice:any = await rpc.post("eth_gasPrice", [],chain)
+        data = {
+            AvgGasPrice: {
+                gasPrice: utils.fromValue(defaultGasPrice,9).toString(10),
+                second: 3,
+            }
+        }
     } else if (chain == ChainType.SERO) {
         data = {
             AvgGasPrice: {
@@ -340,3 +343,24 @@ function hexToUtf8(hex: string): string {
 export function hexToCy(str:string){
     return hexToUtf8(str).toUpperCase()
 }
+
+export function notCrossToken(cy:string){
+    return NOT_CROSS_TOKEN.indexOf(cy) == -1
+}
+
+export function getPrefix(chain:ChainType){
+    if(chain == ChainType.BSC){
+        return "eth"
+    }else {
+        return ChainType[chain].toLowerCase();
+    }
+}
+
+export function defaultCy(chain:ChainType){
+    if(chain == ChainType.BSC){
+        return "BNB"
+    }else {
+        return ChainType[chain];
+    }
+}
+

@@ -17,6 +17,8 @@
  */
 
 import rpc from "../rpc";
+import {ChainType} from "../types";
+
 const serojs = require('serojs');
 
 class SeroContract{
@@ -37,7 +39,7 @@ class SeroContract{
                 params.from = from
             }
             params.data = packData;
-            rpc.post("sero_call",[params,"latest"]).then(data=>{
+            rpc.post("sero_call",[params,"latest"],ChainType.SERO).then(data=>{
                 if(data !="0x"){
                     const rest: any = contract.unPackDataEx(method, data)
                     resolve(rest)
@@ -51,7 +53,7 @@ class SeroContract{
     }
 
     estimateGas = async (params:any):Promise<any> =>{
-        return await rpc.post("sero_estimateGas",[params]);
+        return await rpc.post("sero_estimateGas",[params],ChainType.SERO);
     }
 
 }

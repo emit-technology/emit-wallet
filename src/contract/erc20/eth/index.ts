@@ -2,11 +2,12 @@ import {Erc20, ABI} from "../index";
 import BigNumber from "bignumber.js";
 import {EMIT_HOST} from "../../../config"
 import EthContract from "../../EthContract";
+import {ChainType} from "../../../types";
 
 class Eth extends EthContract implements Erc20 {
 
-    constructor(address: string) {
-        super(address,ABI);
+    constructor(address: string,chain:ChainType) {
+        super(address,ABI,chain);
     }
 
     allowance = async (owner: string, spender: string): Promise<string> => {
