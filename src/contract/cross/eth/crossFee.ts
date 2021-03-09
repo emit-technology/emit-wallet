@@ -31,8 +31,8 @@ const ABI_FEE = [
 
 class CrossFee extends EthContract {
 
-    constructor(address:string) {
-        super(address,ABI_FEE,ChainType.ETH);
+    constructor(address:string,chain:ChainType) {
+        super(address,ABI_FEE,chain);
     }
 
     estimateFee = async (resourceId: string, inputAmount: BigNumber): Promise<string> => {

@@ -92,8 +92,8 @@ const ABI_CROSS = [
 
 class Eth extends EthContract implements Cross{
 
-    constructor(address:string) {
-        super(address,ABI_CROSS,ChainType.ETH);
+    constructor(address:string,chain:ChainType) {
+        super(address,ABI_CROSS,chain);
     }
 
     depositFT(destinationChainID: number, resourceID: string, recipient: string, amount: BigNumber): Promise<any> {

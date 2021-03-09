@@ -42,7 +42,7 @@ import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils";
 import rpc from "../rpc";
 import BigNumber from "bignumber.js";
-import {ChainType, Transaction} from "../types";
+import {ChainId, ChainType, Transaction} from "../types";
 import {chevronBack, copyOutline} from 'ionicons/icons';
 import url from "../utils/url";
 import i18n from "../locales/i18n";
@@ -191,13 +191,9 @@ class TransactionInfo extends React.Component<any, any> {
         let events = [];
         events = await rpc.getEvents(chain, txHash, "", "", "")
         if (events && events.length > 0) {
-            let c = ChainType.ETH == chain ? ChainType.SERO : ChainType.ETH;
-            //txHash: string,depositNonce: string,originChainID:string,resourceID:string
+            const originChainID = utils.getChainIdByName(ChainId[events[0].event.originChainID?events[0].event.originChainID:events[0].event.destinationChainID])
             const resourceId = chain == ChainType.TRON ? ("0x" + events[0].event.resourceID) : events[0].event.resourceID;
-            if (resourceId.toLowerCase() == BRIDGE_RESOURCE_ID.TUSDT.toLowerCase()) {
-                c = ChainType.TRON == chain ? ChainType.SERO : ChainType.TRON;
-            }
-            const target = await rpc.getEvents(c, "", events[0].event.depositNonce, "", c == ChainType.TRON ? resourceId.slice(2) : resourceId)
+            const target = await rpc.getEvents(originChainID, "", events[0].event.depositNonce, "", originChainID == ChainType.TRON ? resourceId.slice(2) : resourceId)
             events = events.concat(target)
         }
 

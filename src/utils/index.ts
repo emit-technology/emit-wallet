@@ -86,7 +86,7 @@ export function getCyDecimal(cy: string, chainName: string): number {
 }
 
 export function needApproved(chain: ChainType) {
-    if (ChainType.ETH == chain || ChainType.TRON == chain) {
+    if (ChainType.ETH == chain || ChainType.TRON == chain || ChainType.BSC == chain) {
         return true
     }
     return false;
@@ -106,6 +106,7 @@ export function getDestinationChainID(chain: ChainType) {
 }
 
 export function getResourceId(cy: string) {
+    console.log("getResourceId>>",cy,BRIDGE_RESOURCE_ID[cy])
     return BRIDGE_RESOURCE_ID[cy];
 }
 
