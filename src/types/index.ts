@@ -37,7 +37,8 @@ export enum ChainId {
     _,
     ETH,
     SERO,
-    TRON
+    TRON,
+    BSC
 }
 
 export interface Transaction {
