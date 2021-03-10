@@ -106,6 +106,7 @@ class Eth extends EthContract implements Cross{
 
     resourceIDToLimit = async (resourceId: string): Promise<Array<BigNumber>> => {
         const rest = await this.contract.methods.resourceIDToLimit(resourceId).call()
+        console.log(resourceId,rest,"resourceIDToLimit>>")
         return [new BigNumber(rest[0]),new BigNumber(rest[1])]
     }
 

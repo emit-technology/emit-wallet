@@ -113,7 +113,6 @@ class RPC {
             const contract: Src721 = new Src721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["SERO"]);
             const rest = await contract.symbol()
             const symbol = rest[0]
-            console.log("symbol>>",symbol)
             // if(CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"] == symbol){
             //
             // }

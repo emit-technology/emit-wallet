@@ -126,8 +126,6 @@ class Tunnel extends React.Component<any, any> {
         const balance = await rpc.getBalance(chain, account.addresses[chain])
         const crossTypeArr: Array<any> = [];
         const chains: any = Object.keys(BRIDGE_CURRENCY[targetCoin]);
-        console.log("chains>>", chains, chain, targetCoin)
-
         for (let chain of chains) {
             for (let chain2 of chains) {
                 if (chain !== chain2) {
@@ -171,7 +169,6 @@ class Tunnel extends React.Component<any, any> {
 
     private getCrossFee = async () => {
         const {amount, crossMode, targetCoin} = this.state;
-        console.log("targetCoin>>",targetCoin)
         const chain = utils.getChainIdByName(crossMode[0])
 
         const realCy = utils.getCyName(targetCoin, crossMode[0]);
@@ -199,6 +196,7 @@ class Tunnel extends React.Component<any, any> {
         } else if (targetChain == ChainType.BSC) {
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.BSC.FEE,targetChain);
             const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
+            console.log(restETH,targetChain,utils.getResourceId(targetCoin),targetCoin,"restETH>>")
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
             return rest;
         }

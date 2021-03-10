@@ -137,7 +137,7 @@ class WalletWorker {
                     const tmp:any = data.result;
                     tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
                     selfStorage.setItem(accountId,tmp)
-                    console.log(tmp)
+                    // console.log(tmp)
                     resolve(tmp);
                 }
             })

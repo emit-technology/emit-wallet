@@ -106,7 +106,6 @@ export function getDestinationChainID(chain: ChainType) {
 }
 
 export function getResourceId(cy: string) {
-    console.log("getResourceId>>",cy,BRIDGE_RESOURCE_ID[cy])
     return BRIDGE_RESOURCE_ID[cy];
 }
 
