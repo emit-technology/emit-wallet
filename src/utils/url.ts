@@ -27,7 +27,8 @@ class Url {
         backup: "account/backup",
         import: "account/import",
         export: "account/export",
-        receive: "account/receive"
+        receive: "account/receive",
+        unlock: "account/unlock"
     }
 
     private transaction = {
@@ -122,6 +123,10 @@ class Url {
 
     accountExport() {
         this.goTo([this.base, this.account.export].join("/"), [this.base, this.settings].join("/"));
+    }
+
+    accountUnlock() {
+        this.goTo([this.base, this.account.unlock].join("/"), [this.base].join("/"));
     }
 
     receive(address: string) {

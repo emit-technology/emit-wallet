@@ -80,7 +80,7 @@ import i18n from "./locales/i18n"
 import ExchangeWETH from "./pages/ExchangeWETH";
 import TransferNFT from "./pages/TransferNFT";
 import TunnelNFT from "./pages/TunnelNFT";
-
+import Unlock from "./pages/accounts/Unlock";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -122,6 +122,7 @@ class App extends React.Component<any,any>{
                     <Route path="/account/backup" component={Backup} exact={true}/>
                     <Route path="/account/confirm" component={Confirm} exact={true}/>
                     <Route path="/account/import" component={ImportAccount} exact={true}/>
+                    <Route path="/account/unlock" component={Unlock} exact={true}/>
                     <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
                     <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
                     <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>

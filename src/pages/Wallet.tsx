@@ -399,17 +399,22 @@ class Wallet extends React.Component<State, any> {
         })
     }
 
-    showActiveChainAlert = (f:boolean,chain?:ChainType)=>{
-        this.setState({
-            activeChainAlert:f,
-            selectChainType:chain
+    showActiveChainAlert = (f:boolean,chain:ChainType)=>{
+        this.setShowLoading(true)
+        this.activeChain(chain).then(()=>{
+            this.setShowToast(true,"success","Active successfully!");
+            this.setShowLoading(false)
+        }).catch((e)=>{
+            const err = typeof e=="string"?e:e.message;
+            this.setShowLoading(false)
+            this.setShowToast(true,"danger",err);
         })
     }
 
-    activeChain = async (password:string)=>{
-        const {account,selectChainType} = this.state;
+    activeChain = async (chain:ChainType)=>{
+        const {account} = this.state;
         if(account && account.accountId){
-            await walletWorker.genNewWallet(account.accountId,password,selectChainType)
+            await walletWorker.genNewWallet(account.accountId,"",chain)
             const rest = await walletWorker.accountInfoAsync();
             this.setState({
                 account:rest
@@ -545,43 +550,43 @@ class Wallet extends React.Component<State, any> {
                     ]}
                 />
 
-                <IonAlert
-                    mode="ios"
-                    isOpen={activeChainAlert}
-                    onDidDismiss={() => this.showActiveChainAlert(false)}
-                    header={"Active Chain"}
-                    inputs={[
-                        {
-                            name:"password",
-                            type:"password",
-                            placeholder:"Password"
-                        }
-                    ]}
-                    buttons={[
-                        {
-                            text: i18n.t("cancel"),
-                            role: 'cancel',
-                            cssClass: 'secondary',
-                            handler: () => {
-                                console.log('Confirm Cancel');
-                            }
-                        },
-                        {
-                            text: i18n.t("ok"),
-                            handler: (e) => {
-                                this.setShowLoading(true)
-                                this.activeChain(e["password"]).then(()=>{
-                                    this.setShowToast(true,"success","Active successfully!");
-                                    this.setShowLoading(false)
-                                }).catch((e)=>{
-                                    const err = typeof e=="string"?e:e.message;
-                                    this.setShowLoading(false)
-                                    this.setShowToast(true,"danger",err);
-                                })
-                            }
-                        }
-                    ]}
-                />
+                {/*<IonAlert*/}
+                {/*    mode="ios"*/}
+                {/*    isOpen={activeChainAlert}*/}
+                {/*    onDidDismiss={() => this.showActiveChainAlert(false)}*/}
+                {/*    header={"Active Chain"}*/}
+                {/*    inputs={[*/}
+                {/*        {*/}
+                {/*            name:"password",*/}
+                {/*            type:"password",*/}
+                {/*            placeholder:"Password"*/}
+                {/*        }*/}
+                {/*    ]}*/}
+                {/*    buttons={[*/}
+                {/*        {*/}
+                {/*            text: i18n.t("cancel"),*/}
+                {/*            role: 'cancel',*/}
+                {/*            cssClass: 'secondary',*/}
+                {/*            handler: () => {*/}
+                {/*                console.log('Confirm Cancel');*/}
+                {/*            }*/}
+                {/*        },*/}
+                {/*        {*/}
+                {/*            text: i18n.t("ok"),*/}
+                {/*            handler: (e) => {*/}
+                {/*                this.setShowLoading(true)*/}
+                {/*                this.activeChain(e["password"]).then(()=>{*/}
+                {/*                    this.setShowToast(true,"success","Active successfully!");*/}
+                {/*                    this.setShowLoading(false)*/}
+                {/*                }).catch((e)=>{*/}
+                {/*                    const err = typeof e=="string"?e:e.message;*/}
+                {/*                    this.setShowLoading(false)*/}
+                {/*                    this.setShowToast(true,"danger",err);*/}
+                {/*                })*/}
+                {/*            }*/}
+                {/*        }*/}
+                {/*    ]}*/}
+                {/*/>*/}
                 <IonToast
                     color={!toastColor?"warning":toastColor}
                     position="top"

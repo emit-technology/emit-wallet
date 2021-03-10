@@ -46,7 +46,7 @@ import url from "../utils/url";
 interface State{
     transaction?:Transaction
     showActionSheet:boolean
-    showPasswordAlert:boolean
+    // showPasswordAlert:boolean
     showToast:boolean
     toastColor:string
     toastMsg:string
@@ -67,7 +67,7 @@ class ConfirmTransaction extends React.Component<Props, State>{
 
     state:State = {
         showActionSheet:false,
-        showPasswordAlert:false,
+        // showPasswordAlert:false,
         showToast:false,
         toastColor:"warning",
         toastMsg:"",
@@ -111,9 +111,9 @@ class ConfirmTransaction extends React.Component<Props, State>{
 
     confirm = async (password:string):Promise<string>=>{
         const {transaction} = this.state;
-        if(!password){
-            return Promise.reject("Please Input Password!");
-        }
+        // if(!password){
+        //     return Promise.reject("Please Input Password!");
+        // }
         this.props.onProcess(true);
         this.setState({
             showLoading:true
@@ -125,9 +125,20 @@ class ConfirmTransaction extends React.Component<Props, State>{
     }
 
     setShowPasswordAlert = (f:boolean)=>{
-        this.setState({
-            showPasswordAlert:f
-        })
+        // this.setState({
+            // showPasswordAlert:f
+        // })
+        this.confirm("").then((hash:string)=>{
+            this.setShowActionShell(false)
+            this.setShowLoading(true)
+            this.props.onOK && this.props.onOK(hash)
+        }).catch(e=>{
+            this.props.onCancel();
+            this.props.onProcess(false);
+            this.setShowLoading(false)
+            const err = typeof e === "string"?e:e.message;
+            this.setShowToast(true,"danger",err)
+        });
     }
 
     setShowToast = (f:boolean,color:string,err:string)=>{
@@ -172,7 +183,7 @@ class ConfirmTransaction extends React.Component<Props, State>{
     }
 
     render() {
-        const {transaction,showLoading,showActionSheet,showPasswordAlert,showToast,toastMsg,toastColor,accountResource} = this.state;
+        const {transaction,showLoading,showActionSheet,showToast,toastMsg,toastColor,accountResource} = this.state;
         const value = utils.fromValue(transaction&&transaction.value,0).toNumber()==0?
             transaction&&transaction.amount:transaction&&transaction.value
 
@@ -247,51 +258,51 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 </IonRow>
             </IonModal>
 
-            <IonAlert
-                mode="ios"
-                isOpen={showPasswordAlert}
-                onDidDismiss={() => this.setShowPasswordAlert(false)}
-                header={i18n.t("transfer")}
-                inputs={[
-                    {
-                        name: 'password',
-                        type: 'password',
-                        placeholder: i18n.t("password"),
-                        cssClass: 'specialClass',
-                        attributes: {
-                            autofocus: 'autofocus'
-                        }
-                    }
-                ]}
-                buttons={[
-                    {
-                        text: i18n.t("cancel"),
-                        role: 'cancel',
-                        cssClass: 'secondary',
-                        handler: () => {
-                            console.log('Confirm Cancel');
-                        }
-                    },
-                    {
-                        text: i18n.t("ok"),
-                        handler: (e) => {
-                            console.log('Confirm Ok',e);
-                            this.setShowPasswordAlert(false)
-                            this.confirm(e["password"]).then((hash:string)=>{
-                                this.setShowActionShell(false)
-                                this.setShowLoading(true)
-                                this.props.onOK && this.props.onOK(hash)
-                            }).catch(e=>{
-                                this.props.onCancel();
-                                this.props.onProcess(false);
-                                this.setShowLoading(false)
-                                const err = typeof e === "string"?e:e.message;
-                                this.setShowToast(true,"danger",err)
-                            });
-                        }
-                    }
-                ]}
-            />
+            {/*<IonAlert*/}
+            {/*    mode="ios"*/}
+            {/*    isOpen={showPasswordAlert}*/}
+            {/*    onDidDismiss={() => this.setShowPasswordAlert(false)}*/}
+            {/*    header={i18n.t("transfer")}*/}
+            {/*    inputs={[*/}
+            {/*        {*/}
+            {/*            name: 'password',*/}
+            {/*            type: 'password',*/}
+            {/*            placeholder: i18n.t("password"),*/}
+            {/*            cssClass: 'specialClass',*/}
+            {/*            attributes: {*/}
+            {/*                autofocus: 'autofocus'*/}
+            {/*            }*/}
+            {/*        }*/}
+            {/*    ]}*/}
+            {/*    buttons={[*/}
+            {/*        {*/}
+            {/*            text: i18n.t("cancel"),*/}
+            {/*            role: 'cancel',*/}
+            {/*            cssClass: 'secondary',*/}
+            {/*            handler: () => {*/}
+            {/*                console.log('Confirm Cancel');*/}
+            {/*            }*/}
+            {/*        },*/}
+            {/*        {*/}
+            {/*            text: i18n.t("ok"),*/}
+            {/*            handler: (e) => {*/}
+            {/*                console.log('Confirm Ok',e);*/}
+            {/*                this.setShowPasswordAlert(false)*/}
+            {/*                this.confirm(e["password"]).then((hash:string)=>{*/}
+            {/*                    this.setShowActionShell(false)*/}
+            {/*                    this.setShowLoading(true)*/}
+            {/*                    this.props.onOK && this.props.onOK(hash)*/}
+            {/*                }).catch(e=>{*/}
+            {/*                    this.props.onCancel();*/}
+            {/*                    this.props.onProcess(false);*/}
+            {/*                    this.setShowLoading(false)*/}
+            {/*                    const err = typeof e === "string"?e:e.message;*/}
+            {/*                    this.setShowToast(true,"danger",err)*/}
+            {/*                });*/}
+            {/*            }*/}
+            {/*        }*/}
+            {/*    ]}*/}
+            {/*/>*/}
             <IonLoading
                 mode="ios"
                 isOpen={showLoading}

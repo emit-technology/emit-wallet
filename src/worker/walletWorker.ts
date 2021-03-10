@@ -19,6 +19,7 @@
 import service from 'walletService/src/index';
 import {AccountModel, ChainType} from "../types";
 import selfStorage from "../utils/storage";
+import url from "../utils/url";
 
 class WalletWorker {
 
@@ -146,6 +147,11 @@ class WalletWorker {
         if(!accountId){
             accountId = selfStorage.getItem("accountId");
         }
+        this.isLocked().then(ret=>{
+            if(ret){
+                url.accountUnlock()
+            }
+        })
         return new Promise((resolve, reject)=>{
             if(accountId) {
                 const data:any = selfStorage.getItem(accountId);
@@ -190,6 +196,33 @@ class WalletWorker {
             })
         })
     }
+
+    async unlockWallet(password:string){
+        const account:any = await this.accountInfo()
+        return new Promise((resolve, reject) =>{
+            service.unlockWallet(account.accountId,password,function (data:any){
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+    async isLocked(){
+        return new Promise((resolve, reject) =>{
+            service.isLocked(function (data:any){
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+
 }
 
 const walletWorker = new WalletWorker();
