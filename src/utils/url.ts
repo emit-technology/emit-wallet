@@ -101,7 +101,7 @@ class Url {
 
 
     home() {
-        this.goTo(this.base, "/");
+        this.goTo(this.base, "/#/");
         return
     }
 

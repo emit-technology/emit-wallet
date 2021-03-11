@@ -129,6 +129,8 @@ class Transfer extends React.Component<any, any> {
             return;
         }
 
+        this.setShowProgress(true)
+
         let tx: Transaction | any = {
             from: account.addresses && account.addresses[chain],
             to: to,
@@ -182,6 +184,7 @@ class Transfer extends React.Component<any, any> {
                 tx.data = await tron.transfer(tx.to,new BigNumber(tx.value?tx.value:"0").toNumber(),tx.from)
             }
         }
+        this.setShowProgress(false)
         this.setState({
             tx:tx,
             showAlert:true
@@ -307,7 +310,10 @@ class Transfer extends React.Component<any, any> {
                 </IonList>
                 <div className="form-button-div">
                     <IonButton mode="ios" expand="block" disabled={showProgress || !to || !amount} onClick={() => {
-                        this.check().catch(e=>{
+                        this.check().then(()=>{
+                            this.setShowProgress(false)
+                        }).catch(e=>{
+                            this.setShowProgress(false)
                             const err = typeof e === "string"?e:e.message;
                             this.setShowToast(true,"danger",err);
                         });
