@@ -196,7 +196,6 @@ class Tunnel extends React.Component<any, any> {
         } else if (targetChain == ChainType.BSC) {
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.BSC.FEE,targetChain);
             const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
-            console.log(restETH,targetChain,utils.getResourceId(targetCoin),targetCoin,"restETH>>")
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
             return rest;
         }
