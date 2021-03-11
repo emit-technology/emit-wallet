@@ -91,13 +91,13 @@ class ConfirmTransaction extends React.Component<Props, State>{
     init = async ()=>{
         if(this.props.show){
             const tx:any = this.props.transaction;
-            if(tx.chain == ChainType.ETH){
+            if(tx.chain == ChainType.ETH || tx.chain == ChainType.BSC){
                 if(!tx.gas){
-                    tx.gas = tx.data? await rpc.post("eth_estimateGas",[tx]):utils.defaultGas(ChainType.ETH);
+                    tx.gas = tx.data? await rpc.post("eth_estimateGas",[tx],tx.chain):utils.defaultGas(ChainType.ETH);
                 }
             }else if(tx.chain == ChainType.SERO){
                 if(!tx.gas){
-                    tx.gas =  tx.data?await rpc.post("sero_estimateGas",[tx]):utils.defaultGas(ChainType.SERO);
+                    tx.gas =  tx.data?await rpc.post("sero_estimateGas",[tx],tx.chain):utils.defaultGas(ChainType.SERO);
                 }
             }else if(tx.chain == ChainType.TRON){
 

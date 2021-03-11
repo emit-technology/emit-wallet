@@ -17,16 +17,14 @@
  */
 
 import axios from "axios";
-import * as config from "../config"
-import {CHAIN_PARAMS, EMIT_HOST, CONTRACT_ADDRESS} from "../config"
+import {CHAIN_PARAMS, CHAIN_PARAMS_BSC, CONTRACT_ADDRESS, EMIT_HOST} from "../config"
 import {ChainType, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
-import Tron from "../contract/erc20/tron";
-import BigNumber from "bignumber.js";
 import tron from "./tron";
 import Erc721 from "../contract/erc721/meta/eth";
 import Src721 from "../contract/erc721/meta/sero";
+import * as utils from "../utils"
 
 class RPC {
 
@@ -43,15 +41,20 @@ class RPC {
         return resp.data;
     }
 
-    async post(method: any, params: any) {
+    async post(method: any, params: any,chain:ChainType) {
         const data: any = {
             id: this.messageId++,
             jsonrpc: '2.0',
             method: method,
             params: params,
         };
+        if(chain){
+            axios.defaults.headers.post['chain'] = chain;
+        }
         return new Promise((resolve, reject) => {
-            axios.post(this.host, data).then((resp: any) => {
+            axios.post(this.host, data,{
+                headers:{}
+            }).then((resp: any) => {
                 if (resp.data.error) {
                     reject(typeof resp.data.error === "string" ? resp.data.error : resp.data.error.message);
                 } else {
@@ -84,7 +87,7 @@ class RPC {
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const ret:any = {}
         for (let key of keys) {
-            const contract: Erc721 = new Erc721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["ETH"]);
+            const contract: Erc721 = new Erc721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["ETH"],ChainType.ETH);
             const balance: number = await contract.balanceOf(address)
             const symbol = await contract.symbol()
             const tokenArr: Array<any> = [];
@@ -105,12 +108,11 @@ class RPC {
         const tKey = ["ticket", ChainType.SERO].join("_");
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const ret:any = {}
-        const seroData:any = await this.post(["sero", "getTicket"].join("_"), [address]);
+        const seroData:any = await this.post(["sero", "getTicket"].join("_"), [address],ChainType.SERO);
         for (let key of keys) {
             const contract: Src721 = new Src721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["SERO"]);
             const rest = await contract.symbol()
             const symbol = rest[0]
-            console.log("symbol>>",symbol)
             // if(CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"] == symbol){
             //
             // }
@@ -133,8 +135,9 @@ class RPC {
     getBalance = async (chain: ChainType, address: string, localOnly?: boolean) => {
         const key = ["balance", chain].join("_");
         let rest: any = selfStorage.getItem(key);
+        let prefix = utils.getPrefix(chain)
         if (!rest) {
-            rest = await this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address])
+            rest = await this.post([prefix, "getBalance"].join("_"), [address],chain)
             selfStorage.setItem(key, rest);
         } else {
             if (!localOnly) {
@@ -143,7 +146,7 @@ class RPC {
                         selfStorage.setItem(key, balance);
                     })
                 } else {
-                    this.post([ChainType[chain].toLowerCase(), "getBalance"].join("_"), [address]).then(balance => {
+                    this.post([prefix, "getBalance"].join("_"), [address],chain).then(balance => {
                         selfStorage.setItem(key, balance);
                     })
                 }
@@ -153,17 +156,20 @@ class RPC {
     }
 
     getTransactions = async (chain: ChainType, address: string, cy: string, hash: string, pageSize: number, pageNo: number, fingerprint?: string) => {
-        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getTransactions"].join("_"), [address, cy, hash, pageSize, pageNo, fingerprint])
+        let prefix = utils.getPrefix(chain)
+        const rest: any = await this.post([prefix, "getTransactions"].join("_"), [address, cy, hash, pageSize, pageNo, fingerprint],chain)
         return rest;
     }
 
     getTxInfo = async (chain: ChainType, txHash: string) => {
-        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getTxInfo"].join("_"), [txHash])
+        const prefix = utils.getPrefix(chain)
+        const rest: any = await this.post([prefix, "getTxInfo"].join("_"), [txHash],chain)
         return rest;
     }
 
     getEvents = async (chain: ChainType, txHash: string, depositNonce: string, originChainID: string, resourceID: string) => {
-        const rest: any = await this.post([ChainType[chain].toLowerCase(), "getEvents"].join("_"), [txHash, depositNonce, originChainID, resourceID])
+        const prefix = utils.getPrefix(chain)
+        const rest: any = await this.post([prefix, "getEvents"].join("_"), [txHash, depositNonce, originChainID, resourceID],chain)
         return rest;
     }
 
@@ -173,11 +179,11 @@ class RPC {
             let hash: any = "";
             if (tx.chain == ChainType.SERO) {
                 //gen tx params
-                const txParams: any = await this.post("sero_genParams", [tx]);
+                const txParams: any = await this.post("sero_genParams", [tx],tx.chain);
                 //sign
                 const signSeroRet: any = await walletWorker.signTx(accountId, password, ChainType.SERO, txParams)
                 //commitTx
-                await this.post("sero_commitTx", [signSeroRet, tx])
+                await this.post("sero_commitTx", [signSeroRet, tx],tx.chain)
                 hash = signSeroRet.Hash;
 
             } else if (tx.chain == ChainType.ETH) {
@@ -185,14 +191,24 @@ class RPC {
                 // tx.chainId = 1337;
                 if (!tx.nonce) {
                     // @ts-ignore
-                    tx.nonce = await this.post("eth_getTransactionCount", [tx.from, "pending"]);
+                    tx.nonce = await this.post("eth_getTransactionCount", [tx.from, "pending"],tx.chain);
                 }
                 const signEthRet = await walletWorker.signTx(accountId, password, ChainType.ETH, tx, CHAIN_PARAMS)
                 //commitTx
-                hash = await this.post("eth_commitTx", ["0x" + signEthRet, tx])
+                hash = await this.post("eth_commitTx", ["0x" + signEthRet, tx],tx.chain)
+            }  else if (tx.chain == ChainType.BSC) {
+                //sign
+                // tx.chainId = 1337;
+                if (!tx.nonce) {
+                    // @ts-ignore
+                    tx.nonce = await this.post("eth_getTransactionCount", [tx.from, "pending"],tx.chain);
+                }
+                const signEthRet = await walletWorker.signTx(accountId, password, ChainType.ETH, tx, CHAIN_PARAMS_BSC)
+                //commitTx
+                hash = await this.post("eth_commitTx", ["0x" + signEthRet, tx],tx.chain)
             } else if (tx.chain == ChainType.TRON) {
                 const signEthRet = await walletWorker.signTx(accountId, password, ChainType.TRON, tx.data)
-                const rest: any = await this.post("tron_commitTx", [signEthRet, tx])
+                const rest: any = await this.post("tron_commitTx", [signEthRet, tx],tx.chain)
                 hash = rest.txid;
             }
             return Promise.resolve(hash);

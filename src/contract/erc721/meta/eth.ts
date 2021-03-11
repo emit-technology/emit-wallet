@@ -1,6 +1,7 @@
 import EthContract from "../../EthContract";
 import Erc721 from "../index";
 import {EMIT_HOST} from "../../../config";
+import {ChainType} from "../../../types";
 const Web3 = require('web3');
 const web3 = new Web3(EMIT_HOST);
 
@@ -376,8 +377,8 @@ const ABI = [
 
 class Eth extends EthContract implements Erc721 {
 
-    constructor(address: string) {
-        super(address, ABI);
+    constructor(address: string,chain:ChainType) {
+        super(address, ABI,chain);
     }
 
     totalSupply = async (): Promise<number> => {

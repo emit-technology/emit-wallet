@@ -1,6 +1,7 @@
 import EthContract from "../../EthContract";
 import BigNumber from "bignumber.js";
 import {EMIT_HOST} from "../../../config";
+import {ChainType} from "../../../types";
 
 const Web3 = require('web3');
 const web3 = new Web3(EMIT_HOST);
@@ -52,7 +53,7 @@ const ABI = [
 class CrossNFT extends EthContract {
 
     constructor(address:string) {
-        super(address,ABI);
+        super(address,ABI,ChainType.ETH);
     }
 
     depositNFT = async (destinationChainID:number,resourceId: string, recipient:string,tokenId:string): Promise<string> => {

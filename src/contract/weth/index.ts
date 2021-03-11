@@ -16,6 +16,7 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 import EthContract from "../EthContract";
+import {ChainType} from "../../types";
 
 const ABI=[
     {
@@ -42,8 +43,8 @@ const ABI=[
 
 class WETH extends EthContract{
 
-    constructor(contractAddress:string) {
-        super(contractAddress,ABI);
+    constructor(contractAddress:string,chain:ChainType) {
+        super(contractAddress,ABI,chain);
     }
 
     deposit = ()=>{

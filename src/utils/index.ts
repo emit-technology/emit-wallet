@@ -18,16 +18,20 @@
 
 import BigNumber from 'bignumber.js'
 import {
-    BRIDGE_NFT_RESOURCE_ID,
     BRIDGE_CURRENCY,
-    BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS,
+    BRIDGE_NFT_RESOURCE_ID,
+    BRIDGE_RESOURCE_ID,
+    CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
+    EXPLORER_URL,
     GAS_DEFAULT,
-    GAS_PRICE_UNIT
+    GAS_PRICE_UNIT,
+    NOT_CROSS_TOKEN
 } from "../config"
 import {ChainId, ChainType, GasPriceLevel} from "../types";
 import rpc from "../rpc";
+import * as utils from "../utils"
 
 const utf8 = require("utf8");
 
@@ -39,184 +43,188 @@ export function bs58ToHex(value: string): string {
     return `0x${bytes.toString("hex")}`;
 }
 
-export function ellipsisStr(v:string){
-    if(!v) return ""
-    if (v.length>=15){
-        return v.slice(0,7) + " ... " +v.slice(v.length-7,v.length);
+export function ellipsisStr(v: string) {
+    if (!v) return ""
+    if (v.length >= 15) {
+        return v.slice(0, 7) + " ... " + v.slice(v.length - 7, v.length);
     }
     return v
 }
 
-export function arrayToObject(arr:Array<any>){
-    const ret:any = {};
-    for(let o of arr){
+export function arrayToObject(arr: Array<any>) {
+    const ret: any = {};
+    for (let o of arr) {
         ret[o.currency] = o.value;
     }
     return ret
 }
 
-export function fromValue(value:string | BigNumber | number | undefined, decimal:number):BigNumber{
-    if (!value){
+export function fromValue(value: string | BigNumber | number | undefined, decimal: number): BigNumber {
+    if (!value) {
         return new BigNumber(0)
     }
-    return new BigNumber(value).dividedBy(10**decimal)
+    return new BigNumber(value).dividedBy(10 ** decimal)
 }
 
-export function toValue(value:string | BigNumber | number, decimal:number):BigNumber{
-    if (!value){
+export function toValue(value: string | BigNumber | number, decimal: number): BigNumber {
+    if (!value) {
         return new BigNumber(0)
     }
-    return new BigNumber(value).multipliedBy(10**decimal)
+    return new BigNumber(value).multipliedBy(10 ** decimal)
 }
 
-export function getCyDecimal(cy:string,chainName:string):number{
-    try{
-        if(!cy || !chainName){
+export function getCyDecimal(cy: string, chainName: string): number {
+    try {
+        if (!cy || !chainName) {
             return 0
         }
         return DECIMAL_CURRENCY[chainName][cy];
-    }catch (e){
+    } catch (e) {
         console.log(e)
     }
     return 0
 }
 
-export function needApproved(chain:ChainType){
-    if(ChainType.ETH == chain || ChainType.TRON == chain){
+export function needApproved(chain: ChainType) {
+    if (ChainType.ETH == chain || ChainType.TRON == chain || ChainType.BSC == chain) {
         return true
     }
     return false;
 }
 
-export function getResourceId(cy:string){
+export function getDestinationChainID(chain: ChainType) {
+    if (chain == ChainType.TRON) {
+        return ChainId.TRON
+    } else if (chain == ChainType.ETH) {
+        return ChainId.ETH
+    } else if (chain == ChainType.SERO) {
+        return ChainId.SERO
+    } else if (chain == ChainType.BSC) {
+        return ChainId.BSC
+    }
+    return ChainId._
+}
+
+export function getResourceId(cy: string) {
     return BRIDGE_RESOURCE_ID[cy];
 }
 
-export function getNFTResourceId(symbol:string){
+export function getNFTResourceId(symbol: string) {
     return BRIDGE_NFT_RESOURCE_ID[symbol];
 }
 
-export function getCrossTargetAddress(resourceId:string,destinationChainID:any){
+export function getCrossTargetAddress(resourceId: string, destinationChainID: any) {
     const keys = Object.keys(BRIDGE_NFT_RESOURCE_ID)
-    for(let k of keys){
-        if(BRIDGE_NFT_RESOURCE_ID[k] == resourceId){
+    for (let k of keys) {
+        if (BRIDGE_NFT_RESOURCE_ID[k] == resourceId) {
             return CONTRACT_ADDRESS.ERC721[k]["ADDRESS"][ChainId[destinationChainID]]
         }
     }
     return ""
 }
 
-export function getCyName(cy:string,chain:string):string{
-    try{
+export function getCyName(cy: string, chain: string): string {
+    try {
         return BRIDGE_CURRENCY[cy][chain]["CY"];
-    }catch (e){
+    } catch (e) {
         console.log(e)
     }
     return ""
 }
 
-export function getChainIdByName(chain:string):any{
-    for(let key in ChainType){
-        if(ChainType[key] === chain){
+export function getChainIdByName(chain: string): any {
+    for (let key in ChainType) {
+        if (ChainType[key] === chain) {
             return key;
         }
     }
     return ChainType._
 }
 
-export function getDestinationChainIDByName(chain:string):any{
-    for(let key in ChainId){
-        if(ChainId[key] === chain){
+export function getDestinationChainIDByName(chain: string): any {
+    for (let key in ChainId) {
+        if (ChainId[key] === chain) {
             return key;
         }
     }
     return ChainId._
 }
 
-export function toHex(value:string | number | BigNumber){
-    if(value === "0x"){
+export function toHex(value: string | number | BigNumber) {
+    if (value === "0x") {
         return "0x0"
     }
-    return "0x"+new BigNumber(value).toString(16)
+    return "0x" + new BigNumber(value).toString(16)
 }
 
-export function formatDate(timestamp:number){
+export function formatDate(timestamp: number) {
     const date = new Date(timestamp);
-    return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 }
 
-export function defaultGas(chain:ChainType){
+export function defaultGas(chain: ChainType) {
     return GAS_DEFAULT[ChainType[chain]]
 }
 
-export function gasUnit(chain:ChainType){
+export function gasUnit(chain: ChainType) {
     return GAS_PRICE_UNIT[ChainType[chain]]
 }
 
-export function getCyType(chain:string,cy:string){
+export function getCyType(chain: string, cy: string) {
     return BRIDGE_CURRENCY[cy][chain]["CY_TYPE"];
 }
 
-export function getCyDisplayName(key:string){
-    if(DISPLAY_NAME[key]){
+export function getCyDisplayName(key: string) {
+    if (DISPLAY_NAME[key]) {
         return DISPLAY_NAME[key]
-    }else {
+    } else {
         return key;
     }
 }
 
-export function getCrossEventStatus(status:string){
+export function getCrossEventStatus(status: string) {
     //{Inactive, Active, Passed, Executed, Cancelled}
-    if(status == "1"){
+    if (status == "1") {
         return "Active"
-    }else if(status == "2"){
+    } else if (status == "2") {
         return "Passed"
-    }else if(status == "3"){
+    } else if (status == "3") {
         return "Executed"
-    }else if(status == "4"){
+    } else if (status == "4") {
         return "Cancelled"
-    }else{
+    } else {
         return "Deposited"
     }
 }
 
-export function getExplorerTxUrl(chain:ChainType,hash:string){
-    if (chain == ChainType.ETH){
-        if(new Date().getTimezoneOffset() / 60 == -8){
-            return `https://cn.etherscan.com/tx/${hash}`
-        }else {
-            return `https://etherscan.com/tx/${hash}`
+export function getExplorerTxUrl(chain: ChainType, hash: string) {
+    if (chain == ChainType.ETH) {
+        if (new Date().getTimezoneOffset() / 60 == -8) {
+            return `${EXPLORER_URL.TRANSACTION.ETH.CN}${hash}`
+        } else {
+            return `${EXPLORER_URL.TRANSACTION.ETH.EN}${hash}`
         }
-    }else if(chain == ChainType.SERO){
-        return `https://explorer.sero.cash/txsInfo.html?hash=${hash}`
-    }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/transaction/${hash}`
     }
-    return `https://etherscan.com/tx/${hash}`
+    return EXPLORER_URL.TRANSACTION[ChainType[chain]] + hash
 }
 
-export function getExplorerBlockUrl(chain:ChainType,hash:string,num:number){
-    if (chain == ChainType.ETH){
-        if(new Date().getTimezoneOffset() / 60 == -8){
-            return `https://cn.etherscan.com/block/${num}`
-        }else {
-            return `https://etherscan.com/block/${num}`
+export function getExplorerBlockUrl(chain: ChainType, hash: string, num: number) {
+    if (chain == ChainType.ETH) {
+        if (new Date().getTimezoneOffset() / 60 == -8) {
+            return `${EXPLORER_URL.BLOCK.ETH.CN}${num}`
+        } else {
+            return `${EXPLORER_URL.BLOCK.ETH.EN}${num}`
         }
-    }else if(chain == ChainType.SERO){
-        return `https://explorer.sero.cash/blockInfo.html?hash=${hash}`
-    }else if(chain == ChainType.TRON){
-        return `https://tronscan.io/#/block/${num}`
     }
-    return `https://etherscan.com/block/${hash}`
+    return EXPLORER_URL.BLOCK[ChainType[chain]] + num
 }
 
-
-export function getEthCyByContractAddress(address:string){
+export function getEthCyByContractAddress(address: string) {
     const keys = Object.keys(CONTRACT_ADDRESS.ERC20.ETH);
     // const keys2 = Object.keys(CONTRACT_ADDRESS.CROSS.ETH);
     // const keys = keys1.concat(keys2);
-    for(let key of keys){
-        if(CONTRACT_ADDRESS.ERC20.ETH[key] && CONTRACT_ADDRESS.ERC20.ETH[key].toLowerCase() == address.toLowerCase()){
+    for (let key of keys) {
+        if (CONTRACT_ADDRESS.ERC20.ETH[key] && CONTRACT_ADDRESS.ERC20.ETH[key].toLowerCase() == address.toLowerCase()) {
             return key
         }
         // if(CONTRACT_ADDRESS.CROSS.ETH[key] && CONTRACT_ADDRESS.CROSS.ETH[key].toLowerCase() == address.toLowerCase()){
@@ -225,6 +233,7 @@ export function getEthCyByContractAddress(address:string){
     }
     return "ETH"
 }
+
 /**
  * Determine the mobile operating system.
  * This function returns one of 'iOS', 'Android', 'Windows Phone', or 'unknown'.
@@ -252,16 +261,26 @@ export function getMobileOperatingSystem() {
     return "unknown";
 }
 
-export function IsAPP(){
+export function IsAPP() {
     return getMobileOperatingSystem() == "iOS" || getMobileOperatingSystem() == "Android";
 }
 
-export async function defaultGasPrice(chain:ChainType){
+export async function defaultGasPrice(chain: ChainType) {
     let defaultGasPrice;
     let data: GasPriceLevel = {};
     if (chain == ChainType.ETH) {
         // @ts-ignore
-        data = await rpc.post("eth_gasTracker", [])
+        data = await rpc.post("eth_gasTracker", [], chain)
+    }
+    if (chain == ChainType.BSC) {
+        // @ts-ignore
+        const defaultGasPrice: any = await rpc.post("eth_gasPrice", [], chain)
+        data = {
+            AvgGasPrice: {
+                gasPrice: utils.fromValue(defaultGasPrice, 9).toString(10),
+                second: 3,
+            }
+        }
     } else if (chain == ChainType.SERO) {
         data = {
             AvgGasPrice: {
@@ -276,32 +295,32 @@ export async function defaultGasPrice(chain:ChainType){
     return defaultGasPrice;
 }
 
-export function getCategoryBySymbol(symbol:string,chain:string):string{
+export function getCategoryBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
 }
 
-export function getAddressBySymbol(symbol:string,chain:string):string{
+export function getAddressBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][chain];
 }
 
-export function getAddressByCategory(category:string,chain:string):string{
+export function getAddressByCategory(category: string, chain: string): string {
     const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
-    for(let k of keys){
+    for (let k of keys) {
         const address = CONTRACT_ADDRESS.ERC721[k]["ADDRESS"];
         const symbol = CONTRACT_ADDRESS.ERC721[k]["SYMBOL"];
-        if(symbol[chain]==category){
+        if (symbol[chain] == category) {
             return address[chain]
         }
     }
     return ""
 }
 
-export function isNFTAddress(add:string,chain:string):boolean{
+export function isNFTAddress(add: string, chain: string): boolean {
     const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
-    for(let k of keys){
+    for (let k of keys) {
         const address = CONTRACT_ADDRESS.ERC721[k]["ADDRESS"];
         // const symbol = CONTRACT_ADDRESS.ERC721[k]["SYMBOL"];
-        if(address[chain].toLowerCase()==add.toLowerCase()){
+        if (address[chain].toLowerCase() == add.toLowerCase()) {
             return true
         }
     }
@@ -337,6 +356,27 @@ function hexToUtf8(hex: string): string {
     return utf8.decode(string);
 }
 
-export function hexToCy(str:string){
+export function hexToCy(str: string) {
     return hexToUtf8(str).toUpperCase()
 }
+
+export function notCrossToken(cy: string) {
+    return NOT_CROSS_TOKEN.indexOf(cy) == -1
+}
+
+export function getPrefix(chain: ChainType) {
+    if (chain == ChainType.BSC) {
+        return "eth"
+    } else {
+        return ChainType[chain].toLowerCase();
+    }
+}
+
+export function defaultCy(chain: ChainType) {
+    if (chain == ChainType.BSC) {
+        return "BNB"
+    } else {
+        return ChainType[chain];
+    }
+}
+

@@ -41,7 +41,6 @@ class CrossFee {
     estimateFee = async (resourceId: string, inputAmount: BigNumber): Promise<string> => {
         const instance = await tron.tronWeb.contract().at(this.address);
         const res = await instance.estimateFee(resourceId,inputAmount.toNumber()).call();
-        console.log(res.fee.toString(10),"estimateFee")
         return res.fee.toString(10)
     }
 

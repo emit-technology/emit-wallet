@@ -96,7 +96,7 @@ class ExchangeWETH extends React.Component<any, any> {
         }
         let value: BigNumber = new BigNumber(0);
         let data: any = "0x";
-        const weth: WETH = new WETH(CONTRACT_ADDRESS.ERC20.ETH.WETH)
+        const weth: WETH = new WETH(CONTRACT_ADDRESS.ERC20.ETH.WETH,ChainType.ETH)
         const tx: Transaction = {
             from: account.addresses && account.addresses[ChainType.ETH],
             to: CONTRACT_ADDRESS.ERC20.ETH.WETH,

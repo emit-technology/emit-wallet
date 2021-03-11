@@ -19,22 +19,37 @@
 import rpc from "../rpc";
 
 import {EMIT_HOST} from "../config"
+import {ChainType} from "../types";
 const Contract = require('web3-eth-contract');
-
-Contract.setProvider(EMIT_HOST);
 
 class EthContract{
 
     contract:any;
     abi:any;
+    chain:ChainType
+    address:string
 
-    constructor(address:string,abi:any) {
+    constructor(address:string,abi:any,chain:ChainType) {
+        this.address = address;
         this.abi = abi;
+        Contract.setProvider([EMIT_HOST,"?chain=",chain].join(""));
         this.contract = new Contract(abi,address);
+        this.chain = chain;
     }
 
     estimateGas = async (params:any):Promise<any>=>{
-        return await rpc.post("eth_estimateGas",[params])
+        return await rpc.post("eth_estimateGas",[params],this.chain)
     }
+
+    // call = async (data:any,from?:string):Promise<any>=>{
+    //     console.log("this.contract.address:::",this.address)
+    //     return await rpc.post("eth_call",[{
+    //         from:from,
+    //         data:data,
+    //         to:this.address,
+    //     },"latest"],this.chain)
+    // }
+
+
 }
 export default EthContract;

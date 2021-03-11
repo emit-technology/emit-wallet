@@ -42,7 +42,7 @@ import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils";
 import rpc from "../rpc";
 import BigNumber from "bignumber.js";
-import {ChainType, Transaction} from "../types";
+import {ChainId, ChainType, Transaction} from "../types";
 import {chevronBack, copyOutline} from 'ionicons/icons';
 import url from "../utils/url";
 import i18n from "../locales/i18n";
@@ -158,9 +158,9 @@ class TransactionInfo extends React.Component<any, any> {
                     }
                 }
             }else if(chain == ChainType.ETH){
-                const rest:any = await this.getTransactionByHash(txHash);
-                if(utils.isNFTAddress(rest.to,ChainType[ChainType.ETH])){
-                    const contact = new ERC721(rest.to);
+                const rest:any = await this.getTransactionByHash(txHash,chain);
+                if(utils.isNFTAddress(rest.to,ChainType[chain])){
+                    const contact = new ERC721(rest.to,chain);
                     const decodeResult = await contact.decodeTransferFromParams(rest.input);
                     if(decodeResult){
                         nft.ticket = decodeResult.tokenId;
@@ -191,13 +191,9 @@ class TransactionInfo extends React.Component<any, any> {
         let events = [];
         events = await rpc.getEvents(chain, txHash, "", "", "")
         if (events && events.length > 0) {
-            let c = ChainType.ETH == chain ? ChainType.SERO : ChainType.ETH;
-            //txHash: string,depositNonce: string,originChainID:string,resourceID:string
+            const originChainID = utils.getChainIdByName(ChainId[events[0].event.originChainID?events[0].event.originChainID:events[0].event.destinationChainID])
             const resourceId = chain == ChainType.TRON ? ("0x" + events[0].event.resourceID) : events[0].event.resourceID;
-            if (resourceId.toLowerCase() == BRIDGE_RESOURCE_ID.TUSDT.toLowerCase()) {
-                c = ChainType.TRON == chain ? ChainType.SERO : ChainType.TRON;
-            }
-            const target = await rpc.getEvents(c, "", events[0].event.depositNonce, "", c == ChainType.TRON ? resourceId.slice(2) : resourceId)
+            const target = await rpc.getEvents(originChainID, "", events[0].event.depositNonce, "", originChainID == ChainType.TRON ? resourceId.slice(2) : resourceId)
             events = events.concat(target)
         }
 
@@ -232,14 +228,14 @@ class TransactionInfo extends React.Component<any, any> {
         })
     }
 
-    getTransactionByHash = async (txHash:string)=>{
-        return await rpc.post("eth_getTransactionByHash", [txHash]);
+    getTransactionByHash = async (txHash:string,chain:ChainType)=>{
+        return await rpc.post("eth_getTransactionByHash", [txHash],chain);
     }
 
-    speedEthTx = async (gasPrice: any) => {
+    speedEthTx = async (gasPrice: any,chain:ChainType) => {
         const txHash = this.props.match.params.hash;
         const {info,opType} = this.state;
-        const rest:any = await this.getTransactionByHash(txHash);
+        const rest:any = await this.getTransactionByHash(txHash,chain);
         if(!rest){
             this.setShowToast(true,"warning","Transaction not found!");
             return
@@ -249,8 +245,8 @@ class TransactionInfo extends React.Component<any, any> {
             to: rest.to,
             cy: info.cy?info.cy:utils.getEthCyByContractAddress(rest.to),
             amount: "0x0",
-            chain: ChainType.ETH,
-            feeCy: ChainType[ChainType.ETH]
+            chain: chain,
+            feeCy: utils.defaultCy(chain)
         };
         tx.gas = rest.gas;
         tx.gasPrice = utils.toHex(utils.toValue(gasPrice, 9));
@@ -294,8 +290,8 @@ class TransactionInfo extends React.Component<any, any> {
         this.setState({
             gasPrice: v
         })
-
-        this.speedEthTx(v).catch(e => {
+        const chain = this.props.match.params.chain;
+        this.speedEthTx(v,chain).catch(e => {
             console.error(e)
         })
     }

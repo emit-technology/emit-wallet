@@ -135,8 +135,11 @@ class WalletWorker {
                     reject(data.error);
                     console.log(data.error)
                 }else{
-                    selfStorage.setItem(accountId,data.result)
-                    resolve(data.result);
+                    const tmp:any = data.result;
+                    tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
+                    selfStorage.setItem(accountId,tmp)
+                    // console.log(tmp)
+                    resolve(tmp);
                 }
             })
         })
@@ -156,17 +159,21 @@ class WalletWorker {
             if(accountId) {
                 const data:any = selfStorage.getItem(accountId);
                 if(data){
+                    if(!data.addresses[ChainType.BSC]){
+                        data.addresses[ChainType.BSC] = data.addresses[ChainType.ETH]
+                    }
                     resolve(data);
-                }else{
-                    service.accountInfo(accountId,function (data:any){
-                        if(data.error){
-                            reject(data.error);
-                        }else{
-                            selfStorage.setItem(accountId,data.result)
-                            resolve(data.result);
-                        }
-                    })
                 }
+                service.accountInfo(accountId,function (data:any){
+                    if(data.error){
+                        // reject(data.error);
+                    }else{
+                        const tmp:any = data.result;
+                        tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
+                        selfStorage.setItem(accountId,tmp)
+                        // resolve(tmp);
+                    }
+                })
             }else{
                 reject("Account not asset!")
             }

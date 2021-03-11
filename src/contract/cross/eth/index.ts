@@ -1,6 +1,7 @@
 import {Cross} from "../index";
 import BigNumber from "bignumber.js";
 import EthContract from "../../EthContract";
+import {ChainType} from "../../../types";
 
 const ABI_CROSS = [
     {
@@ -91,8 +92,8 @@ const ABI_CROSS = [
 
 class Eth extends EthContract implements Cross{
 
-    constructor(address:string) {
-        super(address,ABI_CROSS);
+    constructor(address:string,chain:ChainType) {
+        super(address,ABI_CROSS,chain);
     }
 
     depositFT(destinationChainID: number, resourceID: string, recipient: string, amount: BigNumber): Promise<any> {
@@ -105,6 +106,7 @@ class Eth extends EthContract implements Cross{
 
     resourceIDToLimit = async (resourceId: string): Promise<Array<BigNumber>> => {
         const rest = await this.contract.methods.resourceIDToLimit(resourceId).call()
+        console.log(resourceId,rest,"resourceIDToLimit>>")
         return [new BigNumber(rest[0]),new BigNumber(rest[1])]
     }
 
