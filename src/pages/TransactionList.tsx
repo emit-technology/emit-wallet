@@ -18,15 +18,11 @@
 
 import * as React from 'react';
 import {
-    IonBackButton,
-    IonButtons,
     IonContent,
     IonHeader,
     IonList,
     IonChip,
     IonItem,
-    IonSegment,
-    IonSegmentButton,
     IonPage,
     IonTitle,
     IonRefresher,
@@ -37,6 +33,9 @@ import {
     IonAvatar,
     IonLabel,
     IonButton,
+    IonGrid,
+    IonRow,
+    IonCol,
     IonText,
     IonSearchbar,
     IonInfiniteScroll,
@@ -170,7 +169,7 @@ class TransactionList extends React.Component<any, any>{
                     </IonRefresherContent>
                 </IonRefresher>
                 <IonSearchbar mode="ios" value={searchText} onIonChange={e => this.setSearchText(e.detail.value!)}/>
-                <IonList>
+                <IonList style={{paddingBottom:"100px"}}>
                     {
                         records && records.length>0 ? records.map((record:any)=>{
                             let value = new BigNumber(record.amount);
@@ -222,6 +221,24 @@ class TransactionList extends React.Component<any, any>{
                     >
                     </IonInfiniteScrollContent>
                 </IonInfiniteScroll>
+                <div className="form-button-div">
+                    <IonRow>
+                        <IonCol size="4">
+                            <IonButton mode="ios" expand="block" onClick={() => {
+                                // window.location.href=`#/transfer/${cy}/${chain}`
+                                // window.location.reload();
+                                url.receive(address)
+                            }} fill="outline">{i18n.t("receive")}</IonButton>
+                        </IonCol>
+                        <IonCol size="8">
+                            <IonButton mode="ios" expand="block" onClick={() => {
+                                // window.location.href=`#/transfer/${cy}/${chain}`
+                                // window.location.reload();
+                                url.transfer(cy, ChainType[chain]);
+                            }} >{i18n.t("transfer")}</IonButton>
+                        </IonCol>
+                    </IonRow>
+                </div>
                 <IonLoading
                     mode="ios"
                     isOpen={showLoading}

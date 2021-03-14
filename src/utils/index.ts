@@ -20,7 +20,6 @@ import BigNumber from 'bignumber.js'
 import {
     BRIDGE_CURRENCY,
     BRIDGE_NFT_RESOURCE_ID,
-    BRIDGE_RESOURCE_ID,
     CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
@@ -105,8 +104,8 @@ export function getDestinationChainID(chain: ChainType) {
     return ChainId._
 }
 
-export function getResourceId(cy: string) {
-    return BRIDGE_RESOURCE_ID[cy];
+export function getResourceId(cy: string,from:string,to:string) {
+    return BRIDGE_CURRENCY[cy][from]["RESOURCE_ID"][to];
 }
 
 export function getNFTResourceId(symbol: string) {
@@ -380,3 +379,22 @@ export function defaultCy(chain: ChainType) {
     }
 }
 
+export function getCrossChainByCy(cy:string):Array<any>{
+    const obj = BRIDGE_CURRENCY[cy];
+    if(obj){
+        const keys = Object.keys(obj)
+        const arr = []
+        for(let k of keys){
+            for(let j of keys){
+                if(k !== j && (!obj[k].EXCEPT ||  obj[k].EXCEPT.indexOf(j) == -1)){
+                    arr.push({
+                        from:k,
+                        to:j
+                    })
+                }
+            }
+        }
+        return arr;
+    }
+    return [{}]
+}

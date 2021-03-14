@@ -40,11 +40,19 @@ import {
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar
+    IonToolbar,IonPopover
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
-import {chevronForwardOutline, linkOutline, qrCodeSharp, scanOutline,} from 'ionicons/icons'
+import {
+    arrowForwardOutline,
+    chevronDownOutline, chevronForwardCircleOutline,
+    chevronForwardOutline,
+    chevronUpOutline,
+    linkOutline, qrCodeOutline,
+    qrCodeSharp,
+    scanOutline,
+} from 'ionicons/icons'
 
 import {BRIDGE_CURRENCY, TOKEN_DESC} from "../config"
 
@@ -80,6 +88,8 @@ interface State {
     toastColor:string
     toastMsg:string
     showToast:boolean
+    crossMode:Array<string>,
+    popoverState:any,
 }
 
 class Wallet extends React.Component<State, any> {
@@ -102,6 +112,8 @@ class Wallet extends React.Component<State, any> {
         toastColor:"warning",
         toastMsg:"",
         showToast:false,
+        crossMode:[],
+        popoverState:{}
     }
 
     componentDidMount() {
@@ -243,8 +255,21 @@ class Wallet extends React.Component<State, any> {
         })
     }
 
+    setShowPopover = (cy:string,e:any,f:boolean)=>{
+        const crossMode: Array<string> = Object.keys(BRIDGE_CURRENCY[cy])
+        const ret:any = {};
+        ret[cy] = {
+            event:e,
+            showPopover:f
+        }
+        this.setState({
+            crossMode:crossMode,
+            popoverState: ret
+        })
+    }
+
     renderAssets = () => {
-        const {assets, coinShow,account} = this.state;
+        const {assets, coinShow,account,popoverState} = this.state;
         const assetsKeys = Object.keys(assets);
         const itemGroup: Array<any> = [];
 
@@ -275,22 +300,17 @@ class Wallet extends React.Component<State, any> {
                                 </IonText>
                             </div>
                         </IonAvatar>
-                        <IonLabel slot="start" onClick={() => {
+                        <IonLabel onClick={() => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
                             url.transactionList(cy, chain);
                         }}>
                             {/*<IonText>{parseFloat(value.toFixed(3, 1)).toLocaleString()}</IonText>*/}
-                            <IonText>{value.toString(10)}</IonText>
+                            <IonText className="text-bold">{value.toString(10)}</IonText>
                             <p>
                                 <IonText color="medium">{currency}{utils.getCyType(chain, cy) && `(${utils.getCyType(chain, cy)})`}</IonText>
                             </p>
                         </IonLabel>
-                        <IonButton slot="end" mode="ios" size="small" onClick={() => {
-                            // window.location.href=`#/transfer/${cy}/${chain}`
-                            // window.location.reload();
-                            url.transfer(cy, chain);
-                        }} fill="outline">{i18n.t("transfer")}</IonButton>
-                        <IonIcon src={chevronForwardOutline} color="medium" slot="end" onClick={() => {
+                        <IonIcon src={chevronForwardOutline} color="medium" size="small" slot="end" onClick={() => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
                             url.transactionList(cy, chain);
                         }}/>
@@ -319,16 +339,16 @@ class Wallet extends React.Component<State, any> {
                         <IonItem mode="ios" lines="none">
                             <IonRow style={{textAlign:"center",width:"100%"}}>
                                 <IonCol size="6">
-                                    <IonLabel>{i18n.t("available")}</IonLabel>
+                                    <IonText className="text-small-x2">{i18n.t("available")}</IonText>
                                 </IonCol>
                                 <IonCol size="6">
-                                    <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX"],6).toNumber()}</IonText>
+                                    <IonText  className="text-bold">{utils.fromValue(tron.getBalanceLocal()["TRX"],6).toNumber()}</IonText>
                                 </IonCol>
                                 <IonCol size="6">
-                                    <IonLabel>{i18n.t("frozen")}</IonLabel>
+                                    <IonText className="text-small-x2">{i18n.t("frozen")}</IonText>
                                 </IonCol>
                                 <IonCol size="6">
-                                    <IonText>{utils.fromValue(tron.getBalanceLocal()["TRX_FROZEN"],6).toNumber()}</IonText>
+                                    <IonText  className="text-bold">{utils.fromValue(tron.getBalanceLocal()["TRX_FROZEN"],6).toNumber()}</IonText>
                                 </IonCol>
                             </IonRow>
                         </IonItem>
@@ -336,30 +356,87 @@ class Wallet extends React.Component<State, any> {
                 }
             }
 
+
             itemGroup.push(<IonCard mode="ios">
-                <IonItem lines="none" style={{margin: "10px 0 0"}} onClick={(e) => {
-                    coinShow[cy] = !coinShow[cy];
-                    this.setState({
-                        coinHidden: coinShow
-                    })
-                }}>
-                    <IonAvatar slot="start">
+                <IonItem lines="none" style={{margin: "10px 0 0"}}>
+                    <IonAvatar slot="start"  onClick={(e) => {
+                        coinShow[cy] = !coinShow[cy];
+                        this.setState({
+                            coinHidden: coinShow
+                        })
+                    }}>
                         <img src={require(`../img/${cy}.png`)} style={{borderRadius:"unset"}}/>
                     </IonAvatar>
-                    <IonCardTitle slot="start">
+                    <IonCardTitle slot="start"  onClick={(e) => {
+                        coinShow[cy] = !coinShow[cy];
+                        this.setState({
+                            coinHidden: coinShow
+                        })
+                    }}>
                         {utils.getCyDisplayName(cy)}
                         <IonCardSubtitle>{TOKEN_DESC[cy]}</IonCardSubtitle>
                     </IonCardTitle>
-                    <IonLabel className="text-bold">{parseFloat(total.toFixed(3, 1)).toLocaleString()}</IonLabel>
-                    {utils.notCrossToken(cy) && <IonButton size="small" slot="end" mode="ios" onClick={() => {
-                        url.tunnel(cy)
-                    }} style={{float: "right"}}>{i18n.t("cross")}</IonButton>}
+                    {utils.notCrossToken(cy) && <>
+                        <IonButton size="small" slot="end" mode="ios" onClick={(e:any) => {
+                            e.persist();
+                            this.setShowPopover(cy,e,true);
+                        }} style={{float: "right"}}>{i18n.t("cross")}
+                        </IonButton>
+                        <IonPopover
+                            mode="ios"
+                            cssClass='my-custom-class'
+                            event={popoverState[cy] && popoverState[cy].event}
+                            isOpen={popoverState[cy] && popoverState[cy].showPopover}
+                            onDidDismiss={() => this.setShowPopover(cy,undefined,false)}
+                        >
+                            <IonList>
+                                {
+                                    utils.getCrossChainByCy(cy).map((v:any) => {
+                                        return <IonItem onClick={()=>{
+                                            url.tunnel(cy,v.from,v.to)
+                                        }}>
+                                            <IonText>{utils.getCyDisplayName(v.from)}</IonText>
+                                            <IonIcon icon={arrowForwardOutline} size={"small"}/>
+                                            <IonText>{v.to}</IonText>
+                                            <IonIcon icon={chevronForwardOutline} slot="end" color="medium" size={"small"}/>
+                                        </IonItem>
+                                    })
+                                }
+                            </IonList>
+                        </IonPopover>
+                    </>}
+                    {coinShow[cy]?<IonIcon icon={chevronUpOutline} slot="end" color="medium"  onClick={(e) => {
+                        coinShow[cy] = !coinShow[cy];
+                        this.setState({
+                            coinHidden: coinShow
+                        })
+                    }}/>:<IonIcon icon={chevronDownOutline} slot="end" color="medium"  onClick={(e) => {
+                        coinShow[cy] = !coinShow[cy];
+                        this.setState({
+                            coinHidden: coinShow
+                        })
+                    }}/>}
                 </IonItem>
-                <IonCardContent hidden={!coinShow[cy]}>
+                <IonCardContent hidden={!coinShow[cy]} className="wallet-card-content" >
                     <IonItemGroup>
                         {item}
                     </IonItemGroup>
                 </IonCardContent>
+                <div style={{padding:"0 15px"}}>
+                    <IonItem lines="none">
+                        <IonLabel>
+                            Total
+                        </IonLabel>
+                        <IonText className="total-amount"  onClick={(e) => {
+                            coinShow[cy] = !coinShow[cy];
+                            this.setState({
+                                coinHidden: coinShow
+                            })
+                        }}>
+                            {parseFloat(total.toFixed(3, 1)).toLocaleString()}
+                        </IonText>
+                    </IonItem>
+                </div>
             </IonCard>)
         }
         return itemGroup;
@@ -433,7 +510,7 @@ class Wallet extends React.Component<State, any> {
     }
 
     render() {
-        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,activeChainAlert,toastColor,toastMsg,showToast} = this.state;
+        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast} = this.state;
 
         return (
             <IonPage>

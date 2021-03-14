@@ -133,12 +133,11 @@ class WalletWorker {
             service.accountInfo(accountId,function (data:any){
                 if(data.error){
                     reject(data.error);
-                    console.log(data.error)
+                    console.log (data.error)
                 }else{
                     const tmp:any = data.result;
                     tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
                     selfStorage.setItem(accountId,tmp)
-                    // console.log(tmp)
                     resolve(tmp);
                 }
             })
@@ -151,7 +150,8 @@ class WalletWorker {
             accountId = selfStorage.getItem("accountId");
         }
         this.isLocked().then(ret=>{
-            if(ret){
+            const urlHash = window.location.hash;
+            if(ret && urlHash.indexOf("account/unlock") == -1){
                 url.accountUnlock()
             }
         })
@@ -166,12 +166,12 @@ class WalletWorker {
                 }
                 service.accountInfo(accountId,function (data:any){
                     if(data.error){
-                        // reject(data.error);
+                        reject(data.error);
                     }else{
                         const tmp:any = data.result;
                         tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
                         selfStorage.setItem(accountId,tmp)
-                        // resolve(tmp);
+                        resolve(tmp);
                     }
                 })
             }else{

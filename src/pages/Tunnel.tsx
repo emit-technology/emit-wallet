@@ -71,7 +71,7 @@ class Tunnel extends React.Component<any, any> {
         allowance: 0,
         balance: {},
         crossTypes: [],
-        crossMode: ["ETH", "SERO"],
+        crossMode: [this.props.match.params.chain1, this.props.match.params.chain2],
         showModal: false,
         address: "",
         amount: "0.0",
@@ -86,12 +86,12 @@ class Tunnel extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        //const {crossMode} = this.state;
+        const {crossMode} = this.state;
         const targetCoin = this.props.match.params.cy;
-        const crossMode: Array<string> = Object.keys(BRIDGE_CURRENCY[targetCoin])
-        this.setState({
-            crossMode: crossMode
-        })
+        // const crossMode: Array<string> = Object.keys(BRIDGE_CURRENCY[targetCoin])
+        // this.setState({
+        //     crossMode: crossMode
+        // })
         this.init(targetCoin, crossMode).then(() => {
 
         }).catch(e => {
@@ -177,25 +177,26 @@ class Tunnel extends React.Component<any, any> {
         const targetChain = utils.getChainIdByName(crossMode[1])
         const realTargetCy = utils.getCyName(targetCoin, crossMode[1]);
         const decimalTarget = utils.getCyDecimal(realTargetCy, ChainType[targetChain]);
+        const resourceId = utils.getResourceId(targetCoin,crossMode[0],crossMode[1]);
         if (targetChain == ChainType.SERO) {
             const crossFeeSero: CrossFeeSERO = new CrossFeeSERO(config.CONTRACT_ADDRESS.CROSS.SERO.FEE);
-            const restSERO: any = await crossFeeSero.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
+            const restSERO: any = await crossFeeSero.estimateFee(resourceId , utils.toValue(amount, decimal));
             const rest = utils.fromValue(restSERO, decimalTarget).toString(10);
             return rest;
         } else if (targetChain == ChainType.TRON) {
             const tronCrossFee: CrossFeeTRON = new CrossFeeTRON(config.CONTRACT_ADDRESS.CROSS.TRON.FEE);
 
-            const restTron: any = await tronCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
+            const restTron: any = await tronCrossFee.estimateFee(resourceId, utils.toValue(amount, decimal));
             const rest = utils.fromValue(restTron, decimalTarget).toString(10);
             return rest;
         } else if (targetChain == ChainType.ETH) {
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.ETH.FEE,targetChain);
-            const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
+            const restETH: any = await ethCrossFee.estimateFee(resourceId, utils.toValue(amount, decimal));
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
             return rest;
         } else if (targetChain == ChainType.BSC) {
             const ethCrossFee: CrossFeeEth = new CrossFeeEth(config.CONTRACT_ADDRESS.CROSS.BSC.FEE,targetChain);
-            const restETH: any = await ethCrossFee.estimateFee(utils.getResourceId(targetCoin), utils.toValue(amount, decimal));
+            const restETH: any = await ethCrossFee.estimateFee(resourceId, utils.toValue(amount, decimal));
             const rest = utils.fromValue(restETH, decimalTarget).toString(10);
             return rest;
         }
@@ -203,32 +204,34 @@ class Tunnel extends React.Component<any, any> {
     }
 
     private async getMinAndMaxValue(chain: ChainType, targetCoinName: string, targetCoin: string) {
+        const {crossMode} = this.state;
         let minValue: any = 0;
         let maxValue: any = 0;
+        const resourceId = utils.getResourceId(targetCoin,crossMode[0],crossMode[1]);
         if (chain == ChainType.SERO) {
             const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
             const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
-            const rest = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            const rest = await seroCross.resourceIDToLimit(resourceId)
             minValue = utils.fromValue(rest[0], decimal).toNumber();
             maxValue = utils.fromValue(rest[1], decimal).toNumber();
         } else if (chain == ChainType.ETH) {
             const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE,ChainType.ETH);
             const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.ETH]);
 
-            const rest = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            const rest = await ethCross.resourceIDToLimit(resourceId)
             minValue = utils.fromValue(rest[0], decimal).toNumber();
             maxValue = utils.fromValue(rest[1], decimal).toNumber();
         } else if (chain == ChainType.BSC) {
             const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.BSC.BRIDGE,chain);
             const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.BSC]);
 
-            const rest = await ethCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            const rest = await ethCross.resourceIDToLimit(resourceId)
             minValue = utils.fromValue(rest[0], decimal).toNumber();
             maxValue = utils.fromValue(rest[1], decimal).toNumber();
         } else if (chain == ChainType.TRON) {
             const tronCross: TronCross = new TronCross(config.CONTRACT_ADDRESS.CROSS.TRON.BRIDGE);
             const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.TRON]);
-            const rest: any = await tronCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+            const rest: any = await tronCross.resourceIDToLimit(resourceId)
             minValue = utils.fromValue(rest.min.toString(10), decimal).toNumber();
             maxValue = utils.fromValue(rest.max.toString(10), decimal).toNumber();
         }
@@ -368,20 +371,21 @@ class Tunnel extends React.Component<any, any> {
             amount: utils.toHex(utils.toValue(amount, decimal)),
             feeCy: utils.defaultCy(chain)
         }
+        const resourceId = utils.getResourceId(targetCoin,crossMode[0],crossMode[1]);
         if (chain == ChainType.TRON) {
             const cross: TronCross = new TronCross(config.CONTRACT_ADDRESS.CROSS.TRON.BRIDGE);
-            tx.data = await cross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
+            tx.data = await cross.depositFT(ChainId.SERO, resourceId,
                 utils.bs58ToHex(address),
                 utils.toValue(amount, decimal), from)
         } else if (chain == ChainType.ETH) {
             const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.ETH.BRIDGE,chain);
-            tx.data = await ethCross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
+            tx.data = await ethCross.depositFT(ChainId.SERO, resourceId,
                 utils.bs58ToHex(address),
                 utils.toValue(amount, decimal))
             tx.gas = await ethCross.estimateGas(tx)
         } else if (chain == ChainType.BSC) {
             const ethCross: EthCross = new EthCross(config.CONTRACT_ADDRESS.CROSS.BSC.BRIDGE,chain);
-            tx.data = await ethCross.depositFT(ChainId.SERO, utils.getResourceId(targetCoin),
+            tx.data = await ethCross.depositFT(ChainId.SERO, resourceId,
                 utils.bs58ToHex(address),
                 utils.toValue(amount, decimal))
             tx.gas = await ethCross.estimateGas(tx)
@@ -399,8 +403,8 @@ class Tunnel extends React.Component<any, any> {
         const seroCross: SeroCross = new SeroCross(config.CONTRACT_ADDRESS.CROSS.SERO.BRIDGE);
         const targetCoinName = utils.getCyName(targetCoin, crossMode[0]);
         const decimal = utils.getCyDecimal(targetCoinName, ChainType[ChainType.SERO]);
-
-        const restValue: any = await seroCross.resourceIDToLimit(utils.getResourceId(targetCoin))
+        const resourceId = utils.getResourceId(targetCoin,crossMode[0],crossMode[1]);
+        const restValue: any = await seroCross.resourceIDToLimit(resourceId)
         const minValue = utils.fromValue(restValue[0], decimal).toNumber();
         const maxValue = utils.fromValue(restValue[1], decimal).toNumber();
         if (minValue > new BigNumber(amount).toNumber()) {
@@ -416,7 +420,7 @@ class Tunnel extends React.Component<any, any> {
         const targetChain = utils.getChainIdByName(crossMode[1]);
         const destinationChainID = utils.getDestinationChainID(targetChain)
         const toAddress = "0x" + tron.tronWeb.address.toHex(address);
-        const data: any = await seroCross.depositFT(destinationChainID, utils.getResourceId(targetCoin), toAddress)
+        const data: any = await seroCross.depositFT(destinationChainID, resourceId, toAddress)
 
         const tx: Transaction = {
             from: account.addresses && account.addresses[ChainType.SERO],
@@ -434,7 +438,7 @@ class Tunnel extends React.Component<any, any> {
             const gasFeeProxy: GasFeeProxy = new GasFeeProxy(config.GAS_FEE_PROXY_ADDRESS[realCy]);
             const tokenRate = await gasFeeProxy.tokenRate()
             tx.value = utils.toHex(utils.toValue(amount, decimal));
-            tx.data = await gasFeeProxy.depositFT(destinationChainID, utils.getResourceId(targetCoin), toAddress);
+            tx.data = await gasFeeProxy.depositFT(destinationChainID, resourceId, toAddress);
             tx.to = config.GAS_FEE_PROXY_ADDRESS[realCy];
             tx.gas = await gasFeeProxy.estimateGas(tx)
             tx.amount = "0x0";

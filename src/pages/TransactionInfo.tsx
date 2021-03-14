@@ -50,7 +50,7 @@ import {Plugins} from "@capacitor/core";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import tron from "../rpc/tron";
-import {BRIDGE_RESOURCE_ID, CONTRACT_ADDRESS} from "../config";
+import { CONTRACT_ADDRESS} from "../config";
 import SRC721 from "../contract/erc721/meta/sero"
 import ERC721 from "../contract/erc721/meta/eth"
 import CrossNFT from "../contract/cross/eth/crossNFT";

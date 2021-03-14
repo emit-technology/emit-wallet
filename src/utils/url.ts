@@ -126,16 +126,17 @@ class Url {
     }
 
     accountUnlock() {
-        this.goTo([this.base, this.account.unlock].join("/"), [this.base].join("/"));
+        this.goTo([this.base, this.account.unlock].join("/"), "");
     }
 
     receive(address: string) {
-        this.goTo([this.base, this.account.receive, address].join("/"), [this.base].join("/"))
+        this.goTo([this.base, this.account.receive, address].join("/"), window.location.hash)
     }
 
     transfer(cy: string, chain: string,to?:string) {
-        to ?this.goTo([this.base, this.transaction.transfer, cy, chain,to].join("/"), [this.base].join("/")):
-            this.goTo([this.base, this.transaction.transfer, cy, chain].join("/"), [this.base].join("/"))
+        const hash = window.location.hash
+        to ?this.goTo([this.base, this.transaction.transfer, cy, chain,to].join("/"), hash):
+            this.goTo([this.base, this.transaction.transfer, cy, chain].join("/"), hash)
         return
     }
 
@@ -143,8 +144,8 @@ class Url {
         this.goTo([this.base, this.transaction.transferNft, category, chain,value].join("/"), [this.base,this.nftTabs].join("/"))
     }
 
-    tunnel(cy: string) {
-        this.goTo([this.base, this.transaction.tunnel, cy].join("/"), [this.base].join("/"));
+    tunnel(cy: string, chain1: string, chain2: string) {
+        this.goTo([this.base, this.transaction.tunnel, cy, chain1, chain2].join("/"), [this.base].join("/"));
         return
     }
 
