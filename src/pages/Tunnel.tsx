@@ -30,7 +30,7 @@ import {
     IonLabel,
     IonPage,
     IonProgressBar,
-    IonRow,
+    IonRow, IonSpinner,
     IonText,
     IonTitle,
     IonToast,
@@ -505,7 +505,7 @@ class Tunnel extends React.Component<any, any> {
             this.setShowToast(true, "warning", `Not enough ${realCy} to transfer!`);
             return;
         }
-
+        this.setShowProgress(true);
         if (chain == ChainType.SERO) {
             this.transferSero().then(() => {
             }).catch((e: any) => {
@@ -701,39 +701,46 @@ class Tunnel extends React.Component<any, any> {
                                                     && new BigNumber(allowance).toNumber() > 0 ?
                                                         <IonButton mode="ios" expand="block" fill="outline"
                                                                    disabled={showProgress} onClick={() => {
-                                                            this.approve("cancel").catch(e => {
+                                                            this.setShowProgress1(true);
+                                                            this.approve("cancel").then(()=>{
+                                                                this.setShowProgress1(false);
+                                                            }).catch(e => {
+                                                                this.setShowProgress1(false);
                                                                 const err = typeof e == "string" ? e : e.message;
                                                                 this.setShowToast(true, "danger", err)
                                                                 console.error(e)
                                                             })
                                                         }}>
-                                                            {i18n.t("cancelApprove")}</IonButton>
+                                                            {(showProgress1)&&<IonSpinner name="bubbles" />}{i18n.t("cancelApprove")}</IonButton>
                                                         :
                                                         <IonButton mode="ios" expand="block" fill="outline"
                                                                    disabled={showProgress1} onClick={() => {
-                                                            this.approve("approve").catch(e => {
+                                                            this.setShowProgress1(true);
+                                                            this.approve("approve").then(()=>{
+                                                                this.setShowProgress1(false);
+                                                            }).catch(e => {
+                                                                this.setShowProgress1(false);
                                                                 const err = typeof e == "string" ? e : e.message;
                                                                 this.setShowToast(true, "danger", err)
                                                                 console.error(e)
                                                             })
-                                                        }}>{i18n.t("approve")}</IonButton>}
+                                                        }}>{(showProgress1)&&<IonSpinner name="bubbles" />}{i18n.t("approve")}</IonButton>}
                                                 </IonCol>
                                                 <IonCol size="6">
                                                     <IonButton mode="ios" expand="block" color="primary"
-                                                               disabled={showProgress || showProgress1 || !address || new BigNumber(allowance).toNumber() == 0}
+                                                               disabled={showProgress || showProgress1 || !address || new BigNumber(allowance).toNumber() == 0  || utils.toValue(amount,0).toNumber() == 0 }
                                                                onClick={() => {
                                                                    this.commit()
-                                                               }}>{i18n.t("confirm")}</IonButton>
+                                                               }}>{(showProgress)&&<IonSpinner name="bubbles" />}{i18n.t("confirm")}</IonButton>
                                                 </IonCol>
                                             </IonRow>
                                         </IonGrid>
                                         :
                                         <IonButton mode="ios" expand="block" color="primary"
-                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH"
-                                                   && new BigNumber(allowance).toNumber() == 0}
+                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH" && new BigNumber(allowance).toNumber() == 0 || utils.toValue(amount,0).toNumber() == 0 }
                                                    onClick={() => {
                                                        this.commit()
-                                                   }}>{i18n.t("confirm")}</IonButton>
+                                                   }}>{(showProgress)&&<IonSpinner name="bubbles" />}{i18n.t("confirm")}</IonButton>
                                 }
                             </IonCol>
                         </IonRow>
@@ -753,7 +760,11 @@ class Tunnel extends React.Component<any, any> {
                                      onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 
                 <ConfirmTransaction show={passwordAlert} transaction={tx} onProcess={(f) => this.setShowProgress(f)}
-                                    onCancel={() => this.showPasswordAlert(false)} onOK={this.confirm}/>
+                                    onCancel={() => {
+                                        this.showPasswordAlert(false)
+                                        this.setShowProgress(false)
+                                        this.setShowProgress1(false)
+                                    }} onOK={this.confirm}/>
 
             </IonPage>
         );

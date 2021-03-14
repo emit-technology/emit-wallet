@@ -357,22 +357,18 @@ class Wallet extends React.Component<State, any> {
             }
 
 
-            itemGroup.push(<IonCard mode="ios">
+            itemGroup.push(<IonCard mode="ios"   onClick={(e) => {
+                e.persist();
+                coinShow[cy] = !coinShow[cy];
+                this.setState({
+                    coinHidden: coinShow
+                })
+            }}>
                 <IonItem lines="none" style={{margin: "10px 0 0"}}>
-                    <IonAvatar slot="start"  onClick={(e) => {
-                        coinShow[cy] = !coinShow[cy];
-                        this.setState({
-                            coinHidden: coinShow
-                        })
-                    }}>
+                    <IonAvatar slot="start">
                         <img src={require(`../img/${cy}.png`)} style={{borderRadius:"unset"}}/>
                     </IonAvatar>
-                    <IonCardTitle slot="start"  onClick={(e) => {
-                        coinShow[cy] = !coinShow[cy];
-                        this.setState({
-                            coinHidden: coinShow
-                        })
-                    }}>
+                    <IonCardTitle slot="start">
                         {utils.getCyDisplayName(cy)}
                         <IonCardSubtitle>{TOKEN_DESC[cy]}</IonCardSubtitle>
                     </IonCardTitle>
@@ -405,17 +401,7 @@ class Wallet extends React.Component<State, any> {
                             </IonList>
                         </IonPopover>
                     </>}
-                    {coinShow[cy]?<IonIcon icon={chevronUpOutline} slot="end" color="medium"  onClick={(e) => {
-                        coinShow[cy] = !coinShow[cy];
-                        this.setState({
-                            coinHidden: coinShow
-                        })
-                    }}/>:<IonIcon icon={chevronDownOutline} slot="end" color="medium"  onClick={(e) => {
-                        coinShow[cy] = !coinShow[cy];
-                        this.setState({
-                            coinHidden: coinShow
-                        })
-                    }}/>}
+                    {coinShow[cy]?<IonIcon icon={chevronUpOutline} slot="end" color="medium"/>:<IonIcon icon={chevronDownOutline} slot="end" color="medium"/>}
                 </IonItem>
                 <IonCardContent hidden={!coinShow[cy]} className="wallet-card-content" >
                     <IonItemGroup>
@@ -427,12 +413,7 @@ class Wallet extends React.Component<State, any> {
                         <IonLabel>
                             Total
                         </IonLabel>
-                        <IonText className="total-amount"  onClick={(e) => {
-                            coinShow[cy] = !coinShow[cy];
-                            this.setState({
-                                coinHidden: coinShow
-                            })
-                        }}>
+                        <IonText className="total-amount">
                             {parseFloat(total.toFixed(3, 1)).toLocaleString()}
                         </IonText>
                     </IonItem>
@@ -543,18 +524,6 @@ class Wallet extends React.Component<State, any> {
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
                         <IonItem mode="ios" lines="none" onClick={() => {
-                            url.receive(account.addresses && account.addresses[ChainType.SERO])
-                        }}>
-                            <IonAvatar slot="start">
-                                <img src={require(`../img/SERO.png`)}/>
-                            </IonAvatar>
-                            <IonLabel className="address-wrap" mode="ios">
-                                <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.SERO])}</IonText>
-                                <p><IonText color="medium">Super Zero</IonText></p>
-                            </IonLabel>
-                            <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
-                        </IonItem>
-                        <IonItem mode="ios" lines="none" onClick={() => {
                             url.receive(account.addresses && account.addresses[ChainType.BSC])
                         }}>
                             <IonAvatar slot="start">
@@ -563,6 +532,18 @@ class Wallet extends React.Component<State, any> {
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.BSC])}</IonText>
                                 <p><IonText color="medium">Binance Smart Chain</IonText></p>
+                            </IonLabel>
+                            <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
+                        </IonItem>
+                        <IonItem mode="ios" lines="none" onClick={() => {
+                            url.receive(account.addresses && account.addresses[ChainType.SERO])
+                        }}>
+                            <IonAvatar slot="start">
+                                <img src={require(`../img/SERO.png`)}/>
+                            </IonAvatar>
+                            <IonLabel className="address-wrap" mode="ios">
+                                <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.SERO])}</IonText>
+                                <p><IonText color="medium">Super Zero</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
