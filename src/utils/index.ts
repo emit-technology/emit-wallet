@@ -23,7 +23,7 @@ import {
     CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
-    EXPLORER_URL,
+    EXPLORER_URL, FULL_NAME,
     GAS_DEFAULT,
     GAS_PRICE_UNIT,
     NOT_CROSS_TOKEN
@@ -397,4 +397,11 @@ export function getCrossChainByCy(cy:string):Array<any>{
         return arr;
     }
     return [{}]
+}
+
+export function getChainFullName(chain:ChainType){
+    if(FULL_NAME[ChainType[chain]]){
+        return FULL_NAME[ChainType[chain]]
+    }
+    return ChainType[chain]
 }

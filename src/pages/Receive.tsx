@@ -20,6 +20,7 @@ import * as React from 'react';
 import copy from 'copy-to-clipboard';
 import './Receive.css'
 import {
+    IonChip,
     IonBackButton,
     IonButtons,
     IonContent,
@@ -38,23 +39,18 @@ import {
 import {add,chevronBack} from "ionicons/icons";
 import url from "../utils/url";
 import i18n from "../locales/i18n"
+import * as utils from "../utils"
 
 const QRCode = require('qrcode.react');
 
 class Receive extends React.Component<any, any> {
 
     state: any = {
-        address: ""
+        address: this.props.match.params.address,
+        chain:this.props.match.params.chain
     }
 
     componentDidMount() {
-        this.init();
-    }
-
-    init = () => {
-        this.setState({
-            address: this.props.match.params.address
-        })
     }
 
     setShowToast =(f:boolean)=>{
@@ -63,7 +59,7 @@ class Receive extends React.Component<any, any> {
         })
     }
     render() {
-        const {address,showToast} = this.state;
+        const {address,showToast,chain} = this.state;
         return <IonPage>
             <IonContent fullscreen>
                 <IonHeader>
@@ -75,12 +71,13 @@ class Receive extends React.Component<any, any> {
 
                 <div>
                     <IonCard mode="ios">
-                        <IonCardHeader>
-                            <IonCardSubtitle className="text-center">
-                                {i18n.t("receiveTip")}
-                            </IonCardSubtitle>
-                        </IonCardHeader>
                         <IonCardContent className="text-center" mode="ios">
+                            <h3 style={{fontWeight:800}}>
+                                {i18n.t("receiveTip")}
+                            </h3>
+                            <div style={{margin:"12px 0"}}>
+                                <IonChip color="primary" outline={true} mode="ios">{utils.getChainFullName(chain)}</IonChip>
+                            </div>
                             <QRCode value={address} level="L"/>
                             <br/>
                             <IonText className="receive-small">{address}</IonText>
@@ -99,7 +96,7 @@ class Receive extends React.Component<any, any> {
                     isOpen={showToast}
                     onDidDismiss={() => this.setShowToast(false)}
                     message="Copied to clipboard!"
-                    duration={1500}
+                    duration={1000}
                     mode="ios"
                 />
             </IonContent>

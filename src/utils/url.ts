@@ -129,8 +129,8 @@ class Url {
         this.goTo([this.base, this.account.unlock].join("/"), "");
     }
 
-    receive(address: string) {
-        this.goTo([this.base, this.account.receive, address].join("/"), window.location.hash)
+    receive(address: string,chain:ChainType) {
+        this.goTo([this.base, this.account.receive, address,chain].join("/"), window.location.hash)
     }
 
     transfer(cy: string, chain: string,to?:string) {

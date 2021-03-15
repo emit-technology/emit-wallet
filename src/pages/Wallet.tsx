@@ -36,20 +36,21 @@ import {
     IonListHeader,
     IonLoading,
     IonPage,
+    IonPopover,
     IonRow,
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar,IonPopover
+    IonToolbar
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
 import {
     arrowForwardOutline,
-    chevronDownOutline, chevronForwardCircleOutline,
+    chevronDownOutline,
     chevronForwardOutline,
     chevronUpOutline,
-    linkOutline, qrCodeOutline,
+    linkOutline,
     qrCodeSharp,
     scanOutline,
 } from 'ionicons/icons'
@@ -289,8 +290,9 @@ class Wallet extends React.Component<State, any> {
 
                 item.push(
                     <IonItem mode="ios" lines="none" style={{marginBottom:"5px"}} >
-                        <IonAvatar slot="start" onClick={() => {
+                        <IonAvatar slot="start" onClick={(e:any) => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
+                            e.stopPropagation();
                             url.transactionList(cy, chain);
                         }}>
                             <IonIcon src={linkOutline} size="large" color="primary"/>
@@ -300,8 +302,9 @@ class Wallet extends React.Component<State, any> {
                                 </IonText>
                             </div>
                         </IonAvatar>
-                        <IonLabel onClick={() => {
+                        <IonLabel onClick={(e:any) => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
+                            e.stopPropagation();
                             url.transactionList(cy, chain);
                         }}>
                             {/*<IonText>{parseFloat(value.toFixed(3, 1)).toLocaleString()}</IonText>*/}
@@ -310,8 +313,9 @@ class Wallet extends React.Component<State, any> {
                                 <IonText color="medium">{currency}{utils.getCyType(chain, cy) && `(${utils.getCyType(chain, cy)})`}</IonText>
                             </p>
                         </IonLabel>
-                        <IonIcon src={chevronForwardOutline} color="medium" size="small" slot="end" onClick={() => {
+                        <IonIcon src={chevronForwardOutline} color="medium" size="small" slot="end" onClick={(e:any) => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
+                            e.stopPropagation();
                             url.transactionList(cy, chain);
                         }}/>
                     </IonItem>
@@ -321,12 +325,14 @@ class Wallet extends React.Component<State, any> {
                         <IonItem mode="ios">
                             <IonRow style={{textAlign:"center",width:"100%"}}>
                                 <IonCol size="6">
-                                    <IonButton size="small" expand="block" fill="outline" onClick={()=>{
+                                    <IonButton size="small" expand="block" fill="outline" onClick={(e:any)=>{
+                                        e.stopPropagation();
                                         url.swapEth("withdraw")
                                     }}>Withdraw</IonButton>
                                 </IonCol>
                                 <IonCol size="6">
-                                    <IonButton size="small" expand="block" onClick={()=>{
+                                    <IonButton size="small" expand="block" onClick={(e:any)=>{
+                                        e.stopPropagation();
                                         url.swapEth("deposit")
                                     }}>Deposit</IonButton>
                                 </IonCol>
@@ -376,6 +382,7 @@ class Wallet extends React.Component<State, any> {
                         <IonButton size="small" slot="end" mode="ios" onClick={(e:any) => {
                             e.persist();
                             this.setShowPopover(cy,e,true);
+                            e.stopPropagation();
                         }} style={{float: "right"}}>{i18n.t("cross")}
                         </IonButton>
                         <IonPopover
@@ -512,44 +519,44 @@ class Wallet extends React.Component<State, any> {
                             <IonLabel><IonText color="medium">{i18n.t("hello")} </IonText>{account.name} </IonLabel>
                         </IonListHeader>
                         <IonItem mode="ios" lines="none" onClick={() => {
-                            url.receive(account.addresses[ChainType.ETH])
+                            url.receive(account.addresses[ChainType.ETH],ChainType.ETH)
                         }}>
                             <IonAvatar slot="start">
                                 <img src={require(`../img/ETH.png`)}/>
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.ETH])}</IonText>
-                                <p><IonText color="medium">Ethereum</IonText></p>
+                                <p><IonText color="medium">{utils.getChainFullName(ChainType.ETH)}</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
                         <IonItem mode="ios" lines="none" onClick={() => {
-                            url.receive(account.addresses && account.addresses[ChainType.BSC])
+                            url.receive(account.addresses && account.addresses[ChainType.BSC],ChainType.BSC)
                         }}>
                             <IonAvatar slot="start">
                                 <img src={require(`../img/BNB.svg`)}/>
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.BSC])}</IonText>
-                                <p><IonText color="medium">Binance Smart Chain</IonText></p>
+                                <p><IonText color="medium">{utils.getChainFullName(ChainType.BSC)}</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
                         <IonItem mode="ios" lines="none" onClick={() => {
-                            url.receive(account.addresses && account.addresses[ChainType.SERO])
+                            url.receive(account.addresses && account.addresses[ChainType.SERO],ChainType.SERO)
                         }}>
                             <IonAvatar slot="start">
                                 <img src={require(`../img/SERO.png`)}/>
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios">
                                 <IonText>{account.addresses && utils.ellipsisStr(account.addresses[ChainType.SERO])}</IonText>
-                                <p><IonText color="medium">Super Zero</IonText></p>
+                                <p><IonText color="medium">{utils.getChainFullName(ChainType.SERO)}</IonText></p>
                             </IonLabel>
                             <IonIcon src={qrCodeSharp} slot="end" color="medium"/>
                         </IonItem>
                         <IonItem mode="ios" lines="none" onClick={() => {
                             if((account.addresses && account.addresses[ChainType.TRON])){
-                                url.receive(account.addresses && account.addresses[ChainType.TRON])
+                                url.receive(account.addresses && account.addresses[ChainType.TRON],ChainType.TRON)
                             }
                         }}>
                             <IonAvatar slot="start" style={{opacity:!(account.addresses && account.addresses[ChainType.TRON])?0.3:1}}>
@@ -557,7 +564,7 @@ class Wallet extends React.Component<State, any> {
                             </IonAvatar>
                             <IonLabel className="address-wrap" mode="ios" style={{opacity:!(account.addresses && account.addresses[ChainType.TRON])?0.3:1}}>
                                 <IonText>{account.addresses && account.addresses[ChainType.TRON] && utils.ellipsisStr(account.addresses[ChainType.TRON])}</IonText>
-                                <p><IonText color="medium">Tron Network</IonText></p>
+                                <p><IonText color="medium">{utils.getChainFullName(ChainType.TRON)}</IonText></p>
                             </IonLabel>
                             {
                                 !(account.addresses && account.addresses[ChainType.TRON])?<IonButton fill="outline" onClick={()=>{

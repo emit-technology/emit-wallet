@@ -227,7 +227,7 @@ class TransactionList extends React.Component<any, any>{
                             <IonButton mode="ios" expand="block" onClick={() => {
                                 // window.location.href=`#/transfer/${cy}/${chain}`
                                 // window.location.reload();
-                                url.receive(address)
+                                url.receive(address,chain)
                             }} fill="outline">{i18n.t("receive")}</IonButton>
                         </IonCol>
                         <IonCol size="8">

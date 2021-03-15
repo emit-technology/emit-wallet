@@ -126,7 +126,7 @@ class App extends React.Component<any,any>{
                     <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
                     <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
                     <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>
-                    <Route path="/account/receive/:address" component={Receive} exact={true}/>
+                    <Route path="/account/receive/:address/:chain" component={Receive} exact={true}/>
                     <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
                     <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
                     <Route path="/scan" component={Scan} exact={true}/>
