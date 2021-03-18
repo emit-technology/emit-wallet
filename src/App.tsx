@@ -81,6 +81,8 @@ import ExchangeWETH from "./pages/ExchangeWETH";
 import TransferNFT from "./pages/TransferNFT";
 import TunnelNFT from "./pages/TunnelNFT";
 import Unlock from "./pages/accounts/Unlock";
+import Altar from "./pages/epoch/altar";
+import Chaos from "./pages/epoch/chaos";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -132,6 +134,9 @@ class App extends React.Component<any,any>{
                     <Route path="/scan" component={Scan} exact={true}/>
                     <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
                     <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
+
+                    <Route path="/epoch/altar" component={Altar} exact={true}/>
+                    <Route path="/epoch/chaos" component={Chaos} exact={true}/>
 
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');

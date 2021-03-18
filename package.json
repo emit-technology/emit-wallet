@@ -116,6 +116,7 @@
     "bignumber.js": "^9.0.1",
     "copy-to-clipboard": "^3.3.1",
     "history": "4.10.1",
+    "node-sass": "^4.14.1",
     "qrcode.react": "^1.0.0",
     "serojs": "0.0.6",
     "utf8": "^3.0.0",

@@ -45,6 +45,12 @@ class Url {
         about:"manage/about",
     }
 
+    private epoch = {
+        index : "tabs/epoch",
+        altar : "epoch/altar",
+        chaos : "epoch/chaos",
+    }
+
     private nftTabs = "tabs/nft"
 
     private scan = "scan";
@@ -182,6 +188,15 @@ class Url {
     frozenTronBalance(){
         this.goTo([this.base,"tron/frozen"].join("/"),[this.base].join("/"))
         return
+    }
+
+    epochAltar(){
+        this.goTo([this.base,this.epoch.altar].join("/"),[this.base,this.epoch.index].join("/"))
+        return
+    }
+
+    epochChaos(){
+        this.goTo([this.base,this.epoch.chaos].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
 }

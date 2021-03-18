@@ -33,6 +33,7 @@ import {
     IonCardSubtitle
 } from '@ionic/react';
 import './Epoch.css';
+import url from "../utils/url";
 
 const Epoch: React.FC = () => {
     return (
@@ -53,10 +54,14 @@ const Epoch: React.FC = () => {
 
                     </IonCardHeader>
                     <IonCardContent>
-                        <div style={{opacity:0.5}}>
+                        <div onClick={()=>{
+                            url.epochAltar()
+                        }}>
                             <img src="./assets/img/altar.png" style={{maxWidth:"unset",width:"100%"}}/>
                         </div>
-                        <div style={{opacity:0.5}}>
+                        <div onClick={()=>{
+                            url.epochChaos()
+                        }}>
                             <img src="./assets/img/chaos.png" style={{maxWidth:"unset",width:"100%"}}/>
                         </div>
                     </IonCardContent>
