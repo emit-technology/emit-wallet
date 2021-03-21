@@ -68,6 +68,7 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
 import WETH from "../contract/weth";
 import tron from "../rpc/tron";
+import interVar from "../interval";
 
 const {StatusBar,Device} = Plugins;
 
@@ -143,17 +144,10 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
-        this.init().then(() => {
-        }).catch()
-        let initInterValId: any = sessionStorage.getItem("initInterValId");
-        if (initInterValId) {
-            clearInterval(initInterValId)
-        }
-        initInterValId = setInterval(() => {
+        interVar.start(()=>{
             this.init().then(() => {
             }).catch()
-        }, 5000)
-        sessionStorage.setItem("initInterValId", initInterValId);
+        },5000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{

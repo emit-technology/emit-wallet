@@ -8,7 +8,7 @@
 }
 
 .progress {
-  padding: 12px 48px;
+  padding: 2vw 10vw;
 }
 
 .text-little {
@@ -50,9 +50,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  left: -100px;
   width: 28vw;
-  animation: slide 1s forwards;
   animation-delay: 1s;
   z-index: 5;
 }
@@ -62,9 +60,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  left: 100%;
   width: 28vw;
-  animation: slide 1s forwards;
   animation-delay: 1s;
   z-index: 5;
 }
@@ -122,8 +118,8 @@ body {
 }
 
 .start-btn {
-  width: 100px;
-  height: 100px;
+  width: 30vw;
+  height: 30vw;
   color: #fff;
   border: #00ffff 1px solid;
   position: absolute;
@@ -132,11 +128,57 @@ body {
   left: 50%;
   border-radius: 50%;
   text-align: center;
-  padding: 40px 0;
+  padding: 12vw 0;
   animation: bigAssButtonPulse 3s linear infinite alternate;
   box-shadow: 0 0 15px #0ff;
 }
 
+.ne-text {
+  top: calc(66vh + 36px);
+  font-weight: 600;
+  font-family: Epilogue, sans-serif;
+  padding: 6px 5px 2px;
+  position: absolute;
+  transform: translateX(-50%);
+  left: 50%;
+  color: #fff;
+  text-shadow: 0 0 3px #0ff;
+  font-size: 24px;
+  letter-spacing: 5px;
+  border: 1px solid #0ff;
+  border-radius: 5px;
+  box-shadow: 0 0 3px #0ff;
+}
+
+.nonce-text {
+  bottom: 2px;
+  position: absolute;
+  transform: translateX(-50%);
+  left: 50%;
+  padding: 3px;
+  width: 80vw;
+  font-weight: 600;
+  text-align: center;
+  font-family: Epilogue, sans-serif;
+}
+
+.nonce-span {
+  color: #fff;
+  text-shadow: 0 0 3px #fff;
+  font-size: 12px;
+  letter-spacing: 2px;
+  font-family: Epilogue, sans-serif;
+}
+
+@keyframes nonce-an {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+}
 @keyframes bigAssButtonPulse {
   from {
     box-shadow: 0 0 15px #0ff;

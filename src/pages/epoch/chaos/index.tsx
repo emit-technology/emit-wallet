@@ -4,24 +4,91 @@ import {chevronBack} from "ionicons/icons";
 import url from "../../../utils/url";
 import "./index.scss"
 import {Plugins} from "@capacitor/core";
+import {MinerScenes, MintData} from "../miner";
+
+import miner from "../miner/chaos";
+import interVar from "../../../interval";
+import walletWorker from "../../../worker/walletWorker";
 
 interface State{
     showProgress:boolean
+    mintData:MintData
+    isMining:boolean
 }
-
+const scenes = MinerScenes.chaos;
 class Chaos extends React.Component<any, State>{
 
     state:State = {
-        showProgress:false
+        showProgress:false,
+        mintData: {ne: "0", accountId: "", accountScenes: "", scenes: "", phash: "", address: "", index: ""},
+        isMining:false
     }
     componentDidMount() {
         Plugins.StatusBar.setBackgroundColor({
             color: "#1e274e"
         })
+
+        this.init().catch(e => {
+            console.error(e)
+        });
+        interVar.start(() => {
+            this.mintState().then(() => {
+            }).catch(e => {
+                console.error(e)
+            })
+        }, 1 * 1000)
+    }
+
+    init = async () => {
+        const account: any = await walletWorker.accountInfo()
+        miner.setMiner(account.accountId)
+        await miner.init();
+        await this.mintState();
+        this.setState({
+            isMining: await miner.isMining()
+        })
+    }
+
+    operate = async () => {
+        const {isMining} = this.state;
+        if (isMining) {
+            await this.stop()
+        } else {
+            await this.start()
+        }
+    }
+
+    start = async () => {
+        const account: any = await walletWorker.accountInfo()
+        await miner.start({
+            phash: "0x6643536dbd7163921fef7f59c2c75e876d176f8bdc9a154536acf72e4d3c9d64",
+            address: "0xBc149B2e61C169394C8d7Fd9bF4912B3B8C1c8E1",
+            index: "0x1",
+            scenes: scenes,
+            accountScenes: miner.uKey(),
+            accountId: account.accountId
+        })
+        this.setState({
+            isMining: true
+        })
+    }
+
+    stop = async () => {
+        await miner.stop();
+        this.setState({
+            isMining: false
+        })
+    }
+
+    async mintState() {
+        const rest = await miner.mintState()
+        this.setState({
+            mintData: rest
+        })
     }
 
     render() {
-        const {showProgress} = this.state;
+        const {showProgress,mintData,isMining} = this.state;
 
         return (
             <IonPage>
@@ -111,7 +178,19 @@ class Chaos extends React.Component<any, State>{
                         </div>
 
                         <div>
-                            <div className="start-btn">START</div>
+                            {mintData && mintData.ne && <div className="ne-text">
+                                {mintData && mintData.ne}
+                            </div>}
+                            {mintData && mintData.nonce && <div className="nonce-text">
+                                <span className="nonce-span">{mintData && mintData.nonce}</span>
+                            </div>}
+                            <div className="start-btn" style={{background: !!isMining ? "red" : "green"}}
+                                 onClick={() => {
+                                     this.operate().then(() => {
+                                     }).catch((e) => {
+                                         console.error(e)
+                                     })
+                                 }}>{!!isMining ? "STOP" : "START"}</div>
                         </div>
                     </div>
                 </IonContent>

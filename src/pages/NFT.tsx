@@ -9,6 +9,7 @@ import {ChainType} from "../types";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
+import interVar from "../interval";
 
 class NFT extends React.Component<any, any> {
 
@@ -17,20 +18,12 @@ class NFT extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        this.init().catch(e => {
-            console.error(e)
-        })
-
-        let initInterValId: any = sessionStorage.getItem("initInterValIdNFT");
-        if (initInterValId) {
-            clearInterval(initInterValId)
-        }
-        initInterValId = setInterval(() => {
-            this.init().catch(e => {
-                console.log(e)
+        interVar.start(()=>{
+            this.init().then(() => {
+            }).catch(e=>{
+                console.error(e)
             })
-        }, 10000)
-        sessionStorage.setItem("initInterValIdNFT", initInterValId);
+        },5000)
     }
 
     init = async () => {
