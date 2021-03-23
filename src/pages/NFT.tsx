@@ -10,6 +10,8 @@ import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
 import interVar from "../interval";
+import {Plugins} from "@capacitor/core";
+
 
 class NFT extends React.Component<any, any> {
 
@@ -17,7 +19,15 @@ class NFT extends React.Component<any, any> {
         wrapTicket: [],
     }
 
+    constructor(props:any) {
+        super(props);
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#222428"
+        })
+    }
+
     componentDidMount() {
+
         interVar.start(()=>{
             this.init().then(() => {
             }).catch(e=>{

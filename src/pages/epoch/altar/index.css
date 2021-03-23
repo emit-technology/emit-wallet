@@ -53,6 +53,8 @@
   width: 28vw;
   animation-delay: 1s;
   z-index: 5;
+  transition: transform 0.6s ease 0.1s;
+  transform-style: preserve-3d;
 }
 
 .altar div:nth-child(5) img {
@@ -63,6 +65,8 @@
   width: 28vw;
   animation-delay: 1s;
   z-index: 5;
+  transition: transform 0.6s ease 0.1s;
+  transform-style: preserve-3d;
 }
 
 .altar div:nth-child(4) div:nth-child(2) {

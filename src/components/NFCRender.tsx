@@ -25,6 +25,7 @@ import * as utils from "../utils"
 import url from "../utils/url";
 import i18n from "../locales/i18n";
 import {META_TEMP} from "../config";
+import CardTransform from "./CardTransform";
 
 interface Props {
     data: Array<any>
@@ -34,6 +35,7 @@ class NFCRender extends React.Component<Props, any> {
 
     state: any = {
         showModal: false,
+        tab:"medal",
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any) {
@@ -75,43 +77,88 @@ class NFCRender extends React.Component<Props, any> {
 
     render() {
         const {data} = this.props;
-        const {showModal,mateData,metaInfo} = this.state;
+        const {showModal,mateData,metaInfo,tab} = this.state;
         return <>
             <IonHeader mode="ios">
-                <IonToolbar color="primary" mode="ios">
+                <IonToolbar color="dark" mode="ios">
                     <IonTitle>{i18n.t("NFT")}</IonTitle>
                 </IonToolbar>
             </IonHeader>
-            <div style={{padding:"12px 12px 0"}}>
-                <IonSegment mode="ios" value="medal" onIonChange={e => console.log('Segment selected', e.detail.value)}>
-                    <IonSegmentButton mode="ios" value="medal">
-                        <IonLabel>Medal</IonLabel>
+            <div style={{padding:"12px 12px 0",background:"#000"}}>
+                <IonSegment mode="ios" color="light" value={tab} style={{background:"#000"}} onIonChange={e => this.setState({tab:e.detail.value})}>
+                    <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="medal">
+                        <IonLabel color={tab=="medal"?"dark":"light"}>Medal</IonLabel>
                     </IonSegmentButton>
-                    <IonSegmentButton mode="ios" disabled value="driver">
-                        <IonLabel>Driver</IonLabel>
+                    <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="driver">
+                        <IonLabel color={tab=="driver"?"dark":"light"}>Driver</IonLabel>
                     </IonSegmentButton>
-                    <IonSegmentButton mode="ios" disabled value="devices">
-                        <IonLabel>Devices</IonLabel>
+                    <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="devices">
+                        <IonLabel color={tab=="devices"?"dark":"light"}>Devices</IonLabel>
                     </IonSegmentButton>
                 </IonSegment>
             </div>
-            <div>
-                {
-                    data && data.map((v: any,index:number) => {
-                        //lines={index == data.length-1?"none":"inset"}
-                        return <IonItem onClick={()=>this.showModal(v,true)} >
-                            <IonAvatar slot="start" className="medal-avatar">
-                                {mateData && mateData[v.value] && <img src={mateData[v.value].image} /> }
-                            </IonAvatar>
-                            <IonLabel>
-                                <h2>{mateData && mateData[v.value] && mateData[v.value].name}</h2>
-                                <h3><IonBadge color="light" mode="md">{v.chain} Chain</IonBadge></h3>
-                                <p><IonText color="medium">Token Id: {v.value}</IonText></p>
-                            </IonLabel>
-                        </IonItem>
-                    })
-                }
+            <div className="card-page">
+                <div className="card-inset">
 
+
+                {/*{*/}
+                {/*    data && data.map((v: any,index:number) => {*/}
+                {/*        //lines={index == data.length-1?"none":"inset"}*/}
+                {/*        return <IonItem onClick={()=>this.showModal(v,true)} >*/}
+                {/*            <IonAvatar slot="start" className="medal-avatar">*/}
+                {/*                {mateData && mateData[v.value] && <img src={mateData[v.value].image} /> }*/}
+                {/*            </IonAvatar>*/}
+                {/*            <IonLabel>*/}
+                {/*                <h2>{mateData && mateData[v.value] && mateData[v.value].name}</h2>*/}
+                {/*                <h3><IonBadge color="light" mode="md">{v.chain} Chain</IonBadge></h3>*/}
+                {/*                <p><IonText color="medium">Token Id: {v.value}</IonText></p>*/}
+                {/*            </IonLabel>*/}
+                {/*        </IonItem>*/}
+                {/*    })*/}
+                {/*}*/}
+
+                    {
+                        data && data.map((v: any,index:number) => {
+                            //lines={index == data.length-1?"none":"inset"}
+                            const meta = mateData && mateData[v.value]?mateData[v.value]:{};
+                            return <CardTransform src={meta.image}
+                                                  title={meta.name} subTitle={v.value} chain={v.chain}
+                                                  timestamp={Date.now()} description={meta.description}
+                                                  dna={utils.getAddressBySymbol(v.symbol,v.chain)} symbol={v.symbol}/>
+                        })
+                    }
+                    {
+                        data && data.map((v: any,index:number) => {
+                            //lines={index == data.length-1?"none":"inset"}
+                            const meta = mateData && mateData[v.value]?mateData[v.value]:{};
+                            return <CardTransform src={meta.image}
+                                                  title={meta.name} subTitle={v.value} chain={v.chain}
+                                                  timestamp={Date.now()} description={meta.description}
+                                                  dna={utils.getAddressBySymbol(v.symbol,v.chain)} symbol={v.symbol}/>
+                        })
+                    }
+                    {
+                        data && data.map((v: any,index:number) => {
+                            //lines={index == data.length-1?"none":"inset"}
+                            const meta = mateData && mateData[v.value]?mateData[v.value]:{};
+                            return <CardTransform src={meta.image}
+                                                  title={meta.name} subTitle={v.value} chain={v.chain}
+                                                  timestamp={Date.now()} description={meta.description}
+                                                  dna={utils.getAddressBySymbol(v.symbol,v.chain)} symbol={v.symbol}/>
+                        })
+                    }
+                    {
+                        data && data.map((v: any,index:number) => {
+                            //lines={index == data.length-1?"none":"inset"}
+                            const meta = mateData && mateData[v.value]?mateData[v.value]:{};
+                            return <CardTransform src={meta.image}
+                                                  title={meta.name} subTitle={v.value} chain={v.chain}
+                                                  timestamp={Date.now()} description={meta.description}
+                                                  dna={utils.getAddressBySymbol(v.symbol,v.chain)} symbol={v.symbol}/>
+                        })
+                    }
+
+                </div>
             </div>
 
             {/*<div style={{height:"25vh",background:"#fff",overflowY:"scroll",margin:"12px 12px 0",border:"1px solid #ddd",borderRadius:"15px"}}>*/}

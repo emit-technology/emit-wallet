@@ -155,7 +155,7 @@ class Url {
         return
     }
 
-    tunnelNFT(symbol: string,chain:string,tokenId:string) {
+    tunnelNFT(symbol: string,chain:ChainType,tokenId:string) {
         this.goTo([this.base, this.transaction.tunnelNFT, symbol,chain,tokenId].join("/"), [this.base,this.nftTabs].join("/"))
         return
     }

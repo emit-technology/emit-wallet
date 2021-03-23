@@ -149,6 +149,14 @@ class Settings extends React.Component<any, any>{
         exportType:"privateKey"
     }
 
+    constructor(props:any) {
+        super(props);
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
+    }
+
+
     componentDidMount() {
         walletWorker.accountInfo().then(account=>{
             this.setState({

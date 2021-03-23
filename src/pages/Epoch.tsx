@@ -34,44 +34,54 @@ import {
 } from '@ionic/react';
 import './Epoch.css';
 import url from "../utils/url";
+import {Plugins} from "@capacitor/core";
 
-const Epoch: React.FC = () => {
-    return (
-        <IonPage>
-            <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar color="primary" mode="ios">
-                        <IonTitle>Epoch</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonCard mode="ios">
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            <IonLabel>
-                                ORIGIN
-                            </IonLabel>
-                        </IonCardTitle>
+class Epoch extends React.Component<any, any>{
+    constructor(props:any) {
+        super(props);
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
+    }
 
-                    </IonCardHeader>
-                    <IonCardContent>
-                        <div onClick={()=>{
-                            url.epochAltar()
-                        }}>
-                            <img src="./assets/img/altar.png" style={{maxWidth:"unset",width:"100%"}}/>
+    render() {
+        return (
+            <IonPage>
+                <IonContent fullscreen>
+                    <IonHeader>
+                        <IonToolbar color="primary" mode="ios">
+                            <IonTitle>Epoch</IonTitle>
+                        </IonToolbar>
+                    </IonHeader>
+                    <IonCard mode="ios">
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                <IonLabel>
+                                    ORIGIN
+                                </IonLabel>
+                            </IonCardTitle>
+
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <div onClick={() => {
+                                url.epochAltar()
+                            }}>
+                                <img src="./assets/img/altar.png" style={{maxWidth: "unset", width: "100%"}}/>
+                            </div>
+                            <div onClick={() => {
+                                url.epochChaos()
+                            }}>
+                                <img src="./assets/img/chaos.png" style={{maxWidth: "unset", width: "100%"}}/>
+                            </div>
+                        </IonCardContent>
+                        <div className="text-center">
+                            <IonChip color="warning">This universe is about to be initialized</IonChip>
                         </div>
-                        <div onClick={()=>{
-                            url.epochChaos()
-                        }}>
-                            <img src="./assets/img/chaos.png" style={{maxWidth:"unset",width:"100%"}}/>
-                        </div>
-                    </IonCardContent>
-                    <div className="text-center">
-                        <IonChip color="warning">This universe is about to be initialized</IonChip>
-                    </div>
-                </IonCard>
-            </IonContent>
-        </IonPage>
-    );
+                    </IonCard>
+                </IonContent>
+            </IonPage>
+        );
+    }
 };
 
 export default Epoch;

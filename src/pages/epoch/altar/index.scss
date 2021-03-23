@@ -50,18 +50,22 @@ $colorYellow: #edcc67;
   @include altar-absolute;
   //left: -100px;
   width: 28vw;
-  //animation: slide 1s forwards;
+  //animation: cover 1s forwards;
   animation-delay: 1s;
   z-index: 5;
+  transition: transform 0.6s ease 0.1s;
+  transform-style: preserve-3d;
 }
 
 .altar div:nth-child(5) img {
   @include altar-absolute;
   //left: 100%;
   width: 28vw;
-  //animation: slide 1s forwards;
+  //animation: cover 1s forwards;
   animation-delay: 1s;
   z-index: 5;
+  transition: transform 0.6s ease 0.1s;
+  transform-style: preserve-3d;
 }
 
 .altar div:nth-child(4) div:nth-child(2) {
