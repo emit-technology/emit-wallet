@@ -29,6 +29,7 @@ $colorYellow: #edcc67;
   @include altar-absolute;
   width: 75vw;
   animation: turn 60s linear infinite;
+  //animation-delay: 1s;
   z-index: 1;
 }
 
@@ -36,6 +37,7 @@ $colorYellow: #edcc67;
   @include altar-absolute;
   width: 53vw;
   animation: turn-left 40s linear infinite;
+  //animation-delay: 1s;
   z-index: 2;
 }
 
@@ -43,6 +45,7 @@ $colorYellow: #edcc67;
   @include altar-absolute;
   width: 56vw;
   animation: turn 60s linear infinite;
+  //animation-delay: 1s;
   z-index: 3;
 }
 
@@ -150,7 +153,7 @@ body {
 .ne-text {
   top: calc(66vh + 36px);
   font-weight: 600;
-  font-family: Epilogue,sans-serif;
+  font-family: Epilogue, sans-serif;
   padding: 6px 5px 2px;
   @include show-text
 }
@@ -167,7 +170,7 @@ body {
   width: 80vw;
   font-weight: 600;
   text-align: center;
-  font-family: Epilogue,sans-serif;
+  font-family: Epilogue, sans-serif;
 }
 
 .nonce-span {
@@ -175,7 +178,7 @@ body {
   text-shadow: 0 0 3px #fff;
   font-size: 12px;
   letter-spacing: 2px;
-  font-family: Epilogue,sans-serif;
+  font-family: Epilogue, sans-serif;
   //animation: nonce-an 1s linear infinite;
 }
 
@@ -248,4 +251,51 @@ body {
   100% {
     -webkit-transform: translate(-50%, -50%) rotate(-360deg);
   }
+}
+
+.progress-background {
+  height: 6px;
+}
+
+.epoch-modal{
+  --width: 90%;
+  --height: 80%;
+  --border-radius: 15px;
+  --background:#fff;
+  //opacity: 0.9;
+}
+.epoch-md .close{
+  float: right;
+  padding: 10px 12px;
+  //width: 100%;
+}
+.btn-bottom{
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  padding: 5px;
+}
+
+.font-weight-800{
+  font-weight: 800;
+}
+
+.modal-header{
+  font-size: 24px;
+  font-weight: 800;
+  text-align: center;
+  padding: 12px
+}
+
+.epoch-desc{
+  padding: 12px;
+}
+
+.epoch-desc .ctx{
+  width: 100%;
+  border-radius: 0.375em;
+  border: 2px dashed #e2e8f0;
+  min-height: 100px;
+  margin: 12px 0 0;
+  padding: 12px;
 }

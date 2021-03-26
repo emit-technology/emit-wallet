@@ -87,6 +87,9 @@ class RPC {
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const ret:any = {}
         for (let key of keys) {
+            if(!CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["ETH"]){
+                continue
+            }
             const contract: Erc721 = new Erc721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["ETH"],ChainType.ETH);
             const balance: number = await contract.balanceOf(address)
             const symbol = await contract.symbol()
@@ -110,12 +113,12 @@ class RPC {
         const ret:any = {}
         const seroData:any = await this.post(["sero", "getTicket"].join("_"), [address],ChainType.SERO);
         for (let key of keys) {
+            if(!CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["SERO"]){
+                continue
+            }
             const contract: Src721 = new Src721(CONTRACT_ADDRESS.ERC721[key]["ADDRESS"]["SERO"]);
             const rest = await contract.symbol()
             const symbol = rest[0]
-            // if(CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"] == symbol){
-            //
-            // }
             const balance = seroData[symbol];
             if(balance && balance.length>0){
                 const tokenArr: Array<any> = [];
@@ -174,6 +177,8 @@ class RPC {
     }
 
     commitTx = async (tx: Transaction, password: string) => {
+        //FOR Test
+        password = "12345678"
         const accountId: string | null = selfStorage.getItem("accountId");
         if (accountId) {
             let hash: any = "";

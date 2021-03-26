@@ -23,7 +23,8 @@ import {
     CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
-    EXPLORER_URL, FULL_NAME,
+    EXPLORER_URL,
+    FULL_NAME,
     GAS_DEFAULT,
     GAS_PRICE_UNIT,
     NOT_CROSS_TOKEN
@@ -75,13 +76,13 @@ export function toValue(value: string | BigNumber | number, decimal: number): Bi
 export function getCyDecimal(cy: string, chainName: string): number {
     try {
         if (!cy || !chainName) {
-            return 0
+            return 18
         }
         return DECIMAL_CURRENCY[chainName][cy];
     } catch (e) {
         console.log(e)
     }
-    return 0
+    return 18
 }
 
 export function needApproved(chain: ChainType) {
@@ -149,9 +150,12 @@ export function getDestinationChainIDByName(chain: string): any {
     return ChainId._
 }
 
-export function toHex(value: string | number | BigNumber) {
+export function toHex(value: string | number | BigNumber,decimal?:number) {
     if (value === "0x") {
         return "0x0"
+    }
+    if(decimal){
+        return "0x" + toValue(value,decimal).toString(16);
     }
     return "0x" + new BigNumber(value).toString(16)
 }
@@ -404,4 +408,9 @@ export function getChainFullName(chain:ChainType){
         return FULL_NAME[ChainType[chain]]
     }
     return ChainType[chain]
+}
+
+export async function getShortAddress(shotAddress:string){
+    const rest:any = await rpc.post("sero_getShortAddress",[shotAddress],ChainType.SERO);
+    return rest
 }

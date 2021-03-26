@@ -24,9 +24,11 @@ const serojs = require('serojs');
 class SeroContract{
 
     contract:any = {};
+    address:string;
 
     constructor(address:string,abi:any) {
         this.contract = serojs.callContract(abi, address)
+        this.address = address;
     }
 
     async call(method: string, args: Array<any>, from: string): Promise<any> {

@@ -117,18 +117,18 @@ class TunnelNFT extends React.Component<any, any> {
             }
         }
         let metaData: any = {};
-        if (chain == ChainType.ETH) {
-            const contract: Erc721 = new Erc721(contractAddress,chain);
-            const uri = await contract.tokenURI(tokenId)
-            metaData = await rpc.req(uri, {})
-        } else if (chain == ChainType.SERO) {
-            const contract: Src721 = new Src721(contractAddress);
-            const uri = await contract.tokenURI(tokenId)
-            metaData = await rpc.req(uri, {})
-        }
+        // if (chain == ChainType.ETH) {
+        //     const contract: Erc721 = new Erc721(contractAddress,chain);
+        //     const uri = await contract.tokenURI(tokenId)
+        //     metaData = await rpc.req(uri, {})
+        // } else if (chain == ChainType.SERO) {
+        //     const contract: Src721 = new Src721(contractAddress);
+        //     const uri = await contract.tokenURI(tokenId)
+        //     metaData = await rpc.req(uri, {})
+        // }
 
         //TODO FOR TEST
-        metaData = META_TEMP.MEDAL
+        metaData = META_TEMP[symbol]
 
         const rest: any = await this.getCrossFee()
 

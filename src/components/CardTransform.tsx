@@ -98,12 +98,12 @@ class CardTransform extends React.Component<Props, State> {
                     <IonGrid>
                         <IonRow>
                             <IonCol size="6">
-                                <IonButton color="light" fill="outline" expand="block" size="small"  onClick={()=>{
+                                <IonButton color="light" mode="ios" fill="outline" expand="block" size="small"  onClick={()=>{
                                     url.tunnelNFT(symbol,chain,subTitle)
                                 }}>CROSS</IonButton>
                             </IonCol>
                             <IonCol size="6">
-                                <IonButton color="light" fill="outline" expand="block" size="small" onClick={() => {
+                                <IonButton color="light" mode="ios" fill="outline" expand="block" size="small" onClick={() => {
                                     url.transferNFT(symbol,chain,subTitle)
                                 }}>Transfer</IonButton>
                             </IonCol>

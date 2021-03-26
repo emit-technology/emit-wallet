@@ -73,3 +73,8 @@ export interface costTime {
     gasPrice: string
     second: number
 }
+
+export interface Ticket {
+    Value:string
+    Category:string
+}

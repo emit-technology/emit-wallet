@@ -18,8 +18,8 @@ export interface MintData {
     scenes:any
     phash: string
     address: string
-    index: string
-    accountId: string
+    index: any
+    accountId?: string
     hashseed?: string
     ne?: string
     nonce?: string

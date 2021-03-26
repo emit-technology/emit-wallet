@@ -84,18 +84,18 @@ class TransferNFT extends React.Component<any, any> {
         const contractAddress = utils.getAddressBySymbol(category,chainName)
         if (category && chainId) {
             let metaData:any = {};
-            if(chainId == ChainType.ETH){
-                const contract: Erc721 = new Erc721(contractAddress,chainId);
-                const uri = await contract.tokenURI(tokenId)
-                metaData = await rpc.req(uri,{})
-            }else if (chainId == ChainType.SERO){
-                const contract: Src721 = new Src721(contractAddress);
-                const uri = await contract.tokenURI(tokenId)
-                metaData = await rpc.req(uri,{})
-            }
+            // if(chainId == ChainType.ETH){
+            //     const contract: Erc721 = new Erc721(contractAddress,chainId);
+            //     const uri = await contract.tokenURI(tokenId)
+            //     metaData = await rpc.req(uri,{})
+            // }else if (chainId == ChainType.SERO){
+            //     const contract: Src721 = new Src721(contractAddress);
+            //     const uri = await contract.tokenURI(tokenId)
+            //     metaData = await rpc.req(uri,{})
+            // }
 
             //TODO FOR TEST
-            metaData = META_TEMP.MEDAL
+            metaData = META_TEMP[category]
 
             const account = await walletWorker.accountInfo()
             const balance = await rpc.getBalance(chainId, account.addresses[chainId]);

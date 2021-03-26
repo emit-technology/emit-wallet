@@ -74,9 +74,6 @@ class Epoch extends React.Component<any, any>{
                                 <img src="./assets/img/chaos.png" style={{maxWidth: "unset", width: "100%"}}/>
                             </div>
                         </IonCardContent>
-                        <div className="text-center">
-                            <IonChip color="warning">This universe is about to be initialized</IonChip>
-                        </div>
                     </IonCard>
                 </IonContent>
             </IonPage>
