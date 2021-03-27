@@ -1,6 +1,6 @@
 import SeroContract from "../../SeroContract";
 import {MinerScenes} from "../../../pages/epoch/miner";
-import {Device, UserInfo} from "./types";
+import {Device, DeviceInfo, UserInfo} from "./types";
 import {CONTRACT_ADDRESS} from "../../../config";
 
 const ABI = [
@@ -22,19 +22,29 @@ const ABI = [
             {
                 "components": [
                     {
-                        "internalType": "int128",
+                        "internalType": "string",
+                        "name": "category",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "ticket",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
                         "name": "base",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "int128",
+                        "internalType": "uint256",
                         "name": "capacity",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "int128",
+                        "internalType": "uint256",
                         "name": "power",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
                         "internalType": "bytes32",
@@ -47,7 +57,7 @@ const ABI = [
                         "type": "uint64"
                     }
                 ],
-                "internalType": "struct Types.Device",
+                "internalType": "struct Types.DeviceInfo",
                 "name": "",
                 "type": "tuple"
             }
@@ -81,19 +91,29 @@ const ABI = [
             {
                 "components": [
                     {
-                        "internalType": "int128",
+                        "internalType": "string",
+                        "name": "category",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "ticket",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
                         "name": "base",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "int128",
+                        "internalType": "uint256",
                         "name": "capacity",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "int128",
+                        "internalType": "uint256",
                         "name": "power",
-                        "type": "int128"
+                        "type": "uint256"
                     },
                     {
                         "internalType": "bytes32",
@@ -106,7 +126,7 @@ const ABI = [
                         "type": "uint64"
                     }
                 ],
-                "internalType": "struct Types.Device",
+                "internalType": "struct Types.DeviceInfo",
                 "name": "",
                 "type": "tuple"
             }
@@ -228,12 +248,12 @@ class Index extends SeroContract {
         return ret[0]
     }
 
-    axInfo = async (catg: string, tkt: string, from: string): Promise<Device> => {
+    axInfo = async (catg: string, tkt: string, from: string): Promise<DeviceInfo> => {
         const ret:any = await  this.call("axInfo", [catg, tkt], from)
         return ret[0]
     }
 
-    lockedDevice = async (scenes: MinerScenes, from: string): Promise<Device> => {
+    lockedDevice = async (scenes: MinerScenes, from: string): Promise<DeviceInfo> => {
         const ret:any = await  this.call("lockedDevice", [scenes], from)
         return ret[0]
     }

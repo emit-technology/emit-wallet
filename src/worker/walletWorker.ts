@@ -152,7 +152,7 @@ class WalletWorker {
         this.isLocked().then(ret=>{
             const urlHash = window.location.hash;
             if(ret && urlHash.indexOf("account/unlock") == -1){
-                // url.accountUnlock()
+                url.accountUnlock()
             }
         })
         return new Promise((resolve, reject)=>{
@@ -162,7 +162,6 @@ class WalletWorker {
                     if(!data.addresses[ChainType.BSC]){
                         data.addresses[ChainType.BSC] = data.addresses[ChainType.ETH]
                     }
-                    data.addresses[ChainType.TRON]="TEv3dBso7f2NcSnnPQSafHMM34DtJ7G5N4";
                     resolve(data);
                 }
                 service.accountInfo(accountId,function (data:any){

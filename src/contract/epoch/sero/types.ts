@@ -8,6 +8,16 @@ export interface Device {
     last: number;
 }
 
+export interface DeviceInfo {
+    category:string
+    ticket:string;
+    base: number;
+    capacity: number;
+    power: number;
+    gene: string;
+    last: number;
+}
+
 export interface Driver {
     base: number;
     capacity: number;
