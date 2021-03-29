@@ -81,15 +81,26 @@ import ExchangeWETH from "./pages/ExchangeWETH";
 import TransferNFT from "./pages/TransferNFT";
 import TunnelNFT from "./pages/TunnelNFT";
 import Unlock from "./pages/accounts/Unlock";
+import * as utils from "./utils"
+import embed from "./utils/embed";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
 let epoch = require("./img/icon/epoch.png")
 let setting = require("./img/icon/setting.png")
 
-
+const isEmbedPopup = utils.getQueryString("embed") == "popup" || selfStorage.getItem("embed") == "popup";
 
 class App extends React.Component<any,any>{
+
+    componentDidMount() {
+        if(isEmbedPopup){
+            selfStorage.setItem("embed","popup")
+            embed.initPopup().catch(e=>{
+                console.error(e)
+            })
+        }
+    }
 
     resetIcon = (v:any)=>{
         this.setState({selected:v})
@@ -166,10 +177,13 @@ class App extends React.Component<any,any>{
                                         <IonImg src={nft} className="toolbar-icon"/>
                                         <IonLabel className="text-small-x2">{i18n.t("NFT")}</IonLabel>
                                     </IonTabButton>
-                                    <IonTabButton tab="epoch" href="/tabs/epoch">
-                                        <IonImg src={epoch} className="toolbar-icon"/>
-                                        <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
-                                    </IonTabButton>
+                                    {
+                                        !isEmbedPopup &&
+                                        <IonTabButton tab="epoch" href="/tabs/epoch">
+                                            <IonImg src={epoch} className="toolbar-icon"/>
+                                            <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
+                                        </IonTabButton>
+                                    }
                                     <IonTabButton tab="settings" href="/tabs/settings">
                                         <IonImg src={setting} className="toolbar-icon"/>
                                         <IonLabel className="text-small-x2">{i18n.t("settings")}</IonLabel>

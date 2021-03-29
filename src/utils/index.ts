@@ -405,3 +405,12 @@ export function getChainFullName(chain:ChainType){
     }
     return ChainType[chain]
 }
+
+export function getQueryString(name:string) {
+    const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    const r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return decodeURIComponent(r[2]);
+    }
+    return '';
+}
