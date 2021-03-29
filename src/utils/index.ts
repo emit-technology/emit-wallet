@@ -31,6 +31,7 @@ import {
 import {ChainId, ChainType, GasPriceLevel} from "../types";
 import rpc from "../rpc";
 import * as utils from "../utils"
+import selfStorage from "./storage";
 
 const utf8 = require("utf8");
 
@@ -413,4 +414,8 @@ export function getQueryString(name:string) {
         return decodeURIComponent(r[2]);
     }
     return '';
+}
+
+export function isEmbedPopup(){
+    return utils.getQueryString("embed") == "popup" || selfStorage.getItem("embed") == "popup";
 }

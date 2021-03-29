@@ -89,12 +89,10 @@ let nft = require("./img/icon/NFT.png")
 let epoch = require("./img/icon/epoch.png")
 let setting = require("./img/icon/setting.png")
 
-const isEmbedPopup = utils.getQueryString("embed") == "popup" || selfStorage.getItem("embed") == "popup";
-
 class App extends React.Component<any,any>{
 
     componentDidMount() {
-        if(isEmbedPopup){
+        if(utils.isEmbedPopup()){
             selfStorage.setItem("embed","popup")
             embed.initPopup().catch(e=>{
                 console.error(e)
@@ -146,7 +144,7 @@ class App extends React.Component<any,any>{
 
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');
-                        if (!viewedSlide) {
+                        if (!viewedSlide && !utils.isEmbedPopup()) {
                             return <Redirect to="/slide"/>
                         }
                         const accountId = selfStorage.getItem('accountId');
@@ -178,7 +176,7 @@ class App extends React.Component<any,any>{
                                         <IonLabel className="text-small-x2">{i18n.t("NFT")}</IonLabel>
                                     </IonTabButton>
                                     {
-                                        !isEmbedPopup &&
+                                        !utils.isEmbedPopup() &&
                                         <IonTabButton tab="epoch" href="/tabs/epoch">
                                             <IonImg src={epoch} className="toolbar-icon"/>
                                             <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
