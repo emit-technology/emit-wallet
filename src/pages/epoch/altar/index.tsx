@@ -5,7 +5,6 @@ import {
     IonIcon,
     IonItem,
     IonLabel,
-    IonLoading,IonButton,
     IonPage,
     IonProgressBar,
     IonRow,
@@ -48,6 +47,11 @@ class Altar extends React.Component<any, State> {
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#152955"
+        }).catch(e=>{
+
+        })
         this.init().then(()=>{
 
         }).catch(e => {
@@ -163,33 +167,15 @@ class Altar extends React.Component<any, State> {
                     <div className="content-ion">
                         <IonItem className="heard-bg" color="primary" lines="none">
                             <IonIcon src={chevronBack} style={{color: "#edcc67"}} slot="start" onClick={() => {
-                                url.back()
                                 Plugins.StatusBar.setBackgroundColor({
                                     color: "#194381"
-                                }).catch(e => {
+                                }).catch(e=>{
                                 })
-
+                                url.back()
                             }}/>
                             <IonLabel className="text-center text-bold" style={{color: "#edcc67"}}>ALTAR</IonLabel>
                             <img src={require("../img/help.png")} width={28}/>
                         </IonItem>
-                        {/*<div style={{color:"#fff",textAlign:"center"}}>*/}
-                        {/*    <div><IonText>NO.{userInfo && userInfo.currentPeriod}</IonText></div>*/}
-                        {/*    {*/}
-                        {/*        userInfo && userInfo.lastUpdateTime &&*/}
-                        {/*        <Countdown date={((userInfo? new BigNumber(userInfo.lastUpdateTime).toNumber():0)+210)*1000} renderer={this.renderer}/>*/}
-                        {/*    }*/}
-                        {/*    {*/}
-                        {/*        userInfo && userInfo.currentPeriod>userInfo.settlementPeriod &&*/}
-                        {/*        <IonButton size="small" onClick={()=>{*/}
-                        {/*            this.setState({*/}
-                        {/*                done:true,*/}
-                        {/*                showModal:true*/}
-                        {/*            })*/}
-                        {/*        }}>Done</IonButton>*/}
-                        {/*    }*/}
-                        {/*</div>*/}
-                        <div style={{margin: "30px 0 0"}}></div>
                         <div className="progress">
                             <div>
                                 <IonRow>
@@ -220,20 +206,18 @@ class Altar extends React.Component<any, State> {
                             </div>
                         </div>
 
-                        <div className="altar" onClick={()=>{
+                        <div className="altar-img-1"><img src={require("../img/altar_1.png")}/></div>
+                        <div className="altar-img-2"><img src={require("../img/altar_2.png")}/></div>
+                        <div className="altar-img-3"><img src={require("../img/altar_3.png")}/></div>
+                        <div  className="altar-img-4">
+                            <img src={require("../img/axe_0.png")}/>
+                            <div className="altar-img-4b"></div>
+                        </div>
+                        <div className="altar-img-5" onClick={()=>{
                             this.setShowModal(true)
                             this.init().catch()
                         }}>
-                            <div><img src={require("../img/altar_1.png")}/></div>
-                            <div><img src={require("../img/altar_2.png")}/></div>
-                            <div><img src={require("../img/altar_3.png")}/></div>
-                            <div>
-                                <img src={require("../img/axe_0.png")}/>
-                                <div></div>
-                            </div>
-                            <div>
-                                <img src={require("../img/axe_1.png")}/>
-                            </div>
+                            <img src={require("../img/axe_1.png")}/>
                         </div>
 
                         <div>

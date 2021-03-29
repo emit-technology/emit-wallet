@@ -538,6 +538,7 @@ class Tunnel extends React.Component<any, any> {
         const {crossMode, targetCoin} = this.state;
         const chain = utils.getChainIdByName(crossMode[0]);
         let intervalId: any = 0;
+        this.setShowProgress(true)
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then(rest => {
                 if (rest) {

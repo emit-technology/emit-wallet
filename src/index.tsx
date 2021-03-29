@@ -25,7 +25,6 @@ import { Plugins,StatusBarStyle } from '@capacitor/core';
 import url from "./utils/url";
 
 
-
 setTimeout(()=>{
     Plugins.SplashScreen.hide().then(()=>{
         console.log("App started , hide splash!")

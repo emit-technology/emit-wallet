@@ -13,7 +13,7 @@ import {
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
 import {ChainType} from "../types";
-import {CONTRACT_ADDRESS} from "../config"
+import {CONTRACT_ADDRESS, META_TEMP} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
 import interVar from "../interval";
@@ -72,7 +72,9 @@ class NFT extends React.Component<any, any> {
                             symbol:key,
                             value:d.tokenId,
                             uri:d.uri,
-                            chain:ChainType[ChainType.SERO]
+                            chain:ChainType[ChainType.SERO],
+                            metaData: META_TEMP[key]
+
                         })
                     }
                 }
@@ -87,7 +89,8 @@ class NFT extends React.Component<any, any> {
                             symbol:key,
                             value:d.tokenId,
                             uri:d.uri,
-                            chain:ChainType[ChainType.ETH]
+                            chain:ChainType[ChainType.ETH],
+                            metaData: META_TEMP[key]
                         })
                     }
                 }
@@ -158,7 +161,6 @@ class NFT extends React.Component<any, any> {
                 </div>
                 {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) ?
                     <NFCRender data={ticketMap.get(tab)}/>
-
                     :
                 <div>
                     { drivers && Object.keys(drivers).map((k:any)=>{

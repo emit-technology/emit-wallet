@@ -38,15 +38,9 @@ class CardTransform extends React.Component<Props, State> {
 
     componentDidMount() {
         this.init().catch();
-    }
-
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-        // if(prevProps != this.props){
-        //     // this.init().catch();
-        //     this.setState({
-        //         deg:0
-        //     })
-        // }
+            this.setState({
+                deg:0
+            })
     }
 
     init = async ()=>{

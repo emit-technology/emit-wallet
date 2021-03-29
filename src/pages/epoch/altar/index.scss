@@ -11,6 +11,7 @@ $colorYellow: #edcc67;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
 }
 
 .color-blue {
@@ -25,7 +26,7 @@ $colorYellow: #edcc67;
   font-size: 8px;
 }
 
-.altar div:nth-child(1) img {
+.altar-img-1 img {
   @include altar-absolute;
   width: 75vw;
   animation: turn 60s linear infinite;
@@ -33,7 +34,7 @@ $colorYellow: #edcc67;
   z-index: 1;
 }
 
-.altar div:nth-child(2) img {
+.altar-img-2 img {
   @include altar-absolute;
   width: 53vw;
   animation: turn-left 40s linear infinite;
@@ -41,7 +42,7 @@ $colorYellow: #edcc67;
   z-index: 2;
 }
 
-.altar div:nth-child(3) img {
+.altar-img-3 img {
   @include altar-absolute;
   width: 56vw;
   animation: turn 60s linear infinite;
@@ -49,7 +50,7 @@ $colorYellow: #edcc67;
   z-index: 3;
 }
 
-.altar div:nth-child(4) img {
+.altar-img-4 img {
   @include altar-absolute;
   //left: -100px;
   width: 28vw;
@@ -60,7 +61,7 @@ $colorYellow: #edcc67;
   transform-style: preserve-3d;
 }
 
-.altar div:nth-child(5) img {
+.altar-img-5 img {
   @include altar-absolute;
   //left: 100%;
   width: 28vw;
@@ -71,7 +72,7 @@ $colorYellow: #edcc67;
   transform-style: preserve-3d;
 }
 
-.altar div:nth-child(4) div:nth-child(2) {
+.altar-img-4b {
   @include altar-absolute;
   width: 80px;
   height: 80px;
@@ -82,21 +83,21 @@ $colorYellow: #edcc67;
   z-index: 4;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box
-}
-
-html, body {
-  height: 100%
-}
-
-body {
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  margin: 0;
-  background-color: #000
-}
+//*, *::before, *::after {
+//  box-sizing: border-box
+//}
+//
+//html, body {
+//  height: 100%
+//}
+//
+//body {
+//  display: grid;
+//  align-items: center;
+//  justify-items: center;
+//  margin: 0;
+//  background-color: #000
+//}
 
 @keyframes pulsate {
   50% {
@@ -114,6 +115,7 @@ body {
   --background: initial !important;
   background: initial !important;
   --ion-color-base: initial !important;
+  padding-top: 8px;
 }
 
 .axe-progress {

@@ -37,36 +37,41 @@ class NFCRender extends React.Component<Props, any> {
         showModal: false,
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any) {
-        console.log(this.props,"props")
-        if(prevProps != this.props){
-            this.init().catch(e => {
-                console.error(e)
-            })
-        }
+    componentDidMount() {
+        // this.init().catch(e => {
+        //     console.error(e)
+        // })
     }
+    //
+    // componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any) {
+    //     if(prevProps != this.props){
+    //         this.init().catch(e => {
+    //             console.error(e)
+    //         })
+    //     }
+    // }
 
-    init = async () => {
-        const {data} = this.props
-        if(!data){
-            return
-        }
-        const mateData:any = {};
-        for(let d of data){
-            //TODO for test
-            mateData[d.value]  = META_TEMP[d.symbol]
-
-            //
-            // if(!d.uri){
-            //     continue;
-            // }
-            // const rest = await rpc.req(d.uri,{})
-            // mateData[d.value] = rest
-        }
-        this.setState({
-            mateData:mateData
-        })
-    }
+    // init = async () => {
+    //     const {data} = this.props
+    //     if(!data){
+    //         return
+    //     }
+    //     const mateData:any = {};
+    //     for(let d of data){
+    //         //TODO for test
+    //         mateData[d.value]  = META_TEMP[d.symbol]
+    //
+    //         //
+    //         // if(!d.uri){
+    //         //     continue;
+    //         // }
+    //         // const rest = await rpc.req(d.uri,{})
+    //         // mateData[d.value] = rest
+    //     }
+    //     this.setState({
+    //         mateData:mateData
+    //     })
+    // }
 
     showModal = (v:any,f:boolean)=>{
         this.setState({
@@ -77,14 +82,13 @@ class NFCRender extends React.Component<Props, any> {
 
     render() {
         const {data} = this.props;
-        const {showModal,mateData,metaInfo} = this.state;
         return <>
             <div className="card-page">
                 <div className="card-inset">
                     {
                         data && data.map((v: any,index:number) => {
                             //lines={index == data.length-1?"none":"inset"}
-                            const meta = mateData && mateData[v.value]?mateData[v.value]:{};
+                            const meta = v.metaData?v.metaData:{};
                             return <CardTransform src={meta.image}
                                                   title={meta.name} subTitle={v.value} chain={v.chain}
                                                   timestamp={Date.now()} description={meta.description}
@@ -94,69 +98,69 @@ class NFCRender extends React.Component<Props, any> {
 
                 </div>
             </div>
-            <IonModal isOpen={showModal}
-                      keyboardClose={true}
-                      backdropDismiss={true}
-                      onDidDismiss={()=>{this.showModal("",false)}}
-                      mode="ios"
-                      cssClass="confirm-transaction-modal"
-                      swipeToClose={true}>
-                <div className="nfc-modal">
-                    {
-                        metaInfo && mateData && mateData[metaInfo.value] && <IonCard>
-                            <div>
-                                <img src={mateData[metaInfo.value].image}/>
-                            </div>
-                            <IonCardHeader>
-                                <IonCardTitle>{mateData[metaInfo.value].name}
-                                <IonButton size="small" onClick={()=>{
-                                    url.tunnelNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)
-                                }}>CROSS</IonButton></IonCardTitle>
-                                <IonCardSubtitle>
-                                    {metaInfo && metaInfo.chain} Chain
-                                </IonCardSubtitle>
-                            </IonCardHeader>
+            {/*<IonModal isOpen={showModal}*/}
+            {/*          keyboardClose={true}*/}
+            {/*          backdropDismiss={true}*/}
+            {/*          onDidDismiss={()=>{this.showModal("",false)}}*/}
+            {/*          mode="ios"*/}
+            {/*          cssClass="confirm-transaction-modal"*/}
+            {/*          swipeToClose={true}>*/}
+            {/*    <div className="nfc-modal">*/}
+            {/*        {*/}
+            {/*            metaInfo && mateData && mateData[metaInfo.value] && <IonCard>*/}
+            {/*                <div>*/}
+            {/*                    <img src={mateData[metaInfo.value].image}/>*/}
+            {/*                </div>*/}
+            {/*                <IonCardHeader>*/}
+            {/*                    <IonCardTitle>{mateData[metaInfo.value].name}*/}
+            {/*                    <IonButton size="small" onClick={()=>{*/}
+            {/*                        url.tunnelNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)*/}
+            {/*                    }}>CROSS</IonButton></IonCardTitle>*/}
+            {/*                    <IonCardSubtitle>*/}
+            {/*                        {metaInfo && metaInfo.chain} Chain*/}
+            {/*                    </IonCardSubtitle>*/}
+            {/*                </IonCardHeader>*/}
 
-                            <IonCardContent>
-                                <IonItemGroup>
-                                    <IonItemDivider mode="md">
-                                        <IonLabel>Token Id</IonLabel>
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <p className="work-break">{metaInfo && metaInfo.value}</p>
-                                    </IonItem>
-                                    <IonItemDivider mode="md">
-                                        <IonLabel>Description</IonLabel>
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <p className="work-break">{mateData[metaInfo.value].description}</p>
-                                    </IonItem>
-                                    <IonItemDivider mode="md">
-                                        <IonLabel>Contract Address</IonLabel>
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <p className="work-break">{metaInfo && utils.getAddressBySymbol(metaInfo.symbol,metaInfo.chain)}</p>
-                                    </IonItem>
-                                </IonItemGroup>
-                            </IonCardContent>
-                        </IonCard>
-                    }
-                    <div style={{position:"fixed",bottom:"0",background:"#fff",padding:"15px",width:"100%"}}>
-                        <IonRow>
-                            <IonCol>
-                                <IonButton expand="block"  mode="ios" fill="outline" onClick={() => this.showModal("",false)}>
-                                    {i18n.t("close")}
-                                </IonButton>
-                            </IonCol>
-                            <IonCol>
-                                <IonButton expand="block" mode="ios" onClick={() => {
-                                    url.transferNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)
-                                }}>{i18n.t("transfer")}</IonButton>
-                            </IonCol>
-                        </IonRow>
-                    </div>
-                </div>
-            </IonModal>
+            {/*                <IonCardContent>*/}
+            {/*                    <IonItemGroup>*/}
+            {/*                        <IonItemDivider mode="md">*/}
+            {/*                            <IonLabel>Token Id</IonLabel>*/}
+            {/*                        </IonItemDivider>*/}
+            {/*                        <IonItem lines="none">*/}
+            {/*                            <p className="work-break">{metaInfo && metaInfo.value}</p>*/}
+            {/*                        </IonItem>*/}
+            {/*                        <IonItemDivider mode="md">*/}
+            {/*                            <IonLabel>Description</IonLabel>*/}
+            {/*                        </IonItemDivider>*/}
+            {/*                        <IonItem lines="none">*/}
+            {/*                            <p className="work-break">{mateData[metaInfo.value].description}</p>*/}
+            {/*                        </IonItem>*/}
+            {/*                        <IonItemDivider mode="md">*/}
+            {/*                            <IonLabel>Contract Address</IonLabel>*/}
+            {/*                        </IonItemDivider>*/}
+            {/*                        <IonItem lines="none">*/}
+            {/*                            <p className="work-break">{metaInfo && utils.getAddressBySymbol(metaInfo.symbol,metaInfo.chain)}</p>*/}
+            {/*                        </IonItem>*/}
+            {/*                    </IonItemGroup>*/}
+            {/*                </IonCardContent>*/}
+            {/*            </IonCard>*/}
+            {/*        }*/}
+            {/*        <div style={{position:"fixed",bottom:"0",background:"#fff",padding:"15px",width:"100%"}}>*/}
+            {/*            <IonRow>*/}
+            {/*                <IonCol>*/}
+            {/*                    <IonButton expand="block"  mode="ios" fill="outline" onClick={() => this.showModal("",false)}>*/}
+            {/*                        {i18n.t("close")}*/}
+            {/*                    </IonButton>*/}
+            {/*                </IonCol>*/}
+            {/*                <IonCol>*/}
+            {/*                    <IonButton expand="block" mode="ios" onClick={() => {*/}
+            {/*                        url.transferNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)*/}
+            {/*                    }}>{i18n.t("transfer")}</IonButton>*/}
+            {/*                </IonCol>*/}
+            {/*            </IonRow>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</IonModal>*/}
         </>;
     }
 }

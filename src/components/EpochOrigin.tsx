@@ -129,7 +129,7 @@ class EpochOrigin extends React.Component<Props, State> {
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then((rest) => {
                 console.log("getTxInfo>>> ",rest)
-                if (rest) {
+                if (rest && rest.num>0) {
                     // this.setShowToast(true,"success","Commit Successfully!")
                     clearInterval(intervalId);
                     // url.transactionInfo(chain,hash,Currency);
@@ -337,7 +337,7 @@ class EpochOrigin extends React.Component<Props, State> {
 
                 onDidDismiss={() => this.setShowLoading(false)}
                 message={'Please wait...'}
-                duration={5000}
+                duration={50000}
             />
 
             <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => {}} onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>

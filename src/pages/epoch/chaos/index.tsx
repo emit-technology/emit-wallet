@@ -50,7 +50,7 @@ class Chaos extends React.Component<any, State>{
 
     componentDidMount() {
         Plugins.StatusBar.setBackgroundColor({
-            color: "#1e274e"
+            color: "#152955"
         }).catch(e=>{
 
         })

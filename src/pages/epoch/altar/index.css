@@ -15,41 +15,45 @@
   font-size: 8px;
 }
 
-.altar div:nth-child(1) img {
+.altar-img-1 img {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 75vw;
   animation: turn 60s linear infinite;
   z-index: 1;
 }
 
-.altar div:nth-child(2) img {
+.altar-img-2 img {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 53vw;
   animation: turn-left 40s linear infinite;
   z-index: 2;
 }
 
-.altar div:nth-child(3) img {
+.altar-img-3 img {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 56vw;
   animation: turn 60s linear infinite;
   z-index: 3;
 }
 
-.altar div:nth-child(4) img {
+.altar-img-4 img {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 28vw;
   animation-delay: 1s;
   z-index: 5;
@@ -57,11 +61,12 @@
   transform-style: preserve-3d;
 }
 
-.altar div:nth-child(5) img {
+.altar-img-5 img {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 28vw;
   animation-delay: 1s;
   z-index: 5;
@@ -69,11 +74,12 @@
   transform-style: preserve-3d;
 }
 
-.altar div:nth-child(4) div:nth-child(2) {
+.altar-img-4b {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin: auto;
   width: 80px;
   height: 80px;
   box-shadow: 0 0 10px #fff, -10px 0 25px #f0f, 10px 0 25px #0ff, inset 0 0 15px #fff, inset 15px 0 25px #f0f, inset -15px 0 25px #0ff, inset 15px 0 100px #f0f, inset -15px 0 100px #0ff;
@@ -81,22 +87,6 @@
   animation-delay: 2.5s;
   border-radius: 50%;
   z-index: 4;
-}
-
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-}
-
-body {
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  margin: 0;
-  background-color: #000;
 }
 
 @keyframes pulsate {
@@ -114,6 +104,7 @@ body {
   --background: initial !important;
   background: initial !important;
   --ion-color-base: initial !important;
+  padding-top: 8px;
 }
 
 .axe-progress {

@@ -35,6 +35,9 @@ $show-customer:
 //23vw -15vh 0px -4.25px $color-boll,
 22vw -12vh 0px -6.25px #fff;
 
+//.chaos{
+//  position: relative;
+//}
 
 .chaos div:nth-child(1){
   @include chaos-absolute;

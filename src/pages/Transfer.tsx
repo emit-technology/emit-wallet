@@ -208,6 +208,7 @@ class Transfer extends React.Component<any, any> {
     confirm = async (hash:string) => {
         const {chain,cy} = this.state;
         let intervalId:any = 0;
+        this.setShowProgress(true)
         intervalId = setInterval(()=>{
             rpc.getTxInfo(chain,hash).then((rest)=>{
                 if(rest){
