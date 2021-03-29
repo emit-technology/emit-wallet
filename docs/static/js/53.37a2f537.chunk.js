@@ -1,0 +1,2 @@
+(this["webpackJsonpemit-wallet"]=this["webpackJsonpemit-wallet"]||[]).push([[53],{1199:function(t,n,e){"use strict";e.r(n),e.d(n,"startStatusTap",(function(){return o}));var i=e(41),o=function(){var t=window;t.addEventListener("statusTap",(function(){Object(i.h)((function(){var n=t.innerWidth,e=t.innerHeight,o=document.elementFromPoint(n/2,e/2);if(o){var c=o.closest("ion-content");c&&c.componentOnReady().then((function(){Object(i.f)((function(){return c.scrollToTop(300)}))}))}}))}))}}}]);
+//# sourceMappingURL=53.37a2f537.chunk.js.map

@@ -54,14 +54,21 @@ class Miner {
         return false
     }
 
-    init = async () => {
+    init = async (data: MintData) => {
         const rest: MintData = await this.miner.mintState(this.uKey())
         if (rest && rest.state == MintState.running) {
             if (rest.timestamp && (Date.now() - rest.timestamp) > this.timeout) {
                 rest.nonce="";// reset nonce
-                await this.miner.mintStart(rest)
+                await this.miner.mintInit(rest)
+                await this.miner.mintStart()
             }
         }
+        if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address){
+            await this.miner.mintInit(data)
+        }else{
+            await this.miner.mintInit(rest)
+        }
+        return
     }
 
     start = async (data: MintData) => {
@@ -72,7 +79,8 @@ class Miner {
         const isMining = await this.isMining();
         console.log("isMining>>",isMining)
         if (!isMining) {
-            await this.miner.mintStart(data)
+            await this.miner.mintInit(data)
+            await this.miner.mintStart()
             console.log("miner started!")
         }
     }

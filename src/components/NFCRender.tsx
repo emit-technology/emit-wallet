@@ -38,6 +38,7 @@ class NFCRender extends React.Component<Props, any> {
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<any>, snapshot?: any) {
+        console.log(this.props,"props")
         if(prevProps != this.props){
             this.init().catch(e => {
                 console.error(e)

@@ -35,6 +35,7 @@ import {
 import './Epoch.css';
 import url from "../utils/url";
 import {Plugins} from "@capacitor/core";
+import interVar from "../interval";
 
 class Epoch extends React.Component<any, any>{
     constructor(props:any) {
@@ -42,6 +43,8 @@ class Epoch extends React.Component<any, any>{
         Plugins.StatusBar.setBackgroundColor({
             color: "#194381"
         })
+
+        interVar.stop()
     }
 
     render() {

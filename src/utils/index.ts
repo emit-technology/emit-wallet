@@ -414,3 +414,10 @@ export async function getShortAddress(shotAddress:string){
     const rest:any = await rpc.post("sero_getShortAddress",[shotAddress],ChainType.SERO);
     return rest
 }
+
+export function getDeviceLv(rate:string|undefined){
+    if(rate){
+        return utils.fromValue(rate,16).toFixed(2,1)
+    }
+    return "0";
+}

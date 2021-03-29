@@ -5,11 +5,11 @@ import {
     IonInput,
     IonItem,
     IonLabel,
-    IonList, IonLoading,
-    IonModal,
+    IonList, IonLoading,IonSegment,IonSegmentButton,
+    IonModal,IonText,
     IonRow,
     IonSelect,
-    IonSelectOption, IonToast
+    IonSelectOption, IonToast,IonCheckbox
 } from "@ionic/react";
 import ConfirmTransaction from "./ConfirmTransaction";
 import epochService from "../contract/epoch/sero";
@@ -18,25 +18,26 @@ import {AccountModel, ChainType, Transaction} from "../types";
 import BigNumber from "bignumber.js";
 import * as utils from "../utils";
 import rpc from "../rpc";
-import {Device, UserInfo} from "../contract/epoch/sero/types";
+import {DeviceInfo, UserInfo} from "../contract/epoch/sero/types";
+import Countdown from 'react-countdown';
 
 interface State {
-    showProgress: boolean
     amount: any
     showAlert: boolean
     tx: any
     showToast: boolean
     toastMessage?: string
     color?: string
-    showLoading: boolean
     selectAxe: string
+    checked:boolean
+    showLoading: boolean
 }
 
 interface Props {
     tkt: Array<any>
     mintData: MintData
     userInfo?: UserInfo
-    device?: Device
+    device?: DeviceInfo
     showModal: boolean
     account?: AccountModel
     callback: () => void
@@ -51,17 +52,16 @@ class EpochOrigin extends React.Component<Props, State> {
 
 
     state: State = {
-        showProgress: false,
         amount: "0",
         showAlert: false,
         tx: {},
         showToast: false,
-        showLoading: false,
-        selectAxe: ""
+        selectAxe: "",
+        checked:false,
+        showLoading:false
     }
 
     done = async () => {
-        this.setShowProgress(true)
         this.setShowLoading(true)
         const data = await epochService.done(this.props.scenes)
         await this.do(data)
@@ -69,7 +69,6 @@ class EpochOrigin extends React.Component<Props, State> {
 
     prepare = async () => {
         const {mintData} = this.props;
-        this.setShowProgress(true)
         this.setShowLoading(true)
         if (mintData.nonce) {
             const data = await epochService.prepare(this.props.scenes, mintData.nonce)
@@ -78,8 +77,11 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     do = async (data: string) => {
-        const {account} = this.props;
-        const {amount, selectAxe} = this.state;
+        const {account,mintData,device} = this.props;
+        const {amount, selectAxe,checked} = this.state;
+        if(mintData.scenes == MinerScenes.chaos && !selectAxe && !checked  && !device?.category){
+            return Promise.reject("Please Select Axe")
+        }
         if (account) {
             let tx: Transaction | any = {
                 from: account.addresses && account.addresses[ChainType.SERO],
@@ -92,7 +94,7 @@ class EpochOrigin extends React.Component<Props, State> {
                 value: utils.toHex(amount, 18),
                 data: data,
             }
-            if (selectAxe) {
+            if (!checked && selectAxe) {
                 tx.catg = Category
                 tx.tkt = selectAxe
                 tx.tickets= [{
@@ -108,14 +110,10 @@ class EpochOrigin extends React.Component<Props, State> {
                 tx: tx,
                 showAlert: true
             })
+            this.setShowLoading(false)
+            this.props.setShowModal(false)
         }
 
-    }
-
-    setShowProgress = (f: boolean) => {
-        this.setState({
-            showProgress: f
-        })
     }
 
     setShowAlert = (f: boolean) => {
@@ -127,24 +125,21 @@ class EpochOrigin extends React.Component<Props, State> {
     confirm = async (hash: string) => {
         let intervalId: any = 0;
         const chain = ChainType.SERO;
+        this.setShowLoading(true)
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then((rest) => {
+                console.log("getTxInfo>>> ",rest)
                 if (rest) {
                     // this.setShowToast(true,"success","Commit Successfully!")
                     clearInterval(intervalId);
                     // url.transactionInfo(chain,hash,Currency);
-
-                    this.props.setShowModal(false)
+                    this.setShowLoading(false)
                     this.props.callback();
                 }
             }).catch(e => {
                 console.error(e)
             })
-        }, 1000)
-
-        this.setShowLoading(false)
-        this.setShowProgress(false)
-
+        }, 3000)
         this.setShowAlert(false)
     }
 
@@ -158,13 +153,31 @@ class EpochOrigin extends React.Component<Props, State> {
 
     setShowLoading = (f: boolean) => {
         this.setState({
-            showLoading: f
+            showLoading:f
         })
     }
 
+    setOperate = (v:string) =>{
+        this.setState({
+            checked: v == "stop"
+        })
+    }
+
+    // @ts-ignore
+    renderer = ({ hours, minutes, seconds,completed }) => {
+        if(completed){
+            return <span>Commit</span>
+        }
+        return <div className="countdown">{hours}:{minutes}:{seconds}</div>;
+    };
+
+
+
     render() {
         const {showModal, mintData, device, userInfo, setShowModal, tkt} = this.props;
-        const {showProgress, showLoading, showAlert, tx, toastMessage, color, showToast, selectAxe} = this.state;
+        const {showAlert, tx, toastMessage,showLoading, color, showToast, selectAxe,checked,amount} = this.state;
+
+        const nextPeriodTime = ((userInfo? new BigNumber(userInfo.lastUpdateTime).toNumber():0)+210)*1000;
 
         return <>
 
@@ -174,98 +187,131 @@ class EpochOrigin extends React.Component<Props, State> {
                 swipeToClose={true}
                 onDidDismiss={() => this.props.setShowModal(false)}>
                 <div className="epoch-md">
-                    <div className="close" onClick={() => {
-                        this.props.setShowModal(false)
-                    }}>X
+                    <div>
+                        <div className="modal-header">Settlement</div>
+                        {/*<div className="close" onClick={() => {*/}
+                        {/*    this.props.setShowModal(false)*/}
+                        {/*}}>X*/}
+                        {/*</div>*/}
                     </div>
                     <IonList>
-                        <div className="modal-header">Settlement</div>
-                        <IonItem>
-                            <IonLabel>Current Period</IonLabel>
-                            <IonChip color="primary"
-                                     className="font-weight-800">{userInfo && userInfo.currentPeriod}</IonChip>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel>Settlement Period</IonLabel>
-                            <IonChip color="primary"
-                                     className="font-weight-800">{userInfo && userInfo.settlementPeriod}</IonChip>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel>NE</IonLabel>
-                            <IonChip color="tertiary" className="font-weight-800">{mintData && mintData.ne}</IonChip>
-                        </IonItem>
+                        {/*<IonItem>*/}
+                        {/*    <IonLabel>Current Period</IonLabel>*/}
+                        {/*    <IonChip color="primary" className="font-weight-800">{userInfo && userInfo.currentPeriod}</IonChip>*/}
+                        {/*</IonItem>*/}
+                        {/*<IonItem>*/}
+                        {/*    <IonLabel>Settlement Period</IonLabel>*/}
+                        {/*    <IonChip color="primary" className="font-weight-800">{userInfo && userInfo.settlementPeriod}</IonChip>*/}
+                        {/*</IonItem>*/}
+                        {/*Refining*/}
+
                         {
-
+                            device && device.category &&
+                            <div style={{padding:"12px"}}>
+                                <IonRow>
+                                    <IonCol size="1"></IonCol>
+                                    <IonCol>
+                                        <IonSegment mode="ios" onIonChange={(e:any) => this.setOperate(e.detail.value)} value={checked?"stop":"refining"}>
+                                            <IonSegmentButton value="refining">
+                                                <IonLabel>{mintData.scenes == MinerScenes.altar?"Forge":"Mint"}</IonLabel>
+                                            </IonSegmentButton>
+                                            <IonSegmentButton value="stop">
+                                                <IonLabel>Stop</IonLabel>
+                                            </IonSegmentButton>
+                                        </IonSegment>
+                                    </IonCol>
+                                    <IonCol size="1"></IonCol>
+                                </IonRow>
+                            </div>
                         }
-                        <IonItem>
-                            <IonLabel>AXE</IonLabel>
-                            <IonSelect value={selectAxe} onIonChange={(e: any) => {
-                                this.setState({
-                                    selectAxe: e.detail.value
-                                })
-                            }
-                            }>
-                                {
-                                    tkt && tkt.map(value => {
-                                        return <IonSelectOption value={value.tokenId}>{value.tokenId}</IonSelectOption>
+                        {
+                            !checked && <IonItem>
+                                <IonLabel>NE</IonLabel>
+                                <IonChip color="tertiary" className="font-weight-800">{mintData && mintData.ne}</IonChip>
+                            </IonItem>
+                        }
+                        {
+                            !checked && <IonItem>
+                                <IonLabel>Change AXE</IonLabel>
+                                <IonSelect mode="ios" value={selectAxe} onIonChange={(e: any) => {
+                                    this.setState({
+                                        selectAxe: e.detail.value
                                     })
-
                                 }
-                            </IonSelect>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel position="stacked">Light</IonLabel>
-                            <IonInput placeholder="0" onIonChange={(v) => {
-                                this.setState({
-                                    amount: v
-                                })
-                            }}/>
-                        </IonItem>
+                                }>
+                                    {
+                                        MinerScenes.altar == mintData.scenes && <IonSelectOption value={""}>{
+                                            device && device.category?"Not Change":"New Axe"
+                                        }</IonSelectOption>
+                                    }
+                                    {
+                                        tkt && tkt.map(value => {
+                                            return <IonSelectOption value={value.tokenId}>{value.tokenId}</IonSelectOption>
+                                        })
+                                    }
+                                </IonSelect>
+                            </IonItem>
+                        }
+                        {
+                            mintData.scenes == MinerScenes.altar && !checked && <IonItem>
+                                <IonLabel position="stacked">Deposit NE with LIGHT</IonLabel>
+                                <IonInput placeholder="0" onIonChange={(v) => {
+                                    console.log(v)
+                                    this.setState({
+                                        amount: v.detail.value
+                                    })
+                                }}/>
+                            </IonItem>
+                        }
                     </IonList>
                     <div className="epoch-desc">
                         <div className="ctx">
-                            <p className="font-weight-800">Introduce</p>
                             <div>
-                                <p>1. You do not have equipment for the first time, you need to use Prepare to
-                                    submit</p>
-                                <p>2. When Current period is greater than or equal to Settle, you can continue mining
-                                    next time</p>
-                                <p>3. Mining results can only be submitted once a day</p>
-                                <p>4. You can also use Light to buy NE</p>
+                                <p>1. The total period is <IonText color="primary" className="font-weight-800">{userInfo && userInfo.currentPeriod}</IonText>, and your settlement period is <IonText color="primary" className="font-weight-800">{userInfo && userInfo.settlementPeriod}</IonText></p>
+                                <p>2. You can commit when the total period greater than or equal to settlement period.</p>
+                                <p>3. The total period will changed at {new Date(nextPeriodTime).toLocaleString()}</p>
+                                {
+                                    device && device.category &&
+                                    <p>4. {checked?<IonText color="danger">You are stopping {mintData.scenes == MinerScenes.altar?"Forge":"Mint"} ,and the axe will returned to your wallet account!</IonText>:<IonText color="warning">Your axe will continue to {mintData.scenes == MinerScenes.altar?"Forge":"Mint"}!</IonText>}</p>
+                                }
                             </div>
                         </div>
                     </div>
                     <div className="btn-bottom">
                         <IonRow>
-                            <IonCol size="6">
-                                <IonButton expand="block" mode="ios" color="primary"
-                                           disabled={showProgress || userInfo && userInfo.currentPeriod < userInfo.settlementPeriod}
-                                           onClick={() => {
-                                               this.prepare().then(() => {
-                                                   this.setShowProgress(false)
-                                                   this.setShowLoading(false)
-                                               }).catch(e => {
-                                                   this.setShowProgress(false)
-                                                   this.setShowLoading(false)
-                                                   const err = typeof e == "string" ? e : e.message;
-                                                   this.setShowToast(true, "warning", err)
-                                               })
-                                           }}>Prepare</IonButton>
+                            <IonCol size="4">
+                                <IonButton expand="block" mode="ios" fill={"outline"} color="primary" onClick={() => {
+                                    setShowModal(false)
+                                }}>Cancel</IonButton>
                             </IonCol>
-                            <IonCol size="6">
-                                <IonButton expand="block" mode="ios"
-                                           disabled={showProgress || userInfo && userInfo.currentPeriod < userInfo.settlementPeriod}
-                                           color="primary" onClick={() => {
-                                    this.done().then(() => {
-                                        this.setShowProgress(false)
-                                        this.setShowLoading(false)
-                                    }).catch(e => {
-                                        this.setShowProgress(false)
-                                        this.setShowLoading(false)
-                                        const err = typeof e == "string" ? e : e.message;
-                                        this.setShowToast(true, "warning", err)
-                                    })
-                                }}>Done</IonButton>
+                            <IonCol size="8">
+                                <IonButton expand="block" mode="ios" color="primary"
+                                           disabled={userInfo && userInfo.currentPeriod < userInfo.settlementPeriod
+                                           || new BigNumber(mintData&&mintData.ne?mintData.ne:0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos
+                                           || new BigNumber(mintData&&mintData.ne?mintData.ne:0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar}
+                                           onClick={() => {
+                                               if(checked){
+                                                   this.done().then(() => {
+                                                   }).catch(e => {
+                                                       this.setShowLoading(false)
+                                                       const err = typeof e == "string" ? e : e.message;
+                                                       this.setShowToast(true, "warning", err)
+                                                   })
+                                               }else {
+                                                   this.prepare().then(() => {
+                                                   }).catch(e => {
+                                                       this.setShowLoading(false)
+                                                       const err = typeof e == "string" ? e : e.message;
+                                                       this.setShowToast(true, "warning", err)
+                                                   })
+                                               }
+                                           }}>
+                                    {
+                                        userInfo && userInfo.currentPeriod < userInfo.settlementPeriod?
+                                            <Countdown date={nextPeriodTime} renderer={this.renderer}/>
+                                            :"Commit"
+                                    }
+                                    </IonButton>
                             </IonCol>
                         </IonRow>
                     </div>
@@ -282,17 +328,19 @@ class EpochOrigin extends React.Component<Props, State> {
                 mode="ios"
             />
 
+
             <IonLoading
+                mode="ios"
                 spinner={"bubbles"}
                 cssClass='my-custom-class'
                 isOpen={showLoading}
+
                 onDidDismiss={() => this.setShowLoading(false)}
                 message={'Please wait...'}
                 duration={5000}
             />
 
-            <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => this.setShowProgress(f)}
-                                onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>
+            <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => {}} onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>
 
         </>;
     }

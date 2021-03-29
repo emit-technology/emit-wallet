@@ -41,9 +41,21 @@ class MintWorker {
      accountId: string
      * @param data
      */
-    async mintStart(data:any) {
+    async mintInit(data:any) {
         return new Promise((resolve, reject)=>{
-            this.service.mintStart(data, function (data: any) {
+            this.service.mintInit(data, function (data: any) {
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+    async mintStart() {
+        return new Promise((resolve, reject)=>{
+            this.service.mintStart(function (data: any) {
                 if(data.error){
                     reject(data.error);
                 }else{
@@ -78,5 +90,4 @@ class MintWorker {
     }
 }
 
-// const chaosMiner = new MintWorker();
 export default MintWorker

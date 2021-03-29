@@ -251,9 +251,14 @@ body {
   --background:#fff;
 }
 
+.epoch-md {
+  max-height: 85vh;
+  overflow: scroll;
+}
+
 .epoch-md .close {
   float: right;
-  padding: 10px 12px;
+  padding: 10px 12px 75px;
 }
 
 .btn-bottom {
@@ -261,6 +266,7 @@ body {
   position: absolute;
   bottom: 0;
   padding: 5px;
+  background: #fff;
 }
 
 .font-weight-800 {
@@ -278,13 +284,16 @@ body {
   padding: 12px;
 }
 
-.epoch-desc .ctx {
+.ctx {
   width: 100%;
+  max-height: 260px;
+  overflow: scroll;
   border-radius: 0.375em;
   border: 2px dashed #e2e8f0;
   min-height: 100px;
   margin: 12px 0 0;
   padding: 12px;
+  font-size: 12px;
 }
 
 /*# sourceMappingURL=index.css.map */

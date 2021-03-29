@@ -1,5 +1,16 @@
 import * as React from 'react';
-import {IonCol, IonContent, IonIcon, IonItem, IonLabel, IonPage, IonProgressBar, IonRow, IonText} from "@ionic/react";
+import {
+    IonCol,
+    IonContent,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonLoading,
+    IonPage,
+    IonProgressBar,
+    IonRow,
+    IonText
+} from "@ionic/react";
 import {chevronBack} from "ionicons/icons";
 import url from "../../../utils/url";
 import "./index.scss"
@@ -11,7 +22,7 @@ import interVar from "../../../interval";
 import walletWorker from "../../../worker/walletWorker";
 import {AccountModel, ChainType} from "../../../types";
 import rpc from "../../../rpc";
-import {Device, UserInfo} from "../../../contract/epoch/sero/types";
+import {DeviceInfo, UserInfo} from "../../../contract/epoch/sero/types";
 import * as utils from "../../../utils";
 import epochService from "../../../contract/epoch/sero";
 import EpochOrigin from "../../../components/EpochOrigin";
@@ -21,7 +32,7 @@ interface State{
     isMining:boolean
 
     userInfo?:UserInfo
-    device?:Device
+    device?:DeviceInfo
     showModal:boolean,
     account?:AccountModel
     tkt: Array<any>
@@ -34,54 +45,66 @@ class Chaos extends React.Component<any, State>{
         mintData: {ne: "0", accountId: "", accountScenes: "", scenes: "", phash: "", address: "", index: ""},
         isMining:false,
         showModal:false,
-        tkt:[]
+        tkt:[],
     }
+
     componentDidMount() {
         Plugins.StatusBar.setBackgroundColor({
             color: "#1e274e"
         }).catch(e=>{
 
         })
+        this.init().then(()=>{
 
-        this.init().catch(e => {
+        }).catch(e => {
             console.error(e)
         });
-        interVar.start(() => {
-            this.mintState().then(() => {
-            }).catch(e => {
-                console.error(e)
-            })
-        }, 5 * 1000)
     }
 
     init = async () => {
-        const account: any = await walletWorker.accountInfo()
-        miner.setMiner(account.accountId)
-        await miner.init();
+        const account = await walletWorker.accountInfo()
+        miner.setMiner(account.accountId ? account.accountId : "")
+
+        const userInfo = await epochService.userInfo(scenes, account.addresses[ChainType.SERO])
+        const device = await epochService.lockedDevice(scenes, account.addresses[ChainType.SERO])
+        if (account && userInfo && userInfo.pImage && userInfo && userInfo.pImage.hash && userInfo && userInfo.pImage.serial) {
+            await miner.init({
+                phash: userInfo.pImage.hash,
+                address: await utils.getShortAddress(account.addresses[ChainType.SERO]),
+                index: utils.toHex(userInfo.pImage.serial),
+                scenes: scenes,
+                accountScenes: miner.uKey(),
+                accountId: account.accountId
+            })
+        }
         await this.mintState();
-        this.setState({
-            isMining: await miner.isMining()
-        })
+        console.log("userInfo>", userInfo)
+        console.log("device>", device)
 
-
-        const userInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
-        const device = await epochService.lockedDevice(MinerScenes.chaos, account.addresses[ChainType.SERO])
-
-        console.log("userInfo>",userInfo)
-        console.log("device>",device)
         const tkt = await this.getTicket(account.addresses[ChainType.SERO])
-
+        const isMining = await miner.isMining()
         this.setState({
-            isMining: await miner.isMining(),
-            userInfo:userInfo,
-            device:device,
-            account:account,
-            tkt:tkt
+            isMining: isMining,
+            userInfo: userInfo,
+            device: device,
+            account: account,
+            tkt: tkt
         })
+
+        if(isMining){
+            interVar.start(() => {
+                this.mintState().then(() => {
+                }).catch(e => {
+                    console.error(e)
+                })
+            }, 1 * 1000)
+        }else{
+            interVar.stop()
+        }
     }
 
-    getTicket = async (address:string) =>{
-        const rest = await rpc.getTicket(ChainType.SERO,address)
+    getTicket = async (address: string) => {
+        const rest = await rpc.getTicket(ChainType.SERO, address)
         return rest["EMIT_AX"]
     }
 
@@ -92,6 +115,7 @@ class Chaos extends React.Component<any, State>{
         } else {
             await this.start()
         }
+        await this.init().catch()
     }
 
     start = async () => {
@@ -113,25 +137,27 @@ class Chaos extends React.Component<any, State>{
 
     stop = async () => {
         await miner.stop();
-        this.setShowModal(true)
         this.setState({
             isMining: false
         })
+        this.setShowModal(true)
     }
 
     async mintState() {
         const rest = await miner.mintState()
-        this.setState({
-            mintData: rest
-        })
+        const {mintData,isMining} = this.state;
+        if(isMining || rest.nonce != mintData.nonce || rest.ne != mintData.ne){
+            this.setState({
+                mintData: rest
+            })
+        }
     }
 
-    setShowModal = (f:boolean) =>{
+    setShowModal = (f: boolean) => {
         this.setState({
-            showModal:f
+            showModal: f
         })
     }
-
 
     render() {
         const {showModal,account, isMining, mintData,userInfo,device,tkt} = this.state;
@@ -159,22 +185,20 @@ class Chaos extends React.Component<any, State>{
                             <div className="moving-3"></div>
                         </div>
                         {/*Progress*/}
-                        <div className="axe-btn">Change Axe</div>
-                        <div style={{margin:"30px 0 0"}}></div>
                         <div className="progress">
                             <div>
                                 <IonRow>
-                                    <IonCol>
-                                        <IonText color="white" className="text-little">AEX1</IonText>
+                                    <IonCol size="8">
+                                        <IonText color="white" className="text-little">AEX{device?.category && `(${utils.ellipsisStr(device.ticket)})`}</IonText>
                                     </IonCol>
-                                    <IonCol style={{textAlign: "right"}}>
-                                        <IonText color="white" className="text-little">LV{device && device.power}</IonText><br/>
+                                    <IonCol style={{textAlign: "right"}} size="4">
+                                        <IonText color="white" className="text-little">Rate:{utils.getDeviceLv(device && device.rate)}%</IonText><br/>
                                     </IonCol>
                                 </IonRow>
                             </div>
-                            <IonProgressBar className="progress-background" value={device && (device.capacity?device.base/device.capacity:0)}/>
+                            <IonProgressBar className="progress-background" value={device && (device.capacity ? device.power / device.capacity : 0)}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{device && `${device.base}/${device.capacity}`}</IonText>
+                                <IonText color="white" className="text-little">{device && `${utils.fromValue(device.power,16).toFixed(0,1)}/${utils.fromValue(device.capacity,16).toFixed(0,1)}`}</IonText>
                             </div>
                         </div>
                         <div className="progress">
@@ -185,13 +209,16 @@ class Chaos extends React.Component<any, State>{
                                     </IonCol>
                                 </IonRow>
                             </div>
-                            <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && userInfo.driver.capacity>0?(userInfo.driver.base/userInfo.driver.capacity):0}/>
+                            <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{userInfo && userInfo.driver && `${userInfo.driver.base}/${userInfo.driver.capacity}`}</IonText>
+                                <IonText color="white" className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
                             </div>
                         </div>
 
-                        <div className="chaos">
+                        <div className="chaos" onClick={()=>{
+                            this.setShowModal(true)
+                            this.init().catch()
+                        }}>
                             <div>
                                 <div></div>
                                 <div></div>
@@ -241,7 +268,7 @@ class Chaos extends React.Component<any, State>{
 
                     <EpochOrigin mintData={mintData} userInfo={userInfo} device={device} showModal={showModal}
                                  account={account} callback={() => this.init()} tkt={tkt}
-                                 setShowModal={(f) => this.setShowModal(f)} scenes={MinerScenes.chaos}/>
+                                 setShowModal={(f) => this.setShowModal(f)} scenes={scenes}/>
                 </IonContent>
             </IonPage>
         );

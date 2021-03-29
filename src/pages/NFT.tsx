@@ -1,7 +1,14 @@
 import * as React from 'react';
 import {
-    IonContent, IonHeader, IonLabel,
-    IonPage, IonSegment, IonSegmentButton, IonTitle, IonToolbar,
+    IonCol,
+    IonContent,
+    IonHeader,
+    IonLabel,
+    IonPage, IonProgressBar, IonRow,
+    IonSegment,
+    IonSegmentButton, IonText,
+    IonTitle,
+    IonToolbar,
 } from "@ionic/react";
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
@@ -12,13 +19,17 @@ import NFCRender from "../components/NFCRender";
 import interVar from "../interval";
 import {Plugins} from "@capacitor/core";
 import i18n from "../locales/i18n";
-
+import epochService from "../contract/epoch/sero";
+import {MinerScenes} from "./epoch/miner";
+import {DriverInfo, UserInfo} from "../contract/epoch/sero/types";
+import * as utils from "../utils";
 
 class NFT extends React.Component<any, any> {
 
     state: any = {
         wrapTicket: [],
         tab:"MEDAL",
+        drivers:{}
     }
 
     constructor(props:any) {
@@ -97,17 +108,43 @@ class NFT extends React.Component<any, any> {
         })
     }
 
+    setTab = (v:any)=>{
+        console.log(this.state,v,"testssss")
+        this.setState({tab:v})
+        this.initDriver(v).catch(e=>{
+            console.log(e)
+        })
+    }
+
+    initDriver = async (v:any ) =>{
+        if(v == "DRIVER"){
+            const account = await walletWorker.accountInfo();
+            const drivers:any = {};
+            for(let k in MinerScenes){
+                const scene = parseInt(k);
+                if(scene && scene !== 0){
+                    const rest = await epochService.userInfo(scene, account.addresses[ChainType.SERO])
+                    drivers[scene]=rest
+                }
+            }
+            this.setState({
+                drivers:drivers
+            })
+        }
+    }
+
     render() {
-        const {ticketMap,tab} = this.state;
+        const {ticketMap,tab,drivers} = this.state;
+        console.log("render:",tab,ticketMap,drivers)
         return <IonPage>
-            <IonContent fullscreen color="dark">
+            <IonContent fullscreen color={"dark"}>
                 <IonHeader mode="ios">
                     <IonToolbar color="dark" mode="ios">
                         <IonTitle>{i18n.t("NFT")}</IonTitle>
                     </IonToolbar>
                 </IonHeader>
                 <div style={{padding:"12px 12px 0",background:"#000"}}>
-                    <IonSegment mode="ios" color="light" value={tab} style={{background:"#000"}} onIonChange={e => this.setState({tab:e.detail.value})}>
+                    <IonSegment mode="ios" color="light" value={tab} style={{background:"#000"}} onIonChange={e => this.setTab(e.detail.value)}>
                         <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="MEDAL">
                             <IonLabel color={tab=="MEDAL"?"dark":"light"}>Medal</IonLabel>
                         </IonSegmentButton>
@@ -119,7 +156,28 @@ class NFT extends React.Component<any, any> {
                         </IonSegmentButton>
                     </IonSegment>
                 </div>
-                {ticketMap && ticketMap.has(tab) && <NFCRender data={ticketMap.get(tab)}/>}
+                {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) ?
+                    <NFCRender data={ticketMap.get(tab)}/>
+
+                    :
+                <div>
+                    { drivers && Object.keys(drivers).map((k:any)=>{
+                        const userInfo:UserInfo = drivers[k];
+                        return <div className="progress">
+                            <div>
+                                <IonRow>
+                                    <IonCol>
+                                        <IonText style={{textTransform:"uppercase",color:"#fff",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
+                                    </IonCol>
+                                </IonRow>
+                            </div>
+                            <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
+                            <div style={{textAlign: "right"}}>
+                                <IonText  style={{textTransform:"uppercase",color:"#fff",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
+                            </div>
+                        </div>
+                    })}
+                </div>}
             </IonContent>
         </IonPage>;
     }

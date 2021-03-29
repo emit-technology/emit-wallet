@@ -119,7 +119,12 @@ class ConfirmTransaction extends React.Component<Props, State>{
             showLoading:true
         })
         if(transaction){
-            return await rpc.commitTx(transaction,password)
+            const hash = await rpc.commitTx(transaction,password)
+            this.props.onProcess(false);
+            this.setState({
+                showLoading:false
+            })
+            return hash
         }
         return ""
     }

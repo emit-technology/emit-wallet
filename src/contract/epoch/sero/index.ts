@@ -1,6 +1,6 @@
 import SeroContract from "../../SeroContract";
 import {MinerScenes} from "../../../pages/epoch/miner";
-import {Device, DeviceInfo, UserInfo} from "./types";
+import {DeviceInfo, UserInfo} from "./types";
 import {CONTRACT_ADDRESS} from "../../../config";
 
 const ABI = [
@@ -21,6 +21,11 @@ const ABI = [
         "outputs": [
             {
                 "components": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
                     {
                         "internalType": "string",
                         "name": "category",
@@ -44,6 +49,11 @@ const ABI = [
                     {
                         "internalType": "uint256",
                         "name": "power",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rate",
                         "type": "uint256"
                     },
                     {
@@ -92,6 +102,11 @@ const ABI = [
                 "components": [
                     {
                         "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
                         "name": "category",
                         "type": "string"
                     },
@@ -113,6 +128,11 @@ const ABI = [
                     {
                         "internalType": "uint256",
                         "name": "power",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rate",
                         "type": "uint256"
                     },
                     {
@@ -180,6 +200,11 @@ const ABI = [
                         "type": "uint64"
                     },
                     {
+                        "internalType": "uint64",
+                        "name": "lastUpdateTime",
+                        "type": "uint64"
+                    },
+                    {
                         "components": [
                             {
                                 "internalType": "uint64",
@@ -199,14 +224,24 @@ const ABI = [
                     {
                         "components": [
                             {
-                                "internalType": "int128",
-                                "name": "base",
-                                "type": "int128"
+                                "internalType": "string",
+                                "name": "name",
+                                "type": "string"
                             },
                             {
-                                "internalType": "int128",
+                                "internalType": "uint256",
+                                "name": "base",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
                                 "name": "capacity",
-                                "type": "int128"
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "rate",
+                                "type": "uint256"
                             },
                             {
                                 "internalType": "bytes32",
@@ -214,7 +249,7 @@ const ABI = [
                                 "type": "bytes32"
                             }
                         ],
-                        "internalType": "struct Types.Driver",
+                        "internalType": "struct Types.DriverInfo",
                         "name": "driver",
                         "type": "tuple"
                     }
@@ -228,7 +263,6 @@ const ABI = [
         "type": "function"
     }
 ]
-
 class Index extends SeroContract {
 
     constructor(address: string) {
