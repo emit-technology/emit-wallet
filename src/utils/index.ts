@@ -37,6 +37,7 @@ const utf8 = require("utf8");
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = require("base-x")(BASE58);
+const BN = require("bn.js");
 
 export function bs58ToHex(value: string): string {
     const bytes = bs58.decode(value);
@@ -420,4 +421,38 @@ export function getDeviceLv(rate:string|undefined){
         return utils.fromValue(rate,16).toFixed(2,1)
     }
     return "0";
+}
+
+export function nFormatter(n:number|BigNumber|string, digits:number) {
+    const num = new BigNumber(n).toNumber();
+    const si = [
+        { value: 1, symbol: "" },
+        { value: 1E3, symbol: "K" },
+        { value: 1E6, symbol: "M" },
+        { value: 1E9, symbol: "G" },
+        { value: 1E12, symbol: "T" },
+        { value: 1E15, symbol: "P" },
+        { value: 1E18, symbol: "E" }
+    ];
+    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+    let i;
+    for (i = si.length - 1; i > 0; i--) {
+        if (num >= si[i].value) {
+            break;
+        }
+    }
+    return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+}
+
+export function calcDark(dna:string):number{
+    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
+    return (new BigNumber(u256[0]&0x3).plus(1).toNumber())
+}
+
+export function isDark(dna:string):boolean {
+    if(new BigNumber(dna).toNumber() == 0){
+       return false
+    }
+    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
+    return (u256[0]&0xFC) == 0;
 }

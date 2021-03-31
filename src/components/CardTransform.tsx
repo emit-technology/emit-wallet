@@ -7,14 +7,14 @@ import {ChainType} from "../types";
 import epochService from "../contract/epoch/sero";
 import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils"
-import {MinerScenes} from "../pages/epoch/miner";
 import {DeviceInfo} from "../contract/epoch/sero/types";
+import EpochAttribute from "./EpochAttribute";
 
 interface Props {
     src: string
     title: string
     subTitle: string
-    chain: ChainType
+    chain: string
     timestamp: number
     description: string
     dna: string
@@ -48,7 +48,6 @@ class CardTransform extends React.Component<Props, State> {
         const account = await walletWorker.accountInfo();
         if(symbol == "DEVICES"){
             const device = await epochService.axInfo(utils.getCategoryBySymbol(symbol,ChainType[ChainType.SERO]),subTitle,account.addresses[ChainType.SERO])
-            console.log("device",device)
             this.setState({
                 device:device
             })
@@ -104,36 +103,28 @@ class CardTransform extends React.Component<Props, State> {
                                 </IonRow>
                                 <IonRow className="row-line">
                                     <IonCol className="col-line">
-                                        <div>Chain</div>
-                                        <div>{chain}</div>
+                                        <div className="font-sm">Chain</div>
+                                        <div className="font-md">{chain}</div>
                                     </IonCol>
                                     <IonCol className="col-line">
-                                        <div>Year</div>
-                                        <div>{new Date(timestamp).getFullYear()}</div>
+                                        <div className="font-sm">Symbol</div>
+                                        <div className="font-md">{utils.getCategoryBySymbol(symbol,chain+"")}</div>
                                     </IonCol>
+                                    {
+                                        device && utils.isDark(device.gene) &&
+                                        <IonCol className="col-line">
+                                            <div className="font-sm">DARK Rate</div>
+                                            <div className="font-md">{utils.calcDark(device.gene)}</div>
+                                        </IonCol>
+                                    }
                                 </IonRow>
-                                <IonRow className="row-line">
+                                <IonRow className="row-line" style={{minHeight:"14vh"}}>
                                     <IonCol className="col-line">
-                                        <div>
-                                            <IonText>
-                                                { device ? <div className="progress">
-                                                    <div>
-                                                        <IonRow>
-                                                            <IonCol size="4">
-                                                                <IonText color="white" className="text-little">AEX</IonText>
-                                                            </IonCol>
-                                                            <IonCol style={{textAlign: "right"}} size="8">
-                                                                <IonText color="white" className="text-little">Rate:{utils.getDeviceLv(device && device.rate)}%</IonText><br/>
-                                                            </IonCol>
-                                                        </IonRow>
-                                                    </div>
-                                                    <IonProgressBar className="progress-background" value={device && (device.capacity ? device.power / device.capacity : 0)}/>
-                                                    <div style={{textAlign: "right"}}>
-                                                        <IonText color="white" className="text-little">{device && `${utils.fromValue(device.power,16).toFixed(0,1)}/${utils.fromValue(device.capacity,16).toFixed(0,1)}`}</IonText>
-                                                    </div>
-                                                </div>:description}
-                                            </IonText>
-                                        </div>
+                                        { device ?
+                                            <EpochAttribute device={device} showDevice={true} showDriver={false}/>
+                                            :
+                                            description
+                                        }
                                     </IonCol>
                                 </IonRow>
                             </IonGrid>
@@ -141,17 +132,17 @@ class CardTransform extends React.Component<Props, State> {
                     </div>
                 </div>
                 <div className="card-foo">
-                    <p><IonText color="light">{title}</IonText></p>
+                    <p><IonText>{title}</IonText></p>
                     <IonGrid>
                         <IonRow>
                             <IonCol size="6">
-                                <IonButton color="light" mode="ios" fill="outline" expand="block" size="small"  onClick={()=>{
-                                    url.tunnelNFT(symbol,chain,subTitle)
+                                <IonButton mode="ios" fill="outline" expand="block" size="small"  onClick={()=>{
+                                    url.tunnelNFT(symbol,utils.getChainIdByName(chain),subTitle)
                                 }}>CROSS</IonButton>
                             </IonCol>
                             <IonCol size="6">
-                                <IonButton color="light" mode="ios" fill="outline" expand="block" size="small" onClick={() => {
-                                    url.transferNFT(symbol,chain,subTitle)
+                                <IonButton mode="ios" fill="outline" expand="block" size="small" onClick={() => {
+                                    url.transferNFT(symbol,utils.getChainIdByName(chain),subTitle)
                                 }}>Transfer</IonButton>
                             </IonCol>
                         </IonRow>

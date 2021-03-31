@@ -46,3 +46,9 @@ export interface DriverInfo {
     rate: string;
     gene: string;
 }
+
+export interface Period{
+    ne:string
+    total:string
+    pool:string
+}

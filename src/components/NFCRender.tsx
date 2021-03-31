@@ -98,69 +98,6 @@ class NFCRender extends React.Component<Props, any> {
 
                 </div>
             </div>
-            {/*<IonModal isOpen={showModal}*/}
-            {/*          keyboardClose={true}*/}
-            {/*          backdropDismiss={true}*/}
-            {/*          onDidDismiss={()=>{this.showModal("",false)}}*/}
-            {/*          mode="ios"*/}
-            {/*          cssClass="confirm-transaction-modal"*/}
-            {/*          swipeToClose={true}>*/}
-            {/*    <div className="nfc-modal">*/}
-            {/*        {*/}
-            {/*            metaInfo && mateData && mateData[metaInfo.value] && <IonCard>*/}
-            {/*                <div>*/}
-            {/*                    <img src={mateData[metaInfo.value].image}/>*/}
-            {/*                </div>*/}
-            {/*                <IonCardHeader>*/}
-            {/*                    <IonCardTitle>{mateData[metaInfo.value].name}*/}
-            {/*                    <IonButton size="small" onClick={()=>{*/}
-            {/*                        url.tunnelNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)*/}
-            {/*                    }}>CROSS</IonButton></IonCardTitle>*/}
-            {/*                    <IonCardSubtitle>*/}
-            {/*                        {metaInfo && metaInfo.chain} Chain*/}
-            {/*                    </IonCardSubtitle>*/}
-            {/*                </IonCardHeader>*/}
-
-            {/*                <IonCardContent>*/}
-            {/*                    <IonItemGroup>*/}
-            {/*                        <IonItemDivider mode="md">*/}
-            {/*                            <IonLabel>Token Id</IonLabel>*/}
-            {/*                        </IonItemDivider>*/}
-            {/*                        <IonItem lines="none">*/}
-            {/*                            <p className="work-break">{metaInfo && metaInfo.value}</p>*/}
-            {/*                        </IonItem>*/}
-            {/*                        <IonItemDivider mode="md">*/}
-            {/*                            <IonLabel>Description</IonLabel>*/}
-            {/*                        </IonItemDivider>*/}
-            {/*                        <IonItem lines="none">*/}
-            {/*                            <p className="work-break">{mateData[metaInfo.value].description}</p>*/}
-            {/*                        </IonItem>*/}
-            {/*                        <IonItemDivider mode="md">*/}
-            {/*                            <IonLabel>Contract Address</IonLabel>*/}
-            {/*                        </IonItemDivider>*/}
-            {/*                        <IonItem lines="none">*/}
-            {/*                            <p className="work-break">{metaInfo && utils.getAddressBySymbol(metaInfo.symbol,metaInfo.chain)}</p>*/}
-            {/*                        </IonItem>*/}
-            {/*                    </IonItemGroup>*/}
-            {/*                </IonCardContent>*/}
-            {/*            </IonCard>*/}
-            {/*        }*/}
-            {/*        <div style={{position:"fixed",bottom:"0",background:"#fff",padding:"15px",width:"100%"}}>*/}
-            {/*            <IonRow>*/}
-            {/*                <IonCol>*/}
-            {/*                    <IonButton expand="block"  mode="ios" fill="outline" onClick={() => this.showModal("",false)}>*/}
-            {/*                        {i18n.t("close")}*/}
-            {/*                    </IonButton>*/}
-            {/*                </IonCol>*/}
-            {/*                <IonCol>*/}
-            {/*                    <IonButton expand="block" mode="ios" onClick={() => {*/}
-            {/*                        url.transferNFT(metaInfo.symbol,metaInfo.chain,metaInfo.value)*/}
-            {/*                    }}>{i18n.t("transfer")}</IonButton>*/}
-            {/*                </IonCol>*/}
-            {/*            </IonRow>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</IonModal>*/}
         </>;
     }
 }

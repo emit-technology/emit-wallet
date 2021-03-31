@@ -1,7 +1,8 @@
 import SeroContract from "../../SeroContract";
 import {MinerScenes} from "../../../pages/epoch/miner";
-import {DeviceInfo, UserInfo} from "./types";
+import {DeviceInfo, Period, UserInfo} from "./types";
 import {CONTRACT_ADDRESS} from "../../../config";
+import BigNumber from "bignumber.js";
 
 const ABI = [
     {
@@ -173,6 +174,24 @@ const ABI = [
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "tokenRate",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "seroAmount",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint16",
@@ -261,12 +280,66 @@ const ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "scenes_",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint64",
+                "name": "period_",
+                "type": "uint64"
+            }
+        ],
+        "name": "userPeriodInfo",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "ne",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "total",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "pool",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct Types.Period[]",
+                "name": "_periods",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ]
 class Index extends SeroContract {
 
     constructor(address: string) {
         super(address, ABI);
+    }
+
+    tokenRate = async (gasPrice: string | number | BigNumber, gas: number | string | BigNumber): Promise<string> => {
+        const rest: any = await this.call("tokenRate", [], "");
+        let feeAmount = new BigNumber(1)
+        let seroAmount = new BigNumber(1)
+        if (rest) {
+            feeAmount = new BigNumber(rest[0]);
+            seroAmount = new BigNumber(rest[1])
+        }
+        return feeAmount.multipliedBy(
+            new BigNumber(gas).multipliedBy(new BigNumber(gasPrice))
+        ).dividedBy(seroAmount).toFixed(0, 2)
     }
 
     prepare = async (scenes: MinerScenes, nonce: string) => {
@@ -278,19 +351,27 @@ class Index extends SeroContract {
     }
 
     userInfo = async (scenes: MinerScenes, from: string): Promise<UserInfo> => {
-        const ret:any = await this.call("userInfo", [scenes], from)
+        const ret: any = await this.call("userInfo", [scenes], from)
         return ret[0]
     }
 
     axInfo = async (catg: string, tkt: string, from: string): Promise<DeviceInfo> => {
-        const ret:any = await  this.call("axInfo", [catg, tkt], from)
+        const ret: any = await this.call("axInfo", [catg, tkt], from)
         return ret[0]
     }
 
     lockedDevice = async (scenes: MinerScenes, from: string): Promise<DeviceInfo> => {
-        const ret:any = await  this.call("lockedDevice", [scenes], from)
+        const ret: any = await this.call("lockedDevice", [scenes], from)
         return ret[0]
     }
+
+    userPeriodInfo = async (scenes: MinerScenes,period:number, from: string): Promise<Array<Period>> => {
+        const ret: any = await this.call("userPeriodInfo", [scenes,period], from)
+        console.log()
+        return ret[0]
+    }
+
 }
+
 const index = new Index(CONTRACT_ADDRESS.EPOCH.SERO.SERVICE)
 export default index

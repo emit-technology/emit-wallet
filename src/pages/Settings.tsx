@@ -190,8 +190,6 @@ class Settings extends React.Component<any, any>{
                     privateKey:privateKey
                 })
                 this.setShowPasswordAlert2(true);
-                // privateKey
-                // console.log(privateKey,"privateKey")
             }
         }
     }

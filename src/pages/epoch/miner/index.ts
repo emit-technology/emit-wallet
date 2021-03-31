@@ -23,8 +23,14 @@ export interface MintData {
     hashseed?: string
     ne?: string
     nonce?: string
+    nonceDes?:string
     timestamp?: number
     state?: MintState
+    hashrate?: {
+        h:string
+        t:number
+        o:number
+    }
 }
 
 class Miner {
@@ -47,7 +53,6 @@ class Miner {
 
     isMining = async (): Promise<boolean> => {
         const rest: MintData = await this.miner.mintState(this.uKey())
-        console.log("isMining>> ",rest)
         if (rest && (rest.state == MintState.running && rest.timestamp && (Date.now() - rest.timestamp) < this.timeout)) {
             return true
         }
@@ -77,7 +82,6 @@ class Miner {
         data.scenes=this.scenes;
         data.accountScenes=this.uKey()
         const isMining = await this.isMining();
-        console.log("isMining>>",isMining)
         if (!isMining) {
             await this.miner.mintInit(data)
             await this.miner.mintStart()

@@ -1,14 +1,15 @@
 
 .card-page{
   height: auto;
-  background: #000;
+  //background: #000;
   //min-height: 100vh;
   padding: 12px;
 }
 
 .card-inset{
-  border: 2px dashed #2d3748;
+  border: 2px dashed #ddd;
   border-radius: 0.375em;
+  min-height: 65vh;
 }
 
 .n-card{
@@ -55,7 +56,7 @@
 .card-front{
   position: absolute;
   z-index: 10;
-  background: #000;
+  background: #FFF;
   //background: #fff;
   transform: rotateY(
                   0deg
@@ -64,9 +65,10 @@
   transform: perspective(1529.69px);
   overflow: hidden;
   transition: transform 1s cubic-bezier(.445,.05,.55,.95);
-  box-shadow: 0 0 5px 1px #fff;
+  box-shadow: 0 0 5px 1px #ddd;
   border-radius: 0.375em;
   backface-visibility: hidden;
+  padding: 30px;
 }
 
 .card-back{
@@ -78,9 +80,11 @@
   );
   overflow: hidden;
   transition: transform 1s cubic-bezier(.445,.05,.55,.95);
-  box-shadow: 0 0 5px 1px #fff;
+  box-shadow: 0 0 5px 1px #ddd;
   border-radius: 0.375em;
   backface-visibility: hidden;
+  padding: 30px;
+
 }
 
 .card-back-f{
@@ -89,7 +93,8 @@
   bottom: 0;
   right: 0;
   left: 0;
-  background: #fff;
+  background: #FFF;
   opacity: 0.9;
+  overflow:scroll;
   //transform: rotateY(180deg);
 }

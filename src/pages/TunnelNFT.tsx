@@ -411,7 +411,7 @@ class TunnelNFT extends React.Component<any, any> {
                         <IonRow>
                             <IonCol size={"7"}>
                                 <div style={{height: "30vh", border: "#ddd 1px solid"}}>
-                                    <IonImg src={metaData && metaData.image}/>
+                                    <img src={metaData && metaData.image}/>
                                 </div>
                             </IonCol>
                             <IonCol size={"5"} style={{height: "30vh"}}>

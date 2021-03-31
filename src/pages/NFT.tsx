@@ -21,7 +21,7 @@ import {Plugins} from "@capacitor/core";
 import i18n from "../locales/i18n";
 import epochService from "../contract/epoch/sero";
 import {MinerScenes} from "./epoch/miner";
-import {DriverInfo, UserInfo} from "../contract/epoch/sero/types";
+import {UserInfo} from "../contract/epoch/sero/types";
 import * as utils from "../utils";
 
 class NFT extends React.Component<any, any> {
@@ -34,9 +34,6 @@ class NFT extends React.Component<any, any> {
 
     constructor(props:any) {
         super(props);
-        Plugins.StatusBar.setBackgroundColor({
-            color: "#222428"
-        })
     }
 
     componentDidMount() {
@@ -105,15 +102,20 @@ class NFT extends React.Component<any, any> {
             }
 
         }
-        console.log(ticketMap)
         this.setState({
             ticketMap: ticketMap,
         })
     }
 
     setTab = (v:any)=>{
-        console.log(this.state,v,"testssss")
-        this.setState({tab:v})
+
+        const {ticketMap} = this.state;
+
+        const tmp:any = ticketMap;
+        this.setState({tab:v,ticketMap:new Map()})
+        this.setState({
+            ticketMap:tmp
+        })
         this.initDriver(v).catch(e=>{
             console.log(e)
         })
@@ -138,47 +140,49 @@ class NFT extends React.Component<any, any> {
 
     render() {
         const {ticketMap,tab,drivers} = this.state;
-        console.log("render:",tab,ticketMap,drivers)
         return <IonPage>
-            <IonContent fullscreen color={"dark"}>
+            <IonContent fullscreen >
                 <IonHeader mode="ios">
-                    <IonToolbar color="dark" mode="ios">
+                    <IonToolbar color="primary" mode="ios">
                         <IonTitle>{i18n.t("NFT")}</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <div style={{padding:"12px 12px 0",background:"#000"}}>
-                    <IonSegment mode="ios" color="light" value={tab} style={{background:"#000"}} onIonChange={e => this.setTab(e.detail.value)}>
-                        <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="MEDAL">
-                            <IonLabel color={tab=="MEDAL"?"dark":"light"}>Medal</IonLabel>
+                <div style={{padding:"12px 12px 0"}}>
+                    <IonSegment mode="ios"value={tab} onIonChange={e => this.setTab(e.detail.value)}>
+                        <IonSegmentButton mode="ios" value="MEDAL">
+                            <IonLabel>Medal</IonLabel>
                         </IonSegmentButton>
-                        <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="DRIVER">
-                            <IonLabel color={tab=="DRIVER"?"dark":"light"}>Driver</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton  color="light" mode="ios" style={{background:"#000"}} value="DEVICES">
-                            <IonLabel color={tab=="DEVICES"?"dark":"light"}>Devices</IonLabel>
+                        {/*<IonSegmentButton mode="ios" value="DRIVER">*/}
+                        {/*    <IonLabel>Driver</IonLabel>*/}
+                        {/*</IonSegmentButton>*/}
+                        <IonSegmentButton value="DEVICES">
+                            <IonLabel>Devices</IonLabel>
                         </IonSegmentButton>
                     </IonSegment>
                 </div>
                 {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) ?
                     <NFCRender data={ticketMap.get(tab)}/>
                     :
-                <div>
+                <div className="card-page">
+                    <div className="card-inset">
+
                     { drivers && Object.keys(drivers).map((k:any)=>{
                         const userInfo:UserInfo = drivers[k];
                         return <div className="progress">
                             <div>
                                 <IonRow>
                                     <IonCol>
-                                        <IonText style={{textTransform:"uppercase",color:"#fff",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
+                                        <IonText style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
                                     </IonCol>
                                 </IonRow>
                             </div>
                             <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText  style={{textTransform:"uppercase",color:"#fff",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
+                                <IonText  style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
                             </div>
                         </div>
                     })}
+                    </div>
                 </div>}
             </IonContent>
         </IonPage>;
