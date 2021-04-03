@@ -18,55 +18,89 @@
 
 import React from 'react';
 import {
-    IonChip,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
     IonContent,
     IonHeader,
+    IonLabel,
     IonPage,
     IonTitle,
-    IonToolbar,
-    IonCard,
-    IonCardTitle,
-    IonCardContent,
-    IonFooter,
-    IonLabel,
-    IonCardHeader,
-    IonCardSubtitle
+    IonToolbar
 } from '@ionic/react';
 import './Epoch.css';
+import url from "../utils/url";
+import EpochAttribute from "../components/EpochAttribute";
+import epochService from "../contract/epoch/sero";
+import walletWorker from "../worker/walletWorker";
+import {ChainType} from "../types";
+import {MinerScenes} from "./epoch/miner";
 
-const Epoch: React.FC = () => {
-    return (
-        <IonPage>
-            <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar color="primary" mode="ios">
-                        <IonTitle>Epoch</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <IonCard mode="ios">
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            <IonLabel>
-                                ORIGIN
-                            </IonLabel>
-                        </IonCardTitle>
+class Epoch extends React.Component<any, any>{
 
-                    </IonCardHeader>
-                    <IonCardContent>
-                        <div style={{opacity:0.5}}>
-                            <img src="./assets/img/altar.png" style={{maxWidth:"unset",width:"100%"}}/>
-                        </div>
-                        <div style={{opacity:0.5}}>
-                            <img src="./assets/img/chaos.png" style={{maxWidth:"unset",width:"100%"}}/>
-                        </div>
-                    </IonCardContent>
-                    <div className="text-center">
-                        <IonChip color="warning">This universe is about to be initialized</IonChip>
-                    </div>
-                </IonCard>
-            </IonContent>
-        </IonPage>
-    );
+    state:any = {
+    }
+
+    constructor(props:any) {
+        super(props);
+    }
+
+    componentDidMount() {
+        this.init().catch(e=>{
+            console.error(e)
+        })
+        console.log("init epoch")
+    }
+
+    init = async ()=>{
+        const account = await walletWorker.accountInfo()
+        const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
+        const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
+        this.setState({
+            altarInfo: altarInfo,
+            chaosInfo: chaosInfo
+        })
+    }
+
+    render() {
+        const {chaosInfo,altarInfo} = this.state;
+        return (
+            <IonPage>
+                <IonContent fullscreen>
+                    <IonHeader>
+                        <IonToolbar color="primary" mode="ios">
+                            <IonTitle>Epoch</IonTitle>
+                        </IonToolbar>
+                    </IonHeader>
+                    <IonCard mode="ios">
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                <IonLabel>
+                                    ORIGIN
+                                </IonLabel>
+                            </IonCardTitle>
+
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <div onClick={() => {
+                                url.epochAltar()
+                            }}>
+                                <img src="./assets/img/altar.png" style={{maxWidth: "unset", width: "100%"}}/>
+                                <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
+                            </div>
+                            <div onClick={() => {
+                                url.epochChaos()
+                            }}>
+                                <img src="./assets/img/chaos.png" style={{maxWidth: "unset", width: "100%"}}/>
+                                <EpochAttribute driver={chaosInfo && chaosInfo.driver} showDriver={true} showDevice={false}/>
+                            </div>
+                        </IonCardContent>
+                    </IonCard>
+                </IonContent>
+            </IonPage>
+        );
+    }
 };
 
 export default Epoch;

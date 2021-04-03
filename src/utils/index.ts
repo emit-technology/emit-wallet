@@ -23,7 +23,8 @@ import {
     CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
-    EXPLORER_URL, FULL_NAME,
+    EXPLORER_URL,
+    FULL_NAME,
     GAS_DEFAULT,
     GAS_PRICE_UNIT,
     NOT_CROSS_TOKEN
@@ -37,6 +38,7 @@ const utf8 = require("utf8");
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = require("base-x")(BASE58);
+const BN = require("bn.js");
 
 export function bs58ToHex(value: string): string {
     const bytes = bs58.decode(value);
@@ -76,13 +78,13 @@ export function toValue(value: string | BigNumber | number, decimal: number): Bi
 export function getCyDecimal(cy: string, chainName: string): number {
     try {
         if (!cy || !chainName) {
-            return 0
+            return 18
         }
         return DECIMAL_CURRENCY[chainName][cy];
     } catch (e) {
         console.log(e)
     }
-    return 0
+    return 18
 }
 
 export function needApproved(chain: ChainType) {
@@ -150,9 +152,12 @@ export function getDestinationChainIDByName(chain: string): any {
     return ChainId._
 }
 
-export function toHex(value: string | number | BigNumber) {
+export function toHex(value: string | number | BigNumber,decimal?:number) {
     if (value === "0x") {
         return "0x0"
+    }
+    if(decimal){
+        return "0x" + toValue(value,decimal).toString(16);
     }
     return "0x" + new BigNumber(value).toString(16)
 }
@@ -299,6 +304,10 @@ export function getCategoryBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
 }
 
+export function crossAbleBySymbol(symbol: string):boolean{
+    return CONTRACT_ADDRESS.ERC721[symbol]["CROSS_ABLE"];
+}
+
 export function getAddressBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][chain];
 }
@@ -406,6 +415,62 @@ export function getChainFullName(chain:ChainType){
     }
     return ChainType[chain]
 }
+
+export async function getShortAddress(shotAddress:string){
+    const rest:any = await rpc.post("sero_getShortAddress",[shotAddress],ChainType.SERO);
+    return rest
+}
+
+export function getDeviceLv(rate:string|undefined){
+    if(rate){
+        return utils.fromValue(rate,16).toFixed(2,1)
+    }
+    return "0";
+}
+
+export function nFormatter(n:number|BigNumber|string, digits:number) {
+    const num = new BigNumber(n).toNumber();
+    const si = [
+        { value: 1, symbol: "" },
+        { value: 1E3, symbol: "K" },
+        { value: 1E6, symbol: "M" },
+        { value: 1E9, symbol: "G" },
+        { value: 1E12, symbol: "T" },
+        { value: 1E15, symbol: "P" },
+        { value: 1E18, symbol: "E" }
+    ];
+    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+    let i;
+    for (i = si.length - 1; i > 0; i--) {
+        if (num >= si[i].value) {
+            break;
+        }
+    }
+    return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+}
+
+export function calcDark(dna:string):number{
+    if(!dna){
+        return 0
+    }
+    if(!isDark(dna)){
+        return 0
+    }
+    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
+    return (new BigNumber(u256[0]&0x3).plus(1).toNumber())
+}
+
+export function isDark(dna:string):boolean {
+    if(!dna){
+        return false
+    }
+    if(new BigNumber(dna).toNumber() == 0){
+       return false
+    }
+    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
+    return (u256[0]&0xFC) == 0;
+}
+
 
 export function getQueryString(name:string) {
     const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");

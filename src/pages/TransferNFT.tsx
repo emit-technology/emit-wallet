@@ -30,8 +30,8 @@ import {
     IonLabel,
     IonTextarea,
     IonText, IonSpinner, IonGrid,
-    IonIcon, IonButton,IonItemDivider,
-    IonToast, IonProgressBar, IonRow, IonCol, IonImg
+    IonIcon, IonButton, IonItemDivider,
+    IonToast, IonProgressBar, IonRow, IonCol, IonImg, IonLoading
 } from "@ionic/react";
 import {chevronBack, chevronForwardOutline, trash} from "ionicons/icons"
 
@@ -65,7 +65,8 @@ class TransferNFT extends React.Component<any, any> {
         showActionSheet:false,
         gasPrice:"",
         showProgress:false,
-        tx:{}
+        tx:{},
+        showLoading:false
     }
 
     componentDidMount() {
@@ -84,18 +85,18 @@ class TransferNFT extends React.Component<any, any> {
         const contractAddress = utils.getAddressBySymbol(category,chainName)
         if (category && chainId) {
             let metaData:any = {};
-            if(chainId == ChainType.ETH){
-                const contract: Erc721 = new Erc721(contractAddress,chainId);
-                const uri = await contract.tokenURI(tokenId)
-                metaData = await rpc.req(uri,{})
-            }else if (chainId == ChainType.SERO){
-                const contract: Src721 = new Src721(contractAddress);
-                const uri = await contract.tokenURI(tokenId)
-                metaData = await rpc.req(uri,{})
-            }
+            // if(chainId == ChainType.ETH){
+            //     const contract: Erc721 = new Erc721(contractAddress,chainId);
+            //     const uri = await contract.tokenURI(tokenId)
+            //     metaData = await rpc.req(uri,{})
+            // }else if (chainId == ChainType.SERO){
+            //     const contract: Src721 = new Src721(contractAddress);
+            //     const uri = await contract.tokenURI(tokenId)
+            //     metaData = await rpc.req(uri,{})
+            // }
 
             //TODO FOR TEST
-            metaData = META_TEMP.MEDAL
+            metaData = META_TEMP[category]
 
             const account = await walletWorker.accountInfo()
             const balance = await rpc.getBalance(chainId, account.addresses[chainId]);
@@ -182,15 +183,22 @@ class TransferNFT extends React.Component<any, any> {
     confirm = async (hash:string) => {
         const {chain,feeCy} = this.state;
         let intervalId:any = 0;
+        this.setState({
+            showLoading:true
+        })
         intervalId = setInterval(()=>{
             rpc.getTxInfo(chain,hash).then((rest)=>{
                 if(rest){
                     this.setShowToast(true,"success","Commit Successfully!")
                     clearInterval(intervalId);
-                    url.transactionInfo(chain,hash,feeCy);
                     this.setShowProgress(false);
+                    this.setState({
+                        showLoading:false
+                    })
+                    url.transactionInfo(chain,hash,feeCy);
                 }
             }).catch(e=>{
+                this.setShowProgress(false);
                 console.error(e)
             })
         },1000)
@@ -237,7 +245,7 @@ class TransferNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {metaData, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet} = this.state;
+        const {metaData, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet,showLoading} = this.state;
 
         return <IonPage>
             <IonContent fullscreen>
@@ -253,7 +261,7 @@ class TransferNFT extends React.Component<any, any> {
                     <IonRow>
                         <IonCol size={"7"} >
                             <div style={{height:"30vh",border:"#ddd 1px solid"}}>
-                                <IonImg src={metaData&&metaData.image}/>
+                                <img src={metaData&&metaData.image}/>
                             </div>
                         </IonCol>
                         <IonCol size={"5"} style={{height:"30vh"}}>
@@ -322,6 +330,21 @@ class TransferNFT extends React.Component<any, any> {
                 duration={1500}
                 mode="ios"
             />
+
+            <IonLoading
+                mode="ios"
+                spinner={"bubbles"}
+                cssClass='my-custom-class'
+                isOpen={showLoading}
+                onDidDismiss={() => {
+                    this.setState({
+                        showLoading:false
+                    })
+                }}
+                message={'Please wait...'}
+                duration={120000}
+            />
+
 
             <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 

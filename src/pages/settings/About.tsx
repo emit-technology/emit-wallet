@@ -41,11 +41,13 @@ const items = [
     {name: "Blog", url: "https://blog.emit.technology", value: "https://blog.emit.technology"},
     {name: "Community", url: "https://community.emit.technology", value: "https://community.emit.technology"},
     {name: "Github", url: "https://github.com/emit-technology", value: "https://github.com/emit-technology"},
-    {name: "Telegram", url: "https://t.me/EMITCommunication", value: "https://t.me/EMITCommunication"},
+    {name: "Telegram", url: "https://t.me/emit_protocol", value: "https://t.me/emit_protocol"},
     {name: "Facebook", url: "https://www.facebook.com/EMITProtocolc", value: "https://www.facebook.com/EMITProtocol"},
     {name: "Twitter", url: "https://twitter.com/emit_protocol", value: "https://twitter.com/emit_protocol"},
     {name: "Medium", url: "https://emitprotocol.medium.com", value: "https://emitprotocol.medium.com"},
-    {name: "Reddit", url: "https://www.reddit.com/r/CryptoEMIT", value: "https://www.reddit.com/r/CryptoEMIT"},
+    {name: "Reddit", url: "https://www.reddit.com/r/emit_protocol/", value: "https://www.reddit.com/r/emit_protocol/"},
+    {name: "Documents", url: "https://docs.emit.technology", value: "https://docs.emit.technology"},
+
 ]
 
 class About extends React.Component<any, any> {

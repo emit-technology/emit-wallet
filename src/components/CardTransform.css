@@ -1,0 +1,88 @@
+.card-page {
+  height: auto;
+  padding: 12px;
+}
+
+.card-inset {
+  border: 2px dashed #ddd;
+  border-radius: 0.375em;
+  min-height: 65vh;
+}
+
+.n-card {
+  margin: 15px;
+  position: relative;
+  height: 115vw;
+  color: #000;
+}
+
+.card-foo {
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.row-line {
+  border: 1px solid #555;
+  text-align: center;
+}
+
+.col-line {
+  border: 1px solid #555;
+}
+
+.card-p {
+  word-break: break-word;
+  overflow: scroll;
+}
+
+.card-display {
+  position: relative;
+  transition: transform 0.6s ease 0.1s;
+  transform-style: preserve-3d;
+  /* width: 220px; */
+  /* height: 305.938px; */
+  transform: rotateY(180deg);
+  margin: auto;
+}
+
+.card-front {
+  position: absolute;
+  z-index: 10;
+  background: #FFF;
+  transform: rotateY(0deg) perspective(1529.69px);
+  backface-visibility: visible;
+  transform: perspective(1529.69px);
+  overflow: hidden;
+  transition: transform 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+  box-shadow: 0 0 5px 1px #ddd;
+  border-radius: 0.375em;
+  backface-visibility: hidden;
+  padding: 30px;
+}
+
+.card-back {
+  position: absolute;
+  z-index: 9;
+  transform: rotateY(180deg);
+  overflow: hidden;
+  transition: transform 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+  box-shadow: 0 0 5px 1px #ddd;
+  border-radius: 0.375em;
+  backface-visibility: hidden;
+  padding: 30px;
+}
+
+.card-back-f {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: #FFF;
+  opacity: 0.9;
+  overflow: scroll;
+}
+
+/*# sourceMappingURL=CardTransform.css.map */

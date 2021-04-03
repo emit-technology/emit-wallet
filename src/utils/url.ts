@@ -45,6 +45,12 @@ class Url {
         about:"manage/about",
     }
 
+    private epoch = {
+        index : "tabs/epoch",
+        altar : "epoch/altar",
+        chaos : "epoch/chaos",
+    }
+
     private nftTabs = "tabs/nft"
 
     private scan = "scan";
@@ -141,7 +147,7 @@ class Url {
     }
 
     transferNFT(category: string, chain: ChainType,value:string) {
-        this.goTo([this.base, this.transaction.transferNft, category, chain,value].join("/"), [this.base,this.nftTabs].join("/"))
+        this.goTo([this.base, this.transaction.transferNft, category, ChainType[chain],value].join("/"), [this.base,this.nftTabs].join("/"))
     }
 
     tunnel(cy: string, chain1: string, chain2: string) {
@@ -149,8 +155,8 @@ class Url {
         return
     }
 
-    tunnelNFT(symbol: string,chain:string,tokenId:string) {
-        this.goTo([this.base, this.transaction.tunnelNFT, symbol,chain,tokenId].join("/"), [this.base,this.nftTabs].join("/"))
+    tunnelNFT(symbol: string,chain:ChainType,tokenId:string) {
+        this.goTo([this.base, this.transaction.tunnelNFT, symbol,ChainType[chain],tokenId].join("/"), [this.base,this.nftTabs].join("/"))
         return
     }
 
@@ -182,6 +188,15 @@ class Url {
     frozenTronBalance(){
         this.goTo([this.base,"tron/frozen"].join("/"),[this.base].join("/"))
         return
+    }
+
+    epochAltar(){
+        this.goTo([this.base,this.epoch.altar].join("/"),[this.base,this.epoch.index].join("/"))
+        return
+    }
+
+    epochChaos(){
+        this.goTo([this.base,this.epoch.chaos].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
 }

@@ -27,7 +27,7 @@ import {
     IonIcon,
     IonInput,
     IonItem,
-    IonLabel,
+    IonLabel, IonLoading,
     IonPage,
     IonProgressBar,
     IonRow, IonSpinner,
@@ -82,7 +82,8 @@ class Tunnel extends React.Component<any, any> {
         gasPrice: 1,
         gas: 21000,
         minValue: 0,
-        initAllowanceAmount: true
+        initAllowanceAmount: true,
+        showLoading:false,
     }
 
     componentDidMount() {
@@ -289,16 +290,18 @@ class Tunnel extends React.Component<any, any> {
     approve = async (op: any) => {
         let {amount, gasPrice, crossMode} = this.state;
         const chain = utils.getChainIdByName(crossMode[0])
-        if (!amount) {
-            this.setShowToast(true, "warning", "Please Input Approve Amount")
-            setTimeout(() => {
-                this.setApproveAlert(true)
-            }, 2100)
-            this.setShowProgress1(false);
-            return;
-        }
+        // if (!amount) {
+        //     this.setShowToast(true, "warning", "Please Input Approve Amount")
+        //     setTimeout(() => {
+        //         this.setApproveAlert(true)
+        //     }, 2100)
+        //     this.setShowProgress1(false);
+        //     return;
+        // }
         if (op == "cancel") {
             amount = 0;
+        }else{
+            amount = new BigNumber(1e32);
         }
         const {targetCoin} = this.state;
         const account = await walletWorker.accountInfo();
@@ -318,14 +321,18 @@ class Tunnel extends React.Component<any, any> {
             const ETH_COIN: EthToken = new EthToken(tx.to, chain);
             tx.data = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.ETH.HANDLE, utils.toValue(amount, decimal))
             tx.gas = await ETH_COIN.estimateGas(tx)
+            tx.amount = tx.value;
         } else if (chain == ChainType.BSC) {
             const ETH_COIN: EthToken = new EthToken(tx.to, chain);
             tx.data = await ETH_COIN.approve(config.CONTRACT_ADDRESS.CROSS.BSC.HANDLE, utils.toValue(amount, decimal))
             tx.gas = await ETH_COIN.estimateGas(tx)
+            tx.amount = tx.value;
         } else if (chain == ChainType.TRON) {
             const tronToken: TronToken = new TronToken(tx.to);
+            amount = new BigNumber(1e8);
             tx.data = await tronToken.approve(config.CONTRACT_ADDRESS.CROSS.TRON.HANDLE, utils.toValue(amount, decimal), tx.from)
-            tx.value = tx.amount;
+            // tx.value = tx.amount;
+            tx.amount = tx.value;
             tx.cy = realCY;
         }
         this.setState({
@@ -538,14 +545,22 @@ class Tunnel extends React.Component<any, any> {
         const {crossMode, targetCoin} = this.state;
         const chain = utils.getChainIdByName(crossMode[0]);
         let intervalId: any = 0;
+        this.setState({
+            showLoading:true
+        })
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then(rest => {
                 if (rest) {
                     clearInterval(intervalId)
                     this.setShowProgress(false);
+                    this.setShowProgress1(false)
+                    this.setState({
+                        showLoading:false
+                    })
                     url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, targetCoin);
                 }
             }).catch((e: any) => {
+                this.setShowProgress(false);
                 console.error(e);
             })
         }, 1000)
@@ -553,9 +568,9 @@ class Tunnel extends React.Component<any, any> {
     }
 
     render() {
-        const {targetCoin, gasPrice, color, initAllowanceAmount, tx, showActionSheet, accountResource, minValue, maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {targetCoin, gasPrice, color, showLoading, tx, showActionSheet, accountResource, minValue, maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
-        let amountValue: any = initAllowanceAmount ? allowance : amount;
+        // let amountValue: any = initAllowanceAmount ? allowance : amount;
         // if(new BigNumber(amountValue).toNumber() == 0){
         //     amountValue = "";
         // }
@@ -583,7 +598,7 @@ class Tunnel extends React.Component<any, any> {
                                 <IonItem mode="ios">
                                     <IonLabel position="stacked"
                                               color="dark">{i18n.t("from")} {crossMode[0]} {i18n.t("chain")}  </IonLabel>
-                                    <IonInput autofocus style={{fontSize: "32px"}} type="number" value={amountValue}
+                                    <IonInput autofocus style={{fontSize: "32px"}} type="number" value={amount}
                                               placeholder={amount} onIonChange={(e) => {
                                         this.setState({amount: e.detail.value, initAllowanceAmount: false});
                                         this.init(targetCoin, crossMode).catch((e) => {
@@ -636,7 +651,7 @@ class Tunnel extends React.Component<any, any> {
                                     utils.needApproved(utils.getChainIdByName(crossMode[0])) &&
                                     <IonItem mode="ios" lines="none">
                                         <IonLabel mode="ios" color="medium">{i18n.t("approved")}</IonLabel>
-                                        <IonBadge mode="ios" color="light">{allowance} {realCy}</IonBadge>
+                                        <IonBadge mode="ios" color="light">{new BigNumber(allowance).toNumber() > 0? new BigNumber(allowance).comparedTo(1e8) == 1 ?"YES":allowance:"NO"}</IonBadge>
                                     </IonItem>
                                 }
 
@@ -753,7 +768,20 @@ class Tunnel extends React.Component<any, any> {
                     position="top"
                     onDidDismiss={() => this.setShowToast(false)}
                     message={toastMessage}
-                    duration={1500}
+                    duration={2000}
+                />
+                <IonLoading
+                    mode="ios"
+                    spinner={"bubbles"}
+                    cssClass='my-custom-class'
+                    isOpen={showLoading}
+                    onDidDismiss={() => {
+                        this.setState({
+                            showLoading:false
+                        })
+                    }}
+                    message={'Please wait...'}
+                    duration={120000}
                 />
 
                 <GasPriceActionSheet onClose={() => this.setShowActionSheet(false)} show={showActionSheet}

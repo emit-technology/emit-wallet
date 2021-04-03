@@ -68,6 +68,7 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
 import WETH from "../contract/weth";
 import tron from "../rpc/tron";
+import interVar from "../interval";
 
 const {StatusBar,Device} = Plugins;
 
@@ -128,13 +129,14 @@ class Wallet extends React.Component<State, any> {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
                 for (let chain of chains) {
-                    if (chain === "SERO") {
-                        assets[cy][chain] = "0";
-                    } else if (chain === "ETH") {
-                        assets[cy][chain] = "0";
-                    } else if (chain === "TRON") {
-                        assets[cy][chain] = "0";
-                    }
+                    // if (chain === "SERO") {
+                    //     assets[cy][chain] = "0";
+                    // } else if (chain === "ETH") {
+                    //     assets[cy][chain] = "0";
+                    // } else if (chain === "TRON") {
+                    //     assets[cy][chain] = "0";
+                    // }
+                    assets[cy][chain] = "0";
                 }
             }
             this.setState({
@@ -143,17 +145,10 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
-        this.init().then(() => {
-        }).catch()
-        let initInterValId: any = sessionStorage.getItem("initInterValId");
-        if (initInterValId) {
-            clearInterval(initInterValId)
-        }
-        initInterValId = setInterval(() => {
+        interVar.start(()=>{
             this.init().then(() => {
             }).catch()
-        }, 5000)
-        sessionStorage.setItem("initInterValId", initInterValId);
+        },5 * 1000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
