@@ -32,7 +32,7 @@ import {
     IonTextarea,
     IonText, IonSpinner,
     IonIcon, IonButton, IonAlert, IonActionSheet,
-    IonBackButton, IonButtons, IonToast, IonProgressBar, IonRow, IonCol
+    IonBackButton, IonButtons, IonToast, IonProgressBar, IonRow, IonCol, IonLoading
 } from "@ionic/react";
 import {chevronBack, chevronForwardOutline, trash} from "ionicons/icons"
 
@@ -208,7 +208,9 @@ class Transfer extends React.Component<any, any> {
     confirm = async (hash:string) => {
         const {chain,cy} = this.state;
         let intervalId:any = 0;
-        this.setShowProgress(true)
+        this.setState({
+            showLoading:true
+        })
         intervalId = setInterval(()=>{
             rpc.getTxInfo(chain,hash).then((rest)=>{
                 if(rest){
@@ -216,8 +218,15 @@ class Transfer extends React.Component<any, any> {
                     clearInterval(intervalId);
                     url.transactionInfo(chain,hash,cy);
                     this.setShowProgress(false);
+                    this.setState({
+                        showLoading:false
+                    })
                 }
             }).catch(e=>{
+                this.setShowProgress(false);
+                this.setState({
+                    showLoading:false
+                })
                 console.error(e)
             })
         },1000)
@@ -264,7 +273,7 @@ class Transfer extends React.Component<any, any> {
     }
 
     render() {
-        const {cy, chain, account, realCy, showProgress,gasPrice,tx, to, amount,showToast,toastMessage,accountResource,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
+        const {showLoading, chain, account, realCy, showProgress,gasPrice,tx, to, amount,showToast,toastMessage,accountResource,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
 
         return <IonPage>
             <IonContent fullscreen>
@@ -344,6 +353,20 @@ class Transfer extends React.Component<any, any> {
                 duration={1500}
                 mode="ios"
             />
+            <IonLoading
+                mode="ios"
+                spinner={"bubbles"}
+                cssClass='my-custom-class'
+                isOpen={showLoading}
+                onDidDismiss={() => {
+                    this.setState({
+                        showLoading:false
+                    })
+                }}
+                message={'Please wait...'}
+                duration={120000}
+            />
+
 
             <GasPriceActionSheet onClose={()=>this.setShowActionSheet(false)}  show={showActionSheet} onSelect={this.setGasPrice} value={gasPrice} chain={chain}/>
 

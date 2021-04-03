@@ -35,7 +35,7 @@ import {
     IonTitle,
     IonItemDivider,
     IonToast,
-    IonToolbar
+    IonToolbar, IonLoading
 } from "@ionic/react";
 import copy from 'copy-to-clipboard';
 import walletWorker from "../worker/walletWorker";
@@ -64,8 +64,8 @@ class TransactionInfo extends React.Component<any, any> {
         address: "",
         events: {},
         showToast: false,
-        showActionSheet: false
-
+        showActionSheet: false,
+        showLoading:false
     }
 
     componentDidMount() {
@@ -299,17 +299,26 @@ class TransactionInfo extends React.Component<any, any> {
     confirm = async (hash: string) => {
         const {chain,tx} = this.state;
         let intervalId: any = 0;
+        this.setState({
+            showLoading:true
+        })
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then((rest) => {
                 if (rest) {
                     this.setShowToast(true, "success", "Commit Successfully!")
                     clearInterval(intervalId);
                     this.setShowProgress(false);
+                    this.setState({
+                        showLoading:false
+                    })
                     url.transactionList(tx.cy,"ETH")
                     // url.transactionInfo(chain, hash, "ETH");
                 }
             }).catch(e => {
                 const err = typeof e == "string"?e:e.message;
+                this.setState({
+                    showLoading:false
+                })
                 this.setShowToast(true, "danger", err)
                 // console.error(e)
             })
@@ -318,7 +327,7 @@ class TransactionInfo extends React.Component<any, any> {
     }
 
     render() {
-        const {info, tokens,nft, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert} = this.state;
+        const {info, tokens,nft, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert,showLoading} = this.state;
         return <IonPage>
             <IonContent fullscreen>
                 <IonHeader>
@@ -487,7 +496,7 @@ class TransactionInfo extends React.Component<any, any> {
 
                 </IonList>
 
-                <IonModal isOpen={showModal} mode="ios" swipeToClose={true}>
+                <IonModal isOpen={showModal} mode="ios" cssClass="tx-info-modal" onDidDismiss={()=>this.setShowModal(false)} swipeToClose={true}>
                     <IonList mode="ios">
                         <IonItem>
                             <IonLabel>{i18n.t("deposit")}</IonLabel>
@@ -522,7 +531,7 @@ class TransactionInfo extends React.Component<any, any> {
                             </IonText>
                         </IonItem>
                     </IonList>
-                    <IonButton mode="ios" onClick={() => this.setShowModal(false)}>{i18n.t("close")}</IonButton>
+                    {/*<IonButton mode="ios" onClick={() => this.setShowModal(false)}>{i18n.t("close")}</IonButton>*/}
                 </IonModal>
 
                 <IonToast
@@ -533,6 +542,20 @@ class TransactionInfo extends React.Component<any, any> {
                     message={toastMsg ? toastMsg : "Copied to clipboard!"}
                     duration={1500}
                     mode="ios"
+                />
+
+                <IonLoading
+                    mode="ios"
+                    spinner={"bubbles"}
+                    cssClass='my-custom-class'
+                    isOpen={showLoading}
+                    onDidDismiss={() => {
+                        this.setState({
+                            showLoading:false
+                        })
+                    }}
+                    message={'Please wait...'}
+                    duration={120000}
                 />
 
                 <GasPriceActionSheet onClose={() => this.setShowActionSheet(false,"")} show={showActionSheet}

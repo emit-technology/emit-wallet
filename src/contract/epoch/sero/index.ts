@@ -156,6 +156,19 @@ const ABI = [
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "minPowNE",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint16",
@@ -367,7 +380,11 @@ class Index extends SeroContract {
 
     userPeriodInfo = async (scenes: MinerScenes,period:number, from: string): Promise<Array<Period>> => {
         const ret: any = await this.call("userPeriodInfo", [scenes,period], from)
-        console.log()
+        return ret[0]
+    }
+
+    minPowNE = async (): Promise<string> => {
+        const ret: any = await this.call("minPowNE", [], "")
         return ret[0]
     }
 

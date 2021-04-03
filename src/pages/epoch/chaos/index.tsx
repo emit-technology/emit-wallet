@@ -22,10 +22,10 @@ class Chaos extends React.Component<any, any>{
                         <div></div>
                     </div>
                     <div className="display-n">
-                        <img src={require("../img/axe_0.png")}/>
+                        <img src={"./assets/img/epoch/axe_0.png"}/>
                     </div>
                     <div className="display-n">
-                        <img src={require("../img/axe_1.png")}/>
+                        <img src={"./assets/img/epoch/axe_1.png"}/>
                     </div>
                 </div>
 

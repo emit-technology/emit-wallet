@@ -96,10 +96,10 @@ class RPC {
             const tokenArr: Array<any> = [];
             for (let i = 0; i < balance; i++) {
                 const tokenId = await contract.tokenOfOwnerByIndex(address, i)
-                const uri = await contract.tokenURI(tokenId)
+                // const uri = await contract.tokenURI(tokenId)
                 tokenArr.push({
                     tokenId: tokenId,
-                    uri: uri
+                    // uri: uri
                 })
             }
             ret[symbol]=tokenArr
@@ -123,10 +123,10 @@ class RPC {
             if(balance && balance.length>0){
                 const tokenArr: Array<any> = [];
                 for (let d of balance) {
-                    const uri = await contract.tokenURI(d)
+                    // const uri = await contract.tokenURI(d)
                     tokenArr.push({
                         tokenId: d,
-                        uri: uri
+                        // uri: uri
                     })
                 }
                 ret[symbol]=tokenArr

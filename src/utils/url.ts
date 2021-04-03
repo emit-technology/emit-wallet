@@ -147,7 +147,7 @@ class Url {
     }
 
     transferNFT(category: string, chain: ChainType,value:string) {
-        this.goTo([this.base, this.transaction.transferNft, category, chain,value].join("/"), [this.base,this.nftTabs].join("/"))
+        this.goTo([this.base, this.transaction.transferNft, category, ChainType[chain],value].join("/"), [this.base,this.nftTabs].join("/"))
     }
 
     tunnel(cy: string, chain1: string, chain2: string) {
@@ -156,7 +156,7 @@ class Url {
     }
 
     tunnelNFT(symbol: string,chain:ChainType,tokenId:string) {
-        this.goTo([this.base, this.transaction.tunnelNFT, symbol,chain,tokenId].join("/"), [this.base,this.nftTabs].join("/"))
+        this.goTo([this.base, this.transaction.tunnelNFT, symbol,ChainType[chain],tokenId].join("/"), [this.base,this.nftTabs].join("/"))
         return
     }
 

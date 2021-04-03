@@ -28,15 +28,15 @@ import {
     IonLabel,
     IonText,
     IonIcon,
-    IonLoading,
+    IonLoading,IonButton,
     IonAlert, IonToast,IonActionSheet
 } from '@ionic/react';
 import {
-    chevronForward,documentTextOutline,
+    chevronForward, documentTextOutline,
     homeOutline,
-    languageOutline,keyOutline,
+    languageOutline, keyOutline,
     planetOutline,
-    shieldCheckmarkOutline
+    shieldCheckmarkOutline, swapHorizontalOutline
 } from 'ionicons/icons'
 import './Settings.css';
 import walletWorker from "../worker/walletWorker";
@@ -273,6 +273,14 @@ class Settings extends React.Component<any, any>{
                         }}>
                             <IonIcon src={shieldCheckmarkOutline} slot="start"/>
                             <IonLabel>{i18n.t("backupWallet")}</IonLabel>
+                            <IonIcon src={chevronForward} slot="end"  color="medium"/>
+                        </IonItem>
+
+                        <IonItem mode="ios" onClick={()=>{
+                            url.accountCreate();
+                        }}>
+                            <IonIcon src={swapHorizontalOutline} slot="start"/>
+                            <IonLabel>{i18n.t("switchAccount")}</IonLabel>
                             <IonIcon src={chevronForward} slot="end"  color="medium"/>
                         </IonItem>
 

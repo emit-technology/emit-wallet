@@ -40,3 +40,9 @@
 .info-block-span{
     /*background-color: #3ab9fe;*/
 }
+
+.tx-info-modal{
+    --width: 75%;
+    --height: 35%;
+    --border-radius: 15px;
+}

@@ -234,6 +234,18 @@ class ConfirmTransaction extends React.Component<Props, State>{
                             </IonText>
                         </IonItem>
                     }
+                    {transaction && transaction.catg &&
+                    <IonItem>
+                        <IonLabel position="stacked" color="medium">{i18n.t("Category")}</IonLabel>
+                        <IonText className="work-break text-small">{transaction && transaction.catg}</IonText>
+                    </IonItem>
+                    }
+                    {transaction && transaction.tkt &&
+                    <IonItem>
+                        <IonLabel position="stacked" color="medium">{i18n.t("Ticket")}</IonLabel>
+                        <IonText className="work-break text-small">{transaction && transaction.tkt}</IonText>
+                    </IonItem>
+                    }
                     {transaction && transaction.data && transaction.chain!= ChainType.TRON &&
                     <IonItem>
                         <IonLabel position="stacked" color="medium">{i18n.t("data")}</IonLabel>

@@ -303,6 +303,10 @@ export function getCategoryBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
 }
 
+export function crossAbleBySymbol(symbol: string):boolean{
+    return CONTRACT_ADDRESS.ERC721[symbol]["CROSS_ABLE"];
+}
+
 export function getAddressBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][chain];
 }
@@ -445,11 +449,20 @@ export function nFormatter(n:number|BigNumber|string, digits:number) {
 }
 
 export function calcDark(dna:string):number{
+    if(!dna){
+        return 0
+    }
+    if(!isDark(dna)){
+        return 0
+    }
     const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
     return (new BigNumber(u256[0]&0x3).plus(1).toNumber())
 }
 
 export function isDark(dna:string):boolean {
+    if(!dna){
+        return false
+    }
     if(new BigNumber(dna).toNumber() == 0){
        return false
     }

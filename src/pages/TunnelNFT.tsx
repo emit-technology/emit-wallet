@@ -34,7 +34,7 @@ import {
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar
+    IonToolbar, IonLoading
 } from '@ionic/react';
 import './Tunnel.css';
 import {ChainId, ChainType, Transaction} from "../types";
@@ -78,7 +78,8 @@ class TunnelNFT extends React.Component<any, any> {
         gasPrice: 1,
         gas: 21000,
         minValue: 0,
-        initAllowanceAmount: true
+        initAllowanceAmount: true,
+        showLoading:false
     }
 
     componentDidMount() {
@@ -365,15 +366,23 @@ class TunnelNFT extends React.Component<any, any> {
         const {crossMode,feeCy} = this.state;
         const chain = utils.getChainIdByName(crossMode[0]);
         let intervalId: any = 0;
-        this.setShowProgress(true)
+        this.setState({
+            showLoading:true
+        })
         intervalId = setInterval(() => {
             rpc.getTxInfo(chain, hash).then(rest => {
                 if (rest) {
                     clearInterval(intervalId)
-                    this.setShowProgress(false);
+                    this.setState({
+                        showLoading:false
+                    })
                     url.transactionInfo(utils.getChainIdByName(crossMode[0]), hash, feeCy);
                 }
             }).catch((e: any) => {
+                this.setShowProgress(false);
+                this.setState({
+                    showLoading:false
+                })
                 console.error(e);
             })
         }, 1000)
@@ -381,9 +390,9 @@ class TunnelNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {feeCy, metaData, gasPrice, color, initAllowanceAmount, tx, showActionSheet, accountResource, minValue, maxValue, crossFee, address, amount, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {feeCy, metaData, gasPrice, color, showLoading, tx, showActionSheet, crossFee, address, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
-        let amountValue: any = initAllowanceAmount ? allowance : amount;
+        // let amountValue: any = initAllowanceAmount ? allowance : amount;
         // if(new BigNumber(amountValue).toNumber() == 0){
         //     amountValue = "";
         // }
@@ -518,6 +527,19 @@ class TunnelNFT extends React.Component<any, any> {
                     onDidDismiss={() => this.setShowToast(false)}
                     message={toastMessage}
                     duration={1500}
+                />
+                <IonLoading
+                    mode="ios"
+                    spinner={"bubbles"}
+                    cssClass='my-custom-class'
+                    isOpen={showLoading}
+                    onDidDismiss={() => {
+                        this.setState({
+                            showLoading:false
+                        })
+                    }}
+                    message={'Please wait...'}
+                    duration={120000}
                 />
 
                 <GasPriceActionSheet onClose={() => this.setShowActionSheet(false)} show={showActionSheet}

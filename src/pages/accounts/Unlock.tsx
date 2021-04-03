@@ -77,7 +77,7 @@ class Unlock extends React.Component<any, State>{
                     </IonHeader>
                     <div style={{padding:"15px 15px 0",textAlign:"center"}}>
                         <img src={"./assets/img/welcome.png"} style={{width:"200px"}}/>
-                        <h1>Welcome Back!</h1>
+                        <h1>{i18n.t("welcome")}</h1>
                         <p><IonText color="medium">The decentralized word waits</IonText></p>
                     </div>
                     <div style={{padding:"0 24px"}}>

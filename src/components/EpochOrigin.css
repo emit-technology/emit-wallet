@@ -43,40 +43,49 @@
   height: 40vh;
 }
 
-.altar-img-1 img {
+.altar-img-1 {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: auto;
   width: 75vw;
-  animation: turn 60s linear infinite;
   z-index: 1;
   max-width: 300px;
 }
 
-.altar-img-2 img {
+.altar-img-1 img {
+  animation: turn 60s linear infinite;
+}
+
+.altar-img-2 {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: auto;
   width: 53vw;
-  animation: turn-left 40s linear infinite;
   z-index: 2;
   max-width: 200px;
 }
 
-.altar-img-3 img {
+.altar-img-2 img {
+  animation: turn-left 40s linear infinite;
+}
+
+.altar-img-3 {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: auto;
   width: 56vw;
-  animation: turn 60s linear infinite;
   z-index: 3;
   max-width: 200px;
+}
+
+.altar-img-3 img {
+  animation: turn 60s linear infinite;
 }
 
 .altar-img-4 img {
@@ -86,7 +95,7 @@
   transform: translate(-50%, -50%);
   margin: auto;
   width: 28vw;
-  animation-delay: 3s;
+  animation: slide 6s forwards;
   z-index: 5;
   transition: transform 0.6s ease 0.1s;
   transform-style: preserve-3d;
@@ -100,7 +109,7 @@
   transform: translate(-50%, -50%);
   margin: auto;
   width: 28vw;
-  animation-delay: 3s;
+  animation: slide 6s forwards;
   z-index: 5;
   transition: transform 0.6s ease 0.1s;
   transform-style: preserve-3d;
@@ -217,52 +226,45 @@
   }
 }
 @keyframes slide {
-  0% {
-    -webkit-transform: translate(-50%, -50%) rotate(0deg) scale(0.1, 0.1);
+  from {
+    opacity: 0;
   }
-  50% {
-    -webkit-transform: translate(-50%, -50%) rotate(90deg) scale(0.3, 0.3);
-  }
-  75% {
-    -webkit-transform: translate(-50%, -50%) rotate(180deg) scale(0.5, 0.5);
-  }
-  100% {
-    -webkit-transform: translate(-50%, -50%) rotate(360deg) scale(1, 1);
-    left: 50%;
+  to {
+    opacity: 1;
   }
 }
 @keyframes turn {
   0% {
-    -webkit-transform: translate(-50%, -50%) rotate(0deg);
+    -webkit-transform: rotate(0deg);
   }
   25% {
-    -webkit-transform: translate(-50%, -50%) rotate(90deg);
+    -webkit-transform: rotate(90deg);
   }
   50% {
-    -webkit-transform: translate(-50%, -50%) rotate(180deg);
+    -webkit-transform: rotate(180deg);
   }
   75% {
-    -webkit-transform: translate(-50%, -50%) rotate(270deg);
+    -webkit-transform: rotate(270deg);
   }
   100% {
-    -webkit-transform: translate(-50%, -50%) rotate(360deg);
+    -webkit-transform: rotate(360deg);
   }
 }
 @keyframes turn-left {
   0% {
-    -webkit-transform: translate(-50%, -50%) rotate(0deg);
+    -webkit-transform: rotate(0deg);
   }
   25% {
-    -webkit-transform: translate(-50%, -50%) rotate(-90deg);
+    -webkit-transform: rotate(-90deg);
   }
   50% {
-    -webkit-transform: translate(-50%, -50%) rotate(-180deg);
+    -webkit-transform: rotate(-180deg);
   }
   75% {
-    -webkit-transform: translate(-50%, -50%) rotate(-270deg);
+    -webkit-transform: rotate(-270deg);
   }
   100% {
-    -webkit-transform: translate(-50%, -50%) rotate(-360deg);
+    -webkit-transform: rotate(-360deg);
   }
 }
 .epoch-modal {
@@ -528,6 +530,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 38vw;
+  animation: slide 6s forwards;
 }
 
 .chaos div:nth-child(3) img {
@@ -536,6 +539,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 38vw;
+  animation: slide 6s forwards;
 }
 
 @keyframes star-move-out {
@@ -669,7 +673,7 @@ div.starfield .moving-3 {
 }
 
 .countdown {
-  padding: 0 10px 0 30vw;
+  padding: 0 10px 0 20vw;
   font-size: 14px;
   color: #000;
   font-weight: 800;
@@ -687,6 +691,11 @@ div.starfield .moving-3 {
 
 .display-n {
   display: none;
+}
+
+.dark-star {
+  color: #edcc67;
+  font-size: 15px;
 }
 
 /*# sourceMappingURL=EpochOrigin.css.map */
