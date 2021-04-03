@@ -259,8 +259,8 @@ class EpochOrigin extends React.Component<Props, State> {
         const chain = ChainType.SERO;
         this.setShowLoading(true)
         intervalId = setInterval(() => {
-            rpc.getTxInfo(chain, hash).then((rest) => {
-                if (rest && rest.num > 0) {
+            rpc.getTransactionByHash(hash,chain).then((rest:any) => {
+                if (rest && new BigNumber(rest.blockNumber).toNumber() > 0) {
                     // this.setShowToast(true,"success","Commit Successfully!")
                     clearInterval(intervalId);
                     // url.transactionInfo(chain,hash,Currency);

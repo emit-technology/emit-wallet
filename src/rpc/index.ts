@@ -220,6 +220,10 @@ class RPC {
             return Promise.reject("Account not exist!")
         }
     }
+
+    getTransactionByHash = async (txHash:string,chain:ChainType)=>{
+        return await rpc.post(chain == ChainType.SERO?"sero_getTransactionByHash":"eth_getTransactionByHash", [txHash],chain);
+    }
 }
 
 const rpc = new RPC(EMIT_HOST)
