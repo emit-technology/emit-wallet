@@ -561,9 +561,6 @@ class Tunnel extends React.Component<any, any> {
                 }
             }).catch((e: any) => {
                 this.setShowProgress(false);
-                this.setState({
-                    showLoading:false
-                })
                 console.error(e);
             })
         }, 1000)

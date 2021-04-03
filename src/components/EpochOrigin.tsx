@@ -445,8 +445,8 @@ class EpochOrigin extends React.Component<Props, State> {
 
     onSelectDevice = async (ticket: string) => {
         if (ticket) {
-            const account = await walletWorker.accountInfo();
-            const rest = await epochService.axInfo(Category, ticket, account.addresses[ChainType.SERO])
+            const {account} = this.state;
+            const rest = await epochService.axInfo(Category, ticket, account && account.addresses[ChainType.SERO])
             this.setState({
                 selectDevice: rest,
                 selectAxe: ticket

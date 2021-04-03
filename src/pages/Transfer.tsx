@@ -224,9 +224,6 @@ class Transfer extends React.Component<any, any> {
                 }
             }).catch(e=>{
                 this.setShowProgress(false);
-                this.setState({
-                    showLoading:false
-                })
                 console.error(e)
             })
         },1000)

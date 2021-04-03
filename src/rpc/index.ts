@@ -178,7 +178,6 @@ class RPC {
 
     commitTx = async (tx: Transaction, password: string) => {
         //FOR Test
-        password = "12345678"
         const accountId: string | null = selfStorage.getItem("accountId");
         if (accountId) {
             let hash: any = "";
