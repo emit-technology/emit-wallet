@@ -26,7 +26,7 @@ import {
     IonList,
     IonItem,
     IonLabel,
-    IonInput, IonText, IonButton, IonToast, IonProgressBar, IonSpinner
+    IonInput, IonText, IonButton, IonToast, IonProgressBar, IonSpinner, IonIcon
 } from "@ionic/react";
 import './style.css';
 import walletWorker from "../../worker/walletWorker";
@@ -34,6 +34,8 @@ import {AccountModel} from "../../types";
 import url from "../../utils/url";
 import {Plugins} from "@capacitor/core";
 import i18n from "../../locales/i18n";
+import selfStorage from "../../utils/storage";
+import {chevronBack} from "ionicons/icons";
 
 interface State {
     name: string;
@@ -113,11 +115,17 @@ class CreateAccount extends React.Component<any, State> {
 
     render() {
         const {name,password,rePassword,tips,showToast,toastMessage,showProgress,showPasswordTips} = this.state;
+
         return <>
             <IonPage>
                 <IonContent fullscreen>
                     <IonHeader>
                         <IonToolbar mode="ios" color="primary">
+                            {
+                                selfStorage.getItem("accountId") && <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                                    url.back()
+                                }}/>
+                            }
                             <IonTitle>
                                 <IonText>{i18n.t("create")} {i18n.t("wallet")}</IonText>
                             </IonTitle>

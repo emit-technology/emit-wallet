@@ -277,7 +277,7 @@ class Settings extends React.Component<any, any>{
                         </IonItem>
 
                         <IonItem mode="ios" onClick={()=>{
-                            url.accountCreate();
+                            url.accountCreate(url.path_settings());
                         }}>
                             <IonIcon src={swapHorizontalOutline} slot="start"/>
                             <IonLabel>{i18n.t("switchAccount")}</IonLabel>

@@ -111,8 +111,8 @@ class Url {
         return
     }
 
-    accountCreate() {
-        this.goTo([this.base, this.account.create].join("/"), "");
+    accountCreate(pre?:string) {
+        this.goTo([this.base, this.account.create].join("/"), pre?pre:"");
     }
 
     accountBackup(pre?: string) {

@@ -334,6 +334,7 @@ class Transfer extends React.Component<any, any> {
                         this.check().then(()=>{
                             this.setShowProgress(false)
                         }).catch(e=>{
+                            console.log(e)
                             this.setShowProgress(false)
                             const err = typeof e === "string"?e:e.message;
                             this.setShowToast(true,"danger",err);

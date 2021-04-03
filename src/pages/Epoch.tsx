@@ -50,7 +50,6 @@ class Epoch extends React.Component<any, any>{
         this.init().catch(e=>{
             console.error(e)
         })
-        console.log("init epoch")
     }
 
     init = async ()=>{

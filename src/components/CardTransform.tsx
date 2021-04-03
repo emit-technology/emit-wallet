@@ -88,7 +88,6 @@ class CardTransform extends React.Component<Props, State> {
     render() {
         const {deg,device,showToast} = this.state;
         const {src, title, subTitle, chain, timestamp, description,dna,symbol} = this.props;
-        console.log(device,device?.ticket)
         return <>
             <div className="n-card">
                 <div className="card-display" style={{transform: `rotateY(${deg}deg)`}} onClick={()=>{
