@@ -473,6 +473,7 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     onSelectDevice = async (ticket: string) => {
+        interVar.stop()
         if (ticket) {
             const {account} = this.state;
             const rest = await epochService.axInfo(Category, ticket, account && account.addresses[ChainType.SERO])
@@ -480,11 +481,17 @@ class EpochOrigin extends React.Component<Props, State> {
                 selectDevice: rest,
                 selectAxe: ticket
             })
-            return
+        }else {
+            this.setState({
+                selectAxe: ticket
+            })
         }
-        this.setState({
-            selectAxe: ticket
-        })
+        interVar.start(() => {
+            this.mintState().then(() => {
+            }).catch(e => {
+                console.error(e)
+            })
+        }, 1 * 1000)
     }
 
     render() {

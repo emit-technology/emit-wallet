@@ -43,7 +43,7 @@ class NFT extends React.Component<any, any> {
             }).catch(e=>{
                 console.error(e)
             })
-        },10*1000)
+        },5*1000)
     }
 
     init = async () => {
