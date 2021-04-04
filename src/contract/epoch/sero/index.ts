@@ -1,6 +1,6 @@
 import SeroContract from "../../SeroContract";
 import {MinerScenes} from "../../../pages/epoch/miner";
-import {DeviceInfo, Period, UserInfo} from "./types";
+import {DeviceInfo, DriverInfo, Period, UserInfo} from "./types";
 import {CONTRACT_ADDRESS} from "../../../config";
 import BigNumber from "bignumber.js";
 
@@ -87,6 +87,52 @@ const ABI = [
         "name": "done",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "scenes",
+                "type": "uint16"
+            }
+        ],
+        "name": "driverInfo",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "base",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "capacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "gene",
+                        "type": "bytes32"
+                    }
+                ],
+                "internalType": "struct Types.DriverInfo",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -336,6 +382,7 @@ const ABI = [
         "type": "function"
     }
 ]
+
 class Index extends SeroContract {
 
     constructor(address: string) {
@@ -385,6 +432,11 @@ class Index extends SeroContract {
 
     minPowNE = async (): Promise<string> => {
         const ret: any = await this.call("minPowNE", [], "")
+        return ret[0]
+    }
+
+    driverInfo = async (scenes: MinerScenes, from: string): Promise<DriverInfo> => {
+        const ret: any = await this.call("driverInfo", [scenes], from)
         return ret[0]
     }
 

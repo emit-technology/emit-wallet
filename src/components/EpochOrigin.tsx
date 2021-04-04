@@ -28,7 +28,7 @@ import {AccountModel, ChainType, Transaction} from "../types";
 import BigNumber from "bignumber.js";
 import * as utils from "../utils";
 import rpc from "../rpc";
-import {DeviceInfo, Period, UserInfo} from "../contract/epoch/sero/types";
+import {DeviceInfo, DriverInfo, Period, UserInfo} from "../contract/epoch/sero/types";
 import Countdown from 'react-countdown';
 import {chevronBack} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
@@ -42,6 +42,7 @@ import './EpochOrigin.scss';
 import {EPOCH_SETTLE_TIME} from "../config";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
+import {nFormatter} from "../utils";
 
 interface State {
     amount: any
@@ -64,6 +65,7 @@ interface State {
     showModal: boolean
     account?: AccountModel
     tkt: Array<any>
+    estimateLight:string
 
     selectDevice?: DeviceInfo
 }
@@ -93,7 +95,8 @@ class EpochOrigin extends React.Component<Props, State> {
         tkt: [],
         periods: [],
         nexPeriods: [],
-        myPeriods: []
+        myPeriods: [],
+        estimateLight:"0"
     }
 
 
@@ -124,11 +127,14 @@ class EpochOrigin extends React.Component<Props, State> {
 
         let myPeriods: Array<Period> = [];
         if (myPeriod > 0 && myPeriod != period) {
-            myPeriods = await epochService.userPeriodInfo(scenes, new BigNumber(userInfo.settlementPeriod).toNumber(), fromAddress)
+            if(myPeriod != period+1){
+                myPeriods = await epochService.userPeriodInfo(scenes, new BigNumber(userInfo.settlementPeriod).toNumber(), fromAddress)
+            }else{
+                myPeriods = nexPeriods;
+            }
         } else {
-            myPeriods = periods
+            myPeriods = periods;
         }
-
 
         if (account && userInfo && userInfo.pImage && userInfo && userInfo.pImage.hash && userInfo && userInfo.pImage.serial) {
             await this.miner().init({
@@ -144,6 +150,8 @@ class EpochOrigin extends React.Component<Props, State> {
         const tkt = await this.getTicket(fromAddress)
         const isMining = await this.miner().isMining()
 
+        const estimateLight = await this.convertPeriod(device,nexPeriods,scenes,fromAddress)
+
         this.setState({
             isMining: isMining,
             userInfo: userInfo,
@@ -152,7 +160,8 @@ class EpochOrigin extends React.Component<Props, State> {
             tkt: tkt,
             periods: periods,
             nexPeriods: nexPeriods,
-            myPeriods: myPeriods
+            myPeriods: myPeriods,
+            estimateLight:estimateLight
         })
 
         if (device && device.category) {
@@ -179,6 +188,21 @@ class EpochOrigin extends React.Component<Props, State> {
         }
     }
 
+    convertPeriod = async (device:DeviceInfo,periods:Array<Period>,scenes:MinerScenes,fromAddress:string):Promise<string>=>{
+        if(device && periods && periods.length ==1 && scenes == MinerScenes.chaos){
+            if(new BigNumber(periods[0].ne).toNumber()>0){
+                const c = new BigNumber(periods[0].total).toNumber() > 0 ?
+                    new BigNumber(periods[0].pool).multipliedBy(new BigNumber(periods[0].ne))
+                        .dividedBy(new BigNumber(periods[0].total)):new BigNumber(0)
+                const driverOrigin:DriverInfo = await epochService.driverInfo(MinerScenes.chaos,fromAddress)
+                const m1 = new BigNumber(driverOrigin.capacity).comparedTo(c) == -1?new BigNumber(driverOrigin.capacity):c;
+                const d1 = utils.fromValue(m1.multipliedBy(new BigNumber(driverOrigin.rate)),18)
+                const m2 = d1.comparedTo(new BigNumber(device.capacity))==-1?d1:new BigNumber(device.capacity)
+                return utils.fromValue(m2.multipliedBy(device.rate),36).toFixed(3,1)
+            }
+        }
+        return "0"
+    }
 
     miner = () => {
         return this.props.scenes == MinerScenes.altar ? altarMiner : chaosMiner;
@@ -202,6 +226,9 @@ class EpochOrigin extends React.Component<Props, State> {
             } else {
                 return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
             }
+        }else{
+            const data = await epochService.prepare(this.props.scenes, "0")
+            await this.do(data)
         }
     }
 
@@ -339,6 +366,7 @@ class EpochOrigin extends React.Component<Props, State> {
     start = async () => {
         const {scenes} = this.props
         const {account, userInfo} = this.state;
+
         if (account && userInfo && userInfo.pImage && userInfo && userInfo.pImage.hash && userInfo && userInfo.pImage.serial) {
             await this.miner().start({
                 phash: userInfo.pImage.hash,
@@ -379,12 +407,12 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     renderStatic = (periods: Array<Period>, b: boolean, text: string, period: number) => {
+        console.log("periods>",periods)
         const {scenes} = this.props;
         const {userInfo} = this.state;
         const t = <IonText>{text} <span className="font-weight-800 font-ep">{period}</span></IonText>;
         const nextPeriodTime = (userInfo && new BigNumber(userInfo.lastUpdateTime).toNumber() > 0
             ? new BigNumber(userInfo.lastUpdateTime).toNumber() + EPOCH_SETTLE_TIME : 0) * 1000;
-
         return <>
             {
                 scenes == MinerScenes.altar && periods.length == 2 ?
@@ -395,7 +423,7 @@ class EpochOrigin extends React.Component<Props, State> {
                             <IonCol size="3"></IonCol>
                             <IonCol size="3">{i18n.t("my")}</IonCol>
                             <IonCol size="3">{i18n.t("total")}</IonCol>
-                            <IonCol size="3">{i18n.t("pool")}</IonCol>
+                            <IonCol size="3">{i18n.t("estimateReceive")}</IonCol>
                         </IonRow>
                         <IonRow>
                             <IonCol size="3">HR({new BigNumber(periods[0].pool).multipliedBy(100).dividedBy(
@@ -415,7 +443,8 @@ class EpochOrigin extends React.Component<Props, State> {
                             <IonCol size="3">{utils.nFormatter(utils.fromValue(periods[1].total, 18), 2)}(L)</IonCol>
                             <IonCol size="3">{
                                 utils.nFormatter(new BigNumber(periods[1].total).toNumber() > 0 ? utils.fromValue(new BigNumber(periods[1].pool).multipliedBy(new BigNumber(periods[1].ne))
-                                    .dividedBy(new BigNumber(periods[1].total)), 18).toFixed(0, 1) : 0, 2)}(EN)</IonCol>
+                                    .dividedBy(new BigNumber(periods[1].total)), 18).toFixed(0, 1) : 0, 2)}(EN)
+                            </IonCol>
                         </IonRow>
                     </div>
                     :
@@ -427,7 +456,7 @@ class EpochOrigin extends React.Component<Props, State> {
                             <IonCol size="3"></IonCol>
                             <IonCol size="3">{i18n.t("my")}</IonCol>
                             <IonCol size="3">{i18n.t("total")}</IonCol>
-                            <IonCol size="3">{i18n.t("pool")}</IonCol>
+                            <IonCol size="3">{i18n.t("estimateReceive")}</IonCol>
                         </IonRow>
                         <IonRow>
                             <IonCol size="3">HR</IonCol>
@@ -435,7 +464,7 @@ class EpochOrigin extends React.Component<Props, State> {
                             <IonCol size="3">{utils.nFormatter(periods[0].total, 2)}(NE)</IonCol>
                             <IonCol size="3">{
                                 utils.nFormatter(new BigNumber(periods[0].total).toNumber() > 0 ? utils.fromValue(new BigNumber(periods[0].pool).multipliedBy(new BigNumber(periods[0].ne))
-                                    .dividedBy(new BigNumber(periods[0].total)), 18).toFixed(0, 1) : 0, 2)}(L)
+                                    .dividedBy(new BigNumber(periods[0].total)), 18).toFixed(0, 1) : 0, 2)}(EN)
                             </IonCol>
                         </IonRow>
                     </div>
@@ -464,7 +493,7 @@ class EpochOrigin extends React.Component<Props, State> {
         const {
             periods, showAlert, tx, toastMessage, showLoading,
             color, showToast, selectAxe, checked, amount, isMining,
-            mintData, device, userInfo, showModal, tkt, nexPeriods, selectDevice, myPeriods
+            mintData, device, userInfo, showModal, tkt, nexPeriods, selectDevice, myPeriods,estimateLight
         } = this.state;
 
         const period = new BigNumber(userInfo ? userInfo.currentPeriod : 0).toNumber();
@@ -622,6 +651,11 @@ class EpochOrigin extends React.Component<Props, State> {
                         </IonList>
                         <div className="epoch-desc">
                             {
+                                scenes == MinerScenes.chaos && <div>
+                                    {i18n.t("currentPeriod")} {i18n.t("estimateReceive")} <IonText color="primary" className="font-weight-800 font-ep">{nFormatter(estimateLight,3)}</IonText> LIGHT
+                                </div>
+                            }
+                            {
                                 this.renderStatic(nexPeriods, true, i18n.t("currentPeriod"), period + 1)
                             }
                             {
@@ -663,7 +697,7 @@ class EpochOrigin extends React.Component<Props, State> {
                                                    }
                                                }}>
                                         {
-                                            checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ? "Your Period is in progress" :
+                                            checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ? "Your period is in progress" :
                                                 !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ? "HashRate is 0" :
                                                     new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked ? "HR or BL is 0" : i18n.t("commit")
                                         }

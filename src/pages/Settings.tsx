@@ -462,7 +462,7 @@ class Settings extends React.Component<any, any>{
                                 handler: (language) => {
                                     localStorage.setItem("language",language);
                                     i18n.changeLanguage(language).then(()=>{
-                                        window.location.reload();
+                                        // window.location.reload();
                                     }).catch(e=>{
                                         console.error(e)
                                     })

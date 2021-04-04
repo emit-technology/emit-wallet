@@ -35,6 +35,7 @@ class EpochAttribute extends React.Component<Props, any>{
 
     render() {
         const {device,driver,showDevice,showDriver} = this.props
+        const health:any = device && (new BigNumber(device.capacity).toNumber()>0 ? new BigNumber(device.power).dividedBy(new BigNumber(device.capacity)).toNumber() : 0);
         return <>
             {
                 showDevice && device ?
@@ -50,7 +51,7 @@ class EpochAttribute extends React.Component<Props, any>{
                         </IonCol>
                     </IonRow>
                     <div style={{padding:"0 12px"}}>
-                        <IonProgressBar className="progress-background-health" value={device && (new BigNumber(device.capacity).toNumber()>0 ? new BigNumber(device.power).dividedBy(new BigNumber(device.capacity)).toNumber() : 0)}/>
+                        <IonProgressBar className={health<0.33?"progress-background-health-red":health>0.66?"progress-background-health":"progress-background"} value={health}/>
                         <div style={{padding:"2px 0"}}></div>
                         <IonProgressBar className="progress-background" value ={device && utils.fromValue(device.rate,18).toNumber()}/>
                         <IonRow>
