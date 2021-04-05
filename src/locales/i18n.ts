@@ -117,6 +117,8 @@ Plugins.Device.getLanguageCode().then(d=>{
         langCode = "pt_BR"
     }else if(langCode.toLowerCase().indexOf("zh")>-1){
         langCode = "zh_TW"
+    }else{
+        langCode = "en_US"
     }
     let lang = localStorage.getItem("language");
     if(!lang){

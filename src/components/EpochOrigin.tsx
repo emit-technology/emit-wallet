@@ -68,6 +68,8 @@ interface State {
     estimateLight:string
 
     selectDevice?: DeviceInfo
+
+    minNE:any
 }
 
 interface Props {
@@ -96,7 +98,8 @@ class EpochOrigin extends React.Component<Props, State> {
         periods: [],
         nexPeriods: [],
         myPeriods: [],
-        estimateLight:"0"
+        estimateLight:"0",
+        minNE:0
     }
 
 
@@ -151,7 +154,8 @@ class EpochOrigin extends React.Component<Props, State> {
         const isMining = await this.miner().isMining()
 
         const estimateLight = await this.convertPeriod(device,nexPeriods,scenes,fromAddress)
-
+        const minNE = await epochService.minPowNE()
+        const minValue = new BigNumber(minNE).plus(utils.toValue(5000000,0)).toString(10)
         this.setState({
             isMining: isMining,
             userInfo: userInfo,
@@ -161,7 +165,8 @@ class EpochOrigin extends React.Component<Props, State> {
             periods: periods,
             nexPeriods: nexPeriods,
             myPeriods: myPeriods,
-            estimateLight:estimateLight
+            estimateLight:estimateLight,
+            minNE:minValue
         })
 
         if (device && device.category) {
@@ -215,21 +220,25 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     prepare = async () => {
-        const {mintData,amount} = this.state;
+        const {mintData,amount,minNE} = this.state;
         this.setShowLoading(true)
-
-        if (mintData.nonceDes) {
-            const minNE = await epochService.minPowNE()
-            if (new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1 || new BigNumber(amount).toNumber()>0) {
-                const data = await epochService.prepare(this.props.scenes, mintData.nonceDes)
+        if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
+            if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
+                const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
                 await this.do(data)
-            } else {
-                return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
+            }else{
+                if(new BigNumber(amount).toNumber()>0){
+                    const data = await epochService.prepare(this.props.scenes, "0")
+                    await this.do(data)
+                }else{
+                    return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
+                }
             }
         }else{
             const data = await epochService.prepare(this.props.scenes, "0")
             await this.do(data)
         }
+
     }
 
     do = async (data: string) => {
@@ -498,7 +507,7 @@ class EpochOrigin extends React.Component<Props, State> {
         const {scenes} = this.props;
         // const {showModal, mintData, device, userInfo, setShowModal, tkt,periods} = this.props;
         const {
-            periods, showAlert, tx, toastMessage, showLoading,
+            periods, showAlert, tx, toastMessage, showLoading,minNE,
             color, showToast, selectAxe, checked, amount, isMining,
             mintData, device, userInfo, showModal, tkt, nexPeriods, selectDevice, myPeriods,estimateLight
         } = this.state;
@@ -662,6 +671,10 @@ class EpochOrigin extends React.Component<Props, State> {
                                     {i18n.t("currentPeriod")} {i18n.t("estimateReceive")} <IonText color="primary" className="font-weight-800 font-ep">{nFormatter(estimateLight,3)}</IonText> LIGHT
                                 </div>
                             }
+                            {/*{*/}
+                            {/*    new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == -1&&*/}
+                            {/*    <div><IonText color="warning">{i18n.t("minNE")}</IonText><IonChip color="tertiary">{minNE.toLocaleString()} NE</IonChip></div>*/}
+                            {/*}*/}
                             {
                                 this.renderStatic(nexPeriods, true, i18n.t("currentPeriod"), period + 1)
                             }
@@ -726,7 +739,7 @@ class EpochOrigin extends React.Component<Props, State> {
                     isOpen={showToast}
                     onDidDismiss={() => this.setShowToast(false)}
                     message={toastMessage}
-                    duration={1500}
+                    duration={2500}
                     mode="ios"
                 />
 
