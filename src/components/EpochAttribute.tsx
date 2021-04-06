@@ -46,7 +46,7 @@ class EpochAttribute extends React.Component<Props, any>{
                         </IonCol>
                         <IonCol size="5">
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{i18n.t("health")}: {device && `${utils.fromValue(device.power,16).toFixed(0,1)}/${utils.fromValue(device.capacity,16).toFixed(0,1)}`}</IonText>
+                                <IonText color="white" className="text-little">{i18n.t("health")}: {device && `${utils.fromValue(device.power,18).toFixed(2,1)}/${utils.fromValue(device.capacity,18).toFixed(2,1)}`}</IonText>
                             </div>
                         </IonCol>
                     </IonRow>
@@ -93,8 +93,13 @@ class EpochAttribute extends React.Component<Props, any>{
                 showDriver && driver ?
                     <div className="progress" style={{minHeight:"45px"}}>
                         <IonRow>
-                            <IonCol size="7">
+                            <IonCol size="4">
                                 <IonText color="white" className="text-little">DRIVER</IonText>
+                            </IonCol>
+                            <IonCol size="8">
+                                <div style={{textAlign: "right"}}>
+                                    <IonText color="white" className="text-little">{i18n.t("capacity")}: {utils.fromValue(driver.capacity,18).toFixed(2,1)}</IonText>
+                                </div>
                             </IonCol>
                         </IonRow>
                         <div style={{padding:"0 12px"}}>

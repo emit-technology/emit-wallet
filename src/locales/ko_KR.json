@@ -141,5 +141,7 @@
   "getItBack": "검색",
   "retrieve": "검색",
   "refining": "정제",
-  "recharge": "요금"
+  "recharge": "요금",
+
+  "capacity": "생산 능력"
 }

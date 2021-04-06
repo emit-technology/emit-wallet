@@ -128,6 +128,8 @@ class EpochOrigin extends React.Component<Props, State> {
         const periods = await epochService.userPeriodInfo(scenes, period, fromAddress)
         const nexPeriods = await epochService.userPeriodInfo(scenes, period + 1, fromAddress)
 
+        console.log("device",device,userInfo)
+
         let myPeriods: Array<Period> = [];
         if (myPeriod > 0 && myPeriod != period) {
             if(myPeriod != period+1){
