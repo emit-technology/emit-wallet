@@ -139,7 +139,7 @@ class CreateAccount extends React.Component<any, State> {
                     </IonHeader>
                     <IonList>
                         <IonItem mode="ios">
-                            <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
+                            <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
                             <IonInput mode="ios" value={name} onIonChange={(e:any) => {
                                 this.setState({
                                     name:e.target.value!
@@ -147,7 +147,7 @@ class CreateAccount extends React.Component<any, State> {
                             }}/>
                         </IonItem>
                         <IonItem mode="ios">
-                            <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
+                            <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
                             <IonInput mode="ios" type="password" value={password} onIonChange={(e: any) => {
                                 this.setState({
                                     password:e.target.value!
@@ -162,7 +162,7 @@ class CreateAccount extends React.Component<any, State> {
                             {i18n.t("passwordTip")}
                         </div>}
                         <IonItem mode="ios">
-                            <IonLabel position="floating"><IonText color="medium"> {i18n.t("repeat")}  {i18n.t("password")}</IonText></IonLabel>
+                            <IonLabel position="stacked"><IonText color="medium"> {i18n.t("repeat")}  {i18n.t("password")}</IonText></IonLabel>
                             <IonInput mode="ios" type="password" value={rePassword} onIonChange={(e: any) => {
                                 this.setState({
                                     rePassword:e.target.value!
@@ -170,7 +170,7 @@ class CreateAccount extends React.Component<any, State> {
                             }}/>
                         </IonItem>
                         <IonItem mode="ios">
-                            <IonLabel position="floating"><IonText color="medium"> {i18n.t("password")}  {i18n.t("hint")}( {i18n.t("optional")})</IonText></IonLabel>
+                            <IonLabel position="stacked"><IonText color="medium"> {i18n.t("password")}  {i18n.t("hint")}( {i18n.t("optional")})</IonText></IonLabel>
                             <IonInput mode="ios" value={tips} onIonChange={(e: any) => {
                                 this.setState({
                                     tips:e.target.value!

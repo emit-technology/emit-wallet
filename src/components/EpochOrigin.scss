@@ -63,7 +63,7 @@ $colorYellow: #edcc67;
   max-width: 300px;
 }
 .altar-img-1 img{
-  animation: turn 60s linear infinite;
+  //animation: turn 60s linear infinite;
 }
 
 .altar-img-2 {
@@ -74,7 +74,7 @@ $colorYellow: #edcc67;
   max-width: 200px;
 }
 .altar-img-2 img {
-  animation: turn-left 40s linear infinite;
+  //animation: turn-left 40s linear infinite;
 }
 
 .altar-img-3 {
@@ -84,7 +84,7 @@ $colorYellow: #edcc67;
   max-width: 200px;
 }
 .altar-img-3 img {
-  animation: turn 60s linear infinite;
+  //animation: turn 60s linear infinite;
 }
 
 .altar-img-4 img{
@@ -147,10 +147,11 @@ $colorYellow: #edcc67;
 }
 
 .heard-bg {
-  --background: initial !important;
-  background: initial !important;
-  --ion-color-base: initial !important;
-  padding-top: 14px;
+  //--background: initial !important;
+  //background: initial !important;
+  //--ion-color-base: initial !important;
+  //padding-top: 14px;
+  --ion-color-base: #1a2952 !important;
 }
 
 .axe-progress {
@@ -387,72 +388,17 @@ $show-customer:
   border: #fff;
   width: 70vw;
   height: 70vw;
+  max-width: 400px;
+  max-height: 400px;
   background: $color-boll;
   box-shadow: 0 0 20px 0px #edcc67;
   border-radius: 50%;
 }
 
-.chaos div:nth-child(1) div:nth-child(1){
+.chaos div:nth-child(1) div{
   @include chaos-absolute;
   @include chaos-element;
-  animation: star-move-out 20s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-
 }
-.chaos div:nth-child(1) div:nth-child(2){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 16s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(3){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 10s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(4){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 8s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(5){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 17s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(6){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 14s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(7){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 11s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(8){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 7s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(9){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 9s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-.chaos div:nth-child(1) div:nth-child(10){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 5s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-
-.chaos div:nth-child(1) div:nth-child(11){
-  @include chaos-absolute;
-  @include chaos-element;
-  animation: star-move-out 6s cubic-bezier(0.55, 0, 1, 0.45) infinite;
-}
-
-
-/// left over
-
 
 .chaos div:nth-child(1) div:nth-child(12){
   @include chaos-absolute;
@@ -501,12 +447,14 @@ $show-customer:
 .chaos div:nth-child(2) img{
   @include chaos-absolute;
   width: 38vw;
+  max-width: 300px;
   animation: slide 6s forwards;
 }
 
 .chaos div:nth-child(3) img{
   @include chaos-absolute;
   width: 38vw;
+  max-width: 300px;
   animation: slide 6s forwards;
 }
 

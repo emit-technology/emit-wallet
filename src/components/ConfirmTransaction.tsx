@@ -197,32 +197,32 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 isOpen={showActionSheet}
                 cssClass="confirm-transaction-modal"
                 onDidDismiss={() => this.setShowActionShell(false)}>
-                <IonList style={{overflowY:"scroll"}}>
-                    <IonListHeader>
+                <IonList style={{overflowY:"scroll"}} mode="ios">
+                    <IonListHeader mode="ios">
                         <IonLabel>Confirm Transaction</IonLabel>
                     </IonListHeader>
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("from")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.from}</IonText>
                     </IonItem>
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("to")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.to}</IonText>
                     </IonItem>
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("value")}</IonLabel>
                         <IonText slot="end">{transaction && utils.fromValue(value,
                             utils.getCyDecimal(transaction.cy,ChainType[transaction.chain])).toString(10)} {transaction?.cy}</IonText>
                     </IonItem>
                     {transaction && transaction.nonce &&
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">Nonce</IonLabel>
                         <IonText slot="end">{transaction && new BigNumber(transaction.nonce).toString(10)}</IonText>
                     </IonItem>
                     }
                     {
                         transaction?.chain != ChainType.TRON &&
-                        <IonItem>
+                        <IonItem mode="ios">
                             <IonLabel position="stacked" color="medium">{i18n.t("minerFee")}</IonLabel>
                             <IonText slot="end">
                                 {this.fee()} {transaction?.feeCy}<br/>
@@ -235,25 +235,25 @@ class ConfirmTransaction extends React.Component<Props, State>{
                         </IonItem>
                     }
                     {transaction && transaction.catg &&
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("Category")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.catg}</IonText>
                     </IonItem>
                     }
                     {transaction && transaction.tkt &&
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("Ticket")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.tkt}</IonText>
                     </IonItem>
                     }
                     {transaction && transaction.data && transaction.chain!= ChainType.TRON &&
-                    <IonItem>
-                        <IonLabel position="stacked" color="medium">{i18n.t("data")}</IonLabel>
+                    <IonItem mode="ios">
+                        <IonLabel position="stacked" color="medium">{i18n.t("Data")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.data}</IonText>
                     </IonItem>
                     }
                     {transaction && transaction.input &&
-                    <IonItem>
+                    <IonItem mode="ios">
                         <IonLabel position="stacked" color="medium">{i18n.t("input")}</IonLabel>
                         <IonText className="work-break text-small">{transaction && transaction.input}</IonText>
                     </IonItem>

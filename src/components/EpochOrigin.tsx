@@ -3,7 +3,7 @@ import {
     IonButton,
     IonChip,
     IonCol,
-    IonContent,
+    IonContent, IonHeader,
     IonIcon,
     IonInput,
     IonItem,
@@ -18,8 +18,8 @@ import {
     IonSegmentButton,
     IonSelect,
     IonSelectOption,
-    IonText,
-    IonToast
+    IonText, IonTitle,
+    IonToast, IonToolbar
 } from "@ionic/react";
 import ConfirmTransaction from "./ConfirmTransaction";
 import epochService from "../contract/epoch/sero";
@@ -74,6 +74,7 @@ interface State {
 
 interface Props {
     scenes: MinerScenes
+    loadDevice:(d?:DeviceInfo)=>void
 }
 
 const Currency = "LIGHT";
@@ -110,7 +111,7 @@ class EpochOrigin extends React.Component<Props, State> {
 
         })
         this.init().then(() => {
-
+            this.props.loadDevice(this.state.device)
         }).catch(e => {
             console.error(e)
         });
@@ -127,8 +128,6 @@ class EpochOrigin extends React.Component<Props, State> {
         const myPeriod = new BigNumber(userInfo.settlementPeriod).toNumber();
         const periods = await epochService.userPeriodInfo(scenes, period, fromAddress)
         const nexPeriods = await epochService.userPeriodInfo(scenes, period + 1, fromAddress)
-
-        console.log("device",device,userInfo)
 
         let myPeriods: Array<Period> = [];
         if (myPeriod > 0 && myPeriod != period) {
@@ -418,7 +417,6 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     renderStatic = (periods: Array<Period>, b: boolean, text: string, period: number) => {
-        console.log("periods>",periods)
         const {scenes} = this.props;
         const {userInfo} = this.state;
         const t = <IonText>{text} <span className="font-weight-800 font-ep">{period}</span></IonText>;
@@ -519,38 +517,43 @@ class EpochOrigin extends React.Component<Props, State> {
 
         return <IonPage>
             <IonContent fullscreen color="light">
-
-                <div className="content-ion">
-                    <IonItem className="heard-bg" color="primary" lines="none">
-                        <IonIcon src={chevronBack} style={{color: "#edcc67"}} slot="start" onClick={() => {
+                <IonHeader>
+                    <IonToolbar color="primary" mode="ios" className="heard-bg">
+                        <IonIcon src={chevronBack} size="large"  style={{color: "#edcc67"}} slot="start" onClick={() => {
                             Plugins.StatusBar.setBackgroundColor({
                                 color: "#194381"
                             }).catch(e => {
                             })
                             url.back()
                         }}/>
-                        <IonLabel className="text-center text-bold" style={{
+                        <IonTitle className="text-center text-bold" style={{
                             color: "#edcc67",
                             textTransform: "uppercase"
-                        }}>{MinerScenes[this.props.scenes]}</IonLabel>
-                        <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {
-                            const help_url = scenes == MinerScenes.altar ?
-                                "https://docs.emit.technology/emit-documents/emit-epoch/origin-universe/altar-scenes" :
-                                "https://docs.emit.technology/emit-documents/emit-epoch/origin-universe/chaos-scenes";
-                            Plugins.Browser.open({url: help_url, presentationStyle: "popover"}).catch(e => {
-                                console.error(e)
-                            })
-                        }}/>
-                    </IonItem>
+                        }}>{MinerScenes[this.props.scenes]}</IonTitle>
+                        <IonLabel slot="end">
+                            <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {
+                                const help_url = scenes == MinerScenes.altar ?
+                                    "https://docs.emit.technology/emit-documents/emit-epoch/origin-universe/altar-scenes" :
+                                    "https://docs.emit.technology/emit-documents/emit-epoch/origin-universe/chaos-scenes";
+                                Plugins.Browser.open({url: help_url, presentationStyle: "popover"}).catch(e => {
+                                    console.error(e)
+                                })
+                            }}/>
+                        </IonLabel>
+                    </IonToolbar>
+                </IonHeader>
+
+                <div className="content-ion"  onClick={(e) => {
+                    e.stopPropagation();
+                    this.setShowModal(true)
+                    this.init().catch()
+                }}>
 
                     <div style={{padding: "0 10vw", minHeight: "125px"}}>
                         <EpochAttribute device={device} driver={userInfo && userInfo.driver} showDevice={true}
                                         showDriver={true}/>
                     </div>
-                    <div onClick={() => {
-                        this.setShowModal(true)
-                        this.init().catch()
-                    }}>
+                    <div>
                         {this.props.children}
                     </div>
                     <div>
@@ -563,7 +566,8 @@ class EpochOrigin extends React.Component<Props, State> {
                             <span className="nonce-span">{mintData && mintData.nonce}</span>
                         </div>}
                         <div className="start-btn" style={{background: !!isMining ? "red" : "green"}}
-                             onClick={() => {
+                             onClick={(e) => {
+                                 e.stopPropagation();
                                  this.operate().then(() => {
                                  }).catch((e) => {
                                      console.error(e)

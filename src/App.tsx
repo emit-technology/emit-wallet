@@ -85,21 +85,42 @@ import Altar from "./pages/epoch/altar";
 import Chaos from "./pages/epoch/chaos";
 import * as utils from "./utils"
 import embed from "./utils/embed";
+import {DeviceInfo, Plugins} from "@capacitor/core";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
 let epoch = require("./img/icon/epoch.png")
 let setting = require("./img/icon/setting.png")
 
-class App extends React.Component<any,any>{
+interface State{
+    deviceInfo?:DeviceInfo
+    selected:boolean
+}
+
+class App extends React.Component<any,State>{
+
+    state:State = {
+        selected:false
+    }
 
     componentDidMount() {
+        this.init().catch(e=>{
+            console.log(e)
+        })
+    }
+
+    init = async ()=>{
         if(utils.isEmbedPopup()){
             selfStorage.setItem("embed","popup")
             embed.initPopup().catch(e=>{
                 console.error(e)
             })
         }
+
+        const info:DeviceInfo = await Plugins.Device.getInfo()
+        this.setState({
+            deviceInfo:info
+        })
     }
 
     resetIcon = (v:any)=>{
@@ -120,6 +141,7 @@ class App extends React.Component<any,any>{
     }
 
     render() {
+        const {deviceInfo} = this.state;
         return (
             <IonApp>
                 <IonReactHashRouter>
@@ -149,7 +171,7 @@ class App extends React.Component<any,any>{
 
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');
-                        if (!viewedSlide && !utils.isEmbedPopup()) {
+                        if (!viewedSlide && !utils.isEmbedPopup() && deviceInfo && deviceInfo.platform != "web") {
                             return <Redirect to="/slide"/>
                         }
                         const accountId = selfStorage.getItem('accountId');

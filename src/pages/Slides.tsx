@@ -86,7 +86,23 @@ class Slides extends React.Component<any,any>{
                                 <img src="./assets/img/slide-3.png"/>
                                 <h2>{i18n.t("slide.page3.title")}</h2>
                                 <p>{i18n.t("slide.page3.desc")}</p>
-                                <IonButton disabled={!checked} onClick={()=>{
+                                <div style={{width:"100%",transform:"translate(30%)"}}>
+                                    <div style={{float:"left"}} >
+                                        <IonCheckbox mode="ios" onIonChange={(e)=>{
+                                            e.stopPropagation();
+                                            this.setState({
+                                                checked:e.detail.checked
+                                            })
+                                        }}/>
+                                    </div>
+                                    <div style={{padding:'0 12px',float:"left",margin:"0 0 10px",}} >
+                                        <IonLabel color="primary" onClick={(e)=>{
+                                            e.stopPropagation();
+                                            Plugins.Browser.open({url:"https://emit.technology/wallet/terms-of-service.html"}).catch()
+                                        }}>{i18n.t("termOfService")}</IonLabel>
+                                    </div>
+                                </div>
+                                <IonButton expand="block" disabled={!checked} onClick={()=>{
                                     const accountId = selfStorage.getItem("accountId");
                                     if(!accountId){
                                         url.accountCreate();
@@ -95,17 +111,6 @@ class Slides extends React.Component<any,any>{
                                         url.home();
                                     }
                                 }}>{i18n.t("slide.gettingStarted")}</IonButton>
-                                <div style={{textAlign:"center",padding:"0 20vw"}}>
-                                    <IonItem mode="ios">
-                                        <IonCheckbox mode="ios" onIonChange={(e)=>{
-                                            this.setState({
-                                                checked:e.detail.checked
-                                            })
-                                            Plugins.Browser.open({url:"https://emit.technology/wallet/terms-of-service.html"}).catch()
-                                        }}/>
-                                        <IonLabel color="primary" >{i18n.t("termOfService")}</IonLabel>
-                                    </IonItem>
-                                </div>
                             </div>
                         </IonSlide>
                     </IonSlides>

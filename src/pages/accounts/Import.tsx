@@ -182,7 +182,7 @@ class ImportAccount extends React.Component<any, State> {
                     {segment === "mnemonic"?
                         <IonList>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("mnemonicPhrase")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("mnemonicPhrase")}</IonText></IonLabel>
                                 <IonTextarea placeholder={i18n.t("mnemonicTip")} rows={3} mode="ios" clearOnEdit autofocus value={mnemonic} onIonChange={(e:any) => {
                                     this.setState({
                                         mnemonic:e.target.value!
@@ -191,7 +191,7 @@ class ImportAccount extends React.Component<any, State> {
                             </IonItem>
 
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
                                 <IonInput mode="ios" value={name} onIonChange={(e:any) => {
                                     this.setState({
                                         name:e.target.value!
@@ -199,7 +199,7 @@ class ImportAccount extends React.Component<any, State> {
                                 }}/>
                             </IonItem>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
                                 <IonInput mode="ios" type="password" value={password} onIonChange={(e: any) => {
                                     this.setState({
                                         password:e.target.value!
@@ -214,7 +214,7 @@ class ImportAccount extends React.Component<any, State> {
                                 {i18n.t("passwordTip")}
                             </div>}
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
                                 <IonInput mode="ios" type="password" value={rePassword} onIonChange={(e: any) => {
                                     this.setState({
                                         rePassword:e.target.value!
@@ -222,7 +222,7 @@ class ImportAccount extends React.Component<any, State> {
                                 }}/>
                             </IonItem>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("password")} {i18n.t("hint")}({i18n.t("optional")})</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("password")} {i18n.t("hint")}({i18n.t("optional")})</IonText></IonLabel>
                                 <IonInput mode="ios" value={tips} onIonChange={(e: any) => {
                                     this.setState({
                                         tips:e.target.value!
@@ -233,7 +233,7 @@ class ImportAccount extends React.Component<any, State> {
 
                         :<IonList>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("privateKey")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("privateKey")}</IonText></IonLabel>
                                 <IonTextarea placeholder={i18n.t("privateKeyTip")} rows={3} mode="ios" clearOnEdit autofocus value={mnemonic} onIonChange={(e:any) => {
                                     this.setState({
                                         mnemonic:e.target.value!
@@ -242,7 +242,7 @@ class ImportAccount extends React.Component<any, State> {
                             </IonItem>
 
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
                                 <IonInput mode="ios" value={name} onIonChange={(e:any) => {
                                     this.setState({
                                         name:e.target.value!
@@ -250,7 +250,7 @@ class ImportAccount extends React.Component<any, State> {
                                 }}/>
                             </IonItem>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
                                 <IonInput mode="ios" type="password" value={password} onIonChange={(e: any) => {
                                     this.setState({
                                         password:e.target.value!
@@ -265,7 +265,7 @@ class ImportAccount extends React.Component<any, State> {
                                 {i18n.t("passwordTip")}
                             </div>}
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
                                 <IonInput mode="ios" type="password" value={rePassword} onIonChange={(e: any) => {
                                     this.setState({
                                         rePassword:e.target.value!
@@ -273,7 +273,7 @@ class ImportAccount extends React.Component<any, State> {
                                 }}/>
                             </IonItem>
                             <IonItem mode="ios">
-                                <IonLabel position="floating"><IonText color="medium">{i18n.t("password")} {i18n.t("hint")}({i18n.t("optional")})</IonText></IonLabel>
+                                <IonLabel position="stacked"><IonText color="medium">{i18n.t("password")} {i18n.t("hint")}({i18n.t("optional")})</IonText></IonLabel>
                                 <IonInput mode="ios" value={tips} onIonChange={(e: any) => {
                                     this.setState({
                                         tips:e.target.value!
