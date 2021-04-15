@@ -638,12 +638,13 @@ class EpochOrigin extends React.Component<Props, State> {
                                                 <IonSelectOption value={""}>{i18n.t("notChange")}</IonSelectOption>
                                             }
                                             {
-                                                tkt && tkt.map(value => {
+                                                userInfo && new BigNumber(userInfo.currentPeriod).toNumber() >= new BigNumber(userInfo.settlementPeriod).toNumber()
+                                                && tkt && tkt.map(value => {
                                                     return <IonSelectOption
                                                         value={value.tokenId}>{value.tokenId}</IonSelectOption>
                                                 })
                                             }
-                                        </IonSelect>
+                                        </IonSelect>G
                                     </IonItem>
                                 </>
                             }
