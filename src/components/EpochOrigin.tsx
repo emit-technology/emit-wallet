@@ -515,6 +515,8 @@ class EpochOrigin extends React.Component<Props, State> {
         const period = new BigNumber(userInfo ? userInfo.currentPeriod : 0).toNumber();
         const myPeriod = new BigNumber(userInfo ? userInfo.settlementPeriod : 0).toNumber();
 
+        // console.log("userInfo",userInfo)
+        // console.log("deive",device)
         return <IonPage>
             <IonContent fullscreen color="light">
                 <IonHeader>
@@ -644,7 +646,7 @@ class EpochOrigin extends React.Component<Props, State> {
                                                         value={value.tokenId}>{value.tokenId}</IonSelectOption>
                                                 })
                                             }
-                                        </IonSelect>G
+                                        </IonSelect>
                                     </IonItem>
                                 </>
                             }
