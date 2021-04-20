@@ -195,16 +195,17 @@ class TronFrozenBalance extends React.Component<any, any> {
 
         return <>
             <IonPage>
+                <IonHeader>
+                    <IonToolbar mode="ios" color="primary">
+                        <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                            url.back()
+                        }}/>
+                        <IonTitle>{i18n.t("frozenBalance")}</IonTitle>
+                    </IonToolbar>
+                    {showProgress && <IonProgressBar type="indeterminate"/>}
+                </IonHeader>
                 <IonContent fullscreen color="light">
-                    <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
-                            <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
-                                url.back()
-                            }}/>
-                            <IonTitle>{i18n.t("frozenBalance")}</IonTitle>
-                        </IonToolbar>
-                        {showProgress && <IonProgressBar type="indeterminate"/>}
-                    </IonHeader>
+
                     <IonCard mode="ios">
                         <IonCardContent>
                             <TronAccountResource accountResource={accountResource}/>

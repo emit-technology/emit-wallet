@@ -1,0 +1,23 @@
+.device-rank-avatar {
+  --border-radius:0 ;
+}
+
+.device-item {
+  --border-radius: 25px;
+  margin-bottom: 5px;
+  --inner-padding-bottom:5px;
+  --padding-bottom:5px;
+}
+
+.device-box {
+  padding: 15px;
+}
+
+.device-list {
+  background: inherit;
+  border: 1px solid #d1ecf1;
+  padding: 10px;
+  border-radius: 15px;
+}
+
+/*# sourceMappingURL=DeviceRank.css.map */

@@ -329,16 +329,17 @@ class TransactionInfo extends React.Component<any, any> {
     render() {
         const {info, tokens,nft, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert,showLoading} = this.state;
         return <IonPage>
+            <IonHeader>
+                <IonToolbar mode="ios" color="primary">
+                    <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                        url.back()
+                    }}/>
+                    <IonTitle>Transaction Info</IonTitle>
+                </IonToolbar>
+                {showProgress && <IonProgressBar type="indeterminate"/>}
+            </IonHeader>
             <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar mode="ios" color="primary">
-                        <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
-                            url.back()
-                        }}/>
-                        <IonTitle>Transaction Info</IonTitle>
-                    </IonToolbar>
-                    {showProgress && <IonProgressBar type="indeterminate"/>}
-                </IonHeader>
+
                 <IonList>
                     <IonItem mode="ios">
                         <IonLabel color="dark" className="info-label"

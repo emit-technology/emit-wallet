@@ -248,14 +248,15 @@ class TransferNFT extends React.Component<any, any> {
         const {metaData, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet,showLoading} = this.state;
 
         return <IonPage>
+            <IonHeader>
+                <IonToolbar mode="ios" color="primary">
+                    <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                    <IonTitle>NFT {i18n.t("transfer")}</IonTitle>
+                </IonToolbar>
+                {showProgress && <IonProgressBar type="indeterminate"/>}
+            </IonHeader>
+
             <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar mode="ios" color="primary">
-                        <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
-                        <IonTitle>NFT {i18n.t("transfer")}</IonTitle>
-                    </IonToolbar>
-                    {showProgress && <IonProgressBar type="indeterminate"/>}
-                </IonHeader>
 
                 <IonGrid>
                     <IonRow>

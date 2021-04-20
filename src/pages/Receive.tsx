@@ -61,14 +61,13 @@ class Receive extends React.Component<any, any> {
     render() {
         const {address,showToast,chain} = this.state;
         return <IonPage>
+            <IonHeader>
+                <IonToolbar color="primary" mode="ios">
+                    <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                    <IonTitle>{i18n.t("receive")}</IonTitle>
+                </IonToolbar>
+            </IonHeader>
             <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar color="primary" mode="ios">
-                        <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
-                        <IonTitle>{i18n.t("receive")}</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-
                 <div>
                     <IonCard mode="ios">
                         <IonCardContent className="text-center" mode="ios">

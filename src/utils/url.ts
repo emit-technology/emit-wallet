@@ -49,6 +49,7 @@ class Url {
         index : "tabs/epoch",
         altar : "epoch/altar",
         chaos : "epoch/chaos",
+        deviceRank : "epoch/device/rank",
     }
 
     private nftTabs = "tabs/nft"
@@ -197,6 +198,10 @@ class Url {
 
     epochChaos(){
         this.goTo([this.base,this.epoch.chaos].join("/"),[this.base,this.epoch.index].join("/"))
+    }
+
+    epochDeviceRank(){
+        this.goTo([this.base,this.epoch.deviceRank].join("/"),"")
     }
 
 }

@@ -497,18 +497,18 @@ class Wallet extends React.Component<State, any> {
 
         return (
             <IonPage>
+                <IonHeader mode="ios">
+                    <IonToolbar color="primary" mode="ios">
+                        <IonTitle>{i18n.t("wallet")}</IonTitle>
+                        {
+                            utils.IsAPP() &&
+                            <IonIcon onClick={() => {
+                                this.openScanner().catch();
+                            }} src={scanOutline} size="large" slot="end"/>
+                        }
+                    </IonToolbar>
+                </IonHeader>
                 <IonContent fullscreen color="light">
-                    <IonHeader mode="ios">
-                        <IonToolbar color="primary" mode="ios">
-                            <IonTitle>{i18n.t("wallet")}</IonTitle>
-                            {
-                                utils.IsAPP() &&
-                                <IonIcon onClick={() => {
-                                    this.openScanner().catch();
-                                }} src={scanOutline} size="large" slot="end"/>
-                            }
-                        </IonToolbar>
-                    </IonHeader>
                     <IonList color="light">
                         <IonListHeader color="light" mode="ios">
                             <IonLabel><IonText color="medium">{i18n.t("hello")} </IonText>{account.name} </IonLabel>

@@ -86,6 +86,7 @@ import Chaos from "./pages/epoch/chaos";
 import * as utils from "./utils"
 import embed from "./utils/embed";
 import {DeviceInfo, Plugins} from "@capacitor/core";
+import Rank from "./pages/epoch/device/rank";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -168,6 +169,7 @@ class App extends React.Component<any,State>{
 
                     <Route path="/epoch/altar" component={Altar} exact={true}/>
                     <Route path="/epoch/chaos" component={Chaos} exact={true}/>
+                    <Route path="/epoch/device/rank" component={Rank} exact={true}/>
 
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');

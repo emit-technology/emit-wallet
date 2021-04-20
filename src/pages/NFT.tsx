@@ -141,12 +141,12 @@ class NFT extends React.Component<any, any> {
     render() {
         const {ticketMap,tab,drivers} = this.state;
         return <IonPage>
+            <IonHeader mode="ios">
+                <IonToolbar color="primary" mode="ios">
+                    <IonTitle>{i18n.t("NFT")}</IonTitle>
+                </IonToolbar>
+            </IonHeader>
             <IonContent fullscreen >
-                <IonHeader mode="ios">
-                    <IonToolbar color="primary" mode="ios">
-                        <IonTitle>{i18n.t("NFT")}</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
                 <div style={{padding:"12px 12px 0"}}>
                     <IonSegment mode="ios"value={tab} onIonChange={e => this.setTab(e.detail.value)}>
                         <IonSegmentButton mode="ios" value="MEDAL">

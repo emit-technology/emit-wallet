@@ -400,16 +400,16 @@ class TunnelNFT extends React.Component<any, any> {
 
         return (
             <IonPage>
+                <IonHeader>
+                    <IonToolbar mode="ios" color="primary">
+                        <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                            url.back()
+                        }}/>
+                        <IonTitle>NFT {i18n.t("cross")}</IonTitle>
+                    </IonToolbar>
+                    {showProgress && <IonProgressBar type="indeterminate"/>}
+                </IonHeader>
                 <IonContent fullscreen>
-                    <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
-                            <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
-                                url.back()
-                            }}/>
-                            <IonTitle>NFT {i18n.t("cross")}</IonTitle>
-                        </IonToolbar>
-                        {showProgress && <IonProgressBar type="indeterminate"/>}
-                    </IonHeader>
                     <IonChip color="warning" style={{lineHeight:"1.5"}}>
                         You are transferring NFT from the {TOKEN_DESC[crossMode[0]]} to the {TOKEN_DESC[crossMode[1]]}
                         </IonChip>

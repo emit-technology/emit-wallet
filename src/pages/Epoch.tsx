@@ -73,13 +73,14 @@ class Epoch extends React.Component<any, any>{
                         </IonToolbar>
                     </IonHeader>
                     <IonCard mode="ios">
-                        <IonCardHeader>
+                        <IonCardHeader onClick={()=>{
+                            url.epochDeviceRank()
+                        }}>
                             <IonCardTitle>
                                 <IonLabel>
                                     ORIGIN
                                 </IonLabel>
                             </IonCardTitle>
-
                         </IonCardHeader>
                         <IonCardContent>
                             <div onClick={() => {

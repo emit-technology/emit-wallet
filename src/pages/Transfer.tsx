@@ -273,14 +273,15 @@ class Transfer extends React.Component<any, any> {
         const {showLoading, chain, account, realCy, showProgress,gasPrice,tx, to, amount,showToast,toastMessage,accountResource,color,balance,showAlert,showActionSheet,gasPriceLevel} = this.state;
 
         return <IonPage>
+            <IonHeader>
+                <IonToolbar mode="ios" color="primary">
+                    <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                    <IonTitle>{realCy} {i18n.t("transfer")}</IonTitle>
+                </IonToolbar>
+                {showProgress && <IonProgressBar type="indeterminate"/>}
+            </IonHeader>
             <IonContent fullscreen>
-                <IonHeader>
-                    <IonToolbar mode="ios" color="primary">
-                        <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
-                        <IonTitle>{realCy} {i18n.t("transfer")}</IonTitle>
-                    </IonToolbar>
-                    {showProgress && <IonProgressBar type="indeterminate"/>}
-                </IonHeader>
+
 
                 <IonList>
                     <IonItem mode="ios" className="form-padding">

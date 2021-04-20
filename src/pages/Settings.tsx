@@ -257,13 +257,12 @@ class Settings extends React.Component<any, any>{
         const {showPasswordAlert,showToast,toastColor,privateKey,showAlertLang,showPasswordAlert2,toastMsg,showLoading,showActionSheet,account} = this.state;
         return (
             <IonPage>
+                <IonHeader>
+                    <IonToolbar color="primary" mode="ios">
+                        <IonTitle>{i18n.t("settings")}</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
                 <IonContent fullscreen color="light">
-                    <IonHeader>
-                        <IonToolbar color="primary" mode="ios">
-                            <IonTitle>{i18n.t("settings")}</IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-
                     <div className="logo-bg-sharp">
                     </div>
 

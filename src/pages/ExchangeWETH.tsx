@@ -181,16 +181,17 @@ class ExchangeWETH extends React.Component<any, any> {
         const {balance, amount, showProgress, showToast, toastMsg, toastColor, gasPrice, showActionSheet, showAlert, tx, op} = this.state;
         return <>
             <IonPage>
+                <IonHeader>
+                    <IonToolbar mode="ios" color="primary">
+                        <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                            url.back()
+                        }}/>
+                        <IonTitle>{i18n.t(op)} WETH</IonTitle>
+                    </IonToolbar>
+                    {showProgress && <IonProgressBar type="indeterminate"/>}
+                </IonHeader>
                 <IonContent fullscreen color="light">
-                    <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
-                            <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
-                                url.back()
-                            }}/>
-                            <IonTitle>{i18n.t(op)} WETH</IonTitle>
-                        </IonToolbar>
-                        {showProgress && <IonProgressBar type="indeterminate"/>}
-                    </IonHeader>
+
                     <IonList>
                         <IonItem mode="ios" className="form-padding" lines="none">
                             <IonLabel color="medium" position="stacked">ETH {i18n.t("balance")}</IonLabel>
