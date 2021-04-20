@@ -471,6 +471,14 @@ export function isDark(dna:string):boolean {
     return (u256[0]&0xFC) == 0;
 }
 
+export function calcStyle(dna:string):number{
+    if(!dna){
+        return 0
+    }
+    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
+    return (new BigNumber(u256[1]&0x3).toNumber())
+}
+
 
 export function getQueryString(name:string) {
     const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");

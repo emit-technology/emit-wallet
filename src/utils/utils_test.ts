@@ -1,6 +1,6 @@
 
-import {isDark,calcDark} from './index'
+import {isDark,calcDark,calcStyle} from './index'
 
-const dna = "0x01fc5af5f73993593dc84ae6cb53724bd5cc7e3e6a9967692ba30775b59b7f0d";
+const dna = "0x11dc88c7d4ccd27ee60ae2f0ec737db0e5eb68157e015a7f472d61d9c8a00447";
 
-console.log(isDark(dna),calcDark(dna))
+console.log(isDark(dna),calcDark(dna),calcStyle(dna))

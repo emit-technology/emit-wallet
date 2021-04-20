@@ -43,7 +43,7 @@ class Rank extends React.Component<any, any>{
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen color="light">
-                <div className="content-ion">
+                <div className="content-ion-rank">
 
                     <DeviceRank devices={[]}/>
                 </div>

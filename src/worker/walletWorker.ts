@@ -152,7 +152,7 @@ class WalletWorker {
         this.isLocked().then(ret=>{
             const urlHash = window.location.hash;
             if(ret && urlHash.indexOf("account/unlock") == -1){
-                // url.accountUnlock()
+                url.accountUnlock()
             }
         })
 

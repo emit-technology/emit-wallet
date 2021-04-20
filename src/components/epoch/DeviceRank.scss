@@ -1,25 +1,68 @@
-.device-rank-avatar{
-  --border-radius:0
+.device-rank-avatar {
+  --border-radius: 0
 }
 
-.device-item{
+.device-item {
   --border-radius: 25px;
   margin-bottom: 5px;
-  --inner-padding-bottom:5px;
-  --padding-bottom:5px;
+  --inner-padding-bottom: 5px;
+  --padding-bottom: 5px;
   //--min-height:65px;
   //--background:#df6572;
   //--background-opacity: 0.5;
   //background-size: 80%;
 }
 
-.device-box{
+.device-box {
   padding: 15px;
 }
 
-.device-list{
-  background:inherit;
-  border:1px solid #d1ecf1;
-  padding: 10px;
-  border-radius: 15px;
+.device-list {
+  background: inherit;
+  border: 1px solid #ddd;
+  padding: 15px 10px;
+  border-radius: 0 0px 15px 15px;
+
+}
+
+.device-list-h1{
+  max-height: 50vh;
+  overflow: scroll;
+}
+
+.device-list-h2{
+  max-height: 35vh;
+  overflow: scroll;
+}
+
+.content-ion-rank {
+  //font-family: Epilogue, sans-serif;
+  background: url("../../pages/epoch/img/background.png");
+  background-size: 100%;
+  minHeight: calc(100vh - 44px);
+  height: auto;
+}
+
+.rank-text {
+  color: #fff;
+  height: 30px;
+  min-width: 80px;
+  //max-width: 150px;
+  text-align: center;
+  line-height: 30px;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  background: #152955;
+  border-radius: 5px 5px 0 0;
+  font-weight: 800;
+  font-family: Epilogue, sans-serif;
+}
+
+.rank-digital{
+  padding: 10px 6px 10px 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #152955;
+  font-family: Epilogue, sans-serif;
 }

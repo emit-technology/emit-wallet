@@ -23,6 +23,7 @@ import i18n from "../../locales/i18n";
 
 interface State{
     tab: string
+    scenes:string
 }
 
 interface Props{
@@ -32,7 +33,8 @@ interface Props{
 class DeviceRank extends React.Component<Props, State>{
 
     state:State = {
-        tab:"device"
+        tab:"device",
+        scenes:"altar"
     }
 
     componentDidMount() {
@@ -45,27 +47,90 @@ class DeviceRank extends React.Component<Props, State>{
         })
     }
 
+    setScenes = (v:any)=>{
+        this.setState({
+            scenes:v
+        })
+    }
     render() {
-        const {tab} = this.state;
+        const {tab,scenes} = this.state;
         return <>
             <IonToolbar color="primary" mode="ios" className="heard-bg">
-                <IonSegment value={tab} onIonChange={e => this.setTab(e.detail.value)}>
+                <IonSegment value={tab} mode="ios" onIonChange={e => this.setTab(e.detail.value)}>
                     <IonSegmentButton value="device">
-                        Device
+                        DEVICE
                     </IonSegmentButton>
                     <IonSegmentButton value="driver">
-                        Driver
+                        DRIVER
                     </IonSegmentButton>
                 </IonSegment>
             </IonToolbar>
+            {
+                tab == "driver" && <div>
+                    <IonSegment mode="ios" value={scenes} onIonChange={(e:any)=>this.setScenes(e.detail.value)}>
+                        <IonSegmentButton value="altar">
+                            <IonLabel color={scenes=="altar"?"":"white"}>ALTAR</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton value="chaos">
+                            <IonLabel  color={scenes=="chaos"?"":"white"}>CHAOS</IonLabel>
+                        </IonSegmentButton>
+                    </IonSegment>
+                </div>
+            }
             <div className="device-box">
-                <IonList className="device-list">
+                <div className="rank-text">
+                    TOP 10
+                </div>
+                <div className="device-list device-list-h1">
+
                     {
                         [1,2,3,4,5,6,7,8,9,10].map((v:number,i:number)=>{
                             return <IonItem lines="none" className="device-item" detail={true} detailIcon="chevron-forward" >
-                                <IonBadge slot="start">{i+1}</IonBadge>
+                                {v==1 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top1.png" /></IonAvatar>}
+                                {v==2 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top2.png" /></IonAvatar>}
+                                {v==3 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top3.png" /></IonAvatar>}
+                                {v>3 && <IonAvatar slot="start" className="device-rank-avatar"><div className="rank-digital">{v}</div></IonAvatar>}
                                 <IonAvatar slot="start" className="device-rank-avatar">
                                     <img src="./assets/img/axe.png" />
+                                </IonAvatar>
+                                <IonLabel className="ion-text-wrap">
+
+                                    <IonRow>
+                                        <IonCol>
+                                            <div>0x1dees..edx0</div>
+                                        </IonCol>
+                                        <IonCol>
+                                            <div style={{textAlign: "right"}}>
+                                                <IonText color="dark" className="text-little">45.00%</IonText>
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+                                    <IonProgressBar className="progress-background" value ={0.8}/>
+
+                                </IonLabel>
+
+                            </IonItem>
+                        })
+                    }
+
+                </div>
+            </div>
+
+            <div className="device-box">
+                <div className="rank-text">
+                    MY RANKING
+                </div>
+                <IonList className="device-list device-list-h2">
+
+                    {
+                        [1,2,3,4,5,6,7,8,9,10].map((v:number,i:number)=>{
+                            return <IonItem lines="none" className="device-item" detail={true} detailIcon="chevron-forward" >
+                                {v==1 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top1.png" /></IonAvatar>}
+                                {v==2 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top2.png" /></IonAvatar>}
+                                {v==3 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top3.png" /></IonAvatar>}
+                                {v>3 && <IonAvatar slot="start" className="device-rank-avatar"><div className="rank-digital">{v}</div></IonAvatar>}
+                                <IonAvatar slot="start" className="device-rank-avatar">
+                                    {v>0 && <img src="./assets/img/axe.png" />}
                                 </IonAvatar>
                                 <IonLabel className="ion-text-wrap">
                                     <h4>sdfsdf</h4>
