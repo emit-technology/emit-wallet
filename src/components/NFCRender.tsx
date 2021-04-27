@@ -1,34 +1,10 @@
 import * as React from 'react';
-import {
-    IonCol,
-    IonContent, IonText, IonAvatar, IonSegment, IonSegmentButton,
-    IonImg, IonBadge,
-    IonItem,
-    IonItemGroup,
-    IonItemDivider,
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardSubtitle,
-    IonCardHeader,
-    IonCardTitle,
-    IonModal,
-    IonGrid,
-    IonLabel,
-    IonList,
-    IonListHeader,
-    IonRow,
-    IonHeader, IonToolbar, IonTitle
-} from "@ionic/react";
-import rpc from "../rpc";
 import * as utils from "../utils"
-import url from "../utils/url";
-import i18n from "../locales/i18n";
-import {META_TEMP} from "../config";
 import CardTransform from "./CardTransform";
+import {NftInfo} from "../types";
 
 interface Props {
-    data: Array<any>
+    data: Array<NftInfo>
 }
 
 class NFCRender extends React.Component<Props, any> {
@@ -86,13 +62,10 @@ class NFCRender extends React.Component<Props, any> {
             <div className="card-page">
                 <div className="card-inset">
                     {
-                        data && data.map((v: any,index:number) => {
+                        data && data.map((v: NftInfo,index:number) => {
                             //lines={index == data.length-1?"none":"inset"}
-                            const meta = v.metaData?v.metaData:{};
-                            return <CardTransform src={meta.image}
-                                                  title={meta.name} subTitle={v.value} chain={v.chain}
-                                                  timestamp={Date.now()} description={meta.description}
-                                                  dna={utils.getAddressBySymbol(v.symbol,v.chain)} symbol={v.symbol}/>
+                            // const meta = v.metaData?v.metaData:{};
+                            return <CardTransform info={v}/>
                         })
                     }
 

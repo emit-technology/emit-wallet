@@ -3,7 +3,8 @@ import {
     IonButton,
     IonChip,
     IonCol,
-    IonContent, IonHeader,
+    IonContent,
+    IonHeader,
     IonIcon,
     IonInput,
     IonItem,
@@ -18,15 +19,18 @@ import {
     IonSegmentButton,
     IonSelect,
     IonSelectOption,
-    IonText, IonTitle,
-    IonToast, IonToolbar
+    IonText,
+    IonTitle,
+    IonToast,
+    IonToolbar
 } from "@ionic/react";
 import ConfirmTransaction from "./ConfirmTransaction";
 import epochService from "../contract/epoch/sero";
 import {MinerScenes, MintData} from "../pages/epoch/miner";
-import {AccountModel, ChainType, Transaction} from "../types";
+import {AccountModel, ChainType, NftInfo, Transaction} from "../types";
 import BigNumber from "bignumber.js";
 import * as utils from "../utils";
+import {nFormatter} from "../utils";
 import rpc from "../rpc";
 import {DeviceInfo, DriverInfo, Period, UserInfo} from "../contract/epoch/sero/types";
 import Countdown from 'react-countdown';
@@ -42,7 +46,9 @@ import './EpochOrigin.scss';
 import {EPOCH_SETTLE_TIME} from "../config";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
-import {nFormatter} from "../utils";
+import epochNameService from "../contract/epoch/sero/name";
+import selfStorage from "../utils/storage";
+import CardTransform from "./CardTransform";
 
 interface State {
     amount: any
@@ -64,12 +70,13 @@ interface State {
     device?: DeviceInfo
     showModal: boolean
     account?: AccountModel
-    tkt: Array<any>
+    tkt: Array<NftInfo>
     estimateLight:string
 
     selectDevice?: DeviceInfo
 
     minNE:any
+    showModalDevice:boolean
 }
 
 interface Props {
@@ -100,7 +107,8 @@ class EpochOrigin extends React.Component<Props, State> {
         nexPeriods: [],
         myPeriods: [],
         estimateLight:"0",
-        minNE:0
+        minNE:0,
+        showModalDevice:false
     }
 
 
@@ -108,7 +116,6 @@ class EpochOrigin extends React.Component<Props, State> {
         Plugins.StatusBar.setBackgroundColor({
             color: "#152955"
         }).catch(e => {
-
         })
         this.init().then(() => {
             this.props.loadDevice(this.state.device)
@@ -123,7 +130,14 @@ class EpochOrigin extends React.Component<Props, State> {
         this.miner().setMiner(account.accountId ? account.accountId : "")
         const fromAddress = account.addresses[ChainType.SERO];
         const userInfo = await epochService.userInfo(scenes, fromAddress)
+        const alis = await epochNameService.getDriverName(scenes,fromAddress);
+        if(userInfo.driver){
+            userInfo.driver.alis = alis
+        }
         const device = await epochService.lockedDevice(scenes, fromAddress)
+        if(device.category && device.ticket.indexOf("0x0000000000")==-1){
+            device.alis = await epochNameService.getDeviceName(device.ticket)
+        }
         const period = new BigNumber(userInfo.currentPeriod).toNumber();//new BigNumber(userInfo.settlementPeriod).comparedTo(new BigNumber(userInfo.currentPeriod)) == -1?new BigNumber(userInfo.currentPeriod).toNumber():new BigNumber(userInfo.settlementPeriod).toNumber();
         const myPeriod = new BigNumber(userInfo.settlementPeriod).toNumber();
         const periods = await epochService.userPeriodInfo(scenes, period, fromAddress)
@@ -151,7 +165,7 @@ class EpochOrigin extends React.Component<Props, State> {
             })
         }
         await this.mintState();
-        const tkt = await this.getTicket(fromAddress)
+        const tkt = await this.getDevice()
         const isMining = await this.miner().isMining()
 
         const estimateLight = await this.convertPeriod(device,nexPeriods,scenes,fromAddress)
@@ -261,10 +275,10 @@ class EpochOrigin extends React.Component<Props, State> {
             }
             if (!checked && selectAxe) {
                 tx.catg = Category
-                tx.tkt = selectAxe
+                tx.tkt = selectAxe.split("$")[0]
                 tx.tickets = [{
                     Category: Category,
-                    Value: selectAxe
+                    Value: selectAxe.split("$")[0]
                 }]
             }
             if (checked) {
@@ -302,7 +316,11 @@ class EpochOrigin extends React.Component<Props, State> {
                     clearInterval(intervalId);
                     // url.transactionInfo(chain,hash,Currency);
                     this.setShowLoading(false)
-                    this.init()
+                    this.init().then(()=>{
+                        this.props.loadDevice(this.state.device)
+                    }).catch(e=>{
+                        console.error(e)
+                    })
                 }
             }).catch(e => {
                 console.error(e)
@@ -358,8 +376,8 @@ class EpochOrigin extends React.Component<Props, State> {
         return <div className="countdown">{h}:{m}:{s}</div>;
     };
 
-    getTicket = async (address: string) => {
-        const rest = await rpc.getTicket(ChainType.SERO, address)
+    getDevice = async ():Promise<Array<NftInfo>> => {
+        const rest:any = selfStorage.getItem(utils.ticketKey(ChainType.SERO))
         return rest ?rest["EMIT_AX"]:[]
     }
 
@@ -413,6 +431,12 @@ class EpochOrigin extends React.Component<Props, State> {
     setShowModal = (f: boolean) => {
         this.setState({
             showModal: f
+        })
+    }
+
+    setShowModalDevice = (f:boolean)=>{
+        this.setState({
+            showModalDevice:f
         })
     }
 
@@ -481,18 +505,21 @@ class EpochOrigin extends React.Component<Props, State> {
         </>
     }
 
-    onSelectDevice = async (ticket: string) => {
+    onSelectDevice = async (value: string) => {
         interVar.stop()
-        if (ticket) {
+        if (value) {
+            const ticket = value.split("$")[0];
+            const alis = value.split("$")[1]
             const {account} = this.state;
             const rest = await epochService.axInfo(Category, ticket, account && account.addresses[ChainType.SERO])
+            rest.alis = alis;
             this.setState({
                 selectDevice: rest,
-                selectAxe: ticket
+                selectAxe: `${ticket}$${alis}`
             })
         }else {
             this.setState({
-                selectAxe: ticket
+                selectAxe: value
             })
         }
         interVar.start(() => {
@@ -507,7 +534,7 @@ class EpochOrigin extends React.Component<Props, State> {
         const {scenes} = this.props;
         // const {showModal, mintData, device, userInfo, setShowModal, tkt,periods} = this.props;
         const {
-            periods, showAlert, tx, toastMessage, showLoading,minNE,
+            periods, showAlert, tx, toastMessage, showLoading,showModalDevice,
             color, showToast, selectAxe, checked, amount, isMining,
             mintData, device, userInfo, showModal, tkt, nexPeriods, selectDevice, myPeriods,estimateLight
         } = this.state;
@@ -545,43 +572,63 @@ class EpochOrigin extends React.Component<Props, State> {
                     </IonToolbar>
                 </IonHeader>
 
-                <div className="content-ion"  onClick={(e) => {
-                    e.stopPropagation();
-                    this.setShowModal(true)
-                    this.init().catch()
-                }}>
+                <div className="content-ion">
 
                     <div style={{padding: "0 10vw", minHeight: "125px"}}>
                         <EpochAttribute device={device} driver={userInfo && userInfo.driver} showDevice={true}
-                                        showDriver={true}/>
+                                        showDriver={true} scenes={scenes} doUpdate={()=>this.init()}/>
                     </div>
-                    <div>
+                    <div onClick={(e) => {
+                        e.stopPropagation();
+                        this.setShowModalDevice(true)
+                    }}>
                         {this.props.children}
                     </div>
                     <div>
-                        {mintData && mintData.ne &&
-                        <div className="ne-text">
-                            {mintData && mintData.ne}<span style={{letterSpacing: "2px", color: "#f0f"}}>NE</span>
-                        </div>
-                        }
-                        {mintData && mintData.nonce && <div className="nonce-text">
-                            <span className="nonce-span">{mintData && mintData.nonce}</span>
-                        </div>}
-                        <div className="start-btn" style={{background: !!isMining ? "red" : "green"}}
-                             onClick={(e) => {
-                                 e.stopPropagation();
-                                 this.operate().then(() => {
-                                 }).catch((e) => {
-                                     console.error(e)
-                                 })
-                             }}>
-                            <div style={{margin: "10.5vw 0"}} className="font-ep">
-                                {!!isMining ? `${new BigNumber(mintData.hashrate ? mintData.hashrate.o : 0).toFixed(0)}/s` : "HashRate"}
+                        <div className="hashrate-box">
+                            <div className="hashrate-box-display"  onClick={(e) => {
+                                e.stopPropagation();
+                                this.setShowModal(true)
+                                this.init().catch()
+                            }}>
+                                {mintData && mintData.ne &&
+                                <div className="ne-text">
+                                    {mintData && mintData.ne}<span style={{letterSpacing: "2px", color: "#f0f"}}>NE</span>
+                                </div>
+                                }
+                                {mintData && mintData.nonce && <div className="nonce-text">
+                                    <span className="nonce-span">{mintData && mintData.nonce}</span><br/>
+                                    <span className="nonce-span">
+                                        {`${new BigNumber(mintData.hashrate ? mintData.hashrate.o : 0).toFixed(0)}/s`}
+                                    </span>
+                                </div>}
                             </div>
+
+                            <IonRow>
+                                <IonCol>
+                                    <div className="start-btn" style={{border: "2px solid #ddd"}} onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.setShowModal(true)
+                                        this.init().catch()
+                                    }}>
+                                        {scenes == MinerScenes.altar ? i18n.t("forging"):i18n.t("mining")}
+                                    </div>
+                                </IonCol>
+                                <IonCol>
+                                    <div className="start-btn" style={{background: !!isMining ? "red":"green"}} onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.operate().then(() => {
+                                        }).catch((e) => {
+                                            console.error(e)
+                                        })
+                                    }}>
+                                        {!!isMining ? "STOP" : "HASHRATE"}
+                                    </div>
+                                </IonCol>
+                            </IonRow>
                         </div>
                     </div>
                 </div>
-
 
                 <IonModal
                     isOpen={showModal}
@@ -643,7 +690,7 @@ class EpochOrigin extends React.Component<Props, State> {
                                                 userInfo && new BigNumber(userInfo.currentPeriod).toNumber() >= new BigNumber(userInfo.settlementPeriod).toNumber()
                                                 && tkt && tkt.map(value => {
                                                     return <IonSelectOption
-                                                        value={value.tokenId}>{value.tokenId}</IonSelectOption>
+                                                        value={`${value.tokenId}$${value && value.meta && value.meta.alis}`}>{value && value.meta && value.meta.alis?`(${value.meta.alis})`:""} {value.tokenId}</IonSelectOption>
                                                 })
                                             }
                                         </IonSelect>
@@ -698,7 +745,8 @@ class EpochOrigin extends React.Component<Props, State> {
                             <IonRow>
                                 <IonCol size="4">
                                     <IonButton expand="block" mode="ios" fill={"outline"} color="primary"
-                                               onClick={() => {
+                                               onClick={(e) => {
+                                                   e.stopPropagation();
                                                    this.setShowModal(false)
                                                }}>{i18n.t("cancel")}</IonButton>
                                 </IonCol>
@@ -708,7 +756,8 @@ class EpochOrigin extends React.Component<Props, State> {
                                                    checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ||
                                                    !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ||
                                                    new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked}
-                                               onClick={() => {
+                                               onClick={(e) => {
+                                                   e.stopPropagation();
                                                    if (checked) {
                                                        this.done().then(() => {
                                                        }).catch(e => {
@@ -742,6 +791,16 @@ class EpochOrigin extends React.Component<Props, State> {
                     </div>
                 </IonModal>
 
+                <IonModal
+                    isOpen={showModalDevice}
+                    cssClass='epoch-rank-modal'
+                    swipeToClose={true}
+                    onDidDismiss={() => this.setShowModalDevice(false)}>
+                    {
+                        device && <CardTransform info={utils.convertDeviceToNFTInfo(device)} hideButton={true}/>
+                    }
+                </IonModal>
+
                 <IonToast
                     color={!color ? "warning" : color}
                     position="top"
@@ -751,7 +810,6 @@ class EpochOrigin extends React.Component<Props, State> {
                     duration={2500}
                     mode="ios"
                 />
-
 
                 <IonLoading
                     mode="ios"

@@ -50,6 +50,7 @@ class Url {
         altar : "epoch/altar",
         chaos : "epoch/chaos",
         deviceRank : "epoch/device/rank",
+        driverRank : "epoch/driver/rank",
     }
 
     private nftTabs = "tabs/nft"
@@ -201,7 +202,11 @@ class Url {
     }
 
     epochDeviceRank(){
-        this.goTo([this.base,this.epoch.deviceRank].join("/"),"")
+        this.goTo([this.base,this.epoch.deviceRank].join("/"),[this.base,this.epoch.index].join("/"))
+    }
+
+    epochDriverRank(){
+        this.goTo([this.base,this.epoch.driverRank].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
 }

@@ -97,15 +97,15 @@ $colorYellow: #edcc67;
   max-width: 100px;
 }
 
-.altar-img-5 img {
-  @include altar-absolute;
-  width: 28vw;
-  animation: slide 6s forwards;
-  z-index: 5;
-  transition: transform 0.6s ease 0.1s;
-  transform-style: preserve-3d;
-  max-width: 100px;
-}
+//.altar-img-5 img {
+//  @include altar-absolute;
+//  width: 28vw;
+//  animation: slide 6s forwards;
+//  z-index: 5;
+//  transition: transform 0.6s ease 0.1s;
+//  transform-style: preserve-3d;
+//  max-width: 100px;
+//}
 
 .altar-img-4b {
   @include altar-absolute;
@@ -143,7 +143,7 @@ $colorYellow: #edcc67;
 .content-ion {
   background: url("../pages/epoch/img/background.png");
   background-size: 100%;
-  minHeight: calc(100vh - 44px);
+  min-height: calc(100vh - 44px);
   height: auto;
 }
 
@@ -160,55 +160,36 @@ $colorYellow: #edcc67;
   padding: 12px 32px;
 }
 
-.start-btn {
-  width: 25vw;
-  height: 25vw;
-  color: #fff;
-  border: #00ffff 1px solid;
-  position: absolute;
-  bottom: 20px;
-  transform: translateX(-50%);
-  left: 50%;
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 50%;
-  text-align: center;
-  //padding: 10vw 10px;
-  animation: bigAssButtonPulse 3s linear infinite alternate;
-  box-shadow: 0 0 15px #0ff;
-}
 
 @mixin show-text {
   position: absolute;
   transform: translateX(-50%);
   left: 50%;
   color: #fff;
-  text-shadow: 0 0 3px #0ff;
-  font-size: 20px;
-  letter-spacing: 5px;
-  border: 1px solid #0ff;
-  border-radius: 5px;
-  box-shadow: 0 0 3px #0ff;
+}
+
+.start-btn {
+  text-align: center;
+  font-weight: 600;
+  font-family: Epilogue, sans-serif;
+  padding: 10px;
+  border-radius: 15px;
+  border: 2px solid #ddd
 }
 
 .ne-text {
-  top: calc(66vh + 36px);
   font-weight: 600;
   font-family: Epilogue, sans-serif;
   padding: 6px 5px 2px;
-  @include show-text
+  //width: 80vw;
+  max-width: 300px;
+  text-align: center;
+
 }
 
 .nonce-text {
-  top: calc(66vh + 70px);
-  position: absolute;
-  transform: translateX(-50%);
-  left: 50%;
   padding: 3px;
-  //box-shadow: 0 0 3px #fff;
-  //border: 1px solid #0ff;
-  //border-radius: 5px;
-  width: 80vw;
+  //width: 80vw;
   font-weight: 600;
   text-align: center;
   font-family: Epilogue, sans-serif;
@@ -218,9 +199,34 @@ $colorYellow: #edcc67;
   color: #fff;
   text-shadow: 0 0 3px #fff;
   font-size: 12px;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   font-family: Epilogue, sans-serif;
   //animation: nonce-an 1s linear infinite;
+
+}
+
+.hashrate-box{
+  bottom: 20px;
+
+  width: 80vw;
+  max-width: 300px;
+  padding: 10px;
+  min-height: 150px;
+  height: auto;
+  z-index: 90;
+  @include show-text
+}
+
+.hashrate-box-display{
+  animation: bigAssButtonPulse 3s linear infinite alternate;
+  text-shadow: 0 0 3px #0ff;
+  font-size: 20px;
+  letter-spacing: 5px;
+  border: 1px solid #0ff;
+  border-radius: 5px;
+  box-shadow: 0 0 3px #0ff;
+  padding: 10px 0;
+  margin-bottom: 10px;
 }
 
 @keyframes nonce-an {
@@ -392,7 +398,7 @@ $show-customer:
   max-width: 400px;
   max-height: 400px;
   background: $color-boll;
-  box-shadow: 0 0 20px 0px #edcc67;
+  box-shadow: 0 0 25px 0px #edcc67;
   border-radius: 50%;
 }
 
@@ -613,6 +619,13 @@ div.starfield .moving-3 {
 }
 
 .dark-star{
-  color:#edcc67;
+  color: darkred;
   font-size: 15px;
+}
+
+.bottom-button-group{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 0 35px 10px;
 }

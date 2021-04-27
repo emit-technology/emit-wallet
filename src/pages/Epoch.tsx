@@ -19,15 +19,15 @@
 import React from 'react';
 import {
     IonCard,
-    IonCardContent,
-    IonCardHeader,
+    IonCardContent,IonRow,IonCol,
+    IonCardHeader, IonListHeader,
     IonCardTitle,
     IonContent,
     IonHeader,
     IonLabel,
-    IonPage,
+    IonPage, IonSegment, IonSegmentButton,
     IonTitle,
-    IonToolbar
+    IonToolbar, IonIcon
 } from '@ionic/react';
 import './Epoch.css';
 import url from "../utils/url";
@@ -36,6 +36,7 @@ import epochService from "../contract/epoch/sero";
 import walletWorker from "../worker/walletWorker";
 import {ChainType} from "../types";
 import {MinerScenes} from "./epoch/miner";
+import {statsChartOutline} from "ionicons/icons";
 
 class Epoch extends React.Component<any, any>{
 
@@ -66,37 +67,63 @@ class Epoch extends React.Component<any, any>{
         const {chaosInfo,altarInfo} = this.state;
         return (
             <IonPage>
+                <IonHeader>
+                    <IonToolbar color="primary" mode="ios">
+                        <IonTitle>Epoch</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
                 <IonContent fullscreen>
-                    <IonHeader>
-                        <IonToolbar color="primary" mode="ios">
-                            <IonTitle>Epoch</IonTitle>
-                        </IonToolbar>
-                    </IonHeader>
-                    <IonCard mode="ios">
-                        <IonCardHeader onClick={()=>{
-                            url.epochDeviceRank()
-                        }}>
-                            <IonCardTitle>
-                                <IonLabel>
-                                    ORIGIN
-                                </IonLabel>
-                            </IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                            <div onClick={() => {
+                    {/*<div style={{padding:"12px 12px 0"}}>*/}
+                    {/*    <IonSegment mode="ios"value={"origin"}>*/}
+                    {/*        <IonSegmentButton mode="ios" value="origin">*/}
+                    {/*            <IonLabel>ORIGIN</IonLabel>*/}
+                    {/*        </IonSegmentButton>*/}
+                    {/*    </IonSegment>*/}
+                    {/*</div>*/}
+                    <IonListHeader>
+                        <IonLabel>ORIGIN</IonLabel>
+                    </IonListHeader>
+                    <div className="epoch-box">
+                        <div  className="epoch-origin">
+                            <IonRow>
+                                <IonCol style={{textAlign:"center"}}>
+                                    <div className="rank-box" onClick={()=>{
+                                        url.epochDeviceRank()
+                                    }}>
+                                        <IonIcon src={statsChartOutline} size="large"/><br/>
+                                        <IonLabel>DEVICE</IonLabel><br/>
+                                        <IonLabel>RANK</IonLabel><br/>
+                                    </div>
+                                </IonCol>
+                                <IonCol style={{textAlign:"center"}}>
+                                    <div className="rank-box" onClick={()=>{
+                                        url.epochDriverRank()
+                                    }}>
+                                        <IonIcon src={statsChartOutline} size="large"/><br/>
+                                        <IonLabel>DRIVER</IonLabel><br/>
+                                        <IonLabel>RANK</IonLabel><br/>
+                                    </div>
+                                </IonCol>
+                            </IonRow>
+                            <IonCard mode="ios" onClick={() => {
                                 url.epochAltar()
                             }}>
-                                <img src="./assets/img/altar.png" style={{maxWidth: "unset", width: "100%"}}/>
-                                <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
-                            </div>
-                            <div onClick={() => {
+                                <IonCardContent>
+                                    <img src="./assets/img/altar.png"/>
+                                    <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
+                                </IonCardContent>
+                            </IonCard>
+
+                            <IonCard mode="ios" onClick={() => {
                                 url.epochChaos()
                             }}>
-                                <img src="./assets/img/chaos.png" style={{maxWidth: "unset", width: "100%"}}/>
-                                <EpochAttribute driver={chaosInfo && chaosInfo.driver} showDriver={true} showDevice={false}/>
-                            </div>
-                        </IonCardContent>
-                    </IonCard>
+                                <IonCardContent>
+                                    <img src="./assets/img/chaos.png"/>
+                                    <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
+                                </IonCardContent>
+                            </IonCard>
+                        </div>
+                    </div>
                 </IonContent>
             </IonPage>
         );

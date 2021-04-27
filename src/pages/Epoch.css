@@ -1,6 +1,31 @@
-.img-center{
+.img-center {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
+}
+
+.epoch-box {
+    padding: 0 15px;
+}
+
+.epoch-origin {
+    border: 2px dashed #ddd;
+    border-radius: 5px;
+    padding-top: 10px;
+}
+
+.rank-box{
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 18px;
+    /*margin-top: 10px;*/
+    margin:auto;
+    background: #152955;
+    color:#fff;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0px 5px 5px 2px #ddd;
 }

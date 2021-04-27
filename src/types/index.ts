@@ -58,8 +58,8 @@ export interface Transaction {
     feeValue?: string
     input?: string
     tickets?: Array<any>
-    catg?:string
-    tkt?:string
+    catg?: string
+    tkt?: string
 }
 
 export interface GasPriceLevel {
@@ -75,6 +75,27 @@ export interface costTime {
 }
 
 export interface Ticket {
-    Value:string
-    Category:string
+    Value: string
+    Category: string
+}
+
+export interface DeviceMode {
+    style: string
+    category: string
+}
+
+export interface NftInfo {
+    chain: ChainType
+    category:string
+    symbol: string
+    tokenId: string
+    meta: MetaInfo
+}
+
+export interface MetaInfo {
+    name: string
+    description: string
+    image: string
+    attributes: any
+    alis: string
 }

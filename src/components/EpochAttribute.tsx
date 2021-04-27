@@ -1,40 +1,76 @@
 import * as React from 'react';
-import {IonCol, IonIcon, IonProgressBar, IonRow, IonText} from "@ionic/react";
+import {IonCol, IonIcon, IonModal, IonProgressBar, IonRow, IonText} from "@ionic/react";
 import * as utils from "../utils";
-import {DeviceInfo, DriverInfo} from "../contract/epoch/sero/types";
+import {DeviceInfo, DeviceInfoRank, DriverInfo} from "../contract/epoch/sero/types";
 import BigNumber from "bignumber.js";
-import {star, starOutline} from "ionicons/icons";
+import {star, starOutline, createOutline, statsChartOutline} from "ionicons/icons";
 import i18n from "../locales/i18n";
+import ModifyName from "./epoch/ModifyName";
+import {MinerScenes} from "../pages/epoch/miner";
+import DeviceRank from "./epoch/DeviceRank";
+import epochRankService from "../contract/epoch/sero/rank";
 
 interface Props{
     device?:DeviceInfo
     driver?:DriverInfo
     showDevice:boolean
     showDriver:boolean
+    scenes?:MinerScenes
+    doUpdate?:()=>void
+    hiddenButton?:boolean
+    color?:string
 }
 
-class EpochAttribute extends React.Component<Props, any>{
+interface State{
+    showDriverModify:boolean
+    showModal:boolean
+    myRankDevice:Array<DeviceInfoRank>
+    position:number
+}
 
-    renderDarkStar = () =>{
-        const {device} = this.props;
-        const n = utils.calcDark(device ?device.gene:"")
-        const ht:Array<any> = [];
+class EpochAttribute extends React.Component<Props, State>{
 
-        if(n<=4){
-            for(let i=0;i<n;i++){
-                ht.push(<IonIcon src={star} className="dark-star"/>)
-            }
-            //
-            // for(let i=0;i<4-n;i++){
-            //     ht.push(<IonIcon src={starOutline} className="dark-star"/>)
-            // }
+    state:State = {
+        showDriverModify:false,
+        showModal:false,
+        myRankDevice:[],
+        position:0
+    }
+
+
+
+    setShowDriverModify = (f:boolean)=>{
+        this.setState({
+            showDriverModify:f
+        })
+    }
+
+
+    setShowModal = (f:boolean)=>{
+        this.setState({
+            showModal:f,
+        })
+        if(f){
+            this.setState({
+                myRankDevice:[],
+                position:0
+            })
         }
-        return ht;
+    }
+
+    queryMyRank = async (ticket:string)=>{
+        this.setShowModal(true)
+        const rest = await epochRankService.epochPositionDevice(ticket)
+        this.setState({
+            myRankDevice:rest.data,
+            position:rest.position
+        })
     }
 
 
     render() {
-        const {device,driver,showDevice,showDriver} = this.props
+        const {device,driver,showDevice,showDriver,scenes,hiddenButton} = this.props
+        const {showModal,myRankDevice,position,showDriverModify} = this.state;
         const health:any = device && (new BigNumber(device.capacity).toNumber()>0 ? new BigNumber(device.power).dividedBy(new BigNumber(device.capacity)).toNumber() : 0);
         return <>
             {
@@ -42,7 +78,18 @@ class EpochAttribute extends React.Component<Props, any>{
                 <div className="progress" style={{minHeight:"80px"}}>
                     <IonRow>
                         <IonCol size="7">
-                            <IonText color="white" className="text-little">AXE{device?.category && `(${utils.ellipsisStr(device.ticket)})`}</IonText>
+                            <IonText color="white" className="text-little">
+                                AXE{device?.category && device.alis?`(${device.alis})`:`(${utils.ellipsisStr(device.ticket)})`}
+                            </IonText>
+                            {
+                                !hiddenButton && <IonIcon src={statsChartOutline} color="white" onClick={(e)=>{
+                                    e.stopPropagation();
+                                    this.queryMyRank(device.ticket).catch(e=>{
+                                        console.error(e)
+                                    })
+                                }}/>
+                            }
+
                         </IonCol>
                         <IonCol size="5">
                             <div style={{textAlign: "right"}}>
@@ -56,7 +103,11 @@ class EpochAttribute extends React.Component<Props, any>{
                         <IonProgressBar className="progress-background" value ={device && utils.fromValue(device.rate,18).toNumber()}/>
                         <IonRow>
                             <IonCol size="7">
-                                {this.renderDarkStar()}
+                                <div style={{textAlign:"left"}}>
+                                    {utils.renderDarkStar(device.gene).map(v=>{
+                                        return <IonIcon src={star} className="dark-star"/>
+                                    })}
+                                </div>
                             </IonCol>
                             <IonCol size="5">
                                 <div style={{textAlign: "right"}}>
@@ -93,10 +144,14 @@ class EpochAttribute extends React.Component<Props, any>{
                 showDriver && driver ?
                     <div className="progress" style={{minHeight:"45px"}}>
                         <IonRow>
-                            <IonCol size="4">
-                                <IonText color="white" className="text-little">DRIVER</IonText>
+                            <IonCol size="7">
+                                <IonText color="white" className="text-little">DRIVER{driver.alis?`:${driver.alis}`:""}</IonText>
+                                {scenes && <IonIcon src={createOutline} color="white" onClick={(e)=>{
+                                    e.stopPropagation();
+                                    this.setShowDriverModify(true)
+                                }}/>}
                             </IonCol>
-                            <IonCol size="8">
+                            <IonCol size="5">
                                 <div style={{textAlign: "right"}}>
                                     <IonText color="white" className="text-little">{i18n.t("capacity")}: {utils.fromValue(driver.capacity,18).toFixed(2,1)}</IonText>
                                 </div>
@@ -123,6 +178,17 @@ class EpochAttribute extends React.Component<Props, any>{
                         </div>
                     </div>
             }
+            <IonModal
+                isOpen={showModal}
+                cssClass='epoch-rank-modal'
+                swipeToClose={true}
+                onDidDismiss={() => this.setShowModal(false)}>
+
+                <DeviceRank devices={myRankDevice} position={position} ticket={device?.ticket}/>
+            </IonModal>
+
+            {/*<ModifyName show={showDeviceModify} device={device} onDidDismiss={this.setShowDeviceModify} defaultName={device?.alis}/>*/}
+            <ModifyName show={showDriverModify} driver={driver} onDidDismiss={this.setShowDriverModify} defaultName={driver?.alis} scenes={scenes} update={()=>{this.props.doUpdate && this.props.doUpdate()}}/>
         </>;
     }
 }

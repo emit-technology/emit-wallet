@@ -11,6 +11,7 @@
 
 .device-box {
   padding: 15px;
+  overflow-y: scroll;
 }
 
 .device-list {
@@ -21,19 +22,24 @@
 }
 
 .device-list-h1 {
-  max-height: 50vh;
+  max-height: 80vh;
   overflow: scroll;
 }
 
 .device-list-h2 {
-  max-height: 35vh;
+  max-height: 50vh;
+  overflow: scroll;
+}
+
+.device-list-h3 {
+  max-height: 60vh;
   overflow: scroll;
 }
 
 .content-ion-rank {
   background: url("../../pages/epoch/img/background.png");
   background-size: 100%;
-  minHeight: calc(100vh - 44px);
+  min-height: calc(100vh - 44px);
   height: auto;
 }
 
@@ -53,11 +59,33 @@
 }
 
 .rank-digital {
-  padding: 10px 6px 10px 10px;
-  font-size: 20px;
+  padding: 0 0 0 0px;
+  font-size: 18px;
   font-weight: 600;
   color: #152955;
+  text-align: center;
   font-family: Epilogue, sans-serif;
+}
+
+.overflow-cst {
+  width: 100%;
+  overflow: hidden;
+}
+
+.epoch-rank-modal {
+  --width: 90%;
+  --height: 68%;
+  --border-radius: 15px;
+  --background:#fff;
+  overflow-y: scroll;
+}
+
+.epoch-rank-info {
+  --width: 80%;
+  --height: 40%;
+  --border-radius: 15px;
+  --background:#fff;
+  overflow-y: scroll;
 }
 
 /*# sourceMappingURL=DeviceRank.css.map */

@@ -1,148 +1,160 @@
 import * as React from 'react';
-import {
-    IonList,
-    IonListHeader,
-    IonItemDivider,
-    IonItem,
-    IonGrid,
-    IonCol,
-    IonRow,
-    IonText,
-    IonLabel,
-    IonAvatar,
-    IonBadge,
-    IonChip,
-    IonProgressBar, IonIcon, IonSegment, IonSegmentButton, IonToolbar
-} from '@ionic/react'
+import {IonAvatar, IonCol, IonIcon, IonItem, IonLabel, IonModal, IonProgressBar, IonText} from '@ionic/react'
 
-import {DeviceInfo} from "../../contract/epoch/sero/types";
+import {DeviceInfo, DeviceInfoRank} from "../../contract/epoch/sero/types";
 import "./DeviceRank.scss"
-import EpochAttribute from "../EpochAttribute";
 import * as utils from "../../utils";
-import i18n from "../../locales/i18n";
+import ModifyName from "./ModifyName";
+import BigNumber from "bignumber.js";
+import CardTransform from "../CardTransform";
+import {NftInfo} from "../../types";
+import EpochAttribute from "../EpochAttribute";
+import {createOutline, star} from "ionicons/icons";
 
 interface State{
-    tab: string
-    scenes:string
+    showModal:boolean
+    showModify:boolean
+    selectDevice?:DeviceInfo
+    selectNFT?:NftInfo
 }
 
 interface Props{
-    devices:Array<DeviceInfo>
+    devices:Array<DeviceInfoRank>
+    position?:number
+    ticket?:string
 }
 
 class DeviceRank extends React.Component<Props, State>{
 
     state:State = {
-        tab:"device",
-        scenes:"altar"
+        showModal:false,
+        showModify:false
     }
 
     componentDidMount() {
 
+
     }
 
-    setTab = (v:any)=>{
-        this.setState({
-            tab:v
-        })
+    setShowModal = (f:boolean,v?:DeviceInfoRank)=>{
+        if(v){
+            const info = utils.convertDeviceRankInfoToNFTInfo(v);
+            this.setState({
+                showModal:f,
+                selectDevice:utils.toDevice(v),
+                selectNFT:info
+            })
+        }else {
+            this.setState({
+                showModal:f,
+            })
+        }
+
     }
 
-    setScenes = (v:any)=>{
-        this.setState({
-            scenes:v
-        })
+    setShowModify = (f:boolean,v?:DeviceInfoRank)=>{
+        if(v){
+            this.setState({
+                showModify:f,
+                selectDevice:utils.toDevice(v),
+            })
+        }else{
+            this.setState({
+                showModify:f,
+            })
+        }
     }
+
     render() {
-        const {tab,scenes} = this.state;
-        return <>
-            <IonToolbar color="primary" mode="ios" className="heard-bg">
-                <IonSegment value={tab} mode="ios" onIonChange={e => this.setTab(e.detail.value)}>
-                    <IonSegmentButton value="device">
-                        DEVICE
-                    </IonSegmentButton>
-                    <IonSegmentButton value="driver">
-                        DRIVER
-                    </IonSegmentButton>
-                </IonSegment>
-            </IonToolbar>
-            {
-                tab == "driver" && <div>
-                    <IonSegment mode="ios" value={scenes} onIonChange={(e:any)=>this.setScenes(e.detail.value)}>
-                        <IonSegmentButton value="altar">
-                            <IonLabel color={scenes=="altar"?"":"white"}>ALTAR</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton value="chaos">
-                            <IonLabel  color={scenes=="chaos"?"":"white"}>CHAOS</IonLabel>
-                        </IonSegmentButton>
-                    </IonSegment>
-                </div>
+        const {showModal,showModify,selectDevice,selectNFT} = this.state;
+        const {devices,position,ticket} = this.props;
+
+        let precate = 0;
+        if(devices){
+            for(let dr of devices){
+                precate++
+                if(dr.ticket == ticket){
+                    break
+                }
             }
+        }
+        let plusFlag = false;
+        let index = 0;
+        return <>
             <div className="device-box">
                 <div className="rank-text">
-                    TOP 10
+                    {position?"MY RANKING":"TOP 10"}
                 </div>
                 <div className="device-list device-list-h1">
-
                     {
-                        [1,2,3,4,5,6,7,8,9,10].map((v:number,i:number)=>{
-                            return <IonItem lines="none" className="device-item" detail={true} detailIcon="chevron-forward" >
-                                {v==1 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top1.png" /></IonAvatar>}
-                                {v==2 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top2.png" /></IonAvatar>}
-                                {v==3 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top3.png" /></IonAvatar>}
-                                {v>3 && <IonAvatar slot="start" className="device-rank-avatar"><div className="rank-digital">{v}</div></IonAvatar>}
-                                <IonAvatar slot="start" className="device-rank-avatar">
-                                    <img src="./assets/img/axe.png" />
-                                </IonAvatar>
-                                <IonLabel className="ion-text-wrap">
+                        devices && devices.map((v,i:number)=>{
+                            if(position){
+                                if(v.ticket == ticket){
+                                    plusFlag = true
+                                    index = position-1
+                                }else{
+                                    if(plusFlag){
+                                        index = index+1;
+                                    }else{
+                                        index = position - precate + i;
+                                    }
+                                }
+                            }else{
+                                index = i;
+                            }
 
-                                    <IonRow>
-                                        <IonCol>
-                                            <div>0x1dees..edx0</div>
-                                        </IonCol>
-                                        <IonCol>
-                                            <div style={{textAlign: "right"}}>
-                                                <IonText color="dark" className="text-little">45.00%</IonText>
+                            return <IonItem lines="none" color={ticket == v.ticket ?"warning":""} className="device-item" detail={true} detailIcon="chevron-forward" onClick={(e)=>{
+                                e.stopPropagation();
+                                this.setShowModal(true,v)
+                            }} >
+                                {index==0 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top1.png"/></IonAvatar>}
+                                {index==1 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top2.png" /></IonAvatar>}
+                                {index==2 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top3.png" /></IonAvatar>}
+                                {index>2 && <IonAvatar slot="start" className="device-rank-avatar"><div className="rank-digital">{index+1}</div></IonAvatar>}
+                                <IonAvatar slot="start" className="device-rank-avatar">
+                                    <div className={utils.isDark(v.gene)?"dark-element-bg":"light-element-bg"} style={{borderRadius:"5px",border:"1px solid #ddd"}}>
+                                        <img src={`./assets/img/epoch/device/${utils.calcStyle(v.gene).style}.png`}  />
+                                    </div>
+                                </IonAvatar>
+                                {/*<EpochAttribute showDevice={true} showDriver={false} device={this.toDevice()}/>*/}
+
+                                <IonLabel className="ion-text-wrap">
+                                    {utils.isMyDevice("EMIT_AX",v.ticket) && <IonIcon src={createOutline} size="small" onClick={(e)=>{
+                                        e.stopPropagation();
+                                        this.setShowModify(true,v)
+                                    }}/>}<span className="overflow-cst">{v.name?v.name:utils.ellipsisStr(v.ticket)}</span>
+                                    <IonProgressBar className="progress-background" value ={utils.fromValue(v.rate,18).toNumber()}/>
+                                    <div>
+                                        <div>
+                                            <div style={{textAlign:"left"}}>
+                                                {utils.renderDarkStar(v.gene).map(v=>{
+                                                    return <IonIcon src={star} className="dark-star"/>
+                                                })}
                                             </div>
-                                        </IonCol>
-                                    </IonRow>
-                                    <IonProgressBar className="progress-background" value ={0.8}/>
-
+                                        </div>
+                                        <div style={{textAlign: "right"}}  className="overflow-cst">
+                                            <IonText color="dark" className="text-little">{utils.fromValue(v.rate,16).toFixed(2,1)}%</IonText>
+                                        </div>
+                                    </div>
                                 </IonLabel>
 
                             </IonItem>
                         })
                     }
-
                 </div>
             </div>
 
-            <div className="device-box">
-                <div className="rank-text">
-                    MY RANKING
-                </div>
-                <IonList className="device-list device-list-h2">
+            <ModifyName show={showModify} device={selectDevice} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={""}/>
 
-                    {
-                        [1,2,3,4,5,6,7,8,9,10].map((v:number,i:number)=>{
-                            return <IonItem lines="none" className="device-item" detail={true} detailIcon="chevron-forward" >
-                                {v==1 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top1.png" /></IonAvatar>}
-                                {v==2 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top2.png" /></IonAvatar>}
-                                {v==3 && <IonAvatar slot="start" className="device-rank-avatar"><img src="./assets/img/epoch/top3.png" /></IonAvatar>}
-                                {v>3 && <IonAvatar slot="start" className="device-rank-avatar"><div className="rank-digital">{v}</div></IonAvatar>}
-                                <IonAvatar slot="start" className="device-rank-avatar">
-                                    {v>0 && <img src="./assets/img/axe.png" />}
-                                </IonAvatar>
-                                <IonLabel className="ion-text-wrap">
-                                    <h4>sdfsdf</h4>
-                                    <IonProgressBar className="progress-background" value ={0.8}/>
-                                </IonLabel>
-
-                            </IonItem>
-                        })
-                    }
-
-                </IonList>
-            </div>
+            <IonModal
+                isOpen={showModal}
+                cssClass='epoch-rank-modal'
+                swipeToClose={true}
+                onDidDismiss={() => this.setShowModal(false)}>
+                {
+                    selectNFT && <CardTransform info={selectNFT} hideButton={true}/>
+                }
+            </IonModal>
         </>;
     }
 }

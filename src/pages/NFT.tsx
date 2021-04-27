@@ -1,28 +1,22 @@
 import * as React from 'react';
 import {
-    IonCol,
     IonContent,
     IonHeader,
     IonLabel,
-    IonPage, IonProgressBar, IonRow,
+    IonPage,
     IonSegment,
-    IonSegmentButton, IonText,
+    IonSegmentButton,
     IonTitle,
     IonToolbar,
 } from "@ionic/react";
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
-import {ChainType} from "../types";
-import {CONTRACT_ADDRESS, META_TEMP} from "../config"
+import {ChainType, NftInfo} from "../types";
+import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
-import interVar from "../interval";
-import {Plugins} from "@capacitor/core";
+import interVar from "../interval/nft";
 import i18n from "../locales/i18n";
-import epochService from "../contract/epoch/sero";
-import {MinerScenes} from "./epoch/miner";
-import {UserInfo} from "../contract/epoch/sero/types";
-import * as utils from "../utils";
 
 class NFT extends React.Component<any, any> {
 
@@ -43,65 +37,84 @@ class NFT extends React.Component<any, any> {
             }).catch(e=>{
                 console.error(e)
             })
-        },5*1000)
+        },10*1000)
     }
 
     init = async () => {
         const account = await walletWorker.accountInfo()
-
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
-
         const seroTicket = await rpc.getTicket(ChainType.SERO, account.addresses[ChainType.SERO])
         const ethTicket = await rpc.getTicket(ChainType.ETH, account.addresses[ChainType.ETH])
-        const ticketMap: Map<string,Array<any>> = new Map<string, Array<any>>()
-        for (let key of keys) {
-            const wrapTicket: Array<any> = [];
-            const type = key;
+        const ticketMap: Map<string,Array<NftInfo>> = new Map<string, Array<NftInfo>>()
 
+        for (let key of keys) {
+            let wrapTicket: Array<NftInfo> = [];
             const ethSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["ETH"];
             const seroSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"];
-
             if(seroSymbol){
-                const data:any = seroTicket[seroSymbol];
+                const data:Array<NftInfo> = seroTicket[seroSymbol];
                 if(data && data.length>0){
-                    for(let d of data){
-                        wrapTicket.push({
-                            symbol:key,
-                            value:d.tokenId,
-                            uri:d.uri,
-                            chain:ChainType[ChainType.SERO],
-                            metaData: META_TEMP[key]
-
-                        })
-                    }
+                    wrapTicket = wrapTicket.concat(data)
                 }
-
             }
 
             if(ethSymbol){
-                const data2:Array<any> = ethTicket[ethSymbol];
-                if(data2 && data2.length>0){
-                    for(let d of data2){
-                        wrapTicket.push({
-                            symbol:key,
-                            value:d.tokenId,
-                            uri:d.uri,
-                            chain:ChainType[ChainType.ETH],
-                            metaData: META_TEMP[key]
-                        })
-                    }
+                const data:Array<NftInfo> = ethTicket[ethSymbol];
+                if(data && data.length>0){
+                    wrapTicket = wrapTicket.concat(data)
                 }
             }
-
-            if(ticketMap.has(type)){
-                const temp:any = ticketMap.get(type);
-                temp.concat(wrapTicket)
-                ticketMap.set(type,temp);
-            }else{
-                ticketMap.set(type,wrapTicket);
-            }
-
+            wrapTicket.reverse()
+            ticketMap.set(key,wrapTicket);
         }
+
+        // const styles = ["ax",
+        //     "axe",
+        //     "baseball",
+        //     "bone",
+        //     "boomerang",
+        //     "bow",
+        //     "broom",
+        //     "claw",
+        //     "crossbow",
+        //     "darts",
+        //     "fork",
+        //     "grenade",
+        //     "hammer",
+        //     "hammerball",
+        //     "lightsaber",
+        //     "magic",
+        //     "massage",
+        //     "nail",
+        //     "pistol",
+        //     "poniard",
+        //     "samurai",
+        //     "saucepan",
+        //     "saw",
+        //     "shovel",
+        //     "sickle",
+        //     "spear",
+        //     "staff",
+        //     "sword",
+        //     "syringe",
+        //     "trident",
+        //     "whip",
+        //     "wooden",
+        //     "wrench"]
+        //
+        // if(ticketMap.has("DEVICES")){
+        //     // @ts-ignore
+        //     const da:Array<NftInfo> = ticketMap.get("DEVICES")
+        //     for(let s of styles){
+        //         const d = JSON.parse(JSON.stringify(da[0]))
+        //         if(d.meta){
+        //             d.meta.image = `./assets/img/epoch/device/${s}.png`
+        //             da.push(d)
+        //         }
+        //     }
+        //     ticketMap.set("DEVICES",da)
+        // }
+
         this.setState({
             ticketMap: ticketMap,
         })
@@ -116,27 +129,27 @@ class NFT extends React.Component<any, any> {
         this.setState({
             ticketMap:tmp
         })
-        this.initDriver(v).catch(e=>{
-            console.log(e)
-        })
+        // this.initDriver(v).catch(e=>{
+        //     console.log(e)
+        // })
     }
 
-    initDriver = async (v:any ) =>{
-        if(v == "DRIVER"){
-            const account = await walletWorker.accountInfo();
-            const drivers:any = {};
-            for(let k in MinerScenes){
-                const scene = parseInt(k);
-                if(scene && scene !== 0){
-                    const rest = await epochService.userInfo(scene, account.addresses[ChainType.SERO])
-                    drivers[scene]=rest
-                }
-            }
-            this.setState({
-                drivers:drivers
-            })
-        }
-    }
+    // initDriver = async (v:any ) =>{
+    //     if(v == "DRIVER"){
+    //         const account = await walletWorker.accountInfo();
+    //         const drivers:any = {};
+    //         for(let k in MinerScenes){
+    //             const scene = parseInt(k);
+    //             if(scene && scene !== 0){
+    //                 const rest = await epochService.userInfo(scene, account.addresses[ChainType.SERO])
+    //                 drivers[scene]=rest
+    //             }
+    //         }
+    //         this.setState({
+    //             drivers:drivers
+    //         })
+    //     }
+    // }
 
     render() {
         const {ticketMap,tab,drivers} = this.state;
@@ -160,30 +173,31 @@ class NFT extends React.Component<any, any> {
                         </IonSegmentButton>
                     </IonSegment>
                 </div>
-                {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) ?
+                {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
                     <NFCRender data={ticketMap.get(tab)}/>
-                    :
-                <div className="card-page">
-                    <div className="card-inset">
-
-                    { drivers && Object.keys(drivers).map((k:any)=>{
-                        const userInfo:UserInfo = drivers[k];
-                        return <div className="progress">
-                            <div>
-                                <IonRow>
-                                    <IonCol>
-                                        <IonText style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
-                                    </IonCol>
-                                </IonRow>
-                            </div>
-                            <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
-                            <div style={{textAlign: "right"}}>
-                                <IonText  style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
-                            </div>
-                        </div>
-                    })}
-                    </div>
-                </div>}
+                //     :
+                // <div className="card-page">
+                //     <div className="card-inset">
+                //
+                //     { drivers && Object.keys(drivers).map((k:any)=>{
+                //         const userInfo:UserInfo = drivers[k];
+                //         return <div className="progress">
+                //             <div>
+                //                 <IonRow>
+                //                     <IonCol>
+                //                         <IonText style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
+                //                     </IonCol>
+                //                 </IonRow>
+                //             </div>
+                //             <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
+                //             <div style={{textAlign: "right"}}>
+                //                 <IonText  style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
+                //             </div>
+                //         </div>
+                //     })}
+                //     </div>
+                // </div>
+                }
             </IonContent>
         </IonPage>;
     }

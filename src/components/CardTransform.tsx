@@ -1,40 +1,46 @@
 import * as React from 'react';
-import {IonButton, IonCol, IonGrid, IonIcon, IonProgressBar, IonRow, IonText, IonToast} from '@ionic/react'
+import {IonButton, IonCol, IonGrid, IonIcon, IonChip,IonLabel, IonProgressBar, IonRow, IonText, IonToast} from '@ionic/react'
 
 import "./CardTransform.scss"
 import url from "../utils/url";
-import {ChainType} from "../types";
-import epochService from "../contract/epoch/sero";
-import walletWorker from "../worker/walletWorker";
+import {ChainType, NftInfo} from "../types";
 import * as utils from "../utils"
-import {DeviceInfo} from "../contract/epoch/sero/types";
+import {DeviceInfo, DeviceInfoRank} from "../contract/epoch/sero/types";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
 import copy from 'copy-to-clipboard';
-import {copyOutline} from "ionicons/icons";
+import {
+    bookmarkOutline,
+    buildOutline, colorWandOutline,
+    constructOutline,
+    copyOutline,
+    createOutline,
+    hammerOutline,
+    restaurantOutline, ribbonOutline, rocketOutline
+} from "ionicons/icons";
+import ModifyName from "./epoch/ModifyName";
+import {DeviceCategory} from "../utils/device-style";
 
 interface Props {
-    src: string
-    title: string
-    subTitle: string
-    chain: string
-    timestamp: number
-    description: string
-    dna: string
-    symbol:string
+    info:NftInfo
+
+    hideButton?:boolean
+    defaultTranslate?:boolean
 }
 
 interface State {
     deg:number
     device?: DeviceInfo
     showToast:boolean
+    showModify:boolean
 }
 
 class CardTransform extends React.Component<Props, State> {
 
     state: State = {
         deg:0,
-        showToast:false
+        showToast:false,
+        showModify:false,
     }
 
     constructor(props: Props) {
@@ -49,12 +55,13 @@ class CardTransform extends React.Component<Props, State> {
     }
 
     init = async ()=>{
-        const {symbol,subTitle} = this.props
-        const account = await walletWorker.accountInfo();
-        if(symbol == "DEVICES"){
-            const device = await epochService.axInfo(utils.getCategoryBySymbol(symbol,ChainType[ChainType.SERO]),subTitle,account.addresses[ChainType.SERO])
+        const {info} = this.props
+        // const account = await walletWorker.accountInfo();
+        if(info.symbol == "DEVICES"){
+            // const device = await epochService.axInfo(utils.getCategoryBySymbol(symbol,ChainType[ChainType.SERO]),subTitle,account.addresses[ChainType.SERO])
+            // device.alis = await epochNameService.getDeviceName(device.ticket)
             this.setState({
-                device:device
+                device:info.meta.attributes
             })
         }else {
             this.setState({
@@ -85,86 +92,162 @@ class CardTransform extends React.Component<Props, State> {
         // d.style.transform = "transform: rotateY(0deg);"
     }
 
+    setShowModify = (f:boolean)=>{
+        this.setState({
+            showModify:f
+        })
+    }
+
+    reColor = (v:string)=>{
+        const keys = Object.keys(DeviceCategory)
+        if(v == keys[3]){
+            return "success"
+        }else if(v == keys[2]){
+            return "primary"
+        }else if(v == keys[1]){
+            return "tertiary"
+        }else if(v == keys[0]){
+            return "dark"
+        }
+    }
+
+    reIcon = (v:string)=>{
+        const keys = Object.keys(DeviceCategory)
+        if(v == keys[3]){
+            return bookmarkOutline
+        }else if(v == keys[2]){
+            return colorWandOutline
+        }else if(v == keys[1]){
+            return constructOutline
+        }else if(v == keys[0]){
+            return ribbonOutline
+        }
+    }
+
     render() {
-        const {deg,device,showToast} = this.state;
-        const {src, title, subTitle, chain, timestamp, description,dna,symbol} = this.props;
+        const {deg,device,showToast,showModify} = this.state;
+        const {info,hideButton,defaultTranslate} = this.props;
+        const cardBackground = device && device.gene ? utils.isDark(device.gene) ?"dark-element-bg":"light-element-bg":"";
         return <>
             <div className="n-card">
-                <div className="card-display" style={{transform: `rotateY(${deg}deg)`}} onClick={()=>{
+                <div className="card-display" style={{transform: `rotateY(${deg}deg)`}} onClick={(e)=>{
+                    e.stopPropagation();
                     this.change()
                 }}>
-                    <div className="card-front">
-                        <img src={src}/>
+                    <div className={`card-front ${cardBackground}`}>
+                        <img src={info.meta.image} style={{width:"100vw"}}/>
                     </div>
-                    <div className="card-back">
-                        <img src={src}/>
+                    <div className={`card-back ${cardBackground}`}>
+                        <img src={info.meta.image} style={{width:"100vw"}}/>
                         <div className="card-back-f">
                             <IonGrid>
                                 <IonRow className="row-line">
                                     <IonCol className="col-line">
-                                        <h3>{title}</h3>
-                                        <div  onClick={(e:any)=>{
+                                        <h3>{info.meta.name}</h3>
+                                        <div ><IonText>{info.tokenId}</IonText><div><IonIcon src={copyOutline} size="small" onClick={(e:any)=>{
                                             e.stopPropagation();
-                                            copy(subTitle)
-                                            copy(subTitle)
+                                            copy(info.tokenId)
+                                            copy(info.tokenId)
                                             this.setState({
                                                 showToast:true
                                             })
-                                        }}><IonText>{subTitle}</IonText><div><IonIcon src={copyOutline} size="small" /></div></div>
+                                        }}/></div></div>
                                     </IonCol>
                                 </IonRow>
                                 <IonRow className="row-line">
                                     <IonCol className="col-line">
                                         <div className="font-sm">{i18n.t("chain")}</div>
-                                        <div className="font-md">{chain}</div>
+                                        <div className="font-md">{ChainType[info.chain]}</div>
                                     </IonCol>
                                     <IonCol className="col-line">
                                         <div className="font-sm">{i18n.t("symbol")}</div>
-                                        <div className="font-md">{utils.getCategoryBySymbol(symbol,chain+"")}</div>
+                                        <div className="font-md">{info.category}</div>
                                     </IonCol>
                                     {
                                         device && utils.isDark(device.gene) &&
                                         <IonCol className="col-line">
                                             <div className="font-sm">DARK {i18n.t("rate")}</div>
-                                            <div className="font-md">{utils.calcDark(device.gene)}</div>
+                                            <div className="font-md">{utils.calcDark(device.gene)*100/4}%</div>
                                         </IonCol>
                                     }
                                 </IonRow>
-                                <IonRow className="row-line" style={{minHeight:"14vh"}}>
+
+                                <IonRow className="row-line" style={{minHeight:"100px"}}>
                                     <IonCol className="col-line">
                                         { device ?
-                                            <EpochAttribute device={device} showDevice={true} showDriver={false}/>
+                                            <EpochAttribute device={device} showDevice={true} showDriver={false} hiddenButton={hideButton}/>
                                             :
-                                            description
+                                            info.meta.description
                                         }
                                     </IonCol>
                                 </IonRow>
+                                {
+                                    device && device.gene && device.gene != "0x0000000000000000000000000000000000000000000000000000000000000000"
+                                    && <IonRow className="row-line" style={{minHeight:"120px"}}>
+                                        <IonCol>
+                                            <h6>DNA</h6>
+                                            <div>
+                                                <IonText>{device.gene}</IonText>
+                                                <div>
+                                                    <IonIcon src={copyOutline} size="small"  onClick={(e:any)=>{
+                                                        e.stopPropagation();
+                                                        copy(device.gene)
+                                                        copy(device.gene)
+                                                        this.setState({
+                                                            showToast:true
+                                                        })
+                                                    }}/>
+                                                </div>
+                                            </div>
+                                        </IonCol>
+                                    </IonRow>
+                                }
+
                             </IonGrid>
                         </div>
                     </div>
                 </div>
                 <div className="card-foo">
-                    <p><IonText>{title}</IonText></p>
-                    <IonGrid>
-                        <IonRow>
+                    <div>
+                        <h6>{info.meta.name} &nbsp;&nbsp;</h6>
+                        <IonText>({device && device.alis?device.alis:utils.ellipsisStr(info.tokenId)}) {info.symbol == "DEVICES" && !hideButton && <IonIcon src={createOutline} size="medium" color="dark"   onClick={(e)=>{
+                                    e.stopPropagation();
+                                    this.setShowModify(true)
+                                }}/>}
+                        </IonText><br/>
+                        {
+                            device && device.mode && device.mode.category &&
+                            <>
+                                <IonChip color={this.reColor(device.mode.category)}>
+                                    <IonIcon src={this.reIcon(device.mode.category)}/>
+                                    <IonLabel>{device.mode && device.mode.category.toUpperCase()}</IonLabel>
+                                </IonChip>
+                            </>
+                        }
+                    </div>
+                    {
+                        !hideButton && <IonGrid>
+                            <IonRow>
                                 {
-                                    utils.crossAbleBySymbol(symbol) &&
+                                    utils.crossAbleBySymbol(info.symbol) &&
                                     <IonCol>
                                         <IonButton mode="ios" fill="outline" expand="block" size="small"  onClick={()=>{
-                                        url.tunnelNFT(symbol,utils.getChainIdByName(chain),subTitle)
-                                    }}>{i18n.t("cross")}</IonButton>
+                                            url.tunnelNFT(info.symbol,info.chain,info.tokenId)
+                                        }}>{i18n.t("cross")}</IonButton>
                                     </IonCol>
                                 }
 
-                            <IonCol>
-                                <IonButton mode="ios" fill="outline" expand="block" size="small" onClick={() => {
-                                    url.transferNFT(symbol,utils.getChainIdByName(chain),subTitle)
-                                }}>{i18n.t("transfer")}</IonButton>
-                            </IonCol>
-                        </IonRow>
-                    </IonGrid>
+                                <IonCol>
+                                    <IonButton mode="ios" fill="outline" expand="block" size="small" onClick={() => {
+                                        url.transferNFT(info.symbol,info.chain,info.tokenId)
+                                    }}>{i18n.t("transfer")}</IonButton>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
+                    }
                 </div>
             </div>
+            <ModifyName show={showModify} device={device} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={"ssd"}/>
             <IonToast
                 color="dark"
                 position="top"

@@ -155,7 +155,6 @@ class WalletWorker {
                 url.accountUnlock()
             }
         })
-
         return new Promise((resolve, reject)=>{
             if(accountId) {
                 const data:any = selfStorage.getItem(accountId);

@@ -7,12 +7,13 @@
   border: 2px dashed #ddd;
   border-radius: 0.375em;
   min-height: 65vh;
+  height: auto;
 }
 
 .n-card {
   margin: 15px;
   position: relative;
-  height: 115vw;
+  height: calc(100vw + 95px);
   color: #000;
 }
 
@@ -50,7 +51,6 @@
 .card-front {
   position: absolute;
   z-index: 10;
-  background: #FFF;
   transform: rotateY(0deg) perspective(1529.69px);
   backface-visibility: visible;
   transform: perspective(1529.69px);
@@ -83,6 +83,20 @@
   background: #FFF;
   opacity: 0.9;
   overflow: scroll;
+}
+
+.dark-element-bg {
+  background-image: -webkit-radial-gradient(circle, #000 5%, #960404 65%, #000 80%);
+}
+
+.light-element-bg {
+  background: -webkit-radial-gradient(circle, #fff 5%, #fff 65%, #152955 70%);
+}
+
+@keyframes pulsate1 {
+  50% {
+    box-shadow: 0 0 10px #fff, 10px 0 25px #f0f, -10px 0 25px #00ffff, inset 0 0 15px #fff, inset -15px 0 25px #f0f, inset 15px 0 25px #0ff, inset -15px 0 100px #f0f, inset 15px 0 100px #0ff;
+  }
 }
 
 /*# sourceMappingURL=CardTransform.css.map */

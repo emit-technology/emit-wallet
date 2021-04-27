@@ -3,25 +3,51 @@ import {
     IonContent,
     IonHeader,
     IonIcon,
-    IonLabel,
     IonPage,
-    IonSegment,
-    IonSegmentButton,
     IonTitle,
     IonToolbar
 } from "@ionic/react";
 import {chevronBack} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
-import {MinerScenes} from "../miner";
 import DeviceRank from "../../../components/epoch/DeviceRank";
+import walletWorker from "../../../worker/walletWorker";
+import epochRankService from "../../../contract/epoch/sero/rank";
+import {DeviceInfoRank} from "../../../contract/epoch/sero/types";
 
-class Rank extends React.Component<any, any>{
+interface State{
+    devices:Array<DeviceInfoRank>
+    account?:any
+}
+class Rank extends React.Component<any, State>{
 
+    state:State = {
+        devices:[]
+    }
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#152955"
+        }).catch(e => {
+        })
+
+        this.init().catch((e)=>{
+            console.error(e)
+        })
+    }
+
+    init = async ()=>{
+        const account = await walletWorker.accountInfo()
+
+        const devices = await epochRankService.epochTopDevice(10)
+        this.setState({
+            devices:devices,
+            account:account
+        })
     }
 
     render() {
+        const { devices} = this.state;
+
         return <IonPage>
             <IonHeader>
                 <IonToolbar color="primary" mode="ios" className="heard-bg">
@@ -35,17 +61,16 @@ class Rank extends React.Component<any, any>{
                     <IonTitle className="text-center text-bold" style={{
                         color: "#edcc67",
                         textTransform: "uppercase"
-                    }}>RANK</IonTitle>
-                    <IonLabel slot="end">
-                        <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {
-                        }}/>
-                    </IonLabel>
+                    }}>DEVICE RANK</IonTitle>
+                    {/*<IonLabel slot="end">*/}
+                    {/*    <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {*/}
+                    {/*    }}/>*/}
+                    {/*</IonLabel>*/}
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen color="light">
                 <div className="content-ion-rank">
-
-                    <DeviceRank devices={[]}/>
+                    <DeviceRank devices={devices}/>
                 </div>
             </IonContent>
         </IonPage>;

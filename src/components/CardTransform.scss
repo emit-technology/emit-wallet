@@ -1,47 +1,48 @@
 
-.card-page{
+.card-page {
   height: auto;
   //background: #000;
   //min-height: 100vh;
   padding: 12px;
 }
 
-.card-inset{
+.card-inset {
   border: 2px dashed #ddd;
   border-radius: 0.375em;
   min-height: 65vh;
+  height: auto;
 }
 
-.n-card{
+.n-card {
   margin: 15px;
   position: relative;
-  height: 115vw;
+  height: calc(100vw + 95px);
   color: #000;
 }
 
-.card-foo{
+.card-foo {
   position: absolute;
   bottom: 0;
   text-align: center;
   width: 100%;
 }
 
-.row-line{
+.row-line {
   border: 1px solid #555;
   text-align: center;
 }
 
-.col-line{
+.col-line {
   border: 1px solid #555;
 }
 
-.card-p{
+.card-p {
   word-break: break-word;
   //height: 80px;
   overflow: scroll;
 }
 
-.card-display{
+.card-display {
   position: relative;
   transition: transform 0.6s ease 0.1s;
   transform-style: preserve-3d;
@@ -53,10 +54,10 @@
   margin: auto;
 }
 
-.card-front{
+.card-front {
   position: absolute;
   z-index: 10;
-  background: #FFF;
+  //background: #FFF;
   //background: #fff;
   transform: rotateY(
                   0deg
@@ -64,14 +65,14 @@
   backface-visibility: visible;
   transform: perspective(1529.69px);
   overflow: hidden;
-  transition: transform 1s cubic-bezier(.445,.05,.55,.95);
+  transition: transform 1s cubic-bezier(.445, .05, .55, .95);
   box-shadow: 0 0 5px 1px #ddd;
   border-radius: 0.375em;
   backface-visibility: hidden;
   padding: 30px;
 }
 
-.card-back{
+.card-back {
   position: absolute;
   z-index: 9;
   //background: #fff;
@@ -79,7 +80,7 @@
                   180deg
   );
   overflow: hidden;
-  transition: transform 1s cubic-bezier(.445,.05,.55,.95);
+  transition: transform 1s cubic-bezier(.445, .05, .55, .95);
   box-shadow: 0 0 5px 1px #ddd;
   border-radius: 0.375em;
   backface-visibility: hidden;
@@ -87,7 +88,7 @@
 
 }
 
-.card-back-f{
+.card-back-f {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -95,6 +96,28 @@
   left: 0;
   background: #FFF;
   opacity: 0.9;
-  overflow:scroll;
+  overflow: scroll;
   //transform: rotateY(180deg);
+}
+
+.dark-element-bg {
+  background-image: -webkit-radial-gradient(circle, #000 5%, #960404 65%, #000 80%);
+  //animation: pulsate1 6s linear infinite;
+}
+
+.light-element-bg {
+  background: -webkit-radial-gradient(circle, #fff 5%, #fff 65%, #152955 70%);
+}
+
+@keyframes pulsate1 {
+  50% {
+    box-shadow: 0 0 10px #fff,
+    10px 0 25px #f0f,
+    -10px 0 25px #00ffff,
+    inset 0 0 15px #fff,
+    inset -15px 0 25px #f0f,
+    inset 15px 0 25px #0ff,
+    inset -15px 0 100px #f0f,
+    inset 15px 0 100px #0ff
+  }
 }

@@ -3,6 +3,7 @@ import {MinerScenes} from "../miner";
 
 import EpochOrigin from "../../../components/EpochOrigin";
 import {DeviceInfo} from "../../../contract/epoch/sero/types";
+import * as utils from "../../../utils";
 
 interface State {
     device?:DeviceInfo
@@ -20,7 +21,8 @@ class Chaos extends React.Component<any, State>{
     }
 
     render() {
-        const hasDevice = this.state.device && this.state.device.category;
+        const {device} = this.state;
+        const hasDevice = device && device.category;
         return (
             <EpochOrigin scenes={MinerScenes.chaos} loadDevice={(d)=>this.loadDevice(d)}>
                 <div className="chaos">
@@ -38,11 +40,11 @@ class Chaos extends React.Component<any, State>{
                         <div style={{animation: hasDevice && "star-move-out 6s cubic-bezier(0.55, 0, 1, 0.45) infinite"}}></div>
                     </div>
                     <div className="display-n">
-                        <img src={"./assets/img/epoch/axe_0.png"}/>
+                        <img src={`./assets/img/epoch/device/${utils.calcStyle(device && device.gene).style}.png`} />
                     </div>
-                    <div className="display-n">
-                        <img src={"./assets/img/epoch/axe_1.png"}/>
-                    </div>
+                    {/*<div className="display-n">*/}
+                    {/*    <img src={"./assets/img/epoch/axe_1.png"}/>*/}
+                    {/*</div>*/}
                 </div>
 
             </EpochOrigin>

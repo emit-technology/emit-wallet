@@ -26,13 +26,18 @@ import {
     EXPLORER_URL,
     FULL_NAME,
     GAS_DEFAULT,
-    GAS_PRICE_UNIT,
+    GAS_PRICE_UNIT, META_TEMP,
     NOT_CROSS_TOKEN
 } from "../config"
-import {ChainId, ChainType, GasPriceLevel} from "../types";
+import {ChainId, ChainType, DeviceMode, GasPriceLevel, NftInfo} from "../types";
 import rpc from "../rpc";
 import * as utils from "../utils"
 import selfStorage from "./storage";
+import {DeviceCategory, DeviceStyle} from "./device-style";
+import {DeviceInfo, DeviceInfoRank} from "../contract/epoch/sero/types";
+import {IonIcon} from "@ionic/react";
+import {star} from "ionicons/icons";
+import * as React from "react";
 
 const utf8 = require("utf8");
 
@@ -107,7 +112,7 @@ export function getDestinationChainID(chain: ChainType) {
     return ChainId._
 }
 
-export function getResourceId(cy: string,from:string,to:string) {
+export function getResourceId(cy: string, from: string, to: string) {
     return BRIDGE_CURRENCY[cy][from]["RESOURCE_ID"][to];
 }
 
@@ -152,12 +157,12 @@ export function getDestinationChainIDByName(chain: string): any {
     return ChainId._
 }
 
-export function toHex(value: string | number | BigNumber,decimal?:number) {
+export function toHex(value: string | number | BigNumber, decimal?: number) {
     if (value === "0x") {
         return "0x0"
     }
-    if(decimal){
-        return "0x" + toValue(value,decimal).toString(16);
+    if (decimal) {
+        return "0x" + toValue(value, decimal).toString(16);
     }
     return "0x" + new BigNumber(value).toString(16)
 }
@@ -304,7 +309,7 @@ export function getCategoryBySymbol(symbol: string, chain: string): string {
     return CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"][chain];
 }
 
-export function crossAbleBySymbol(symbol: string):boolean{
+export function crossAbleBySymbol(symbol: string): boolean {
     return CONTRACT_ADDRESS.ERC721[symbol]["CROSS_ABLE"];
 }
 
@@ -389,17 +394,17 @@ export function defaultCy(chain: ChainType) {
     }
 }
 
-export function getCrossChainByCy(cy:string):Array<any>{
+export function getCrossChainByCy(cy: string): Array<any> {
     const obj = BRIDGE_CURRENCY[cy];
-    if(obj){
+    if (obj) {
         const keys = Object.keys(obj)
         const arr = []
-        for(let k of keys){
-            for(let j of keys){
-                if(k !== j && (!obj[k].EXCEPT ||  obj[k].EXCEPT.indexOf(j) == -1)){
+        for (let k of keys) {
+            for (let j of keys) {
+                if (k !== j && (!obj[k].EXCEPT || obj[k].EXCEPT.indexOf(j) == -1)) {
                     arr.push({
-                        from:k,
-                        to:j
+                        from: k,
+                        to: j
                     })
                 }
             }
@@ -409,35 +414,39 @@ export function getCrossChainByCy(cy:string):Array<any>{
     return [{}]
 }
 
-export function getChainFullName(chain:ChainType){
-    if(FULL_NAME[ChainType[chain]]){
+export function getChainFullName(chain: ChainType) {
+    if (FULL_NAME[ChainType[chain]]) {
         return FULL_NAME[ChainType[chain]]
     }
     return ChainType[chain]
 }
 
-export async function getShortAddress(shotAddress:string){
-    const rest:any = await rpc.post("sero_getShortAddress",[shotAddress],ChainType.SERO);
+export async function getShortAddress(shotAddress: string) {
+    const rest: any = await rpc.post("sero_getShortAddress", [shotAddress], ChainType.SERO);
     return rest
 }
 
-export function getDeviceLv(rate:string|undefined){
-    if(rate){
-        return utils.fromValue(rate,16).toFixed(2,1)
+export function getDeviceLv(rate: string | undefined) {
+    if (rate) {
+        return utils.fromValue(rate, 16).toFixed(2, 1)
     }
     return "0";
 }
 
-export function nFormatter(n:number|BigNumber|string, digits:number) {
+export const ticketKey = (chain:ChainType) => {
+    return ["nft_ticket", chain].join("_");
+}
+
+export function nFormatter(n: number | BigNumber | string, digits: number) {
     const num = new BigNumber(n).toNumber();
     const si = [
-        { value: 1, symbol: "" },
-        { value: 1E3, symbol: "K" },
-        { value: 1E6, symbol: "M" },
-        { value: 1E9, symbol: "G" },
-        { value: 1E12, symbol: "T" },
-        { value: 1E15, symbol: "P" },
-        { value: 1E18, symbol: "E" }
+        {value: 1, symbol: ""},
+        {value: 1E3, symbol: "K"},
+        {value: 1E6, symbol: "M"},
+        {value: 1E9, symbol: "G"},
+        {value: 1E12, symbol: "T"},
+        {value: 1E15, symbol: "P"},
+        {value: 1E18, symbol: "E"}
     ];
     const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
     let i;
@@ -449,38 +458,53 @@ export function nFormatter(n:number|BigNumber|string, digits:number) {
     return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
 }
 
-export function calcDark(dna:string):number{
-    if(!dna){
+export function calcDark(dna: string): number {
+    if (!dna || dna=="0x0000000000000000000000000000000000000000000000000000000000000000") {
         return 0
     }
-    if(!isDark(dna)){
+    if (!isDark(dna)) {
         return 0
     }
-    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
-    return (new BigNumber(u256[0]&0x3).plus(1).toNumber())
+    const u256 = new BN(dna.slice(2), 16).toArrayLike(Buffer, "be", 32)
+    return (new BigNumber(u256[0] & 0x3).plus(1).toNumber())
 }
 
-export function isDark(dna:string):boolean {
-    if(!dna){
+export function isDark(dna: string): boolean {
+    if (!dna || dna=="0x0000000000000000000000000000000000000000000000000000000000000000") {
         return false
     }
-    if(new BigNumber(dna).toNumber() == 0){
-       return false
+    if (new BigNumber(dna).toNumber() == 0) {
+        return false
     }
-    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
-    return (u256[0]&0xFC) == 0;
+    const u256 = new BN(dna.slice(2), 16).toArrayLike(Buffer, "be", 32)
+    return (u256[0] & 0xFC) == 0;
 }
 
-export function calcStyle(dna:string):number{
-    if(!dna){
-        return 0
+export function calcStyle(dna: string | undefined): DeviceMode {
+    if (!dna || dna=="0x0000000000000000000000000000000000000000000000000000000000000000") {
+        return {style: "ax", category: "normal"}
     }
-    const u256 = new BN(dna.slice(2),16).toArrayLike(Buffer, "be", 32)
-    return (new BigNumber(u256[1]&0x3).toNumber())
+    const u256 = new BN(dna.slice(2), 16).toArrayLike(Buffer, "be", 32)
+    const styleNum = new BigNumber(u256[1]).toNumber();
+
+
+    const styleKeys = Object.keys(DeviceStyle);
+    for (let key of styleKeys) {
+        if (DeviceStyle[key][1] > styleNum  && styleNum >= DeviceStyle[key][0]) {
+            const categoryKeys = Object.keys(DeviceCategory);
+            let category = "";
+            for (let k of categoryKeys) {
+                if (DeviceCategory[k][1] > styleNum  && styleNum >= DeviceCategory[k][0]) {
+                    category = k
+                }
+            }
+            return {style: key, category: category}
+        }
+    }
+    return {style: "ax", category: "normal"}
 }
 
-
-export function getQueryString(name:string) {
+export function getQueryString(name: string) {
     const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
     const r = window.location.search.substr(1).match(reg);
     if (r != null) {
@@ -489,6 +513,112 @@ export function getQueryString(name:string) {
     return '';
 }
 
-export function isEmbedPopup(){
+export function isEmbedPopup() {
     return utils.getQueryString("embed") == "popup" || selfStorage.getItem("embed") == "popup";
+}
+
+export function isMyDevice(category: string, ticket: string): boolean {
+    const tKey = ticketKey(ChainType.SERO);
+    const data: any = selfStorage.getItem(tKey)
+    if(data && data[category]){
+        const all = data[category]
+        if (all) {
+            for (let v of all) {
+                if (v.tokenId == ticket) {
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
+
+
+export const convertDeviceToNFTInfo = (device:DeviceInfo)=>{
+    const data = JSON.parse(JSON.stringify(META_TEMP["DEVICES"]))
+    const mode = utils.calcStyle(device.gene)
+    device.mode=mode;
+    data.image = `./assets/img/epoch/device/${mode.style}.png`
+    data.attributes = device;
+    return {
+        chain:ChainType.SERO,
+        category:"EMIT_AX",
+        symbol: "DEVICES",
+        tokenId:device.ticket,
+        meta:data
+    }
+}
+
+export const convertDeviceRankInfoToNFTInfo = (device:DeviceInfoRank):NftInfo=>{
+    const data = JSON.parse(JSON.stringify(META_TEMP["DEVICES"]))
+    const mode = utils.calcStyle(device.gene)
+    data.image = `./assets/img/epoch/device/${mode.style}.png`
+    data.attributes = toDevice(device);
+    return {
+        chain:ChainType.SERO,
+        category:"EMIT_AX",
+        symbol: "DEVICES",
+        tokenId:device.ticket,
+        meta:data
+    }
+}
+
+export const toDevice = (dr:DeviceInfoRank):DeviceInfo=>{
+    return {
+        category: "EMIT_AX",
+        ticket: dr.ticket,
+        base: new BigNumber( dr.base).toNumber(),
+        capacity: new BigNumber( dr.capacity).toNumber(),
+        power:new BigNumber( dr.power).toNumber(),
+        rate: dr.rate,
+        gene: dr.gene,
+        last: dr.last,
+        alis: dr.name,
+        mode: utils.calcStyle(dr.gene)
+    }
+}
+
+export function renderDarkStar (dna:string):Array<number>{
+    const n = utils.calcDark(dna)
+    const ht:Array<number> = [];
+
+    if(n<=4){
+        for(let i=0;i<n;i++){
+            ht.push(i)
+        }
+        //
+        // for(let i=0;i<4-n;i++){
+        //     ht.push(<IonIcon src={starOutline} className="dark-star"/>)
+        // }
+    }
+    return ht;
+}
+
+export function toBytes( str:string ) {
+    let ch:number = 0 ;
+    let st:Array<number>=[];
+    let re:Array<number> = [];
+    for (let i = 0; i < str.length; i++ ) {
+        ch = str.charCodeAt(i);  // get char
+        st = [];                 // set up "stack"
+
+        do {
+            st.push( ch & 0xFF );  // push byte to stack
+            ch = ch >> 8;          // shift value down by 1 byte
+        }
+
+        while ( ch );
+        // add stack contents to result
+        // done because chars have "wrong" endianness
+        re = re.concat( st.reverse() );
+    }
+    // return an array of bytes
+    return re;
+}
+
+export function Trim(str:string){
+    let result;
+    result = str.replace(/(^\s+)|(\s+$)/g,"");
+    result = result.replace(/\s/g,"");
+    return result;
 }

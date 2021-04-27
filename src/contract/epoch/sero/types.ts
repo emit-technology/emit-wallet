@@ -1,4 +1,5 @@
 import {MinerScenes} from "../../../pages/epoch/miner";
+import {DeviceMode} from "../../../types";
 
 // export interface Device {
 //     base: number;
@@ -17,6 +18,8 @@ export interface DeviceInfo {
     rate: string;
     gene: string;
     last: number;
+    alis?:string;
+    mode?:DeviceMode
 }
 
 export interface Driver {
@@ -45,10 +48,46 @@ export interface DriverInfo {
     capacity: number;
     rate: string;
     gene: string;
+    alis?:string
 }
 
 export interface Period{
     ne:string
     total:string
     pool:string
+}
+
+
+export interface PositionDriverInfoRank{
+    position:number
+    data:Array<DriverInfoRank>
+
+}
+
+export interface PositionDeviceInfoRank{
+    position:number
+    data:Array<DeviceInfoRank>
+}
+
+export interface DriverInfoRank{
+    owner:string
+    scenes:MinerScenes
+    name:string
+    base:string
+    capacity:string
+    rate:string
+    gene:string
+    blockNum:number
+}
+
+export interface DeviceInfoRank{
+    name:string
+    ticket:string
+    base:string
+    capacity:string
+    power:string
+    rate:string
+    gene:string
+    last:number
+    blockNum:number
 }

@@ -261,13 +261,15 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 </IonList>
                 <IonRow>
                     <IonCol size="4">
-                        <IonButton expand="block" mode="ios" fill="outline" onClick={() => {
+                        <IonButton expand="block" mode="ios" fill="outline" onClick={(e) => {
+                            e.stopPropagation();
                             this.setShowActionShell(false)
                             this.props.onCancel()
                         }}>{i18n.t("cancel")}</IonButton>
                     </IonCol>
                     <IonCol size="8">
-                        <IonButton mode="ios"  expand="block" onClick={() => {
+                        <IonButton mode="ios"  expand="block" onClick={(e) => {
+                            e.stopPropagation();
                             // this.setShowActionShell(false)
                             this.setShowPasswordAlert(true)
                         }}>{i18n.t("ok")}</IonButton>
