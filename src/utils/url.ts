@@ -17,6 +17,7 @@
  */
 
 import {ChainType} from "../types";
+import {MinerScenes} from "../pages/epoch/miner";
 
 class Url {
     private base = "#"
@@ -205,8 +206,8 @@ class Url {
         this.goTo([this.base,this.epoch.deviceRank].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
-    epochDriverRank(){
-        this.goTo([this.base,this.epoch.driverRank].join("/"),[this.base,this.epoch.index].join("/"))
+    epochDriverRank(scenes:MinerScenes){
+        this.goTo([this.base,this.epoch.driverRank,scenes].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
 }

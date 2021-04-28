@@ -18,16 +18,19 @@
 
 import React from 'react';
 import {
+    IonButton,
     IonCard,
-    IonCardContent,IonRow,IonCol,
-    IonCardHeader, IonListHeader,
-    IonCardTitle,
+    IonCardContent,
+    IonCol,
     IonContent,
     IonHeader,
+    IonIcon,
+    IonItem,
     IonLabel,
-    IonPage, IonSegment, IonSegmentButton,
+    IonPage,
+    IonRow,
     IonTitle,
-    IonToolbar, IonIcon
+    IonToolbar,IonText
 } from '@ionic/react';
 import './Epoch.css';
 import url from "../utils/url";
@@ -36,7 +39,8 @@ import epochService from "../contract/epoch/sero";
 import walletWorker from "../worker/walletWorker";
 import {ChainType} from "../types";
 import {MinerScenes} from "./epoch/miner";
-import {statsChartOutline} from "ionicons/icons";
+import {chevronForwardOutline, helpCircleOutline, statsChartOutline} from "ionicons/icons";
+import {Plugins} from "@capacitor/core";
 
 class Epoch extends React.Component<any, any>{
 
@@ -73,44 +77,44 @@ class Epoch extends React.Component<any, any>{
                     </IonToolbar>
                 </IonHeader>
                 <IonContent fullscreen>
-                    {/*<div style={{padding:"12px 12px 0"}}>*/}
-                    {/*    <IonSegment mode="ios"value={"origin"}>*/}
-                    {/*        <IonSegmentButton mode="ios" value="origin">*/}
-                    {/*            <IonLabel>ORIGIN</IonLabel>*/}
-                    {/*        </IonSegmentButton>*/}
-                    {/*    </IonSegment>*/}
-                    {/*</div>*/}
-                    <IonListHeader>
-                        <IonLabel>ORIGIN</IonLabel>
-                    </IonListHeader>
+                    <div style={{padding:"12px 15px 5px"}}>
+                        <div style={{fontSize:"24px",fontWeight:500}}>ORIGIN</div>
+                    </div>
                     <div className="epoch-box">
                         <div  className="epoch-origin">
-                            <IonRow>
-                                <IonCol style={{textAlign:"center"}}>
-                                    <div className="rank-box" onClick={()=>{
-                                        url.epochDeviceRank()
-                                    }}>
-                                        <IonIcon src={statsChartOutline} size="large"/><br/>
-                                        <IonLabel>DEVICE</IonLabel><br/>
-                                        <IonLabel>RANK</IonLabel><br/>
-                                    </div>
-                                </IonCol>
-                                <IonCol style={{textAlign:"center"}}>
-                                    <div className="rank-box" onClick={()=>{
-                                        url.epochDriverRank()
-                                    }}>
-                                        <IonIcon src={statsChartOutline} size="large"/><br/>
-                                        <IonLabel>DRIVER</IonLabel><br/>
-                                        <IonLabel>RANK</IonLabel><br/>
-                                    </div>
-                                </IonCol>
-                            </IonRow>
-                            <IonCard mode="ios" onClick={() => {
+                            <IonItem lines="none" detail={true} detailIcon={chevronForwardOutline} onClick={()=>{
+                                Plugins.Browser.open({url:"https://emit.technology"})
+                            }}>
+                                <IonIcon src={helpCircleOutline}  color="warning"/>
+                                <IonLabel className="ion-text-wrap" color="warning">
+                                    This is a test message, click me for more info!
+                                </IonLabel>
+                            </IonItem>
+
+                            <IonCard mode="ios" style={{marginTop: "4px"}} onClick={() => {
                                 url.epochAltar()
                             }}>
                                 <IonCardContent>
                                     <img src="./assets/img/altar.png"/>
                                     <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
+                                    <IonRow>
+                                        <IonCol>
+                                            <IonButton size="small" expand="block" fill="outline" onClick={(e)=>{
+                                                e.stopPropagation();
+                                                url.epochDeviceRank()
+                                            }}>
+                                                <IonLabel><IonIcon src={statsChartOutline} size="small"/> DEVICE</IonLabel>
+                                            </IonButton>
+                                        </IonCol>
+                                        <IonCol>
+                                            <IonButton size="small" expand="block" fill="outline" onClick={(e)=>{
+                                                e.stopPropagation()
+                                                url.epochDriverRank(MinerScenes.altar)
+                                            }}>
+                                                <IonLabel><IonIcon src={statsChartOutline} size="small"/> ALTAR DRIVER</IonLabel>
+                                            </IonButton>
+                                        </IonCol>
+                                    </IonRow>
                                 </IonCardContent>
                             </IonCard>
 
@@ -119,11 +123,32 @@ class Epoch extends React.Component<any, any>{
                             }}>
                                 <IonCardContent>
                                     <img src="./assets/img/chaos.png"/>
-                                    <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
+                                    <EpochAttribute driver={chaosInfo && chaosInfo.driver} showDriver={true} showDevice={false}/>
+                                    <IonRow>
+                                        <IonCol>
+                                            <IonButton size="small" expand="block" fill="outline" onClick={(e)=>{
+                                                e.stopPropagation()
+                                                url.epochDriverRank(MinerScenes.chaos)
+                                            }}>
+                                                <IonLabel><IonIcon src={statsChartOutline} size="small"/> CHAOS DRIVER</IonLabel>
+                                            </IonButton>
+                                        </IonCol>
+                                    </IonRow>
                                 </IonCardContent>
                             </IonCard>
                         </div>
                     </div>
+
+                    {/*<IonFab vertical="bottom" horizontal="end" slot="fixed">*/}
+                        {/*<IonFabButton>*/}
+                        {/*    <IonIcon icon={statsChartOutline} />*/}
+                        {/*</IonFabButton>*/}
+                        {/*<IonFabList side="start">*/}
+                        {/*    <div style={{background:"#fff" ,minHeight:"25px"}}>*/}
+                        {/*        */}
+                        {/*    </div>*/}
+                        {/*</IonFabList>*/}
+                    {/*</IonFab>*/}
                 </IonContent>
             </IonPage>
         );

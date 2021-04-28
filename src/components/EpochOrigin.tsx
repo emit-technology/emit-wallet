@@ -596,24 +596,11 @@ class EpochOrigin extends React.Component<Props, State> {
                                     {mintData && mintData.ne}<span style={{letterSpacing: "2px", color: "#f0f"}}>NE</span>
                                 </div>
                                 }
-                                {mintData && mintData.nonce && <div className="nonce-text">
-                                    <span className="nonce-span">{mintData && mintData.nonce}</span><br/>
-                                    <span className="nonce-span">
-                                        {`${new BigNumber(mintData.hashrate ? mintData.hashrate.o : 0).toFixed(0)}/s`}
-                                    </span>
-                                </div>}
                             </div>
-
+                            {mintData && mintData.nonce && <div className="nonce-text">
+                                <span className="nonce-span">{mintData && mintData.nonce}</span><br/>
+                            </div>}
                             <IonRow>
-                                <IonCol>
-                                    <div className="start-btn" style={{border: "2px solid #ddd"}} onClick={(e) => {
-                                        e.stopPropagation();
-                                        this.setShowModal(true)
-                                        this.init().catch()
-                                    }}>
-                                        {scenes == MinerScenes.altar ? i18n.t("forging"):i18n.t("mining")}
-                                    </div>
-                                </IonCol>
                                 <IonCol>
                                     <div className="start-btn" style={{background: !!isMining ? "red":"green"}} onClick={(e) => {
                                         e.stopPropagation();
@@ -622,7 +609,16 @@ class EpochOrigin extends React.Component<Props, State> {
                                             console.error(e)
                                         })
                                     }}>
-                                        {!!isMining ? "STOP" : "HASHRATE"}
+                                        {!!isMining ? `${new BigNumber(mintData.hashrate ? mintData.hashrate.o : 0).toFixed(0)}/s` : "HASHRATE"}
+                                    </div>
+                                </IonCol>
+                                <IonCol>
+                                    <div className="start-btn" style={{border: "2px solid #ddd"}} onClick={(e) => {
+                                        e.stopPropagation();
+                                        this.setShowModal(true)
+                                        this.init().catch()
+                                    }}>
+                                        {scenes == MinerScenes.altar ? i18n.t("forging"):i18n.t("mining")}
                                     </div>
                                 </IonCol>
                             </IonRow>

@@ -15,7 +15,7 @@ import {ChainType, NftInfo} from "../types";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
-import interVar from "../interval/nft";
+import interVar from "../interval/index";
 import i18n from "../locales/i18n";
 
 class NFT extends React.Component<any, any> {

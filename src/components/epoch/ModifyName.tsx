@@ -167,10 +167,10 @@ class ModifyName extends React.Component<Props, State> {
                                 return;
                             }
                             value = value.trim()
-                            const reg = new RegExp("^[A-Za-z0-9]+$");
-
-                            if(!reg.test(utils.Trim(value))){
-                                this.setShowToast(true,"warning","Only English letters and numbers are allowed !")
+                            const reg = new RegExp("^[\u0000-\u00FF]+$");
+                            const regEmoj= new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
+                            if(!reg.test(utils.Trim(value)) && !regEmoj.test(utils.Trim(value))){
+                                this.setShowToast(true,"warning",`The name [${value}] is invalid !`)
                                 return
                             }
                             if(utils.toBytes(value).length > 32){

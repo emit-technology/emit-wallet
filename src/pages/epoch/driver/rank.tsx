@@ -3,14 +3,14 @@ import {
     IonContent,
     IonHeader,
     IonIcon,
-    IonLabel,
+    IonLabel, IonLoading,
     IonPage,
     IonSegment,
     IonSegmentButton,
-    IonTitle,
+    IonTitle,IonText,
     IonToolbar
 } from "@ionic/react";
-import {chevronBack} from "ionicons/icons";
+import {chevronBack, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
 import {MinerScenes} from "../miner";
@@ -25,6 +25,10 @@ interface State{
     drivers:Array<DriverInfoRank>
     myDriversRank?:PositionDriverInfoRank
     account?:any
+    showLoading:boolean
+    pageSize:number
+    tabType:string
+    position?:number
 }
 
 class Rank extends React.Component<any, State>{
@@ -32,8 +36,11 @@ class Rank extends React.Component<any, State>{
     state:State = {
         scenes:MinerScenes[MinerScenes.altar],
         drivers:[],
-    }
+        showLoading:false,
+        pageSize:10,
+        tabType:"top"
 
+    }
 
     componentDidMount() {
         Plugins.StatusBar.setBackgroundColor({
@@ -41,39 +48,71 @@ class Rank extends React.Component<any, State>{
         }).catch(e => {
         })
 
-        this.init().catch((e)=>{
+        this.setShowLoading(true)
+        this.init().then(()=>{
+            this.setShowLoading(false)
+        }).catch((e)=>{
+            this.setShowLoading(false)
             console.error(e)
         })
     }
 
-    init = async ()=>{
-        const {scenes} = this.state;
-        let scenesParams = MinerScenes.altar
-        if(scenes){
-            scenesParams = scenes==MinerScenes[ MinerScenes.chaos]?MinerScenes.chaos:MinerScenes.altar;
-        }
+    setShowLoading = (f:boolean)=>{
+        this.setState({showLoading:f})
+    }
+
+    init = async (pagesize?:number)=>{
+        const {pageSize,tabType} = this.state;
+        const scenesParams = this.props.match.params.scenes;
         const account = await walletWorker.accountInfo()
 
-        const drivers = await epochRankService.epochTopDriver(scenesParams?scenesParams:MinerScenes.altar,10);
-        const myDriversRank = await epochRankService.epochPositionDriver(account.addresses[ChainType.SERO],scenesParams?scenesParams:MinerScenes.altar)
+        if(tabType == "top"){
+            const drivers = await epochRankService.epochTopDriver(scenesParams?parseInt(scenesParams):MinerScenes.altar,pagesize?pagesize:pageSize);
+            this.setState({
+                position:0,
+                drivers:drivers,
+                account:account
+            })
+        }else if(tabType == "my"){
+            const myDriversRank = await epochRankService.epochPositionDriver(account.addresses[ChainType.SERO],scenesParams?parseInt(scenesParams):MinerScenes.altar)
+            this.setState({
+                drivers:myDriversRank.data,
+                account:account,
+                position:myDriversRank.position
+            })
+        }
+    }
+
+    setTabType = (v:string)=>{
         this.setState({
-            drivers:drivers,
-            myDriversRank:myDriversRank,
-            account:account
+            tabType:v
+        })
+        this.setShowLoading(true)
+        this.init().then(()=>{
+            this.setShowLoading(false)
+        }).catch((e)=>{
+            this.setShowLoading(false)
+            console.error(e)
         })
     }
 
-    setScenes = (v:any)=>{
+    loadMore = (event:any)=>{
         this.setState({
-            scenes:v
+            pageSize:100,
+            showLoading:true
         })
-        this.init().catch(e=>{
+        this.init(100).then(()=>{
+            this.setShowLoading(false)
+            event.target.disabled = true;
+            event.target.complete();
+        }).catch(e=>{
+            this.setShowLoading(false)
             console.error(e)
         })
     }
 
     render() {
-        const {scenes,drivers,myDriversRank,account} = this.state;
+        const {drivers,tabType,account,showLoading,pageSize,position} = this.state;
 
         return <IonPage>
             <IonHeader>
@@ -88,7 +127,10 @@ class Rank extends React.Component<any, State>{
                     <IonTitle className="text-center text-bold" style={{
                         color: "#edcc67",
                         textTransform: "uppercase"
-                    }}>DRIVER RANK</IonTitle>
+                    }}>
+                        <IonIcon src={statsChartOutline}/>&nbsp;&nbsp;
+                        <IonText>{MinerScenes[this.props.match.params.scenes]} DRIVER</IonText>
+                    </IonTitle>
                     {/*<IonLabel slot="end">*/}
                     {/*    <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {*/}
                     {/*    }}/>*/}
@@ -98,18 +140,29 @@ class Rank extends React.Component<any, State>{
             <IonContent fullscreen color="light">
                 <div className="content-ion-rank">
                     <IonToolbar color="primary" mode="ios" className="heard-bg">
-                        <IonSegment mode="ios" value={scenes} onIonChange={(e:any)=>this.setScenes(e.detail.value)}>
-                            <IonSegmentButton value={MinerScenes[MinerScenes.altar]}>
-                                <IonLabel>ALTAR</IonLabel>
+                        <IonSegment mode="ios" value={tabType} onIonChange={(e:any)=>this.setTabType(e.detail.value)}>
+                            <IonSegmentButton value={"top"}>
+                                <IonLabel>TOP</IonLabel>
                             </IonSegmentButton>
-                            <IonSegmentButton value={MinerScenes[MinerScenes.chaos]}>
-                                <IonLabel>CHAOS</IonLabel>
+                            <IonSegmentButton value={"my"}>
+                                <IonLabel>MINE</IonLabel>
                             </IonSegmentButton>
                         </IonSegment>
                     </IonToolbar>
-                    <DriverRank drivers={drivers} myDriversRank={myDriversRank} mainPKr={account && account.addresses[ChainType.SERO]}/>
+                    <DriverRank drivers={drivers} position={position} mainPKr={account && account.addresses[ChainType.SERO]} loadMore={(e)=>this.loadMore(e)} pageSize={pageSize}/>
                 </div>
             </IonContent>
+
+            <IonLoading
+                mode="ios"
+                spinner={"bubbles"}
+                cssClass='my-custom-class'
+                isOpen={showLoading}
+
+                onDidDismiss={() => this.setShowLoading(false)}
+                message={'Please wait...'}
+                duration={120000}
+            />
         </IonPage>;
     }
 }

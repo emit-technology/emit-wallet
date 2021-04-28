@@ -171,7 +171,7 @@ class App extends React.Component<any,State>{
                     <Route path="/epoch/altar" component={Altar} exact={true}/>
                     <Route path="/epoch/chaos" component={Chaos} exact={true}/>
                     <Route path="/epoch/device/rank" component={DeviceRank} exact={true}/>
-                    <Route path="/epoch/driver/rank" component={DriverRank} exact={true}/>
+                    <Route path="/epoch/driver/rank/:scenes" component={DriverRank} exact={true}/>
 
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');

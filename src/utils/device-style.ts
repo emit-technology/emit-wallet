@@ -40,9 +40,9 @@ const DeviceStyle: any = {
 
 const DeviceCategory: any = {
     legendary: [0, 3],
-    scarce: [3, 19],
-    magical: [19, 49],
-    normal: [49, 256]
+    rate: [3, 19],
+    magic: [19, 49],
+    common: [49, 256]
 }
 
 export {

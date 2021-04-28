@@ -79,16 +79,17 @@ class EpochAttribute extends React.Component<Props, State>{
                     <IonRow>
                         <IonCol size="7">
                             <IonText color="white" className="text-little">
-                                AXE{device?.category && device.alis?`(${device.alis})`:`(${utils.ellipsisStr(device.ticket)})`}
+                                AXE{device?.category && device.alis?`(${device.alis})`:`(${utils.ellipsisStr(device.ticket,5)})`}
+                                &nbsp;&nbsp;
+                                {
+                                    !hiddenButton && <IonIcon src={statsChartOutline}  size="small" color="white" onClick={(e)=>{
+                                        e.stopPropagation();
+                                        this.queryMyRank(device.ticket).catch(e=>{
+                                            console.error(e)
+                                        })
+                                    }}/>
+                                }
                             </IonText>
-                            {
-                                !hiddenButton && <IonIcon src={statsChartOutline} color="white" onClick={(e)=>{
-                                    e.stopPropagation();
-                                    this.queryMyRank(device.ticket).catch(e=>{
-                                        console.error(e)
-                                    })
-                                }}/>
-                            }
 
                         </IonCol>
                         <IonCol size="5">
@@ -145,11 +146,13 @@ class EpochAttribute extends React.Component<Props, State>{
                     <div className="progress" style={{minHeight:"45px"}}>
                         <IonRow>
                             <IonCol size="7">
-                                <IonText color="white" className="text-little">DRIVER{driver.alis?`:${driver.alis}`:""}</IonText>
-                                {scenes && <IonIcon src={createOutline} color="white" onClick={(e)=>{
-                                    e.stopPropagation();
-                                    this.setShowDriverModify(true)
-                                }}/>}
+                                <IonText color="white" className="text-little">DRIVER{driver.alis?`:${driver.alis}`:""}&nbsp;&nbsp;
+                                    {scenes && <IonIcon src={createOutline} size="small" color="white" onClick={(e)=>{
+                                        e.stopPropagation();
+                                        this.setShowDriverModify(true)
+                                    }}/>}
+                                </IonText>
+
                             </IonCol>
                             <IonCol size="5">
                                 <div style={{textAlign: "right"}}>
@@ -184,7 +187,7 @@ class EpochAttribute extends React.Component<Props, State>{
                 swipeToClose={true}
                 onDidDismiss={() => this.setShowModal(false)}>
 
-                <DeviceRank devices={myRankDevice} position={position} ticket={device?.ticket}/>
+                <DeviceRank devices={myRankDevice} position={position} ticket={device?.ticket} pageSize={10} isModal={true}/>
             </IonModal>
 
             {/*<ModifyName show={showDeviceModify} device={device} onDidDismiss={this.setShowDeviceModify} defaultName={device?.alis}/>*/}

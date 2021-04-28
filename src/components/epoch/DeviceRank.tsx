@@ -1,14 +1,23 @@
 import * as React from 'react';
-import {IonAvatar, IonCol, IonIcon, IonItem, IonLabel, IonModal, IonProgressBar, IonText} from '@ionic/react'
+import {
+    IonAvatar,
+    IonList,
+    IonCol,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonModal,
+    IonProgressBar,
+    IonText,
+    IonInfiniteScrollContent, IonInfiniteScroll
+} from '@ionic/react'
 
 import {DeviceInfo, DeviceInfoRank} from "../../contract/epoch/sero/types";
 import "./DeviceRank.scss"
 import * as utils from "../../utils";
 import ModifyName from "./ModifyName";
-import BigNumber from "bignumber.js";
 import CardTransform from "../CardTransform";
 import {NftInfo} from "../../types";
-import EpochAttribute from "../EpochAttribute";
 import {createOutline, star} from "ionicons/icons";
 
 interface State{
@@ -22,6 +31,10 @@ interface Props{
     devices:Array<DeviceInfoRank>
     position?:number
     ticket?:string
+    loadMore?:(e:any)=>void;
+    pageSize:number
+    myDevices?:Array<string>
+    isModal?:boolean
 }
 
 class DeviceRank extends React.Component<Props, State>{
@@ -32,7 +45,6 @@ class DeviceRank extends React.Component<Props, State>{
     }
 
     componentDidMount() {
-
 
     }
 
@@ -49,7 +61,6 @@ class DeviceRank extends React.Component<Props, State>{
                 showModal:f,
             })
         }
-
     }
 
     setShowModify = (f:boolean,v?:DeviceInfoRank)=>{
@@ -65,9 +76,20 @@ class DeviceRank extends React.Component<Props, State>{
         }
     }
 
+    isMyDevice = (v:string):boolean=>{
+        const {myDevices,ticket} = this.props;
+        if(myDevices && myDevices.length>0){
+            return myDevices.indexOf(v)>-1
+        }
+        if(ticket){
+            return v == ticket
+        }
+        return false
+    }
+
     render() {
         const {showModal,showModify,selectDevice,selectNFT} = this.state;
-        const {devices,position,ticket} = this.props;
+        const {devices,position,ticket,pageSize,isModal} = this.props;
 
         let precate = 0;
         if(devices){
@@ -83,9 +105,9 @@ class DeviceRank extends React.Component<Props, State>{
         return <>
             <div className="device-box">
                 <div className="rank-text">
-                    {position?"MY RANKING":"TOP 10"}
+                    {position?`MY RANKING`:`TOP ${pageSize}`}
                 </div>
-                <div className="device-list device-list-h1">
+                <IonList className="device-list device-list-h1" style={{maxHeight: isModal?"52vh":""}}>
                     {
                         devices && devices.map((v,i:number)=>{
                             if(position){
@@ -103,7 +125,7 @@ class DeviceRank extends React.Component<Props, State>{
                                 index = i;
                             }
 
-                            return <IonItem lines="none" color={ticket == v.ticket ?"warning":""} className="device-item" detail={true} detailIcon="chevron-forward" onClick={(e)=>{
+                            return <IonItem lines="none" color={this.isMyDevice(v.ticket) ?"warning":""} className="device-item" detail={true} detailIcon="chevron-forward" onClick={(e)=>{
                                 e.stopPropagation();
                                 this.setShowModal(true,v)
                             }} >
@@ -141,10 +163,16 @@ class DeviceRank extends React.Component<Props, State>{
                             </IonItem>
                         })
                     }
-                </div>
+                </IonList>
             </div>
-
-            <ModifyName show={showModify} device={selectDevice} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={""}/>
+            <IonInfiniteScroll threshold="30%" onIonInfinite={(e)=> this.props.loadMore&&this.props.loadMore(e)}>
+                <IonInfiniteScrollContent
+                    loadingSpinner="bubbles"
+                    loadingText="Loading more data..."
+                >
+                </IonInfiniteScrollContent>
+            </IonInfiniteScroll>
+            <ModifyName show={showModify} device={selectDevice} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={selectDevice?.alis}/>
 
             <IonModal
                 isOpen={showModal}

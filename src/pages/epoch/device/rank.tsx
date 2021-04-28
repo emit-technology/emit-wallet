@@ -1,52 +1,89 @@
 import * as React from 'react';
-import {
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar
-} from "@ionic/react";
-import {chevronBack} from "ionicons/icons";
+import {IonContent, IonHeader, IonIcon, IonLoading, IonPage, IonText, IonTitle, IonToolbar} from "@ionic/react";
+import {chevronBack, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
 import DeviceRank from "../../../components/epoch/DeviceRank";
 import walletWorker from "../../../worker/walletWorker";
+import epochService from "../../../contract/epoch/sero";
 import epochRankService from "../../../contract/epoch/sero/rank";
 import {DeviceInfoRank} from "../../../contract/epoch/sero/types";
+import selfStorage from "../../../utils/storage";
+import * as utils from "../../../utils"
+import {ChainType} from "../../../types";
+import {MinerScenes} from "../miner";
 
 interface State{
     devices:Array<DeviceInfoRank>
     account?:any
+    showLoading:boolean
+    pageSize:number
+    myDevices:Array<string>
 }
 class Rank extends React.Component<any, State>{
 
     state:State = {
-        devices:[]
+        devices:[],
+        showLoading:false,
+        pageSize:10,
+        myDevices:[]
     }
+
     componentDidMount() {
         Plugins.StatusBar.setBackgroundColor({
             color: "#152955"
         }).catch(e => {
         })
 
-        this.init().catch((e)=>{
+        this.setShowLoading(true)
+        this.init().then(()=>{
+            this.setShowLoading(false)
+        }).catch((e)=>{
+            this.setShowLoading(false)
             console.error(e)
         })
     }
 
-    init = async ()=>{
+    init = async (pageSize?:number)=>{
         const account = await walletWorker.accountInfo()
 
-        const devices = await epochRankService.epochTopDevice(10)
+        const devices = await epochRankService.epochTopDevice(pageSize?pageSize:this.state.pageSize)
+        let myDevices:Array<string> = selfStorage.getItem(utils.ticketArrKey(ChainType.SERO))
+        const altarLocked = await epochService.lockedDevice(MinerScenes.altar, account.addresses[ChainType.SERO])
+        const chaosLocked = await epochService.lockedDevice(MinerScenes.chaos, account.addresses[ChainType.SERO])
+        if(!myDevices){
+            myDevices=[]
+        }
+        myDevices.push(altarLocked.ticket)
+        myDevices.push(chaosLocked.ticket)
         this.setState({
             devices:devices,
-            account:account
+            account:account,
+            myDevices:myDevices
+        })
+    }
+
+    setShowLoading = (f:boolean)=>{
+        this.setState({showLoading:f})
+    }
+
+    loadMore = (event:any)=>{
+        this.setState({
+            pageSize:100,
+            showLoading:true
+        })
+        this.init(100).then(()=>{
+            this.setShowLoading(false)
+            event.target.disabled = true;
+            event.target.complete();
+        }).catch(e=>{
+            this.setShowLoading(false)
+            console.error(e)
         })
     }
 
     render() {
-        const { devices} = this.state;
+        const { devices,showLoading,pageSize,myDevices} = this.state;
 
         return <IonPage>
             <IonHeader>
@@ -61,7 +98,10 @@ class Rank extends React.Component<any, State>{
                     <IonTitle className="text-center text-bold" style={{
                         color: "#edcc67",
                         textTransform: "uppercase"
-                    }}>DEVICE RANK</IonTitle>
+                    }}>
+                        <IonIcon src={statsChartOutline}/>&nbsp;&nbsp;
+                        <IonText>DEVICE</IonText>
+                    </IonTitle>
                     {/*<IonLabel slot="end">*/}
                     {/*    <img src={"./assets/img/epoch/help.png"} width={28} onClick={() => {*/}
                     {/*    }}/>*/}
@@ -70,9 +110,21 @@ class Rank extends React.Component<any, State>{
             </IonHeader>
             <IonContent fullscreen color="light">
                 <div className="content-ion-rank">
-                    <DeviceRank devices={devices}/>
+                    <DeviceRank devices={devices} loadMore={(e)=>this.loadMore(e)} pageSize={pageSize} myDevices={myDevices}/>
                 </div>
             </IonContent>
+
+            <IonLoading
+                mode="ios"
+                spinner={"bubbles"}
+                cssClass='my-custom-class'
+                isOpen={showLoading}
+
+                onDidDismiss={() => this.setShowLoading(false)}
+                message={'Please wait...'}
+                duration={120000}
+            />
+
         </IonPage>;
     }
 }

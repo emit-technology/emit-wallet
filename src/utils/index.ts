@@ -50,10 +50,13 @@ export function bs58ToHex(value: string): string {
     return `0x${bytes.toString("hex")}`;
 }
 
-export function ellipsisStr(v: string) {
+export function ellipsisStr(v: string,num?:number) {
     if (!v) return ""
+    if(!num){
+        num = 7
+    }
     if (v.length >= 15) {
-        return v.slice(0, 7) + " ... " + v.slice(v.length - 7, v.length);
+        return v.slice(0, num) + " ... " + v.slice(v.length - num, v.length);
     }
     return v
 }
@@ -435,6 +438,10 @@ export function getDeviceLv(rate: string | undefined) {
 
 export const ticketKey = (chain:ChainType) => {
     return ["nft_ticket", chain].join("_");
+}
+
+export const ticketArrKey = (chain:ChainType) => {
+    return ["nft_ticket_arr", chain].join("_");
 }
 
 export function nFormatter(n: number | BigNumber | string, digits: number) {

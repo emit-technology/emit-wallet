@@ -135,10 +135,10 @@ class CardTransform extends React.Component<Props, State> {
                     this.change()
                 }}>
                     <div className={`card-front ${cardBackground}`}>
-                        <img src={info.meta.image} style={{width:"100vw"}}/>
+                        <img src={info.meta.image} style={{width:"100vw",maxWidth:"600px"}}/>
                     </div>
                     <div className={`card-back ${cardBackground}`}>
-                        <img src={info.meta.image} style={{width:"100vw"}}/>
+                        <img src={info.meta.image} style={{width:"100vw",maxWidth:"600px"}}/>
                         <div className="card-back-f">
                             <IonGrid>
                                 <IonRow className="row-line">
@@ -209,20 +209,22 @@ class CardTransform extends React.Component<Props, State> {
                 </div>
                 <div className="card-foo">
                     <div>
-                        <h6>{info.meta.name} &nbsp;&nbsp;</h6>
-                        <IonText>({device && device.alis?device.alis:utils.ellipsisStr(info.tokenId)}) {info.symbol == "DEVICES" && !hideButton && <IonIcon src={createOutline} size="medium" color="dark"   onClick={(e)=>{
-                                    e.stopPropagation();
-                                    this.setShowModify(true)
-                                }}/>}
-                        </IonText><br/>
+                        <h5>{info.meta.name} &nbsp;&nbsp;</h5>
+                        <p>
+                            <IonText>({device && device.alis?device.alis:utils.ellipsisStr(info.tokenId)}) {info.symbol == "DEVICES" && !hideButton && <IonIcon src={createOutline} size="medium" color="dark"   onClick={(e)=>{
+                                e.stopPropagation();
+                                this.setShowModify(true)
+                            }}/>}
+                            </IonText>
+                        </p>
                         {
                             device && device.mode && device.mode.category &&
-                            <>
+                            <p>
                                 <IonChip color={this.reColor(device.mode.category)}>
                                     <IonIcon src={this.reIcon(device.mode.category)}/>
                                     <IonLabel>{device.mode && device.mode.category.toUpperCase()}</IonLabel>
                                 </IonChip>
-                            </>
+                            </p>
                         }
                     </div>
                     {
@@ -247,7 +249,7 @@ class CardTransform extends React.Component<Props, State> {
                     }
                 </div>
             </div>
-            <ModifyName show={showModify} device={device} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={"ssd"}/>
+            <ModifyName show={showModify} device={device} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={device?.alis}/>
             <IonToast
                 color="dark"
                 position="top"

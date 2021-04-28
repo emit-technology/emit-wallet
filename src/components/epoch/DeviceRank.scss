@@ -32,12 +32,12 @@
 }
 
 .device-list-h2{
-  max-height: 50vh;
+  max-height: 80vh;
   overflow: scroll;
 }
 
 .device-list-h3{
-  max-height: 60vh;
+  max-height: 80vh;
   overflow: scroll;
 }
 
@@ -82,6 +82,7 @@
 .epoch-rank-modal{
   --width: 90%;
   --height: 68%;
+  --max-width: 700px;
   --border-radius: 15px;
   --background:#fff;
   overflow-y: scroll;
@@ -91,6 +92,7 @@
 .epoch-rank-info{
   --width: 80%;
   --height: 40%;
+  --max-width: 600px;
   --border-radius: 15px;
   --background:#fff;
   overflow-y: scroll;
