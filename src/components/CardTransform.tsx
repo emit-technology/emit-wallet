@@ -126,7 +126,7 @@ class CardTransform extends React.Component<Props, State> {
 
     render() {
         const {deg,device,showToast,showModify} = this.state;
-        const {info,hideButton,defaultTranslate} = this.props;
+        const {info,hideButton} = this.props;
         const cardBackground = device && device.gene ? utils.isDark(device.gene) ?"dark-element-bg":"light-element-bg":"";
         return <>
             <div className="n-card">
@@ -135,10 +135,10 @@ class CardTransform extends React.Component<Props, State> {
                     this.change()
                 }}>
                     <div className={`card-front ${cardBackground}`}>
-                        <img src={info.meta.image} style={{width:"100vw",maxWidth:"600px"}}/>
+                        <img src={info.meta.image} style={{width:"100vw"}}/>
                     </div>
                     <div className={`card-back ${cardBackground}`}>
-                        <img src={info.meta.image} style={{width:"100vw",maxWidth:"600px"}}/>
+                        <img src={info.meta.image} style={{width:"100vw"}}/>
                         <div className="card-back-f">
                             <IonGrid>
                                 <IonRow className="row-line">

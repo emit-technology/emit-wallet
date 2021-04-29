@@ -95,7 +95,7 @@ class Epoch extends React.Component<any, any>{
                                 url.epochAltar()
                             }}>
                                 <IonCardContent>
-                                    <img src="./assets/img/altar.png"/>
+                                    <img src="./assets/img/altar.png" style={{width:"100vw"}}/>
                                     <EpochAttribute driver={altarInfo && altarInfo.driver} showDriver={true} showDevice={false}/>
                                     <IonRow>
                                         <IonCol>
@@ -122,7 +122,7 @@ class Epoch extends React.Component<any, any>{
                                 url.epochChaos()
                             }}>
                                 <IonCardContent>
-                                    <img src="./assets/img/chaos.png"/>
+                                    <img src="./assets/img/chaos.png" style={{width:"100vw"}}/>
                                     <EpochAttribute driver={chaosInfo && chaosInfo.driver} showDriver={true} showDevice={false}/>
                                     <IonRow>
                                         <IonCol>
