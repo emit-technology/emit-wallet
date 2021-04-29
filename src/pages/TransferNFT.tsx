@@ -82,7 +82,7 @@ class TransferNFT extends React.Component<any, any> {
         const chainName = this.props.match.params.chain;
         const chainId = utils.getChainIdByName(chainName);
         const tokenId = this.props.match.params.value;
-        const contractAddress = utils.getAddressBySymbol(category,chainName)
+        // const contractAddress = utils.getAddressBySymbol(category,chainName)
         if (category && chainId) {
             let metaData:any = {};
             // if(chainId == ChainType.ETH){
@@ -94,12 +94,18 @@ class TransferNFT extends React.Component<any, any> {
             //     const uri = await contract.tokenURI(tokenId)
             //     metaData = await rpc.req(uri,{})
             // }
-
-            //TODO FOR TEST
-            metaData = META_TEMP[category]
-
             const account = await walletWorker.accountInfo()
             const balance = await rpc.getBalance(chainId, account.addresses[chainId]);
+            const ticketObj = await rpc.getTicket(chainId,account.addresses[chainId])
+            const tickets = ticketObj[utils.getCategoryBySymbol(category,chainName)]
+            let ticket = null;
+            if(tickets && tickets.length>0){
+                for(let v of tickets){
+                    if(tokenId == v.tokenId){
+                        ticket = v;
+                    }
+                }
+            }
             // const ticket = await rpc.getTicket(chainId, account.addresses[chainId]);
             const defaultGasPrice = await utils.defaultGasPrice(chainId);
             const cy = chainId == ChainType.SERO ? "LIGHT" : ChainType[chainId];
@@ -111,7 +117,7 @@ class TransferNFT extends React.Component<any, any> {
                 realCy: cy,
                 balance:balance,
                 gasPrice:defaultGasPrice,
-                metaData:metaData,
+                metaData:ticket.meta,
             })
         } else {
             // window.location.href = "#/"
