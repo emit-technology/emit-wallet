@@ -125,7 +125,7 @@ class DriverRank extends React.Component<Props, State>{
                 drivers && position &&
                 <div className="device-box">
                     <div className="rank-text">
-                        MINE
+                        MY RANKING
                     </div>
                     <IonList className="device-list device-list-h2">
                         {
@@ -176,9 +176,9 @@ class DriverRank extends React.Component<Props, State>{
             <ModifyName show={showModify} driver={selectDriver} scenes={scenes}  onDidDismiss={(f)=>this.setShowModify(f,null)} defaultName={selectDriver && selectDriver.alis}/>
 
             <IonModal
+                mode="ios"
                 isOpen={showModal}
                 cssClass='epoch-rank-modal'
-                swipeToClose={true}
                 onDidDismiss={() => this.setShowModal(false)}>
 
                 {/*<CardTransform src={"./assets/img/axe.png"} title={"EMIT_AX"}*/}

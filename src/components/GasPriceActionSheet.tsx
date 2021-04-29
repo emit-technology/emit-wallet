@@ -136,6 +136,7 @@ class GasPriceActionSheet extends React.Component<Props, State> {
                 mode="ios"
                 cssClass="gas-price-modal"
                 isOpen={this.props.show}
+                swipeToClose={true}
                 onDidDismiss={() => this.props.onClose()}>
                 <IonList style={{overflowY:"scroll"}}>
                     <IonRadioGroup value={gasPrice} onIonChange={e => this.setGasPrice(e.detail.value)}>

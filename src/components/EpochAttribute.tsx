@@ -182,9 +182,9 @@ class EpochAttribute extends React.Component<Props, State>{
                     </div>
             }
             <IonModal
+                mode="ios"
                 isOpen={showModal}
                 cssClass='epoch-rank-modal'
-                swipeToClose={true}
                 onDidDismiss={() => this.setShowModal(false)}>
 
                 <DeviceRank devices={myRankDevice} position={position} ticket={device?.ticket} pageSize={10} isModal={true}/>

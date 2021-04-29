@@ -142,10 +142,10 @@ class Rank extends React.Component<any, State>{
                     <IonToolbar color="primary" mode="ios" className="heard-bg">
                         <IonSegment mode="ios" value={tabType} onIonChange={(e:any)=>this.setTabType(e.detail.value)}>
                             <IonSegmentButton value={"top"}>
-                                <IonLabel>TOP</IonLabel>
+                                <IonLabel>TOP {pageSize}</IonLabel>
                             </IonSegmentButton>
                             <IonSegmentButton value={"my"}>
-                                <IonLabel>MINE</IonLabel>
+                                <IonLabel>MY RANKING</IonLabel>
                             </IonSegmentButton>
                         </IonSegment>
                     </IonToolbar>

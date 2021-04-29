@@ -627,6 +627,7 @@ class EpochOrigin extends React.Component<Props, State> {
                 </div>
 
                 <IonModal
+                    mode="ios"
                     isOpen={showModal}
                     cssClass='epoch-modal'
                     swipeToClose={true}
@@ -788,6 +789,7 @@ class EpochOrigin extends React.Component<Props, State> {
                 </IonModal>
 
                 <IonModal
+                    mode="ios"
                     isOpen={showModalDevice}
                     cssClass='epoch-rank-modal'
                     swipeToClose={true}

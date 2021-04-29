@@ -107,7 +107,7 @@ class DeviceRank extends React.Component<Props, State>{
                 <div className="rank-text">
                     {position?`MY RANKING`:`TOP ${pageSize}`}
                 </div>
-                <IonList className="device-list device-list-h1" style={{maxHeight: isModal?"52vh":""}}>
+                <IonList className="device-list device-list-h1" style={{maxHeight: isModal?"60vh":""}}>
                     {
                         devices && devices.map((v,i:number)=>{
                             if(position){
@@ -165,16 +165,19 @@ class DeviceRank extends React.Component<Props, State>{
                     }
                 </IonList>
             </div>
-            <IonInfiniteScroll threshold="30%" onIonInfinite={(e)=> this.props.loadMore&&this.props.loadMore(e)}>
-                <IonInfiniteScrollContent
-                    loadingSpinner="bubbles"
-                    loadingText="Loading more data..."
-                >
-                </IonInfiniteScrollContent>
-            </IonInfiniteScroll>
+            {
+                !isModal && <IonInfiniteScroll threshold="30%" onIonInfinite={(e)=> this.props.loadMore&&this.props.loadMore(e)}>
+                    <IonInfiniteScrollContent
+                        loadingSpinner="bubbles"
+                        loadingText="Loading more data..."
+                    >
+                    </IonInfiniteScrollContent>
+                </IonInfiniteScroll>
+            }
             <ModifyName show={showModify} device={selectDevice} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={selectDevice?.alis}/>
 
             <IonModal
+                mode="ios"
                 isOpen={showModal}
                 cssClass='epoch-rank-modal'
                 swipeToClose={true}

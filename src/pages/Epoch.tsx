@@ -41,6 +41,7 @@ import {ChainType} from "../types";
 import {MinerScenes} from "./epoch/miner";
 import {chevronForwardOutline, helpCircleOutline, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
+import rpc from "../rpc";
 
 class Epoch extends React.Component<any, any>{
 
@@ -61,14 +62,17 @@ class Epoch extends React.Component<any, any>{
         const account = await walletWorker.accountInfo()
         const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
         const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
+        const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
+        const tips = rest && rest.length>0?rest[0]:null
         this.setState({
             altarInfo: altarInfo,
-            chaosInfo: chaosInfo
+            chaosInfo: chaosInfo,
+            tips:tips
         })
     }
 
     render() {
-        const {chaosInfo,altarInfo} = this.state;
+        const {chaosInfo,altarInfo,tips} = this.state;
         return (
             <IonPage>
                 <IonHeader>
@@ -82,16 +86,20 @@ class Epoch extends React.Component<any, any>{
                     </div>
                     <div className="epoch-box">
                         <div  className="epoch-origin">
-                            <IonItem lines="none" detail={true} detailIcon={chevronForwardOutline} onClick={()=>{
-                                Plugins.Browser.open({url:"https://emit.technology"})
-                            }}>
-                                <IonIcon src={helpCircleOutline}  color="warning"/>
-                                <IonLabel className="ion-text-wrap" color="warning">
-                                    This is a test message, click me for more info!
-                                </IonLabel>
-                            </IonItem>
+                            {
+                                tips && <IonItem lines="none" detail={!!tips.url} detailIcon={chevronForwardOutline} onClick={()=>{
+                                    if(tips.url){
+                                        Plugins.Browser.open({url:tips.url})
+                                    }
+                                }}>
+                                    <IonIcon src={helpCircleOutline}  color="warning"/>
+                                    <IonLabel className="ion-text-wrap" color="warning">
+                                        {tips.message}
+                                    </IonLabel>
+                                </IonItem>
+                            }
 
-                            <IonCard mode="ios" style={{marginTop: "4px"}} onClick={() => {
+                            <IonCard mode="ios" style={{marginTop: tips && "4px"}} onClick={() => {
                                 url.epochAltar()
                             }}>
                                 <IonCardContent>

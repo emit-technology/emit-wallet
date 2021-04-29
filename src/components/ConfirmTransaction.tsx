@@ -194,6 +194,8 @@ class ConfirmTransaction extends React.Component<Props, State>{
 
         return <>
             <IonModal
+                swipeToClose={true}
+                mode="ios"
                 isOpen={showActionSheet}
                 cssClass="confirm-transaction-modal"
                 onDidDismiss={() => this.setShowActionShell(false)}>

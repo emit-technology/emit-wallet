@@ -133,6 +133,7 @@
   padding: 10px;
   border-radius: 15px;
   border: 2px solid #ddd;
+  text-transform: uppercase;
 }
 
 .ne-text {
