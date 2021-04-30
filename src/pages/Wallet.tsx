@@ -34,7 +34,7 @@ import {
     IonLabel,
     IonList,
     IonListHeader,
-    IonLoading,
+    IonLoading, IonModal,
     IonPage,
     IonPopover,
     IonRow,
@@ -606,49 +606,15 @@ class Wallet extends React.Component<State, any> {
                     ]}
                 />
 
-                <IonAlert
-                    mode="ios"
-                    isOpen={showVersionAlert}
-                    onDidDismiss={() => this.setShowVersionAlert(false)}
-                    header={`New Version ${version.version}`}
-                    message={`${version.info}`}
-                    buttons={[
-                        {
-                            text:  i18n.t("cancel"),
-                            role: 'cancel',
-                            cssClass: 'secondary',
-                            handler: () => {
-                                console.log('Confirm Cancel');
-                            }
-                        },
-                        {
-                            text: i18n.t("upgrade"),
-                            handler: () => {
-                                if(deviceInfo.platform == "ios"){
-                                    Plugins.App.openUrl({url:version.iosUrl}).catch()
-                                }else if (deviceInfo.platform == "android"){
-                                    Plugins.Browser.open({url:version.androidUrl}).catch()
-                                }
-                            }
-                        }
-                    ]}
-                />
-
                 {/*<IonAlert*/}
                 {/*    mode="ios"*/}
-                {/*    isOpen={activeChainAlert}*/}
-                {/*    onDidDismiss={() => this.showActiveChainAlert(false)}*/}
-                {/*    header={"Active Chain"}*/}
-                {/*    inputs={[*/}
-                {/*        {*/}
-                {/*            name:"password",*/}
-                {/*            type:"password",*/}
-                {/*            placeholder:"Password"*/}
-                {/*        }*/}
-                {/*    ]}*/}
+                {/*    isOpen={showVersionAlert}*/}
+                {/*    onDidDismiss={() => this.setShowVersionAlert(false)}*/}
+                {/*    header={`New Version ${version.version}`}*/}
+                {/*    message={`${version.info}`}*/}
                 {/*    buttons={[*/}
                 {/*        {*/}
-                {/*            text: i18n.t("cancel"),*/}
+                {/*            text:  i18n.t("cancel"),*/}
                 {/*            role: 'cancel',*/}
                 {/*            cssClass: 'secondary',*/}
                 {/*            handler: () => {*/}
@@ -656,21 +622,62 @@ class Wallet extends React.Component<State, any> {
                 {/*            }*/}
                 {/*        },*/}
                 {/*        {*/}
-                {/*            text: i18n.t("ok"),*/}
-                {/*            handler: (e) => {*/}
-                {/*                this.setShowLoading(true)*/}
-                {/*                this.activeChain(e["password"]).then(()=>{*/}
-                {/*                    this.setShowToast(true,"success","Active successfully!");*/}
-                {/*                    this.setShowLoading(false)*/}
-                {/*                }).catch((e)=>{*/}
-                {/*                    const err = typeof e=="string"?e:e.message;*/}
-                {/*                    this.setShowLoading(false)*/}
-                {/*                    this.setShowToast(true,"danger",err);*/}
-                {/*                })*/}
+                {/*            text: i18n.t("upgrade"),*/}
+                {/*            handler: () => {*/}
+                {/*                if(deviceInfo.platform == "ios"){*/}
+                {/*                    Plugins.App.openUrl({url:version.iosUrl}).catch()*/}
+                {/*                }else if (deviceInfo.platform == "android"){*/}
+                {/*                    Plugins.Browser.open({url:version.androidUrl}).catch()*/}
+                {/*                }*/}
                 {/*            }*/}
                 {/*        }*/}
                 {/*    ]}*/}
                 {/*/>*/}
+
+                <IonModal
+                    mode="ios"
+                    isOpen={showVersionAlert}
+                    cssClass='epoch-version-modal'
+                    onDidDismiss={() => this.setShowVersionAlert(false)}>
+                    <div>
+                        <IonCard>
+                            <IonHeader>
+                                <IonListHeader>{version.version}</IonListHeader>
+                            </IonHeader>
+                            <IonCardContent className="version-content">
+                                <IonList>
+                                    {
+                                        version.info && version.info.length>0 &&
+                                            version.info.map((v:any,i:number)=>{
+                                                return <IonItem lines="none">
+                                                    <IonLabel className="ion-text-wrap">
+                                                        {v}
+                                                    </IonLabel>
+                                                </IonItem>
+                                            })
+                                    }
+                                </IonList>
+                            </IonCardContent>
+                        </IonCard>
+                        <IonRow className="version-button">
+                            <IonCol size="5">
+                                <IonButton expand={"block"} fill="outline">{i18n.t("cancel")}</IonButton>
+                            </IonCol>
+                            <IonCol size="7">
+                                <IonButton expand={"block"} onClick={()=>{
+                                    if(deviceInfo.platform == "ios"){
+                                        Plugins.App.openUrl({url:version.iosUrl}).catch()
+                                    }else if (deviceInfo.platform == "android"){
+                                        Plugins.Browser.open({url:version.androidUrl}).catch()
+                                    }else{
+                                        Plugins.Browser.open({url:version.androidUrl}).catch()
+                                    }
+                                }}>{i18n.t("upgrade")}</IonButton>
+                            </IonCol>
+                        </IonRow>
+                    </div>
+                </IonModal>
+
                 <IonToast
                     color={!toastColor?"warning":toastColor}
                     position="top"

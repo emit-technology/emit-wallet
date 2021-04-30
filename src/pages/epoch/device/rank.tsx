@@ -13,20 +13,21 @@ import * as utils from "../../../utils"
 import {ChainType} from "../../../types";
 import {MinerScenes} from "../miner";
 
-interface State{
-    devices:Array<DeviceInfoRank>
-    account?:any
-    showLoading:boolean
-    pageSize:number
-    myDevices:Array<string>
+interface State {
+    devices: Array<DeviceInfoRank>
+    account?: any
+    showLoading: boolean
+    pageSize: number
+    myDevices: Array<string>
 }
-class Rank extends React.Component<any, State>{
 
-    state:State = {
-        devices:[],
-        showLoading:false,
-        pageSize:10,
-        myDevices:[]
+class Rank extends React.Component<any, State> {
+
+    state: State = {
+        devices: [],
+        showLoading: false,
+        pageSize: 10,
+        myDevices: []
     }
 
     componentDidMount() {
@@ -36,59 +37,59 @@ class Rank extends React.Component<any, State>{
         })
 
         this.setShowLoading(true)
-        this.init().then(()=>{
+        this.init().then(() => {
             this.setShowLoading(false)
-        }).catch((e)=>{
+        }).catch((e) => {
             this.setShowLoading(false)
             console.error(e)
         })
     }
 
-    init = async (pageSize?:number)=>{
+    init = async (pageSize?: number) => {
         const account = await walletWorker.accountInfo()
 
-        const devices = await epochRankService.epochTopDevice(pageSize?pageSize:this.state.pageSize)
-        let myDevices:Array<string> = selfStorage.getItem(utils.ticketArrKey(ChainType.SERO))
+        const devices = await epochRankService.epochTopDevice(pageSize ? pageSize : this.state.pageSize)
+        let myDevices: Array<string> = selfStorage.getItem(utils.ticketArrKey(ChainType.SERO))
         const altarLocked = await epochService.lockedDevice(MinerScenes.altar, account.addresses[ChainType.SERO])
         const chaosLocked = await epochService.lockedDevice(MinerScenes.chaos, account.addresses[ChainType.SERO])
-        if(!myDevices){
-            myDevices=[]
+        if (!myDevices) {
+            myDevices = []
         }
         myDevices.push(altarLocked.ticket)
         myDevices.push(chaosLocked.ticket)
         this.setState({
-            devices:devices,
-            account:account,
-            myDevices:myDevices
+            devices: devices,
+            account: account,
+            myDevices: myDevices
         })
     }
 
-    setShowLoading = (f:boolean)=>{
-        this.setState({showLoading:f})
+    setShowLoading = (f: boolean) => {
+        this.setState({showLoading: f})
     }
 
-    loadMore = (event:any)=>{
+    loadMore = (event: any) => {
         this.setState({
-            pageSize:1000,
-            showLoading:true
+            pageSize: 100,
+            showLoading: true
         })
-        this.init(1000).then(()=>{
+        this.init(100).then(() => {
             this.setShowLoading(false)
             event.target.disabled = true;
             event.target.complete();
-        }).catch(e=>{
+        }).catch(e => {
             this.setShowLoading(false)
             console.error(e)
         })
     }
 
     render() {
-        const { devices,showLoading,pageSize,myDevices} = this.state;
+        const {devices, showLoading, pageSize, myDevices} = this.state;
 
         return <IonPage>
             <IonHeader>
                 <IonToolbar color="primary" mode="ios" className="heard-bg">
-                    <IonIcon src={chevronBack} size="large"  style={{color: "#edcc67"}} slot="start" onClick={() => {
+                    <IonIcon src={chevronBack} size="large" style={{color: "#edcc67"}} slot="start" onClick={() => {
                         Plugins.StatusBar.setBackgroundColor({
                             color: "#194381"
                         }).catch(e => {
@@ -110,7 +111,8 @@ class Rank extends React.Component<any, State>{
             </IonHeader>
             <IonContent fullscreen color="light">
                 <div className="content-ion-rank">
-                    <DeviceRank devices={devices} loadMore={(e)=>this.loadMore(e)} pageSize={pageSize} myDevices={myDevices}/>
+                    <DeviceRank devices={devices} loadMore={(e) => this.loadMore(e)} pageSize={pageSize}
+                                myDevices={myDevices}/>
                 </div>
             </IonContent>
 

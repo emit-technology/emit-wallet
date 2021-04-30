@@ -55,3 +55,22 @@
     padding-bottom: 0px !important;
     padding-top: 0px !important;
 }
+
+.epoch-version-modal{
+    --width: 90%;
+    --height: 60%;
+    --border-radius: 15px;
+    --background:#fff;
+}
+
+.version-content{
+    min-height: 35vh;
+    max-height: 40vh;
+    overflow-y: scroll;
+}
+
+.version-button{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
