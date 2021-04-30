@@ -88,6 +88,8 @@ import embed from "./utils/embed";
 import {DeviceInfo, Plugins} from "@capacitor/core";
 import DeviceRank from "./pages/epoch/device/rank";
 import DriverRank from "./pages/epoch/driver/rank";
+import walletWorker from "./worker/walletWorker";
+import url from "./utils/url";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")

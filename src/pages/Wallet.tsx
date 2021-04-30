@@ -122,6 +122,14 @@ class Wallet extends React.Component<State, any> {
         StatusBar.setBackgroundColor({
             color: "#194381"
         })
+
+        walletWorker.isLocked().then(ret=>{
+            const urlHash = window.location.hash;
+            if(ret && urlHash.indexOf("account/unlock") == -1){
+                url.accountUnlock()
+            }
+        })
+
         walletWorker.accountInfo().then((account:any)=>{
             const assets: any = {};
             const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);

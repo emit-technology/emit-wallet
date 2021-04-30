@@ -45,10 +45,8 @@ import i18n from "../locales/i18n";
 import ConfirmTransaction from "../components/ConfirmTransaction";
 import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import Erc721 from "../contract/erc721/meta/eth";
-import Src721 from "../contract/erc721/meta/sero";
 import GasFeeProxyNFT from "../contract/gasFeeProxy/NFT";
-import SRC721CrossFee from "../contract/cross/sero/crossNFTFee";
-import {CONTRACT_ADDRESS, GAS_FEE_PROXY_ADDRESS, META_TEMP} from "../config";
+import { GAS_FEE_PROXY_ADDRESS} from "../config";
 
 class TransferNFT extends React.Component<any, any> {
 

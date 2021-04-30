@@ -149,12 +149,6 @@ class WalletWorker {
         if(!accountId){
             accountId = selfStorage.getItem("accountId");
         }
-        this.isLocked().then(ret=>{
-            const urlHash = window.location.hash;
-            if(ret && urlHash.indexOf("account/unlock") == -1){
-                url.accountUnlock()
-            }
-        })
         return new Promise((resolve, reject)=>{
             if(accountId) {
                 const data:any = selfStorage.getItem(accountId);
