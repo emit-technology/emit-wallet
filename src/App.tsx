@@ -108,6 +108,13 @@ class App extends React.Component<any,State>{
     }
 
     componentDidMount() {
+        walletWorker.isLocked().then(ret=>{
+            const urlHash = window.location.hash;
+            if(ret && urlHash.indexOf("account/unlock") == -1){
+                url.accountUnlock()
+            }
+        })
+
         this.init().catch(e=>{
             console.log(e)
         })
