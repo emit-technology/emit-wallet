@@ -1,6 +1,6 @@
 {
   "appId": "technology.emit.wallet",
-  "appName": "EMIT Wallet",
+  "appName": "EMIT-Wallet",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "build",

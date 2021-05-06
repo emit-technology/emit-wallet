@@ -167,7 +167,7 @@ class Wallet extends React.Component<State, any> {
 
     checkVersion = async () => {
         const deviceInfo = await Device.getInfo();
-        if(deviceInfo && deviceInfo.platform !=="web"){
+        if(deviceInfo && deviceInfo.platform =="ios" || deviceInfo && deviceInfo.platform =="android"){
             const skipVersion: any = selfStorage.getItem("skipVersion");
             const remoteVersion:any = await rpc.post("eth_getAppVersion", ["latest",""],ChainType.ETH)
 
@@ -661,7 +661,9 @@ class Wallet extends React.Component<State, any> {
                         </IonCard>
                         <IonRow className="version-button">
                             <IonCol size="5">
-                                <IonButton expand={"block"} fill="outline">{i18n.t("cancel")}</IonButton>
+                                <IonButton expand={"block"} fill="outline" onClick={()=>{
+                                    this.setShowVersionAlert(false)
+                                }}>{i18n.t("cancel")}</IonButton>
                             </IonCol>
                             <IonCol size="7">
                                 <IonButton expand={"block"} onClick={()=>{
