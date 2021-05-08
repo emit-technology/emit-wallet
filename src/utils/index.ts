@@ -35,9 +35,6 @@ import * as utils from "../utils"
 import selfStorage from "./storage";
 import {DeviceCategory, DeviceStyle} from "./device-style";
 import {DeviceInfo, DeviceInfoRank} from "../contract/epoch/sero/types";
-import {IonIcon} from "@ionic/react";
-import {star} from "ionicons/icons";
-import * as React from "react";
 
 const utf8 = require("utf8");
 
@@ -444,7 +441,10 @@ export const ticketArrKey = (chain:ChainType) => {
     return ["nft_ticket_arr", chain].join("_");
 }
 
-export function nFormatter(n: number | BigNumber | string, digits: number) {
+export function nFormatter(n: number | BigNumber | string | undefined, digits: number) {
+    if(!n){
+        return "0"
+    }
     const num = new BigNumber(n).toNumber();
     const si = [
         {value: 1, symbol: ""},

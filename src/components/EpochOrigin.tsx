@@ -237,6 +237,7 @@ class EpochOrigin extends React.Component<Props, State> {
     prepare = async () => {
         const {mintData,amount,minNE} = this.state;
         this.setShowLoading(true)
+
         if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
             if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
                 const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
