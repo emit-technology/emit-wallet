@@ -155,16 +155,22 @@ class EpochOrigin extends React.Component<Props, State> {
         }
 
         if (account && userInfo && userInfo.pImage && userInfo && userInfo.pImage.hash && userInfo && userInfo.pImage.serial) {
-            await this.miner().init({
+            this.miner().init({
                 phash: userInfo.pImage.hash,
                 address: await utils.getShortAddress(fromAddress),
                 index: utils.toHex(userInfo.pImage.serial),
                 scenes: scenes,
                 accountScenes: this.miner().uKey(),
                 accountId: account.accountId
+            }).then(()=>{
+                this.mintState().catch(e=>{
+                    console.error(e)
+                })
+            }).catch(e=>{
+                console.error(e)
             })
         }
-        await this.mintState();
+        // await this.mintState();
         const tkt = await this.getDevice()
         const isMining = await this.miner().isMining()
 
