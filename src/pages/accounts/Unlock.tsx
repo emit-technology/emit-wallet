@@ -34,6 +34,12 @@ class Unlock extends React.Component<any, State>{
     }
 
     componentDidMount() {
+        walletWorker.accountInfo().then(account=>{
+            if(account && account.accountId){
+            }else {
+                url.accountCreate()
+            }
+        })
     }
 
     setShowToast = (f:boolean,m?:string) =>{
