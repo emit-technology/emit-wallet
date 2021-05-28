@@ -167,7 +167,6 @@ class Swap extends React.Component<any, State> {
     }
 
     setFromAmount = async (v: any,fromT?:string,toT?:string) => {
-        console.log("setFromAmount",v,fromT)
         try{
             if(!v || parseFloat(v) == 0){
                 this.setState({
@@ -320,9 +319,7 @@ class Swap extends React.Component<any, State> {
         // crossReceipt = utils.bs58ToHex(account.addresses[ChainType.SERO])
         if(exact == "from"){
             const inMin = amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100)));
-            console.log("inMin",inMin.toString())
             if (fromToken == "BNB") {
-                console.log("swapExactETHForTokens");
                 tx.data = await pancakeSwap.swapExactETHForTokens(amountTo,path , sendTo , crossReceipt,deadline )
                 tx.value = utils.toHex(amountFrom);
             } else if (toToken == "BNB") {
@@ -334,17 +331,13 @@ class Swap extends React.Component<any, State> {
             }
         }else if(exact == "to"){
             const outMax = amountFrom.multipliedBy(new BigNumber(slippageTolerance).div(100).plus(1));
-            console.log("outMax::",outMax.toString())
             if (fromToken == "BNB") {
-                console.log("swapETHForExactTokens");
                 tx.data = await pancakeSwap.swapETHForExactTokens(amountTo,path,sendTo,crossReceipt,deadline)
                 tx.value = utils.toHex(outMax);
             } else if (toToken == "BNB") {
-                console.log("swapExactETHForTokens");
                 tx.data = await pancakeSwap.swapTokensForExactETH(amountTo,outMax,path,sendTo,deadline)
                 tx.amount = utils.toHex(amountFrom);
             } else {
-                console.log("swapTokensForExactTokens");
                 tx.data = await pancakeSwap.swapTokensForExactTokens(amountTo,outMax,path,sendTo,crossReceipt,deadline)
                 tx.amount = utils.toHex(amountFrom);
             }
@@ -354,7 +347,6 @@ class Swap extends React.Component<any, State> {
             tx:tx,
             showAlert:true
         })
-        console.log("tx>>>",tx)
     }
 
     setShowModal = (f: boolean) => {
@@ -549,7 +541,6 @@ class Swap extends React.Component<any, State> {
                                             focus:"from"
                                         })
                                     }}  onChange={(e)=>{
-                                        console.log("ionChange")
                                         const v = this.inputFromAmount.current.value;
                                         // if((v!=0||v!="0"||v!="0.") && !reg.test(v)){
                                         //     return
