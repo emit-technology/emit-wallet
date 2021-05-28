@@ -131,7 +131,6 @@
   "commit": "제출",
   "stop": "중지",
   "newAxe": "새로운 도끼",
-  "name": "이름",
   "pleaseWait": "기다려주세요 ...",
   "minNE": "ne는보다 큽니다 ",
   "pleaseSelectAxe": "도끼를 선택하십시오",
@@ -143,5 +142,17 @@
   "refining": "정제",
   "recharge": "요금",
 
-  "capacity": "생산 능력"
+  "capacity": "생산 능력",
+
+  "more": "더",
+  "swap": "교환",
+  "exchange": "교환",
+  "estimated": "견적",
+  "slippage": "슬립 포인트",
+  "insufficient": "불충분하다",
+  "price": "가격",
+  "crossLimit": "교차 체인 제한",
+  "max": "최고",
+  "deadline": "거래 마감일",
+  "minutes": "분"
 }

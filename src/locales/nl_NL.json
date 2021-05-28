@@ -131,7 +131,6 @@
   "commit": "Vastleggen",
   "stop": "Stoppen",
   "newAxe": "Nieuwe AXE",
-  "name": "Naam",
   "pleaseWait": "Even geduld aub...",
   "minNE": "NE moet groter zijn dan ",
   "pleaseSelectAxe": "Selecteer AXE",
@@ -141,5 +140,17 @@
   "getItBack": "Terughalen",
   "retrieve": "Ophalen",
   "refining": "Raffineren",
-  "recharge": "Herladen"
+  "recharge": "Herladen",
+
+  "more": "Meer",
+  "swap": "Ruil",
+  "exchange": "Ruilen",
+  "estimated": "Geraamd",
+  "slippage": "Tolerantie ontsporing",
+  "insufficient": "Onvoldoende",
+  "price": "Prijs",
+  "crossLimit": "Grensoverschrijding",
+  "max": "Max",
+  "deadline": "Transactie termijn",
+  "minutes": "Minuten"
 }

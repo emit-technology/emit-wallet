@@ -131,7 +131,6 @@
   "commit": "参加する",
   "stop": "やめる",
   "newAxe": "新しい斧",
-  "name": "名前",
   "pleaseWait": "お待ちください...",
   "minNE": "NEはより大きくなければなりません ",
   "pleaseSelectAxe": "AXを選択してください",
@@ -142,5 +141,17 @@
   "retrieve": "検索します",
   "refining": "洗練された",
   "recharge": "充電",
-  "capacity": "容量"
+  "capacity": "容量",
+
+  "more": "もっと",
+  "swap": "両替",
+  "exchange": "両替",
+  "estimated": "見積もり",
+  "slippage": "スリップポイント",
+  "insufficient": "不十分",
+  "price": "価格",
+  "crossLimit": "クロスチェーン制限",
+  "max": "最大",
+  "deadline": "取引期限",
+  "minutes": "分"
 }

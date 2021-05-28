@@ -99,6 +99,9 @@ class ConfirmTransaction extends React.Component<Props, State>{
                 if(!tx.gas){
                     tx.gas =  tx.data?await rpc.post("sero_estimateGas",[tx],tx.chain):utils.defaultGas(ChainType.SERO);
                 }
+                if(tx.data){
+                    tx.gas = utils.toHex(new BigNumber(tx.gas).multipliedBy(1.1).toFixed(0))
+                }
             }else if(tx.chain == ChainType.TRON){
 
             }

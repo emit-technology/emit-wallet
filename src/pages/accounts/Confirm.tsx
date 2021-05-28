@@ -78,26 +78,31 @@ class Confirm extends React.Component<any, State> {
     confirm = () => {
         const tmpMnemonic: any = sessionStorage.getItem("tmpMnemonic")
         const tmpAccount: any = sessionStorage.getItem("tmpAccount")
-        const account: AccountModel = JSON.parse(tmpAccount);
-        this.setState({
-            showProgress:true,
-            showButton:false
-        })
-        walletWorker.importMnemonic(tmpMnemonic, account.name, account.password ? account.password : "", account.hint ? account.hint : "", "").then(((accountId:any) => {
-            if(accountId){
-                sessionStorage.removeItem("tmpMnemonic");
-                sessionStorage.removeItem("tmpAccount");
-                selfStorage.setItem("accountId",accountId)
-                // window.location.href = "/#/"
-                // window.location.reload();
-                selfStorage.setItem("viewedSlide",true);
-                url.home();
-            }
-        })).catch(()=>{
+        if(tmpAccount){
+            const account: AccountModel = JSON.parse(tmpAccount);
             this.setState({
+                showProgress:true,
                 showButton:false
             })
-        })
+            walletWorker.importMnemonic(tmpMnemonic, account.name, account.password ? account.password : "", account.hint ? account.hint : "", "").then(((accountId:any) => {
+                if(accountId){
+                    sessionStorage.removeItem("tmpMnemonic");
+                    sessionStorage.removeItem("tmpAccount");
+                    selfStorage.setItem("accountId",accountId)
+                    // window.location.href = "/#/"
+                    // window.location.reload();
+                    selfStorage.setItem("viewedSlide",true);
+                    url.home();
+                }
+            })).catch(()=>{
+                this.setState({
+                    showButton:false
+                })
+            })
+        }else{
+            sessionStorage.removeItem("tmpMnemonic");
+            url.goTo(url.path_settings(),"")
+        }
     }
 
     selfCheck = (value: string, index: number) => {

@@ -6,8 +6,10 @@ class Interval {
 
     interValId: number | undefined
 
-    constructor() {
+
+    constructor(key:string) {
         this.interValId = selfStorage.getItem(this.key)
+        this.key = key;
     }
 
     start(fn: Function, t: number) {
@@ -28,6 +30,11 @@ class Interval {
     }
 }
 
-const interVar = new Interval();
+const interVar = new Interval("homeIntervalId");
+const interVarSwap = new Interval("swapIntervalId");
 
 export default interVar
+
+export {
+    interVarSwap
+}

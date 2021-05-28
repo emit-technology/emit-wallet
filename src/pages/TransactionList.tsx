@@ -58,6 +58,7 @@ import {ChainType} from "../types";
 import BigNumber from "bignumber.js";
 import url from "../utils/url";
 import i18n from "../locales/i18n"
+import {Plugins} from "@capacitor/core";
 
 class TransactionList extends React.Component<any, any>{
 
@@ -157,6 +158,9 @@ class TransactionList extends React.Component<any, any>{
                 <IonToolbar mode="ios" color="primary">
                     <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
                     <IonTitle>{cyName}</IonTitle>
+                    <IonButton size="small" mode="ios" fill="outline" color="warning" slot="end" onClick={()=>{
+                        Plugins.Browser.open({url: utils.addressScanInfo(address,chain)})
+                    }}>{i18n.t("more")}</IonButton>
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>

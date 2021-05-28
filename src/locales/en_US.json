@@ -131,7 +131,6 @@
   "commit": "Commit",
   "stop": "Stop",
   "newAxe": "New AXE",
-  "name": "Name",
   "pleaseWait": "Please wait...",
   "minNE": "NE must be greater than ",
   "pleaseSelectAxe": "Please Select AXE",
@@ -142,5 +141,17 @@
   "retrieve": "Retrieval",
   "refining": "Refining",
   "recharge": "Recharge",
-  "capacity": "Capacity"
+  "capacity": "Capacity",
+
+  "more":"More",
+  "swap":"Swap",
+  "exchange":"Exchange",
+  "estimated":"Estimated",
+  "slippage":"Slippage Tolerance",
+  "insufficient":"Insufficient",
+  "price":"Price",
+  "crossLimit":"Cross Limit",
+  "max":"Max",
+  "deadline":"Transaction deadline",
+  "minutes":"Minutes"
 }

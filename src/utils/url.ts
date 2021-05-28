@@ -18,6 +18,7 @@
 
 import {ChainType} from "../types";
 import {MinerScenes} from "../pages/epoch/miner";
+import walletWorker from "../worker/walletWorker";
 
 class Url {
     private base = "#"
@@ -54,6 +55,10 @@ class Url {
         driverRank : "epoch/driver/rank",
     }
 
+    private browserBase = "browser"
+
+    private chartBase = "chart"
+
     private nftTabs = "tabs/nft"
 
     private scan = "scan";
@@ -66,7 +71,6 @@ class Url {
     path_settings = () => {
         return [this.base, this.settings.setting].join("/")
     }
-
     /**
      * go to page
      * @param path
@@ -210,6 +214,13 @@ class Url {
         this.goTo([this.base,this.epoch.driverRank,scenes].join("/"),[this.base,this.epoch.index].join("/"))
     }
 
+    browser(url:string){
+        this.goTo([this.base,this.browserBase,encodeURIComponent(url)].join("/"),window.location.hash)
+    }
+
+    chart(symbol:string){
+        this.goTo([this.base,this.chartBase,symbol].join("/"),window.location.hash)
+    }
 }
 
 const url = new Url();

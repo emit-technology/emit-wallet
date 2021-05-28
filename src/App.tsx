@@ -36,7 +36,7 @@ import {
     sunnyOutline,
     walletOutline,
     appsOutline,
-    settingsOutline
+    settingsOutline, swapHorizontalOutline
 } from 'ionicons/icons';
 import Wallet from './pages/Wallet';
 import Epoch from './pages/Epoch';
@@ -90,6 +90,10 @@ import DeviceRank from "./pages/epoch/device/rank";
 import DriverRank from "./pages/epoch/driver/rank";
 import walletWorker from "./worker/walletWorker";
 import url from "./utils/url";
+import Swap from "./pages/swap";
+import Browser from "./pages/browser/index";
+import Chart from "./pages/browser/chart";
+
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -109,7 +113,7 @@ class App extends React.Component<any,State>{
 
     componentDidMount() {
         const urlHash = window.location.hash;
-        if(urlHash.indexOf("account") == -1){
+        if(urlHash.indexOf("account") == -1 && urlHash.indexOf("slide") == -1){
             walletWorker.isLocked().then(ret=>{
                 if(ret && urlHash.indexOf("account/unlock") == -1){
                     url.accountUnlock()
@@ -184,6 +188,9 @@ class App extends React.Component<any,State>{
                     <Route path="/epoch/device/rank" component={DeviceRank} exact={true}/>
                     <Route path="/epoch/driver/rank/:scenes" component={DriverRank} exact={true}/>
 
+                    <Route path="/browser/:url" component={Browser} exact={true}/>
+                    <Route path="/chart/:symbol" component={Chart} exact={true}/>
+
                     <Route path="/" render={() => {
                         const viewedSlide = selfStorage.getItem('viewedSlide');
                         if (!viewedSlide && !utils.isEmbedPopup() && deviceInfo && deviceInfo.platform != "web") {
@@ -207,6 +214,7 @@ class App extends React.Component<any,State>{
                                     <Route path="/tabs/epoch" component={Epoch} exact={true}/>
                                     <Route path="/tabs/settings" component={Settings} exact={true}/>
                                     <Route path="/tabs/nft" component={NFT} exact={true}/>
+                                    <Route path="/tabs/swap" component={Swap} exact={true}/>
                                 </IonRouterOutlet>
                                 <IonTabBar mode="ios" slot="bottom" selectedTab="wallet" className="toolbar-cust">
                                     <IonTabButton tab="wallet" href="/tabs/wallet">
@@ -224,6 +232,14 @@ class App extends React.Component<any,State>{
                                             <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
                                         </IonTabButton>
                                     }
+                                    {
+                                        !utils.isEmbedPopup() &&
+                                        <IonTabButton tab="swap" href="/tabs/swap">
+                                            <IonIcon src={swapHorizontalOutline}/>
+                                            <IonLabel className="text-small-x2">{i18n.t("swap")}</IonLabel>
+                                        </IonTabButton>
+                                    }
+
                                     <IonTabButton tab="settings" href="/tabs/settings">
                                         <IonImg src={setting} className="toolbar-icon"/>
                                         <IonLabel className="text-small-x2">{i18n.t("settings")}</IonLabel>

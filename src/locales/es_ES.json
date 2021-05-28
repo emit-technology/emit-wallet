@@ -131,7 +131,6 @@
   "commit": "Comprometer",
   "stop": "Parar",
   "newAxe": "Nuevo EJE",
-  "name": "Nombre",
   "pleaseWait": "Por favor, espere...",
   "minNE": "NE debe ser mayor que ",
   "pleaseSelectAxe": "Por favor, seleccione el EJE",
@@ -141,5 +140,16 @@
   "getItBack": "Recuperar",
   "retrieve": "Recuperación",
   "refining": "Refinación",
-  "recharge": "Recarga"
+  "recharge": "Recarga",
+  "more": "Más",
+  "swap": "Intercambio",
+  "exchange": "Intercambio",
+  "estimated": "Estimado",
+  "slippage": "Tolerancia de deslizamiento",
+  "insufficient": "Insuficiente",
+  "price": "Precio",
+  "crossLimit": "Límite cruzado",
+  "max": "Máximo",
+  "deadline": "Plazo de la transacción",
+  "minutes": "Minutos"
 }

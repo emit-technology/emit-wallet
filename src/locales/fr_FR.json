@@ -131,7 +131,6 @@
   "commit": "Engager",
   "stop": "Arrêter",
   "newAxe": "Nouvelle AXE",
-  "name": "Nom",
   "pleaseWait": "Veuillez patienter...",
   "minNE": "NE doit être supérieur à ",
   "pleaseSelectAxe": "Veuillez sélectionner AXE",
@@ -141,5 +140,17 @@
   "getItBack": "Récupérer",
   "retrieve": "Récupération",
   "refining": "Raffinage",
-  "recharge": "Recharge"
+  "recharge": "Recharge",
+
+  "more": "Plus de",
+  "swap": "Échanger",
+  "exchange": "Échanger",
+  "estimated": "Estimation de",
+  "slippage": "Tolérance de dérapage",
+  "insufficient": "Insuffisant",
+  "price": "Prix",
+  "crossLimit": "Limite croisée",
+  "max": "Max",
+  "deadline": "Délai de transaction",
+  "minutes": "Minutes"
 }

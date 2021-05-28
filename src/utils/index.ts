@@ -26,7 +26,8 @@ import {
     EXPLORER_URL,
     FULL_NAME,
     GAS_DEFAULT,
-    GAS_PRICE_UNIT, META_TEMP,
+    GAS_PRICE_UNIT,
+    META_TEMP,
     NOT_CROSS_TOKEN
 } from "../config"
 import {ChainId, ChainType, DeviceMode, GasPriceLevel, NftInfo} from "../types";
@@ -628,4 +629,15 @@ export function Trim(str:string){
     result = str.replace(/(^\s+)|(\s+$)/g,"");
     result = result.replace(/\s/g,"");
     return result;
+}
+
+export function addressScanInfo(address:string,chain:ChainType){
+    if (chain == ChainType.ETH) {
+        if (new Date().getTimezoneOffset() / 60 == -8) {
+            return `${EXPLORER_URL.ADDRESS.ETH.CN}${address}`
+        } else {
+            return `${EXPLORER_URL.ADDRESS.ETH.EN}${address}`
+        }
+    }
+    return `${EXPLORER_URL.ADDRESS[ChainType[chain]]}${address}`
 }

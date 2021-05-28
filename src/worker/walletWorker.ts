@@ -144,7 +144,6 @@ class WalletWorker {
         })
     }
 
-
     async accountInfo(accountId?:any):Promise<AccountModel>{
         if(!accountId){
             accountId = selfStorage.getItem("accountId");

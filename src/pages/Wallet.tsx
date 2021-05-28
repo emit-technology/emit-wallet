@@ -41,7 +41,8 @@ import {
     IonText,
     IonTitle,
     IonToast,
-    IonToolbar
+    IonToolbar,
+    IonActionSheet
 } from '@ionic/react';
 import * as utils from '../utils';
 import './Wallet.css';
@@ -49,7 +50,7 @@ import {
     arrowForwardOutline,
     chevronDownOutline,
     chevronForwardOutline,
-    chevronUpOutline,
+    chevronUpOutline, close,
     linkOutline,
     qrCodeSharp,
     scanOutline,
@@ -92,6 +93,7 @@ interface State {
     showToast:boolean
     crossMode:Array<string>,
     popoverState:any,
+    showSelectChain:boolean
 }
 
 class Wallet extends React.Component<State, any> {
@@ -115,19 +117,13 @@ class Wallet extends React.Component<State, any> {
         toastMsg:"",
         showToast:false,
         crossMode:[],
-        popoverState:{}
+        popoverState:{},
+        showSelectChain:false
     }
 
     componentDidMount() {
         StatusBar.setBackgroundColor({
             color: "#194381"
-        })
-
-        walletWorker.isLocked().then(ret=>{
-            const urlHash = window.location.hash;
-            if(ret && urlHash.indexOf("account/unlock") == -1){
-                url.accountUnlock()
-            }
         })
 
         walletWorker.accountInfo().then((account:any)=>{
@@ -238,7 +234,7 @@ class Wallet extends React.Component<State, any> {
                 scanText:data.text
             })
             if (data.text && data.text.indexOf("0x") == 0) {
-                this.setShowAlert(true, "ETH")
+                this.setShowSelectChain(true)
             } else if (tron.tronWeb.isAddress(data.text)) {
                 this.setShowAlert(true, "TRON")
             } else if (data.text && data.text.indexOf("http") == 0) {
@@ -269,6 +265,12 @@ class Wallet extends React.Component<State, any> {
         this.setState({
             crossMode:crossMode,
             popoverState: ret
+        })
+    }
+
+    setShowSelectChain = (f:boolean)=>{
+        this.setState({
+            showSelectChain:f
         })
     }
 
@@ -501,7 +503,7 @@ class Wallet extends React.Component<State, any> {
     }
 
     render() {
-        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast} = this.state;
+        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain} = this.state;
 
         return (
             <IonPage>
@@ -606,34 +608,6 @@ class Wallet extends React.Component<State, any> {
                     ]}
                 />
 
-                {/*<IonAlert*/}
-                {/*    mode="ios"*/}
-                {/*    isOpen={showVersionAlert}*/}
-                {/*    onDidDismiss={() => this.setShowVersionAlert(false)}*/}
-                {/*    header={`New Version ${version.version}`}*/}
-                {/*    message={`${version.info}`}*/}
-                {/*    buttons={[*/}
-                {/*        {*/}
-                {/*            text:  i18n.t("cancel"),*/}
-                {/*            role: 'cancel',*/}
-                {/*            cssClass: 'secondary',*/}
-                {/*            handler: () => {*/}
-                {/*                console.log('Confirm Cancel');*/}
-                {/*            }*/}
-                {/*        },*/}
-                {/*        {*/}
-                {/*            text: i18n.t("upgrade"),*/}
-                {/*            handler: () => {*/}
-                {/*                if(deviceInfo.platform == "ios"){*/}
-                {/*                    Plugins.App.openUrl({url:version.iosUrl}).catch()*/}
-                {/*                }else if (deviceInfo.platform == "android"){*/}
-                {/*                    Plugins.Browser.open({url:version.androidUrl}).catch()*/}
-                {/*                }*/}
-                {/*            }*/}
-                {/*        }*/}
-                {/*    ]}*/}
-                {/*/>*/}
-
                 <IonModal
                     mode="ios"
                     isOpen={showVersionAlert}
@@ -697,6 +671,31 @@ class Wallet extends React.Component<State, any> {
                     message={'Please wait...'}
                     duration={60000}
                 />
+
+                <IonActionSheet
+                    mode="ios"
+                    isOpen={showSelectChain}
+                    onDidDismiss={() => this.setShowSelectChain(false)}
+                    cssClass='my-custom-class'
+                    buttons={[{
+                        text: 'Binance Smart Chain',
+                        handler: () => {
+                            this.setShowAlert(true,"BSC")
+                        }
+                    }, {
+                        text: 'Ethereum Network',
+                        handler: () => {
+                            this.setShowAlert(true,"ETH")
+                        }
+                    }, {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                            console.log('Cancel clicked');
+                        }
+                    }]}
+                >
+                </IonActionSheet>
             </IonPage>
         );
     }

@@ -143,6 +143,18 @@
   "refining": "炼制",
   "recharge": "充能",
 
-  "capacity": "容量"
+  "capacity": "容量",
+
+  "more":"更多",
+  "swap":"兑换",
+  "exchange":"交易所",
+  "estimated":"估计",
+  "slippage":"滑点",
+  "insufficient":"不足的",
+  "price":"价格",
+  "crossLimit":"跨链限制",
+  "max":"最大",
+  "deadline":"交易截止时间",
+  "minutes":"分钟"
 
 }
