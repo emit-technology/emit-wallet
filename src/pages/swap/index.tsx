@@ -66,6 +66,7 @@ interface State {
     crossFee:string,
     priceSwap:boolean
 }
+const reg =  /^[1-9]\d*\.\d*|0\.\d*[0-9]\d*$/;
 
 class Swap extends React.Component<any, State> {
 
@@ -99,7 +100,7 @@ class Swap extends React.Component<any, State> {
         allowance:"",
         slippageTolerance:selfStorage.getItem("swap:slippageTolerance") || "1",
         deadline:selfStorage.getItem("swap:deadline") || "20",
-        checked:false,
+        checked:true,
         crossFee:"",
         crossLimit:["0","0"],
         priceSwap: false
@@ -192,8 +193,10 @@ class Swap extends React.Component<any, State> {
         if(toToken != "BNB"){
             const rest = await pancakeSwap.crossLimit(router.getTokenAddress(toToken))
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
-            if(new BigNumber(v).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
+            if(utils.fromValue(amounts[1],decimalTo).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
                 checked = false
+            }else{
+                checked = true
             }
         }
 
@@ -240,6 +243,8 @@ class Swap extends React.Component<any, State> {
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
             if(new BigNumber(v).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
                 checked = false
+            }else{
+                checked = true
             }
         }
         this.setState({
@@ -546,6 +551,9 @@ class Swap extends React.Component<any, State> {
                                     }}  onChange={(e)=>{
                                         console.log("ionChange")
                                         const v = this.inputFromAmount.current.value;
+                                        // if((v!=0||v!="0"||v!="0.") && !reg.test(v)){
+                                        //     return
+                                        // }
                                         this.setState({
                                             exact:"from",
                                             fromAmount:v,
@@ -612,6 +620,10 @@ class Swap extends React.Component<any, State> {
                                         })
                                     }} onChange={(e)=>{
                                         const v = this.inputToAmount.current.value;
+                                        //
+                                        // if((v!=0||v!="0"||v!="0.") && !reg.test(v)){
+                                        //     return
+                                        // }
                                         this.setState({
                                             exact:"to",
                                             toAmount:v,
