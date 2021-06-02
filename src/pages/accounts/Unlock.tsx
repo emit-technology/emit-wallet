@@ -14,6 +14,7 @@ import i18n from "../../locales/i18n";
 import url from "../../utils/url";
 import {type} from "os";
 import walletWorker from "../../worker/walletWorker";
+import {Plugins} from "@capacitor/core";
 
 interface State {
     password:string
@@ -34,6 +35,9 @@ class Unlock extends React.Component<any, State>{
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
         walletWorker.accountInfo().then(account=>{
             if(account && account.accountId){
             }else {

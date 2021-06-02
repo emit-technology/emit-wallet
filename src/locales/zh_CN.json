@@ -155,6 +155,8 @@
   "crossLimit":"跨链限制",
   "max":"最大",
   "deadline":"交易截止时间",
-  "minutes":"分钟"
+  "minutes":"分钟",
+
+  "Lock": "锁定"
 
 }

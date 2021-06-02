@@ -27,6 +27,7 @@ import * as utils from "../utils"
 import epochNameService from "../contract/epoch/sero/name";
 import epochService from "../contract/epoch/sero/index";
 import {DeviceInfo} from "../contract/epoch/sero/types";
+import url from "../utils/url";
 
 class RPC {
 
@@ -214,6 +215,12 @@ class RPC {
         //FOR Test
         const accountId: string | null = selfStorage.getItem("accountId");
         if (accountId) {
+            const ret = await walletWorker.isLocked();
+            if(ret){
+                url.accountUnlock();
+                return
+            }
+
             let hash: any = "";
             if (tx.chain == ChainType.SERO) {
                 //gen tx params

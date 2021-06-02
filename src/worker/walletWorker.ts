@@ -222,6 +222,18 @@ class WalletWorker {
         })
     }
 
+    async lockWallet(){
+        return new Promise((resolve, reject) =>{
+            service.lockWallet(function (data:any){
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
 
 }
 

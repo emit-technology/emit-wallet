@@ -153,5 +153,7 @@
   "crossLimit":"Cross Limit",
   "max":"Max",
   "deadline":"Transaction deadline",
-  "minutes":"Minutes"
+  "minutes":"Minutes",
+
+  "Lock": "Lock"
 }

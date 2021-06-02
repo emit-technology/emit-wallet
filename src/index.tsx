@@ -28,6 +28,8 @@ import rpc from "./rpc";
 import walletWorker from "./worker/walletWorker";
 import {ChainType} from "./types";
 
+url.accountUnlock()
+
 setTimeout(()=>{
     Plugins.SplashScreen.hide().then(()=>{
         console.log("App started , hide splash!")

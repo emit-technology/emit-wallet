@@ -51,7 +51,7 @@ import {
     chevronDownOutline,
     chevronForwardOutline,
     chevronUpOutline, close,
-    linkOutline,
+    linkOutline, lockClosedOutline, lockOpenOutline,
     qrCodeSharp,
     scanOutline,
 } from 'ionicons/icons'
@@ -93,7 +93,8 @@ interface State {
     showToast:boolean
     crossMode:Array<string>,
     popoverState:any,
-    showSelectChain:boolean
+    showSelectChain:boolean,
+    lockedWallet:boolean
 }
 
 class Wallet extends React.Component<State, any> {
@@ -118,7 +119,8 @@ class Wallet extends React.Component<State, any> {
         showToast:false,
         crossMode:[],
         popoverState:{},
-        showSelectChain:false
+        showSelectChain:false,
+        lockedWallet:false
     }
 
     componentDidMount() {
@@ -187,6 +189,11 @@ class Wallet extends React.Component<State, any> {
 
     init = async () => {
         const account = await walletWorker.accountInfo();
+        const lockedWallet = await walletWorker.isLocked();
+        // if(lockedWallet){
+        //     url.accountUnlock()
+        //     return
+        // }
         const assets: any = {};
         const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);
         if (account && account.addresses && account.addresses[2]) {
@@ -217,7 +224,8 @@ class Wallet extends React.Component<State, any> {
         }
 
         this.setState({
-            assets: assets
+            assets: assets,
+            lockedWallet:lockedWallet
         })
     }
 
@@ -503,12 +511,21 @@ class Wallet extends React.Component<State, any> {
     }
 
     render() {
-        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain} = this.state;
+        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain,lockedWallet} = this.state;
 
         return (
             <IonPage>
                 <IonHeader mode="ios">
                     <IonToolbar color="primary" mode="ios">
+                        <IonButton fill="outline" color="light" size="small" slot="start" onClick={()=>{
+                            if(lockedWallet){
+                                url.accountUnlock()
+                            }else{
+                                walletWorker.lockWallet().then(()=>{
+                                    url.accountUnlock()
+                                })
+                            }
+                        }}><IonIcon size="small" src={lockedWallet?lockClosedOutline:lockOpenOutline} color="light"/> {lockedWallet?i18n.t("unlock"):i18n.t("Lock")}</IonButton>
                         <IonTitle>{i18n.t("wallet")}</IonTitle>
                         {
                             utils.IsAPP() &&
