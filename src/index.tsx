@@ -27,8 +27,12 @@ import interVar from "./interval/nft";
 import rpc from "./rpc";
 import walletWorker from "./worker/walletWorker";
 import {ChainType} from "./types";
+import selfStorage from "./utils/storage";
 
-url.accountUnlock()
+const accountId = selfStorage.getItem("accountId");
+if(accountId){
+    url.accountUnlock()
+}
 
 setTimeout(()=>{
     Plugins.SplashScreen.hide().then(()=>{
