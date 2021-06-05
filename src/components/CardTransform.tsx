@@ -107,7 +107,7 @@ class CardTransform extends React.Component<Props, State> {
         }else if(v == keys[1]){
             return "tertiary"
         }else if(v == keys[0]){
-            return "dark"
+            return "danger"
         }
     }
 
