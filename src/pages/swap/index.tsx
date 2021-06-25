@@ -200,7 +200,7 @@ class Swap extends React.Component<any, State> {
         }
 
         this.setState({
-            toAmount:utils.fromValue(amounts[1],decimalTo).toString(),//.toFixed(5,1),
+            toAmount:utils.fromValue(amounts[1],decimalTo).toFixed(5,1),
             checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
             crossLimit: crossLimit
@@ -247,7 +247,7 @@ class Swap extends React.Component<any, State> {
             }
         }
         this.setState({
-            fromAmount:utils.fromValue(amounts[0],decimalFrom).toString(),//.toFixed(5,),
+            fromAmount:utils.fromValue(amounts[0],decimalFrom).toFixed(5,1),
             exact:"to",
             checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
@@ -291,7 +291,7 @@ class Swap extends React.Component<any, State> {
         let {fromAmount, fromToken, toAmount, toToken, account,exact,slippageTolerance,deadline} = this.state;
         const decimalFrom = utils.getCyDecimal(fromToken, ChainType[ChainType.BSC])
         const decimalTo = utils.getCyDecimal(fromToken, ChainType[ChainType.BSC])
-        const amountFrom = utils.toValue(fromAmount, decimalFrom)
+        let amountFrom = utils.toValue(fromAmount, decimalFrom)
         const amountTo = utils.toValue(toAmount, decimalTo)
         const defaultGasPrice = await utils.defaultGasPrice(ChainType.BSC);
 
@@ -330,7 +330,8 @@ class Swap extends React.Component<any, State> {
                 tx.amount = utils.toHex(amountFrom);
             }
         }else if(exact == "to"){
-            const outMax = new BigNumber(amountFrom.multipliedBy(new BigNumber(slippageTolerance).div(100).plus(1)).toFixed(0));
+            amountFrom = utils.toValue(new BigNumber(fromAmount).toFixed(4,2), decimalFrom)
+            const outMax = new BigNumber(amountFrom.multipliedBy(new BigNumber(slippageTolerance).div(100).plus(1)).toFixed(0,2));
             if (fromToken == "BNB") {
                 tx.data = await pancakeSwap.swapETHForExactTokens(amountTo,path,sendTo,crossReceipt,deadline)
                 tx.value = utils.toHex(outMax);
