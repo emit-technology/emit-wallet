@@ -18,6 +18,7 @@
 
 import rpc from "../rpc";
 import {ChainType} from "../types";
+import BigNumber from "bignumber.js";
 
 const serojs = require('serojs');
 

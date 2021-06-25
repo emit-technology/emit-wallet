@@ -40,8 +40,8 @@ const DeviceStyle: any = {
 
 const DeviceCategory: any = {
     legendary: [0, 3],
-    rare: [3, 19],
-    magic: [19, 49],
+    rare: [3, 20],
+    magic: [20, 49],
     common: [49, 256]
 }
 

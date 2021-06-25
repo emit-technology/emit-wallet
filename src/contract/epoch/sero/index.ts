@@ -422,7 +422,6 @@ class Index extends SeroContract {
 
     lockedDevice = async (scenes: MinerScenes, from: string): Promise<DeviceInfo> => {
         const ret: any = await this.call("lockedDevice", [scenes], from)
-        console.log("locked::",ret[0])
         return ret[0]
     }
 

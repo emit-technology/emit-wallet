@@ -91,3 +91,14 @@ export interface DeviceInfoRank{
     last:number
     blockNum:number
 }
+
+export interface PoolTask{
+    taskId:number
+    owner:string
+    name:string
+    scenes:MinerScenes
+    begin:number
+    end:number
+    settlement:number
+    reward:number
+}
