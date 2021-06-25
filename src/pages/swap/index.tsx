@@ -200,7 +200,7 @@ class Swap extends React.Component<any, State> {
         }
 
         this.setState({
-            toAmount:utils.fromValue(amounts[1],decimalTo).toFixed(5,1),
+            toAmount:utils.fromValue(amounts[1],decimalTo).toString(),//.toFixed(5,1),
             checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
             crossLimit: crossLimit
@@ -247,7 +247,7 @@ class Swap extends React.Component<any, State> {
             }
         }
         this.setState({
-            fromAmount:utils.fromValue(amounts[0],decimalFrom).toFixed(5,1),
+            fromAmount:utils.fromValue(amounts[0],decimalFrom).toString(),//.toFixed(5,),
             exact:"to",
             checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
@@ -318,7 +318,7 @@ class Swap extends React.Component<any, State> {
         // to = "0x0000000000000000000000000000000000000000"
         // crossReceipt = utils.bs58ToHex(account.addresses[ChainType.SERO])
         if(exact == "from"){
-            const inMin = amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100)));
+            const inMin = new BigNumber(amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100))).toFixed(0));
             if (fromToken == "BNB") {
                 tx.data = await pancakeSwap.swapExactETHForTokens(amountTo,path , sendTo , crossReceipt,deadline )
                 tx.value = utils.toHex(amountFrom);
@@ -330,7 +330,7 @@ class Swap extends React.Component<any, State> {
                 tx.amount = utils.toHex(amountFrom);
             }
         }else if(exact == "to"){
-            const outMax = amountFrom.multipliedBy(new BigNumber(slippageTolerance).div(100).plus(1));
+            const outMax = new BigNumber(amountFrom.multipliedBy(new BigNumber(slippageTolerance).div(100).plus(1)).toFixed(0));
             if (fromToken == "BNB") {
                 tx.data = await pancakeSwap.swapETHForExactTokens(amountTo,path,sendTo,crossReceipt,deadline)
                 tx.value = utils.toHex(outMax);
@@ -720,11 +720,11 @@ class Swap extends React.Component<any, State> {
                                             priceSwap?`${new BigNumber(toAmount).dividedBy(new BigNumber(fromAmount)).toFixed(6)} ${toToken} per ${fromToken}`:
                                                 `${new BigNumber(fromAmount).dividedBy(new BigNumber(toAmount)).toFixed(6)} ${fromToken} per ${toToken}`
                                         }
-                                          <IonIcon color="secondary" size="small" src={swapHorizontal} onClick={()=>{
+                                        <IonIcon color="secondary" size="small" src={swapHorizontal} onClick={()=>{
                                             this.setState({
                                                 priceSwap:!priceSwap
                                             })
-                                    }}/>
+                                        }}/>
                                     </div>
                                 </IonCol>
                             </IonRow>
