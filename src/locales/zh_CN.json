@@ -157,6 +157,31 @@
   "deadline":"交易截止时间",
   "minutes":"分钟",
 
-  "Lock": "锁定"
+  "Lock": "锁定",
+
+  "team": "团队",
+  "all": "全部",
+  "period": "期",
+  "periods": "期数",
+  "load": "加载",
+  "scenes": "场景",
+  "rewardPerPeriod":"每期奖励",
+  "numberOfPeriods":"期数",
+  "target": "目标",
+  "poolTips1":"1. 你可以邀请更多的人向你提供算力",
+  "poolTips2":"2. 然后你需要支付给矿工一些Light作为奖励",
+  "poolTips3":"3. 奖励将在每个结算期后自动结算",
+  "reward": "奖励",
+  "latest": "最新的",
+  "start": "启动",
+  "viewCommitRecords":"查看提交记录",
+  "viewSettlementRecords":"查看结算记录",
+  "update": "更新",
+  "begin": "开始",
+  "end": "结束",
+  "thePeriodsIs": "周期是",
+  "neTips": "你的矿池中需要至少有一个人提交超过$$ NE，那么奖励就会自动结算。",
+  "returnTips": "你将收到$$ LIGHT的返还",
+  "depositTips": "你将存入$$ LIGHT作为挖矿奖励"
 
 }

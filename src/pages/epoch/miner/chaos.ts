@@ -1,5 +1,5 @@
 import Miner, {MinerScenes} from "./index";
 
-const miner = new Miner(MinerScenes.chaos)
+const chaosMiner = new Miner(MinerScenes.chaos)
 
-export default miner
+export default chaosMiner

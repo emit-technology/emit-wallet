@@ -2,6 +2,7 @@ import {ChainType} from "../types";
 import Base from "./base";
 import {EPOCH_POOL_HOST} from "../config";
 import {PoolTask} from "../contract/epoch/sero/types";
+import {MinerScenes} from "../pages/epoch/miner";
 
 class PoolRpc extends Base {
 
@@ -14,8 +15,8 @@ class PoolRpc extends Base {
         return rest?rest:[];
     }
 
-    getTask = async (address: string, pageNo: number, size: number):Promise<Array<PoolTask>> => {
-        const rest:any = await this.post("epoch_getTask", [JSON.stringify({pageNo, size})], ChainType.SERO, "/" + address)
+    getTask = async (address: string, pageNo: number, size: number,scenes:MinerScenes,name?:string):Promise<Array<PoolTask>> => {
+        const rest:any = await this.post("epoch_getTask", [JSON.stringify({pageNo, size,scenes:scenes,name:name})], ChainType.SERO, "/" + address)
         return rest?rest:[];
     }
 
@@ -24,7 +25,7 @@ class PoolRpc extends Base {
         return rest?rest:[];
     }
 
-    getShare = async (taskId:number,address: string, pageNo: number, size: number) :Promise<Array<PoolPayment>> => {
+    getShare = async (taskId:number,address: string, pageNo: number, size: number) :Promise<Array<PoolShare>> => {
         const rest:any = await this.post("epoch_getShare", [JSON.stringify({taskId,pageNo, size})], ChainType.SERO, "/" + address)
         return rest?rest:[];
     }
@@ -33,6 +34,12 @@ class PoolRpc extends Base {
         const rest = await this.post("epoch_submitWork", [JSON.stringify(req)], ChainType.SERO, "/" + address)
         return rest;
     }
+
+    taskWithIds = async (ids:Array<number>,address:string):Promise<Array<PoolTask>> => {
+        const rest:any = await this.post("epoch_taskWithIds", [ids], ChainType.SERO, "/" + address)
+        return rest?rest:[];
+    }
+
 }
 
 export interface SumbitReq {
@@ -42,6 +49,18 @@ export interface SumbitReq {
     nonce: number,
     ne: string
 }
+
+export interface PoolShare {
+    ne: string,
+    nonce: string,
+    period: number,
+    phash: string,
+    scenes: MinerScenes,
+    serial:number,
+    taskId:number,
+    user:string
+}
+
 
 export interface PoolPayment {
     taskId: number,

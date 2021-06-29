@@ -1,58 +1,198 @@
 import * as React from "react";
 import {
+    IonButton,
+    IonCol,
     IonContent,
     IonHeader,
     IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar,
+    IonInput,
     IonItem,
-    IonRow,
-    IonCol,
     IonLabel,
+    IonLoading,
+    IonModal,
+    IonPage,
+    IonRow,
     IonText,
-    IonButton, IonInput, IonSelect, IonSelectOption, IonModal
+    IonTitle,
+    IonToast,
+    IonToolbar,IonChip
 } from "@ionic/react";
-import {addCircleOutline, chevronBack, helpCircleOutline} from "ionicons/icons";
+import {chevronBack, createOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
-import {MinerScenes} from "../miner";
-import poolRpc, {PoolPayment} from "../../../rpc/pool";
+import Miner, {MinerScenes, MintData} from "../miner";
+import poolRpc, {PoolPayment, PoolShare} from "../../../rpc/pool";
 import epochPoolService from "../../../contract/epoch/sero/pool";
 import {PoolTask} from "../../../contract/epoch/sero/types";
 import * as utils from "../../../utils"
-import {AccountModel, ChainType} from "../../../types";
+import {AccountModel, ChainType, Transaction} from "../../../types";
 import walletWorker from "../../../worker/walletWorker";
+import PoolMiner from "../miner/pool";
+import interVar from "../../../interval";
+import BigNumber from "bignumber.js";
+import selfStorage from "../../../utils/storage";
+import ConfirmTransaction from "../../../components/ConfirmTransaction";
+import rpc from "../../../rpc";
+import i18n from "../../../locales/i18n";
+
 interface State {
     showModal:boolean
+    showModal0:boolean
     showModal1:boolean
     task?:PoolTask
     account:AccountModel
     paymentData:Array<PoolPayment>
+    shareData:Array<PoolShare>
+    isMining:boolean
+    mintData?:MintData
+    poolMiner:PoolMiner
+    currentPeriod:number
+
+    depositAmount:any
+    phase:any
+    fromPeriod:number
+    name:any
+    showAlert: boolean
+    tx: any
+    showToast: boolean
+    toastMessage?: string
+    color?: string
+    showLoading:boolean
+
+    shortAddress:string
+    targetNE:any
+    taskEnd:any
 }
 
 class PoolInfo extends React.Component<any, State>{
 
     state:State = {
         showModal:false,
+        showModal0:false,
         showModal1:false,
         account:{name:""},
-        paymentData:[]
+        paymentData:[],
+        shareData:[],
+        isMining:false,
+        poolMiner: new Miner(MinerScenes.pool),
+        currentPeriod:0,
+
+        depositAmount:0,
+        phase:0,
+        fromPeriod:0,
+        name:"",
+        showAlert:false,
+        tx:{},
+        showToast:false,
+        showLoading:false,
+
+        shortAddress:"",
+        targetNE:"",
+        taskEnd:""
     }
 
+
     componentDidMount() {
-        this.init().catch(e=>{
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#152955"
+        }).catch(e => {
+        })
+        this.init().then(()=>{
+            this.mintState().then(() => {
+            }).catch(e => {
+                console.error(e)
+            })
+        }).catch(e=>{
             console.error(e)
         })
     }
 
     init = async ()=>{
+        const taskId = this.props.match.params.id;
         const task = await this.taskInfo()
         const account = await walletWorker.accountInfo();
+        this.state.poolMiner.setMiner(account.accountId ? account.accountId : "")
+        const pImageInfo = await epochPoolService.taskPImage(taskId,"")//account.addresses[ChainType.SERO]
+        task.taskId = new BigNumber(taskId).toNumber()
+        //address owner,uint16 scenes_,uint64 serial,bytes32 phash
+
+        let period = selfStorage.getItem("epochCurrentPeriod");
+        if(period && typeof period == "string"){
+            period = parseInt(period)
+        }
+
+        const mintData:MintData = {
+            phash: pImageInfo[3],
+            address: pImageInfo[0],
+            index: utils.toHex(pImageInfo[2]),
+            scenes: pImageInfo[1],
+            accountScenes: this.state.poolMiner.uKey([account.accountId,pImageInfo[0],MinerScenes[MinerScenes.pool]].join("_"),taskId),
+            accountId: account.accountId,
+            isPool:true,
+            taskId:taskId,
+        }
+        await this.state.poolMiner.init(mintData)
+        const isMining= await this.state.poolMiner.isMining()
+        if (isMining) {
+            if(new BigNumber(task.end).toNumber() < period){
+                this.stop().catch((e:any)=>{console.log(e)});
+            }else{
+                interVar.start(() => {
+                    this.mintState().then(() => {
+                    }).catch(e => {
+                        console.error(e)
+                    })
+                }, 1 * 1000)
+            }
+        } else {
+            interVar.stop()
+        }
+
         this.setState({
             task:task,
-            account:account
+            account:account,
+            mintData:mintData,
+            isMining:isMining,
+            currentPeriod:period,
+            name:task.name,
+            shortAddress: await utils.getShortAddress(account.addresses[ChainType.SERO]),
+            depositAmount:utils.fromValue(task.reward,18).toNumber(),
+            phase:new BigNumber(task.end).minus(task.begin).plus(1).toNumber(),
+            targetNE:new BigNumber(task.targetNE).dividedBy(1E6).toNumber()
         })
+    }
+
+    start = async () => {
+        const {scenes} = this.props
+        const {account,mintData} = this.state;
+        mintData && await this.state.poolMiner.start(mintData)
+        interVar.start(() => {
+            this.mintState().then(() => {
+            }).catch(e => {
+                console.error(e)
+            })
+        }, 1 * 1000)
+        this.setState({
+            isMining: true
+        })
+    }
+
+    stop = async () => {
+        await this.state.poolMiner.stop();
+        interVar.stop()
+        this.setState({
+            isMining: false
+        })
+    }
+
+    async mintState() {
+        const rest = await this.state.poolMiner.mintState()
+        const {mintData, isMining} = this.state;
+        if (isMining || mintData && rest.nonce != mintData.nonce || mintData && rest.ne != mintData.ne) {
+            this.setState({
+                mintData: rest
+            })
+        }
     }
 
     taskInfo = async () =>{
@@ -60,13 +200,29 @@ class PoolInfo extends React.Component<any, State>{
         return await epochPoolService.getTask(taskId)
     }
 
-    setShowModal = (f:boolean) =>{
+    setShowModal0 = (f:boolean) =>{
+        if(f){
+            this.getShare().catch(e=>{
+                console.error(e)
+            })
+        }
+        this.setState({
+            showModal0:f
+        })
+    }
+
+    setShowModal = (f:boolean)=>{
         this.setState({
             showModal:f
         })
     }
 
     setShowModal1 = (f:boolean) =>{
+        if(f){
+            this.getPayment().catch(e=>{
+                console.error(e)
+            })
+        }
         this.setState({
             showModal1:f
         })
@@ -75,23 +231,165 @@ class PoolInfo extends React.Component<any, State>{
     getPayment = async ()=>{
         const {account} = this.state;
         const taskId = this.props.match.params.id;
-        const rest = await poolRpc.getPayment(taskId,account.addresses[ChainType.SERO],1,10)
+        const rest = await poolRpc.getPayment(parseInt(taskId),account.addresses[ChainType.SERO],1,15)
         this.setState({
             paymentData:rest
         })
     }
 
-    render() {
-        const {showModal,showModal1,task,paymentData} = this.state;
+    getShare = async ()=>{
+        const {account} = this.state;
+        const taskId = this.props.match.params.id;
+        const rest = await poolRpc.getShare(parseInt(taskId),account.addresses[ChainType.SERO],1,15)
+        this.setState({
+            shareData:rest
+        })
+    }
 
+    setShowToast = (f: boolean, color?: string, m?: string) => {
+        this.setState({
+            showToast: f,
+            toastMessage: m,
+            color: color
+        })
+    }
+
+    setShowLoading = (f: boolean) => {
+        this.setState({
+            showLoading: f
+        })
+    }
+
+    setShowAlert = (f: boolean) => {
+        this.setState({
+            showAlert: f
+        })
+    }
+
+    commit = async ()=>{
+        let {name,phase,depositAmount,targetNE,currentPeriod,account,task} = this.state;
+        if(task){
+
+            name = name.trim()
+            const reg = new RegExp("^[\u0000-\u00FF]+$");
+            const regEmoj= new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
+            if(!reg.test(utils.Trim(name)) && !regEmoj.test(utils.Trim(name))){
+                this.setShowToast(true,"warning",`The name [${name}] is invalid !`)
+                return
+            }
+            if(utils.toBytes(name).length > 32){
+                this.setShowToast(true,"warning","The length of the name exceeds 32 !")
+                return
+            }
+
+            const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
+            const begin = task ?finished?currentPeriod:task.begin:currentPeriod;
+            const targetEnd = task?new BigNumber(begin).plus(new BigNumber(phase)).minus(1).toNumber():0;
+            let total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(task.end)).toNumber():0
+            if(finished && task){
+                total = new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber()
+            }
+            const data = await epochPoolService.addTask(task.taskId,name,task.scenes,begin,targetEnd,utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
+            const tx: Transaction | any = {
+                from: account.addresses && account.addresses[ChainType.SERO],
+                to: epochPoolService.address,
+                cy: "LIGHT",
+                gasPrice: "0x" + new BigNumber(1).multipliedBy(1e9).toString(16),
+                chain: ChainType.SERO,
+                amount: "0x0",
+                feeCy: "LIGHT",
+                value: total>0?utils.toHex(total,18):"0x0",
+                data: data,
+            }
+            tx.gas = await epochPoolService.estimateGas(tx)
+            if (tx.gas && tx.gasPrice) {
+                tx.feeValue = await epochPoolService.tokenRate(tx.gasPrice, tx.gas);
+            }
+            this.setState({
+                tx: tx,
+                showAlert: true
+            })
+            this.setShowLoading(false)
+        }
+        this.setShowModal(false)
+    }
+
+    confirm = async (hash: string) => {
+        if(hash){
+            let intervalId: any = 0;
+            const chain = ChainType.SERO;
+            this.setShowLoading(true)
+            let count =0;
+            intervalId = setInterval(() => {
+                if (count>60){
+                    clearInterval(intervalId)
+                    this.setShowLoading(false)
+                }
+                rpc.getTransactionByHash(hash,chain).then((rest:any) => {
+                    if (rest && new BigNumber(rest.blockNumber).toNumber() > 0) {
+                        // this.setShowToast(true,"success","Commit Successfully!")
+                        clearInterval(intervalId);
+                        // url.transactionInfo(chain,hash,Currency);
+                        this.setShowLoading(false)
+                        this.init().then(()=>{
+                        }).catch(e=>{
+                            console.error(e)
+                        })
+                    }
+                }).catch(e => {
+                    console.error(e)
+                })
+            }, 3000)
+        }
+        this.setShowAlert(false)
+        this.setState({
+            tx: {},
+        })
+    }
+
+    setEndPeriod = (v:any)=>{
+        const {currentPeriod,task} = this.state;
+        let phase = new BigNumber(v).minus(new BigNumber(currentPeriod)).plus(1).toNumber();
+        if(task){
+            if(phase<=0){
+                phase = 1;
+            }
+            const depositAmount = utils.fromValue(
+                new BigNumber(phase).multipliedBy(task.reward)
+                    .minus(
+                        new BigNumber(task.reward).multipliedBy(new BigNumber(task.end).minus(new BigNumber(currentPeriod))
+                            .plus(1))
+                    )
+                ,18).toNumber()
+            this.setState({
+                depositAmount:depositAmount,
+                phase:phase,
+                taskEnd:v
+            })
+        }
+    }
+
+    render() {
+        const {
+            showModal,showModal1,task,paymentData,mintData,isMining,shareData,currentPeriod,depositAmount,phase,fromPeriod,
+            name,showAlert,tx,showToast,showLoading,color,toastMessage,shortAddress,showModal0,targetNE,taskEnd,
+        } = this.state;
+
+        const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
+        const begin = task ?finished?currentPeriod:task.begin:currentPeriod;
+        const targetEnd = task?new BigNumber(begin).plus(new BigNumber(phase)).minus(1).toNumber():0;
+        let total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(task.end)).toNumber():0
+        if(finished && task){
+            total = new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber()
+        }
         return <IonPage>
             <IonHeader>
                 <IonToolbar color="primary" mode="ios" className="heard-bg">
                     <IonIcon src={chevronBack} size="large" style={{color: "#edcc67"}} onClick={() => {
-                        Plugins.StatusBar.setBackgroundColor({
-                            color: "#194381"
-                        }).catch(e => {
-                        })
+                        // Plugins.StatusBar.setBackgroundColor({
+                        //     color: "#194381"
+                        // }).catch(e => {
+                        // })
                         url.back()
                     }}/>
                     <IonTitle className="text-center text-bold" style={{
@@ -100,34 +398,55 @@ class PoolInfo extends React.Component<any, State>{
                     }}>
                         Pool Info
                     </IonTitle>
+                    {
+                        task && task.owner == shortAddress &&
+                        <IonIcon src={createOutline} style={{color: "#edcc67"}} size="large" slot="end" onClick={()=>{
+                            if(isMining){
+                                this.setShowToast(true,"danger","You are mining, please stop the hash rate first!")
+                            }else {
+                                this.setShowModal(true)
+                            }
+                        }}/>
+                    }
+
+                    {/*<IonButton size="small" fill="outline" style={{color: "#edcc67"}} color="warning" slot="end">UPDATE</IonButton>*/}
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
                 <div className="pool-content">
                     <div className="pool-info-header">
                         <IonItem>
-                            <IonLabel><span>Name</span></IonLabel>
-                            <IonText><span>{task&&task.name}</span></IonText>
+                            <IonLabel><span>{i18n.t("name")}</span></IonLabel>
+                            <IonText color="primary"><span>{task&&task.name}</span></IonText>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>Scenes</span></IonLabel>
-                            <IonText><span>{task&&MinerScenes[task.scenes].toUpperCase()}</span></IonText>
+                            <IonLabel><span>{i18n.t("scenes")}</span></IonLabel>
+                            <IonChip color="primary">{task&&MinerScenes[task.scenes].toUpperCase()}</IonChip>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>Phase</span></IonLabel>
-                            <IonText><span>Start: {task?.begin}  End: {task?.end}</span></IonText>
+                            <IonLabel><span>{i18n.t("period")}</span></IonLabel>
+                            <IonChip color="primary">{task && new BigNumber(task.end).minus(task.begin).plus(1).toNumber()}</IonChip>
+                            <IonText color="secondary"><span>{task?.begin} - {task?.end}</span></IonText>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>Reward</span></IonLabel>
-                            <IonText><span>{utils.fromValue(task?task.reward:0,18).toString(10)}</span></IonText>
+                            <IonLabel><span>{i18n.t("reward")}</span></IonLabel>
+                            <IonText color="secondary"><span>{utils.fromValue(task?task.reward:0,18).toString()}</span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
+                        </IonItem>
+                        {/*<IonItem>*/}
+                        {/*    <IonLabel><span>Deposit Amount</span></IonLabel>*/}
+                        {/*    <IonText><span>{task && utils.fromValue(task?task.reward:0,18).multipliedBy(new BigNumber(task.end).minus(task.begin).plus(1)).toString()}</span> <small>LIGHT </small></IonText>*/}
+                        {/*</IonItem>*/}
+                        {/*<IonItem>*/}
+                        {/*    <IonLabel><span>Settlement</span></IonLabel>*/}
+                        {/*    <IonText><span>{task&&new BigNumber(task.lastSettlement).toNumber()}</span></IonText>*/}
+                        {/*</IonItem>*/}
+                        <IonItem>
+                            <IonLabel><span>{i18n.t("currentPeriod")}</span></IonLabel>
+                            <IonText color="secondary"><span>{currentPeriod}</span></IonText>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>Settlement</span></IonLabel>
-                            <IonText><span>{utils.fromValue(task?task.settlement:0,18).toString(10)}</span></IonText>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel><span>Current Period</span></IonLabel>
-                            <IonText><span>90</span></IonText>
+                            <IonLabel><span>{i18n.t("target")} NE</span></IonLabel>
+                            <IonText color="secondary"><span>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                     </div>
 
@@ -135,32 +454,48 @@ class PoolInfo extends React.Component<any, State>{
                         <IonRow>
 
                             <IonCol size="12">
-                                <IonButton mode="ios" expand="block" color="success" onClick={()=>{
+                                {
+                                    finished?
+                                        <IonButton expand="block" color="danger" fill="outline">CLOSED</IonButton> :
+                                        task&&task.begin>currentPeriod?<IonButton expand="block" fill="outline" color="warning">Not Start</IonButton>
+                                            :<IonButton mode="ios" expand="block"
+                                                            color={isMining?"danger":"success"}
+                                                            disabled={!(mintData && mintData.taskId)}
+                                                            onClick={()=>{
+                                                                if(isMining){
+                                                                    this.stop().catch()
+                                                                }else {
+                                                                    this.start().catch()
+                                                                }
+                                                            }}>{isMining?`${i18n.t("stop")} ${i18n.t("hashRate")}`:`${i18n.t("start")} ${i18n.t("hashRate")}`}</IonButton>
+                                }
 
-                                }}>Start Hash Rate</IonButton>
                             </IonCol>
-                            <IonCol size="12">
-                                <div className="pool-display">
-                                    <IonItem lines="none">
-                                        <IonLabel><small>HashRate</small></IonLabel>
-                                        <IonText><small>1000/s</small></IonText>
-                                    </IonItem>
-                                    <IonItem lines="none">
-                                        <IonLabel><small>Latest NE</small></IonLabel>
-                                        <IonText><small>{parseFloat("1000000000").toLocaleString()}</small></IonText>
-                                    </IonItem>
-                                </div>
-                            </IonCol>
+                            {
+                                task&&task.end >= currentPeriod && <IonCol size="12">
+                                    <div className="pool-display">
+                                        <IonItem lines="none">
+                                            <IonLabel><small>{i18n.t("hashRate")}</small></IonLabel>
+                                            <IonText color="danger"><small>{mintData && mintData.hashrate&&new BigNumber(mintData.hashrate.o).toFixed(0)}/s</small></IonText>
+                                        </IonItem>
+                                        <IonItem lines="none">
+                                            <IonLabel><small>{i18n.t("latest")} NE</small></IonLabel>
+                                            <IonText color="secondary"><small>{mintData && mintData.ne && new BigNumber(mintData.ne).toLocaleString()}</small></IonText>
+                                        </IonItem>
+                                    </div>
+                                </IonCol>
+                            }
+
 
                             <IonCol size="12">
                                 <IonButton expand="block" mode="ios" fill="outline" color="primary" onClick={()=>{
-                                    this.setShowModal(true)
-                                }}>View Commit History</IonButton>
+                                    this.setShowModal0(true)
+                                }}>{i18n.t("viewCommitRecords")}</IonButton>
                             </IonCol>
                             <IonCol size="12">
                                 <IonButton mode="ios" expand="block" fill="outline" color="primary" onClick={()=>{
                                     this.setShowModal1(true)
-                                }}>View Settlement History</IonButton>
+                                }}>{i18n.t("viewSettlementRecords")}</IonButton>
                             </IonCol>
                         </IonRow>
                     </div>
@@ -168,27 +503,29 @@ class PoolInfo extends React.Component<any, State>{
                     <IonModal
                         swipeToClose={true}
                         mode="ios"
-                        isOpen={showModal}
+                        isOpen={showModal0}
                         cssClass='epoch-modal'
-                        onDidDismiss={() => this.setShowModal(false)}>
+                        onDidDismiss={() => this.setShowModal0(false)}>
                         <div className="pool-modal">
                             {/*<h3 className="text-center">Create HashRate Pool</h3>*/}
                             <div className="pool-info-content">
                                 <div className="pool-head">
                                     <IonRow>
-                                        <IonCol size="4">Address</IonCol>
-                                        <IonCol size="4">Period</IonCol>
-                                        <IonCol size="4">NE</IonCol>
+                                        <IonCol size="3"><small>{i18n.t("address")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("period")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("serial")}</small></IonCol>
+                                        <IonCol size="3"><small>NE</small></IonCol>
                                     </IonRow>
                                 </div>
                                 <div className="pool-info-detail">
                                     {
-                                        [1,3,3,3,3,3,3,3,3,3,3,3,3,3,3].map(value => {
+                                        shareData && shareData.map(value => {
                                             return <div className="pool-info-item">
                                                 <IonRow>
-                                                    <IonCol size="4">Absm..123jd</IonCol>
-                                                    <IonCol size="4">87</IonCol>
-                                                    <IonCol size="4">100G</IonCol>
+                                                    <IonCol size="4"><small>{utils.ellipsisStr(value.user,3)}</small></IonCol>
+                                                    <IonCol size="2"><small>{value.period}</small></IonCol>
+                                                    <IonCol size="2"><small>{value.serial}</small></IonCol>
+                                                    <IonCol size="4"><small>{utils.nFormatter(value.ne,3)}</small></IonCol>
                                                 </IonRow>
                                             </div>
                                         })
@@ -209,10 +546,10 @@ class PoolInfo extends React.Component<any, State>{
                             <div className="pool-info-content">
                                 <div className="pool-head">
                                     <IonRow>
-                                        <IonCol size="3"><small>TaskId</small></IonCol>
-                                        <IonCol size="3"><small>Amount</small></IonCol>
-                                        <IonCol size="3"><small>Period</small></IonCol>
-                                        <IonCol size="3"><small>PayTime</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("name")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("amount")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("period")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("payTme")}</small></IonCol>
                                     </IonRow>
                                 </div>
                                 <div className="pool-info-detail">
@@ -221,9 +558,11 @@ class PoolInfo extends React.Component<any, State>{
                                             return <div className="pool-info-item">
                                                 <IonRow>
                                                     <IonCol size="3"><small>{value.taskId}</small></IonCol>
-                                                    <IonCol size="3"><small>{value.amount}</small></IonCol>
+                                                    <IonCol size="3"><small>{utils.fromValue(value.amount,18).toString()}</small></IonCol>
                                                     <IonCol size="3"><small>{value.period}</small></IonCol>
-                                                    <IonCol size="3"><small>{value.payTime}</small></IonCol>
+                                                    <IonCol size="3"><small>{new Date(new BigNumber(value.payTime).multipliedBy(1000).toNumber()).toLocaleDateString()}
+                                                    {/*{new Date(new BigNumber(value.payTime).multipliedBy(1000).toNumber()).toLocaleTimeString()}*/}
+                                                    </small></IonCol>
                                                 </IonRow>
                                             </div>
                                         })
@@ -233,6 +572,155 @@ class PoolInfo extends React.Component<any, State>{
                         </div>
 
                     </IonModal>
+
+                    <IonModal
+                        swipeToClose={true}
+                        mode="ios"
+                        isOpen={showModal}
+                        cssClass='epoch-modal'
+                        onDidDismiss={() => this.setShowModal(false)}>
+                        <div className="pool-modal">
+                            <h3 className="text-center">{i18n.t("update")} {i18n.t("hashRate")} {i18n.t("pool")}</h3>
+                            <IonItem>
+                                <IonLabel> <span>{i18n.t("name")}</span></IonLabel>
+                                <IonInput value={name} color="primary" onIonChange={(e)=>{
+                                    this.setState({name:e.detail.value})
+                                }}/>
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel> <span>{i18n.t("begin")} {i18n.t("period")}</span></IonLabel>
+                                <IonText >{begin}</IonText>
+                                {/*<IonLabel><small></small></IonLabel>*/}
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel> <span>{i18n.t("rewardPerPeriod")}</span></IonLabel>
+                                <IonInput disabled={!finished} placeholder="0.000" value={depositAmount} color="primary" onIonChange={(e)=>{
+                                    this.setState({depositAmount:e.detail.value})
+                                }}/>
+                                <IonLabel><small>LIGHT</small></IonLabel>
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel> <span>{i18n.t("numberOfPeriods")}</span></IonLabel>
+                                <IonInput placeholder="0" value={phase}  type="number"  color="primary" onIonChange={(e)=>{
+                                    const v = e.detail.value;
+                                    if(v && new BigNumber(v).toNumber()>0 &&
+                                        new BigNumber(begin).plus(v).minus(1).toNumber()>=currentPeriod){
+                                        this.setState({phase:v})
+                                    }else {
+                                        //this.setShowToast(true,"danger","Invalid Number of Periods!")
+                                    }
+                                }} onIonBlur={(e:any)=>{
+                                    const v = e.target.value;
+                                    if(v && new BigNumber(v).toNumber()>0 &&
+                                        new BigNumber(begin).plus(v).minus(1).toNumber()>=currentPeriod){
+                                        this.setState({phase:v})
+                                    }else {
+                                        this.setShowToast(true,"danger",`Invalid Period : [${v}]`)
+                                    }
+                                }}/>
+                                {/*<IonLabel><small></small></IonLabel>*/}
+                            </IonItem>
+                            <IonItem>
+                                <IonLabel> <span>{i18n.t("target")} NE</span></IonLabel>
+                                <IonInput disabled={!finished} placeholder="0" value={targetNE} type="number" color="primary" onIonChange={(e)=>{
+                                    this.setState({targetNE:e.detail.value})
+                                }}/>
+                                <IonLabel slot="end"><small>M</small></IonLabel>
+                            </IonItem>
+
+                            {
+                                new BigNumber(phase).toNumber()>0 || new BigNumber(depositAmount).toNumber()>0 || targetNE ?
+                                    <div className="pool-display">
+                                        {
+                                            new BigNumber(phase).toNumber()>0 && <p>
+                                                {i18n.t("thePeriodsIs")} {i18n.t("from")} <IonText color="secondary">
+                                                <span>{finished?currentPeriod:task?.begin}</span>
+                                            </IonText>
+                                                &nbsp;{i18n.t("to")}&nbsp;
+                                                <IonText color="secondary">
+                                                    <span>{targetEnd}</span>
+                                                </IonText>
+
+                                            </p>
+                                        }
+                                        {
+                                            targetNE &&
+                                            <p>{i18n.t("neTips").replace("$$",`${utils.nFormatter(new BigNumber(targetNE).multipliedBy(1E6).toNumber(),3)}`)}</p>
+                                        }
+
+                                        {
+                                            total < 0 && new BigNumber(phase).toNumber()>0 ?
+                                                <p>
+                                                    You will <IonText color="danger"><small>receive</small></IonText> <IonText color="warning">
+                                                    <small>
+                                                        {new BigNumber(total).multipliedBy(-1).toNumber()} LIGHT
+                                                    </small></IonText> for <IonText color="danger"><small>return</small></IonText>
+                                                </p>
+                                                : total>0 &&
+                                                <p>
+                                                    You will <IonText color="danger"><small>deposit</small></IonText> <IonText color="warning">
+                                                    <small>
+                                                        {total} LIGHT
+                                                    </small></IonText> for <IonText color="danger"><small>reward</small></IonText>
+                                                </p>
+                                        }
+
+                                    </div>:""
+                            }
+
+                            <div className="pool-display">
+                                <p>{i18n.t("poolTips1")}</p>
+                                <p>{i18n.t("poolTips2")}</p>
+                                <p>{i18n.t("poolTips3")}</p>
+                            </div>
+                        </div>
+
+                        <IonRow>
+                            <IonCol size="4">
+                                <IonButton expand="block" mode="ios" fill="outline" onClick={() => {
+                                    this.setShowModal(false)
+                                }}>{i18n.t("cancel")}</IonButton>
+                            </IonCol>
+                            <IonCol size="8">
+                                <IonButton disabled={!name || !depositAmount || !phase || new BigNumber(phase).toNumber()<=0 || !targetNE}  mode="ios" expand="block" onClick={() => {
+                                    this.setShowLoading(true)
+                                    this.commit().then(()=>{
+                                        this.setShowLoading(false)
+                                    }).catch(e=>{
+                                        const err = typeof e =="string"?e:e.message;
+                                        this.setShowToast(true,"danger",err)
+                                        this.setShowLoading(false)
+                                    })
+                                }}>{i18n.t("commit")}</IonButton>
+                            </IonCol>
+                        </IonRow>
+                    </IonModal>
+
+                    <IonToast
+                        color={!color ? "warning" : color}
+                        position="top"
+                        isOpen={showToast}
+                        onDidDismiss={() => this.setShowToast(false)}
+                        message={toastMessage}
+                        duration={2500}
+                        mode="ios"
+                    />
+
+                    <IonLoading
+                        mode="ios"
+                        spinner={"bubbles"}
+                        cssClass='my-custom-class'
+                        isOpen={showLoading}
+
+                        onDidDismiss={() => this.setShowLoading(false)}
+                        message={'Please wait...'}
+                        duration={120000}
+                    />
+
+                    <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => {
+                    }} onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>
+
+
                 </div>
             </IonContent>
         </IonPage>;

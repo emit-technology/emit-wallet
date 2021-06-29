@@ -155,5 +155,34 @@
   "deadline":"Transaction deadline",
   "minutes":"Minutes",
 
-  "Lock": "Lock"
+  "Lock": "Lock",
+
+  "team": "Team",
+  "all": "All",
+  "period": "Period",
+  "periods": "Periods",
+  "load": "Load",
+  "scenes": "Scenes",
+  "rewardPerPeriod":"Reward per Period",
+  "numberOfPeriods":"Number of Periods",
+  "target": "Target",
+
+  "poolTips1":"1. You can invite more people to provide you with hash rate",
+  "poolTips2":"2. And you will pay the miners some LIGHT as a reward",
+  "poolTips3":"3. The rewards will be automatically settled after each settlement period",
+
+  "reward": "Reward",
+  "latest": "Latest",
+  "start": "Start",
+  "viewCommitRecords":"View Commit Records",
+  "viewSettlementRecords":"Vie Settlement Records",
+  "update": "Update",
+  "begin": "Begin",
+  "end": "End",
+
+  "thePeriodsIs": "The periods is",
+
+  "neTips": "At least one person in your mining pool needs to submit more than $$ NE, then the reward will be automatically settled",
+  "returnTips": "You will receive $$ LIGHT for return",
+  "depositTips": "You will deposit $$ LIGHT for reward"
 }

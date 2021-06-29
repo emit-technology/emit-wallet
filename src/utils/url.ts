@@ -141,7 +141,7 @@ class Url {
     }
 
     accountUnlock() {
-        // this.goTo([this.base, this.account.unlock].join("/"), "");
+        this.goTo([this.base, this.account.unlock].join("/"), "");
     }
 
     receive(address: string,chain:ChainType) {

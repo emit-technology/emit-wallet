@@ -99,6 +99,7 @@ export interface PoolTask{
     scenes:MinerScenes
     begin:number
     end:number
-    settlement:number
+    lastSettlement:number
+    targetNE:string
     reward:number
 }

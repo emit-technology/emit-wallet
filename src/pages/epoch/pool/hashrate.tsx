@@ -1,14 +1,15 @@
 import * as React from 'react';
 import {
     IonButton,
-    IonCheckbox,
+    IonChip,
     IonCol,
     IonContent,
     IonHeader,
     IonIcon,
     IonInput,
     IonItem,
-    IonLabel, IonLoading,
+    IonLabel,
+    IonLoading,
     IonModal,
     IonPage,
     IonRow,
@@ -17,10 +18,11 @@ import {
     IonSelect,
     IonSelectOption,
     IonText,
-    IonTitle, IonToast,
-    IonToolbar
+    IonTitle,
+    IonToast,
+    IonToolbar, IonSearchbar, IonInfiniteScrollContent, IonInfiniteScroll
 } from "@ionic/react";
-import {addCircleOutline, arrowUpOutline, chevronBack, helpCircleOutline} from "ionicons/icons";
+import {addCircleOutline, chevronBack, chevronForwardOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
 import {MinerScenes} from "../miner";
@@ -33,8 +35,10 @@ import * as utils from "../../../utils"
 import epochPoolService from "../../../contract/epoch/sero/pool";
 import BigNumber from "bignumber.js";
 import ConfirmTransaction from "../../../components/ConfirmTransaction";
-import {type} from "os";
 import rpc from "../../../rpc";
+import selfStorage from "../../../utils/storage";
+import PoolMiner from "../miner/pool";
+import i18n from "../../../locales/i18n";
 
 interface State {
     showModal: boolean
@@ -53,6 +57,13 @@ interface State {
     toastMessage?: string
     color?: string
     showLoading:boolean
+    filterValue:string
+    targetNE:any
+    taskIdArray:Array<any>
+    searchText:string
+    pageSize:number,
+    pageNo:number,
+    noMore:boolean
 }
 
 class HashRatePool extends React.Component<any, State> {
@@ -63,7 +74,6 @@ class HashRatePool extends React.Component<any, State> {
         showMine: false,
         data: [],
         account: {name: ""},
-        currentPeriod:0,
         depositAmount:0,
         phase:0,
         fromPeriod:0,
@@ -71,24 +81,44 @@ class HashRatePool extends React.Component<any, State> {
         showAlert:false,
         tx:{},
         showToast:false,
-        showLoading:false
+        showLoading:false,
+        filterValue:"",
+        currentPeriod:0,
+        targetNE:"",
+        taskIdArray:[],
+        searchText:"",
+        pageSize:15,
+        pageNo:1,
+        noMore:true
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#152955"
+        }).catch(e => {
+        })
         this.init().catch(e=>{
             console.log(e)
         })
     }
 
     init = async () => {
+        const {pageSize,pageNo} = this.state;
         const account = await walletWorker.accountInfo()
-        const period = await epochPoolService.currentPeriod();
-        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,10)
+        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
+
+        let period = await epochPoolService.currentPeriod()
+        selfStorage.setItem("epochCurrentPeriod",period);
+
+        const poolMiner = new PoolMiner(MinerScenes.pool);
+        const taskIdArray:any = await poolMiner.getEpochPollKeys()
         this.setState({
             account:account,
             data:poolTask,
             currentPeriod:period,
-            fromPeriod:period
+            fromPeriod:period,
+            taskIdArray:taskIdArray,
+            noMore: !(poolTask && poolTask.length >= pageSize)
         })
     }
 
@@ -105,9 +135,21 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     commit = async ()=>{
-        this.setShowModal(false)
-        const {name,phase,depositAmount,fromPeriod,scenes,account} = this.state;
-        const data = await epochPoolService.addTask(0,name,scenes,fromPeriod,fromPeriod+parseInt(phase)-1)
+        let {name,phase,depositAmount,fromPeriod,scenes,account,targetNE} = this.state;
+
+        name = name.trim()
+        const reg = new RegExp("^[\u0000-\u00FF]+$");
+        const regEmoj= new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
+        if(!reg.test(utils.Trim(name)) && !regEmoj.test(utils.Trim(name))){
+            this.setShowToast(true,"warning",`The name [${name}] is invalid !`)
+            return
+        }
+        if(utils.toBytes(name).length > 32){
+            this.setShowToast(true,"warning","The length of the name exceeds 32 !")
+            return
+        }
+
+        const data = await epochPoolService.addTask(0,name,scenes,fromPeriod,(fromPeriod+parseInt(phase)-1),utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
         const tx: Transaction | any = {
             from: account.addresses && account.addresses[ChainType.SERO],
             to: epochPoolService.address,
@@ -116,7 +158,7 @@ class HashRatePool extends React.Component<any, State> {
             chain: ChainType.SERO,
             amount: "0x0",
             feeCy: "LIGHT",
-            value: utils.toHex(depositAmount, 18),
+            value: utils.toHex(new BigNumber(depositAmount).multipliedBy(new BigNumber(phase)), 18),
             data: data,
         }
         tx.gas = await epochPoolService.estimateGas(tx)
@@ -132,25 +174,32 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     confirm = async (hash: string) => {
-        let intervalId: any = 0;
-        const chain = ChainType.SERO;
-        this.setShowLoading(true)
-        intervalId = setInterval(() => {
-            rpc.getTransactionByHash(hash,chain).then((rest:any) => {
-                if (rest && new BigNumber(rest.blockNumber).toNumber() > 0) {
-                    // this.setShowToast(true,"success","Commit Successfully!")
-                    clearInterval(intervalId);
-                    // url.transactionInfo(chain,hash,Currency);
+        if(hash){
+            let intervalId: any = 0;
+            const chain = ChainType.SERO;
+            this.setShowLoading(true)
+            let count =0;
+            intervalId = setInterval(() => {
+                if (count>60){
+                    clearInterval(intervalId)
                     this.setShowLoading(false)
-                    this.init().then(()=>{
-                    }).catch(e=>{
-                        console.error(e)
-                    })
                 }
-            }).catch(e => {
-                console.error(e)
-            })
-        }, 3000)
+                rpc.getTransactionByHash(hash,chain).then((rest:any) => {
+                    if (rest && new BigNumber(rest.blockNumber).toNumber() > 0) {
+                        // this.setShowToast(true,"success","Commit Successfully!")
+                        clearInterval(intervalId);
+                        // url.transactionInfo(chain,hash,Currency);
+                        this.setShowLoading(false)
+                        this.init().then(()=>{
+                        }).catch(e=>{
+                            console.error(e)
+                        })
+                    }
+                }).catch(e => {
+                    console.error(e)
+                })
+            }, 3000)
+        }
         this.setShowAlert(false)
         this.setState({
             tx: {},
@@ -177,8 +226,95 @@ class HashRatePool extends React.Component<any, State> {
         })
     }
 
+    filterData = async (v:any) =>{
+        const {account,searchText,pageSize,taskIdArray} = this.state;
+        if(v == "my"){
+            const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
+            this.setState({
+                data:data,
+                filterValue:v,
+                pageNo:1,
+                noMore:true
+            })
+        }else if(v=="mining"){
+            if(taskIdArray && taskIdArray.length==0){
+                this.setState({
+                    data:[],
+                    pageNo:1,
+                    noMore:true,
+                    filterValue:v
+                })
+            }else{
+                const ids = taskIdArray.map(v=>{
+                    return new BigNumber(v).toNumber()
+                })
+                const data = await poolRpc.taskWithIds(ids,account.addresses[ChainType.SERO])
+                this.setState({
+                    data:data,
+                    pageNo:1,
+                    noMore:true,
+                    filterValue:v
+                })
+            }
+        }else{
+            //TODO
+            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(v).toNumber(),searchText)
+            this.setState({
+                data:poolTask,
+                filterValue:v,
+                noMore: !(poolTask && poolTask.length >= pageSize),
+                pageNo:1
+            })
+        }
+    }
+
+    setSearchText = async (v:string)=>{
+        const {account,filterValue,pageSize,taskIdArray} = this.state;
+        if(filterValue=="my"){
+            const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
+            this.setState({
+                data:data,
+                searchText:v,
+                pageNo:1
+            })
+        }else if(filterValue=="mining"){
+
+        }else{
+            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(filterValue).toNumber(),v)
+            this.setState({
+                data:poolTask,
+                searchText:v,
+                noMore: !(poolTask && poolTask.length >= pageSize),
+                pageNo:1
+            })
+        }
+    }
+
+    loadMore = async (event?:any) =>{
+        const {pageSize,pageNo,searchText,account,filterValue,data} = this.state;
+        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo+1,pageSize,new BigNumber(filterValue).toNumber(),searchText)
+        if(poolTask.length == 0){
+            if(event){
+                event.target.disabled = true;
+            }
+            this.setState({
+                noMore:true
+            })
+        }else{
+            this.setState({
+                pageNo:pageNo+1,
+                data:data.concat(poolTask),
+            })
+        }
+        if(event) {
+            event.target.complete();
+        }
+    }
+
     render() {
-        const {showModal, scenes, showMine, data,currentPeriod,showLoading,fromPeriod,showToast,showAlert,color,toastMessage,tx} = this.state;
+        const {showModal, scenes, phase,depositAmount,name,searchText,taskIdArray,targetNE,filterValue, data,
+            currentPeriod,showLoading,noMore,showToast,showAlert,color,toastMessage,tx,pageNo,pageSize
+        } = this.state;
         return <IonPage>
             <IonHeader>
                 <IonToolbar color="primary" mode="ios" className="heard-bg">
@@ -193,7 +329,7 @@ class HashRatePool extends React.Component<any, State> {
                         color: "#edcc67",
                         textTransform: "uppercase"
                     }}>
-                        HashRate Pool
+                        {i18n.t("team").toUpperCase()} {i18n.t("mining").toUpperCase()}
                     </IonTitle>
                     <IonIcon src={addCircleOutline} style={{color: "#edcc67"}} size="large" slot="end" onClick={() => {
                         this.setShowModal(true)
@@ -202,55 +338,81 @@ class HashRatePool extends React.Component<any, State> {
             </IonHeader>
             <IonContent fullscreen>
                 <div className="pool-content">
-                    <IonSegment mode="ios" color="primary" value="all"
-                                onIonChange={e => console.log('Segment selected', e.detail.value)}>
-                        <IonSegmentButton value="all">
-                            <IonLabel>ALL</IonLabel>
+                    <IonSearchbar value={searchText} mode="ios" onIonChange={e => this.setSearchText(e.detail.value!)}></IonSearchbar>
+                    <IonSegment mode="ios" color="primary" value={filterValue}
+                                onIonChange={e => {
+                                    this.filterData(e.detail.value).catch(err=>{
+                                        console.error(err)
+                                    })
+                                }}>
+                        <IonSegmentButton value="">
+                            <IonLabel>{i18n.t("all")}</IonLabel>
                         </IonSegmentButton>
-                        <IonSegmentButton value="altar">
+                        <IonSegmentButton value={MinerScenes.altar.toString()}>
                             <IonLabel>ALTAR</IonLabel>
                         </IonSegmentButton>
-                        <IonSegmentButton value="chaos">
+                        <IonSegmentButton value={MinerScenes.chaos.toString()}>
                             <IonLabel>CHAOS</IonLabel>
                         </IonSegmentButton>
+                        <IonSegmentButton value="my">
+                            <IonLabel>{i18n.t("my")}</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton value="mining">
+                            <IonLabel>{i18n.t("mining").toUpperCase()}</IonLabel>
+                        </IonSegmentButton>
                     </IonSegment>
-                    <div className="pool-head">
-                        <IonRow>
-                            <IonCol size="3"><small>SCENES</small></IonCol>
-                            <IonCol size="3"><small>Name</small></IonCol>
-                            <IonCol size="3"><small>Phase</small></IonCol>
-                            <IonCol size="3"><small>Revenue</small></IonCol>
-                        </IonRow>
-                    </div>
                     <div>
-                        {/*<IonItem lines="none">*/}
-                        {/*    <IonCheckbox mode="ios" color="primary" checked={showMine} onIonChange={e => this.setShowMine(e.detail.checked)}/>*/}
-                        {/*    <IonLabel color="primary"><small>Only show records created by me</small></IonLabel>*/}
-                        {/*</IonItem>*/}
                         {
                             data.map((value, index) => {
                                 return <div className="pool-item" onClick={() => {
                                     url.poolInfo(value.taskId)
                                 }}>
-                                    <IonRow>
-                                        <IonCol size="2"><span><IonText>{MinerScenes[value.scenes].toUpperCase()}</IonText></span></IonCol>
-                                        <IonCol size="4">
-                                            <span>{value.name}</span>
-                                            {/*<small><IonText color="medium">G</IonText></small>*/}
-                                        </IonCol>
-                                        <IonCol size="2">
-                                            <span><IonText>{value.begin}-{value.end}</IonText></span>
-                                        </IonCol>
-                                        <IonCol size="4">
-                                            <small><IonText color="medium">L</IonText></small>
-                                            <span><IonText>{utils.fromValue(value.reward,18).toFixed(3,1)}</IonText></span>
-                                            <small><IonText color="medium">/Period</IonText></small>
-                                        </IonCol>
-                                    </IonRow>
+                                    <IonItem lines="none" detail={true} detailIcon={chevronForwardOutline}>
+                                        <IonLabel className="ion-text-wrap">
+                                            <IonText color="primary">
+                                                <h3><span>{value.name}</span></h3>
+                                            </IonText>
+                                            <IonText color="secondary">
+                                                <p><small><IonText color="medium">{i18n.t("periods")}: </IonText></small><span><IonText>{value.begin}-{value.end}</IonText></span></p>
+                                            </IonText>
+                                            <IonText color="secondary">
+                                                <p>
+                                                    <small><IonText color="medium">L</IonText></small>
+                                                    <span><IonText>{utils.fromValue(value.reward,18).toFixed(3,1)}</IonText></span>
+                                                    <small><IonText color="medium">/{i18n.t("period")}</IonText></small>
+                                                </p>
+                                            </IonText>
+                                        </IonLabel>
+                                        <IonLabel slot="end"  className="ion-text-wrap">
+                                            {value.end<currentPeriod && <IonChip color="danger">CLOSED</IonChip>}
+                                            {/*<IonChip color={value.end<currentPeriod?"medium":value.begin>currentPeriod?"primary":"success"}><small>{value.end<currentPeriod?"FINISHED":value.begin>currentPeriod?"Not Start":"PENDING..."}</small></IonChip>*/}
+                                            <IonChip color="tertiary">{MinerScenes[value.scenes].toUpperCase()}</IonChip>
+                                            {
+                                                taskIdArray.map(v=>{
+                                                    if(new BigNumber(v).toNumber() == new BigNumber(value.taskId).toNumber()){
+                                                        return <IonChip color="danger"><small>{i18n.t("mining").toUpperCase()}...</small></IonChip>
+                                                    }
+                                                })
+                                            }
+                                        </IonLabel>
+                                    </IonItem>
                                 </div>
                             })}
+                        {
+                            !noMore &&
+                            <div onClick={()=>this.loadMore()}>
+                                <p><IonText color="primary">Load More</IonText></p>
+                            </div>
+                        }
                     </div>
                 </div>
+                <IonInfiniteScroll onIonInfinite={(e)=>this.loadMore(e)}>
+                    <IonInfiniteScrollContent
+                        loadingSpinner="bubbles"
+                        loadingText="Loading more data..."
+                    >
+                    </IonInfiniteScrollContent>
+                </IonInfiniteScroll>
 
                 <IonModal
                     swipeToClose={true}
@@ -259,15 +421,15 @@ class HashRatePool extends React.Component<any, State> {
                     cssClass='epoch-modal'
                     onDidDismiss={() => this.setShowModal(false)}>
                     <div className="pool-modal">
-                        <h3 className="text-center">Create HashRate Pool</h3>
+                        <h3 className="text-center">{i18n.t("create")} {i18n.t("hashRate")} {i18n.t("pool")}</h3>
                         <IonItem>
-                            <IonLabel><IonIcon src={helpCircleOutline}/> <span>Name</span></IonLabel>
-                            <IonInput onIonChange={(e)=>{
+                            <IonLabel> <span>{i18n.t("name")}</span></IonLabel>
+                            <IonInput placeholder={i18n.t("name")} color="primary" onIonChange={(e)=>{
                                 this.setState({name:e.detail.value})
                             }}/>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><IonIcon src={helpCircleOutline}/> <span>SCENES</span></IonLabel>
+                            <IonLabel> <span>{i18n.t("scenes")}</span></IonLabel>
                             <IonSelect mode="md" value={scenes} onIonChange={(e) => {
                                 this.setState({
                                     scenes: e.detail.value
@@ -278,42 +440,65 @@ class HashRatePool extends React.Component<any, State> {
                             </IonSelect>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><IonIcon src={helpCircleOutline}/> <span>Deposit</span></IonLabel>
-                            <IonInput placeholder="0.000" onIonChange={(e)=>{
+                            <IonLabel> <span>{i18n.t("rewardPerPeriod")}</span></IonLabel>
+                            <IonInput placeholder="0.000" color="primary" onIonChange={(e)=>{
                                 this.setState({depositAmount:e.detail.value})
                             }}/>
                             <IonLabel><small>LIGHT</small></IonLabel>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><IonIcon src={helpCircleOutline}/> <span>Phase</span></IonLabel>
-                            <IonInput placeholder="0" onIonChange={(e)=>{
+                            <IonLabel> <span>{i18n.t("numberOfPeriods")}</span></IonLabel>
+                            <IonInput placeholder="0" type="number"  color="primary" onIonChange={(e)=>{
                                 this.setState({phase:e.detail.value})
                             }}/>
-                            <IonLabel><small>Periods</small></IonLabel>
-                        </IonItem>
-                        <IonItem>
-                            <IonLabel><IonIcon src={helpCircleOutline}/> <span>From Period</span></IonLabel>
-                            <IonSelect mode="md" value={fromPeriod} onIonChange={(e) => {
-                                this.setState({
-                                    fromPeriod:e.detail.value
-                                })
-                            }}>
-                                {[0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(value => {
-                                    return <IonSelectOption value={currentPeriod+value}>{currentPeriod+value}</IonSelectOption>
-                                })}
-                            </IonSelect>
+                            {/*<IonLabel><small></small></IonLabel>*/}
                         </IonItem>
                         {/*<IonItem>*/}
-                        {/*    <IonLabel><IonIcon src={helpCircleOutline}/> <span>Min HR</span></IonLabel>*/}
-                        {/*    <IonInput placeholder="100"/>*/}
-                        {/*    <IonLabel><small>M</small></IonLabel>*/}
+                        {/*    <IonLabel> <span>Period</span></IonLabel>*/}
+                        {/*    <IonText color="primary">Start: {fromPeriod} {new BigNumber(phase).toNumber()>0 && `, End: ${new BigNumber(fromPeriod).plus(new BigNumber(phase)).minus(1).toNumber()}`}</IonText>*/}
                         {/*</IonItem>*/}
+                        <IonItem>
+                            <IonLabel> <span>{i18n.t("targetNE")}</span></IonLabel>
+                            <IonInput placeholder="0" type="number" color="primary" onIonChange={(e)=>{
+                                this.setState({targetNE:e.detail.value})
+                            }}/>
+                            {/*<IonText color="primary">{utils.nFormatter(new BigNumber(targetNE).toNumber(),3)}</IonText>*/}
+                            <IonLabel><small>M</small></IonLabel>
+                        </IonItem>
+                        {
+                            new BigNumber(phase).toNumber()>0 || new BigNumber(depositAmount).toNumber()>0 || targetNE ?
+                            <div className="pool-display">
+                                {
+                                    new BigNumber(phase).toNumber()>0 && <p>
+                                        {i18n.t("thePeriodsIs")} {i18n.t("from")} <IonText color="secondary">
+                                        <span>{currentPeriod}</span>
+                                    </IonText>
+                                        &nbsp;{i18n.t("to")}&nbsp;
+                                        <IonText color="secondary">
+                                            <span>{new BigNumber(phase).plus(currentPeriod).minus(1).toNumber()}</span>
+                                        </IonText>
 
-                        {/*<h5 style={{paddingLeft:"12px"}}><IonText>RULES</IonText></h5>*/}
+                                    </p>
+                                }
+                                {
+                                    new BigNumber(depositAmount).toNumber()>0 && <p>
+                                        {i18n.t("total")} {i18n.t("deposit")} <IonText color="secondary">
+                                    <span>
+                                        {new BigNumber(depositAmount).multipliedBy(phase).toFixed(5,1)}
+                                    </span>
+                                    </IonText> <small><IonText color="medium"> LIGHT</IonText></small>
+                                    </p>
+                                }
+                                {
+                                  targetNE &&
+                                  <p>{i18n.t("neTips").replace("$$",`${utils.nFormatter(new BigNumber(targetNE).multipliedBy(1E6).toNumber(),3)}`)}</p>
+                                }
+                            </div>:""
+                        }
                         <div className="pool-display">
-                            <p>1. You can invite more people to provide you with hash rate</p>
-                            <p>2. And you will pay the miners some LIGHT as a reward</p>
-                            <p>3. Rewards will be automatically settled after each settlement period</p>
+                            <p>{i18n.t("poolTips1")}</p>
+                            <p>{i18n.t("poolTips2")}</p>
+                            <p>{i18n.t("poolTips3")}</p>
                         </div>
                     </div>
 
@@ -321,15 +506,19 @@ class HashRatePool extends React.Component<any, State> {
                         <IonCol size="4">
                             <IonButton expand="block" mode="ios" fill="outline" onClick={() => {
                                 this.setShowModal(false)
-                            }}>Cancel</IonButton>
+                            }}>{i18n.t("cancel")}</IonButton>
                         </IonCol>
                         <IonCol size="8">
-                            <IonButton mode="ios" expand="block" onClick={() => {
-                                this.commit().catch(e=>{
+                            <IonButton disabled={!name || !depositAmount || !phase || !targetNE} mode="ios" expand="block" onClick={() => {
+                                this.setShowLoading(true)
+                                this.commit().then(()=>{
+                                    this.setShowLoading(false)
+                                }).catch(e=>{
                                     const err = typeof e =="string"?e:e.message;
                                     this.setShowToast(true,"danger",err)
+                                    this.setShowLoading(false)
                                 })
-                            }}>Commit</IonButton>
+                            }}>{i18n.t("commit")}</IonButton>
                         </IonCol>
                     </IonRow>
                 </IonModal>

@@ -6,6 +6,50 @@ import BigNumber from "bignumber.js";
 
 const ABI = [
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint64",
+                "name": "taskId",
+                "type": "uint64"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint64",
+                "name": "period",
+                "type": "uint64"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "targetNE",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "reward",
+                "type": "uint256"
+            }
+        ],
+        "name": "SettlementEvent",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint64",
+                "name": "taskId",
+                "type": "uint64"
+            }
+        ],
+        "name": "TaskEvent",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint64",
@@ -31,6 +75,11 @@ const ABI = [
                 "internalType": "uint64",
                 "name": "end_",
                 "type": "uint64"
+            },
+            {
+                "internalType": "uint256",
+                "name": "targetNE_",
+                "type": "uint256"
             }
         ],
         "name": "addTask",
@@ -101,8 +150,13 @@ const ABI = [
                     },
                     {
                         "internalType": "uint64",
-                        "name": "settlement",
+                        "name": "lastSettlement",
                         "type": "uint64"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "targetNE",
+                        "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
@@ -113,6 +167,19 @@ const ABI = [
                 "internalType": "struct IPool.Task",
                 "name": "task",
                 "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "lastPeriod",
+        "outputs": [
+            {
+                "internalType": "uint64",
+                "name": "",
+                "type": "uint64"
             }
         ],
         "stateMutability": "view",
@@ -165,6 +232,11 @@ const ABI = [
                 "internalType": "bytes32",
                 "name": "phash",
                 "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minNE",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -179,9 +251,9 @@ class Pool extends SeroContract{
     }
 
     //uint64 taskId,uint256 reward
-    addTask = async (taskId:number,taskName:string,scenes:MinerScenes,beginPeriod:number,endPeriod:number) : Promise<any> =>{
-        console.log("[taskId, taskName,scenes,beginPeriod,endPeriod]",[taskId, taskName,scenes,beginPeriod,endPeriod])
-        return this.contract.packData("addTask", [taskId, taskName,scenes,beginPeriod,endPeriod], true)
+    addTask = async (taskId:number,taskName:string,scenes:MinerScenes,beginPeriod:number,endPeriod:number,targetNE:string) : Promise<any> =>{
+        console.log([taskId, taskName,scenes,beginPeriod,endPeriod,targetNE],"Add task")
+        return this.contract.packData("addTask", [taskId, taskName,scenes,beginPeriod,endPeriod,targetNE], true)
     }
 
     getTask = async (taskId:number) :Promise<PoolTask>=>{
@@ -190,9 +262,9 @@ class Pool extends SeroContract{
     }
 
     //address owner,uint16 scenes_,uint64 serial,bytes32 phash
-    taskPImage = async (taskId:number):Promise<Array<any>> =>{
-        const rest: any = await this.call("taskPImage", [taskId], "");
-        return rest[0]
+    taskPImage = async (taskId:number,from:string):Promise<Array<any>> =>{
+        const rest: any = await this.call("taskPImage", [taskId], from);
+        return rest
     }
 
     //return number

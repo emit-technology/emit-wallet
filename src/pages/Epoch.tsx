@@ -42,6 +42,8 @@ import {MinerScenes} from "./epoch/miner";
 import {chevronForwardOutline, helpCircleOutline, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import rpc from "../rpc";
+import selfStorage from "../utils/storage";
+import BigNumber from "bignumber.js";
 
 class Epoch extends React.Component<any, any>{
 
@@ -61,6 +63,7 @@ class Epoch extends React.Component<any, any>{
     init = async ()=>{
         const account = await walletWorker.accountInfo()
         const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
+        selfStorage.setItem("epochCurrentPeriod",new BigNumber(altarInfo.currentPeriod).plus(1).toNumber());
         const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
         const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
         const tips = rest && rest.length>0?rest[0]:null
@@ -103,7 +106,7 @@ class Epoch extends React.Component<any, any>{
                                 url.poolHashRate()
                             }}>
                                 <IonCardContent>
-                                    <img src="./assets/img/altar.png" style={{width:"100vw"}}/>
+                                    <img src="./assets/img/team-mining.png" style={{width:"100vw"}}/>
 
                                 </IonCardContent>
                             </IonCard>
