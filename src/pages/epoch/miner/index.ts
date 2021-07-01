@@ -33,7 +33,8 @@ export interface MintData {
         h:string
         t:number
         o:number
-    }
+    },
+    period?:any
 }
 
 class Miner {
@@ -71,7 +72,7 @@ class Miner {
                 await this.miner.mintStart(this.uKey())
             }
         }
-        if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address){
+        if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address || (this.scenes == MinerScenes.pool && data.period != rest.period)){
             await this.miner.mintInit(data)
         }else{
             await this.miner.mintInit(rest)

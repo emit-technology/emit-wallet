@@ -3,6 +3,8 @@ import Base from "./base";
 import {EPOCH_POOL_HOST} from "../config";
 import {PoolTask} from "../contract/epoch/sero/types";
 import {MinerScenes} from "../pages/epoch/miner";
+import rpc from "../../../emit-wallet-worker/src/rpc";
+import config from "../../../emit-wallet-worker/src/config";
 
 class PoolRpc extends Base {
 
@@ -35,8 +37,23 @@ class PoolRpc extends Base {
         return rest;
     }
 
+    taskImage = async (taskId:number,address: string) :Promise<Array<any>> => {
+        const rest:any = await this.post("epoch_taskImage", [taskId], ChainType.SERO, "/" + address)
+        return rest?rest:[];
+    }
+
     taskWithIds = async (ids:Array<number>,address:string):Promise<Array<PoolTask>> => {
         const rest:any = await this.post("epoch_taskWithIds", [ids], ChainType.SERO, "/" + address)
+        return rest?rest:[];
+    }
+
+    epochTaskShare = async (taskId:number,period:number,address:string):Promise<Array<PoolShare>> => {
+        const rest:any = await this.post("epoch_taskShare", [taskId,period], ChainType.SERO, "/" + address)
+        return rest?rest:[];
+    }
+
+    epochTaskPayment = async (taskId:number,period:number,address:string):Promise<Array<PoolPayment>> => {
+        const rest:any = await this.post("epoch_taskPayment", [taskId,period], ChainType.SERO, "/" + address)
         return rest?rest:[];
     }
 

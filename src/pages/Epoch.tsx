@@ -30,7 +30,7 @@ import {
     IonPage,
     IonRow,
     IonTitle,
-    IonToolbar,IonText
+    IonToolbar,IonText,IonBadge
 } from '@ionic/react';
 import './Epoch.css';
 import url from "../utils/url";
@@ -63,7 +63,6 @@ class Epoch extends React.Component<any, any>{
     init = async ()=>{
         const account = await walletWorker.accountInfo()
         const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
-        selfStorage.setItem("epochCurrentPeriod",new BigNumber(altarInfo.currentPeriod).plus(1).toNumber());
         const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
         const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
         const tips = rest && rest.length>0?rest[0]:null
@@ -107,7 +106,9 @@ class Epoch extends React.Component<any, any>{
                             }}>
                                 <IonCardContent>
                                     <img src="./assets/img/team-mining.png" style={{width:"100vw"}}/>
-
+                                    <div className="mining">
+                                        <IonBadge color="danger">BETA</IonBadge>
+                                    </div>
                                 </IonCardContent>
                             </IonCard>
 

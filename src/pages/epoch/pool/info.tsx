@@ -10,14 +10,19 @@ import {
     IonLabel,
     IonLoading,
     IonModal,
-    IonPage,
+    IonPage,IonAlert,
     IonRow,
-    IonText,
-    IonTitle,
-    IonToast,
-    IonToolbar,IonChip
+    IonText,IonPopover,
+    IonTitle,IonActionSheet,
+    IonToast,IonProgressBar,
+    IonToolbar,IonChip,IonBadge
 } from "@ionic/react";
-import {chevronBack, createOutline} from "ionicons/icons";
+import {
+    chevronBack,
+    close,
+    createOutline, helpCircleOutline,
+    radioButtonOffOutline,
+} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
 import Miner, {MinerScenes, MintData} from "../miner";
@@ -62,6 +67,14 @@ interface State {
     shortAddress:string
     targetNE:any
     taskEnd:any
+    showActionSheet:boolean
+    optionButtons:Array<any>
+    op:string
+    showAlert2:boolean,
+    minNE:any
+    showPopover:boolean
+    event:any
+    popMsg?:string
 }
 
 class PoolInfo extends React.Component<any, State>{
@@ -88,7 +101,14 @@ class PoolInfo extends React.Component<any, State>{
 
         shortAddress:"",
         targetNE:"",
-        taskEnd:""
+        taskEnd:"",
+        showActionSheet:false,
+        optionButtons:[],
+        op:"",
+        showAlert2:false,
+        minNE:"",
+        showPopover:false,
+        event:undefined,
     }
 
 
@@ -97,12 +117,15 @@ class PoolInfo extends React.Component<any, State>{
             color: "#152955"
         }).catch(e => {
         })
+        this.setShowLoading(true)
         this.init().then(()=>{
+            this.setShowLoading(false)
             this.mintState().then(() => {
             }).catch(e => {
                 console.error(e)
             })
         }).catch(e=>{
+            this.setShowLoading(false)
             console.error(e)
         })
     }
@@ -112,10 +135,12 @@ class PoolInfo extends React.Component<any, State>{
         const task = await this.taskInfo()
         const account = await walletWorker.accountInfo();
         this.state.poolMiner.setMiner(account.accountId ? account.accountId : "")
-        const pImageInfo = await epochPoolService.taskPImage(taskId,"")//account.addresses[ChainType.SERO]
+        const pImageInfo = await poolRpc.taskImage(new BigNumber(taskId).toNumber(),account.addresses[ChainType.SERO])
+            //await epochPoolService.taskPImage(taskId,"")//account.addresses[ChainType.SERO]
         task.taskId = new BigNumber(taskId).toNumber()
         //address owner,uint16 scenes_,uint64 serial,bytes32 phash
 
+        console.log("pImageInfo::",pImageInfo)
         let period = selfStorage.getItem("epochCurrentPeriod");
         if(period && typeof period == "string"){
             period = parseInt(period)
@@ -130,6 +155,7 @@ class PoolInfo extends React.Component<any, State>{
             accountId: account.accountId,
             isPool:true,
             taskId:taskId,
+            period:pImageInfo[5],
         }
         await this.state.poolMiner.init(mintData)
         const isMining= await this.state.poolMiner.isMining()
@@ -148,6 +174,7 @@ class PoolInfo extends React.Component<any, State>{
             interVar.stop()
         }
 
+
         this.setState({
             task:task,
             account:account,
@@ -158,7 +185,9 @@ class PoolInfo extends React.Component<any, State>{
             shortAddress: await utils.getShortAddress(account.addresses[ChainType.SERO]),
             depositAmount:utils.fromValue(task.reward,18).toNumber(),
             phase:new BigNumber(task.end).minus(task.begin).plus(1).toNumber(),
-            targetNE:new BigNumber(task.targetNE).dividedBy(1E6).toNumber()
+            targetNE:new BigNumber(task.targetNE).dividedBy(1E6).toNumber(),
+            optionButtons:[],
+            minNE:pImageInfo[4]
         })
     }
 
@@ -202,7 +231,11 @@ class PoolInfo extends React.Component<any, State>{
 
     setShowModal0 = (f:boolean) =>{
         if(f){
-            this.getShare().catch(e=>{
+            this.setShowLoading(true)
+            this.getShare().then(()=>{
+                this.setShowLoading(false)
+            }).catch(e=>{
+                this.setShowLoading(false)
                 console.error(e)
             })
         }
@@ -219,7 +252,11 @@ class PoolInfo extends React.Component<any, State>{
 
     setShowModal1 = (f:boolean) =>{
         if(f){
-            this.getPayment().catch(e=>{
+            this.setShowLoading(true)
+            this.getPayment().then(()=>{
+                this.setShowLoading(false)
+            }).catch(e=>{
+                this.setShowLoading(false)
                 console.error(e)
             })
         }
@@ -235,6 +272,7 @@ class PoolInfo extends React.Component<any, State>{
         this.setState({
             paymentData:rest
         })
+
     }
 
     getShare = async ()=>{
@@ -244,6 +282,35 @@ class PoolInfo extends React.Component<any, State>{
         this.setState({
             shareData:rest
         })
+
+    }
+
+    getShareByPeriod = async (period:number)=>{
+        const {task,account} = this.state;
+        if(task){
+            // if(new BigNumber(task.end).toNumber()<period){
+            //     period = new BigNumber(task.end).toNumber()
+            // }
+            const rest = await poolRpc.epochTaskShare(task.taskId,period,account.addresses[ChainType.SERO])
+            this.setState({
+                shareData:rest,
+                showModal0:true
+            })
+        }
+    }
+
+    getPaymentByPeriod = async (period:number)=>{
+        const {task,account} = this.state;
+        if(task){
+            // if(new BigNumber(task.end).toNumber()<period){
+            //     period = new BigNumber(task.end).toNumber()
+            // }
+            const rest = await poolRpc.epochTaskPayment(task.taskId,period,account.addresses[ChainType.SERO])
+            this.setState({
+                paymentData:rest,
+                showModal1:true
+            })
+        }
     }
 
     setShowToast = (f: boolean, color?: string, m?: string) => {
@@ -267,8 +334,16 @@ class PoolInfo extends React.Component<any, State>{
     }
 
     commit = async ()=>{
-        let {name,phase,depositAmount,targetNE,currentPeriod,account,task} = this.state;
+        let {name,phase,depositAmount,targetNE,currentPeriod,account,task,optionButtons} = this.state;
         if(task){
+            const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
+            const begin = task ?finished?currentPeriod:task.begin:currentPeriod;
+            if(phase && new BigNumber(phase).toNumber()>0 &&
+                new BigNumber(begin).plus(phase).minus(1).toNumber()>=currentPeriod){
+            }else {
+                this.setShowToast(true,"danger",`Invalid Period : [${phase}]`)
+                return
+            }
 
             name = name.trim()
             const reg = new RegExp("^[\u0000-\u00FF]+$");
@@ -282,8 +357,6 @@ class PoolInfo extends React.Component<any, State>{
                 return
             }
 
-            const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
-            const begin = task ?finished?currentPeriod:task.begin:currentPeriod;
             const targetEnd = task?new BigNumber(begin).plus(new BigNumber(phase)).minus(1).toNumber():0;
             let total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(task.end)).toNumber():0
             if(finished && task){
@@ -369,10 +442,100 @@ class PoolInfo extends React.Component<any, State>{
         }
     }
 
+    // setOptionButtons = (period:number,task:PoolTask,op:string)=>{
+    //
+    // }
+
+    setShowActionSheet = (f:boolean,op:string)=>{
+        const optionButtons = [];
+        if(op){
+            const {currentPeriod,task} = this.state;
+            const period = currentPeriod;
+            if(task){
+                let begin = period - 3 > new BigNumber(task.begin).toNumber()?period-3:new BigNumber(task.begin).toNumber();
+                let end = period + 3  > new BigNumber(task.end).toNumber()?new BigNumber(task.end).toNumber():period+3;
+
+                if(new BigNumber(task.begin).toNumber() < begin){
+                    begin = new BigNumber(task.begin).toNumber();
+                }
+                if(new BigNumber(task.end).toNumber() < end){
+                    end = new BigNumber(task.end).toNumber();
+                }
+                if(end>currentPeriod){
+                    end = currentPeriod
+                }
+
+                for(let i=begin;i<=end;i++){
+                    const d = {
+                        text: `${i} Period`,
+                        icon: radioButtonOffOutline,
+                        handler: () => {
+                            const {op} = this.state;
+                            if(op){
+                                if(op=="share"){
+                                    this.setShowLoading(true)
+                                    this.getShareByPeriod(i).then(()=>{
+                                        this.setShowLoading(false)
+                                    }).catch(e=>{
+                                        this.setShowLoading(false)
+                                    })
+                                }else{
+                                    this.setShowLoading(true)
+                                    this.getPaymentByPeriod(i).then(()=>{
+                                        this.setShowLoading(false)
+                                    }).catch(e=>{
+                                        this.setShowLoading(false)
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    optionButtons.push(d)
+                }
+                optionButtons.push({
+                    text: "Custom input",
+                    icon: createOutline,
+                    handler: () => {
+                        this.setShowAlert2(true)
+                    }
+                })
+                optionButtons.push({
+                    text: i18n.t("cancel"),
+                    icon: close,
+                    role: 'cancel',
+                    handler: () => {
+                        console.log('Cancel clicked');
+                    }
+                })
+            }
+        }
+
+        this.setState({
+            showActionSheet:f,
+            op:op,
+            optionButtons:optionButtons
+        })
+    }
+
+    setShowAlert2 = (f:boolean)=>{
+        this.setState({
+            showAlert2:f
+        })
+    }
+
+    setShowPopover = (f:boolean,e:any,popMsg?:string)=>{
+        this.setState({
+            showPopover:f,
+            event:e,
+            popMsg:popMsg
+        })
+    }
+
     render() {
         const {
             showModal,showModal1,task,paymentData,mintData,isMining,shareData,currentPeriod,depositAmount,phase,fromPeriod,
-            name,showAlert,tx,showToast,showLoading,color,toastMessage,shortAddress,showModal0,targetNE,taskEnd,
+            name,showAlert,tx,showToast,showLoading,color,toastMessage,shortAddress,showModal0,targetNE,taskEnd,showActionSheet,
+            optionButtons,showAlert2,op,minNE,showPopover,event,popMsg
         } = this.state;
 
         const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
@@ -382,6 +545,8 @@ class PoolInfo extends React.Component<any, State>{
         if(finished && task){
             total = new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber()
         }
+        const leftPeriod =  task?new BigNumber(task.end).plus(1).minus(currentPeriod).toNumber()>0?new BigNumber(task.end).plus(1).minus(currentPeriod).toNumber():0:0;
+        const countPeriod = task && new BigNumber(task.end).minus(task.begin).plus(1).toNumber()>0?new BigNumber(task.end).minus(task.begin).plus(1).toNumber():0;
         return <IonPage>
             <IonHeader>
                 <IonToolbar color="primary" mode="ios" className="heard-bg">
@@ -416,43 +581,64 @@ class PoolInfo extends React.Component<any, State>{
                 <div className="pool-content">
                     <div className="pool-info-header">
                         <IonItem>
-                            <IonLabel><span>{i18n.t("name")}</span></IonLabel>
+                            <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
+                                e.persist();
+                                this.setShowPopover(true,e,"The name of the mining pool is unique")}
+                            }/><span>{i18n.t("name")}</span></IonLabel>
                             <IonText color="primary"><span>{task&&task.name}</span></IonText>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>{i18n.t("scenes")}</span></IonLabel>
-                            <IonChip color="primary">{task&&MinerScenes[task.scenes].toUpperCase()}</IonChip>
+                            <IonLabel><IonIcon src={helpCircleOutline}
+                                               onClick={(e)=>{
+                                                   e.persist();
+                                                   this.setShowPopover(true,e,"The scene of Origin in EPOCH")}
+                                               }
+                            /><span>{i18n.t("scenes")}</span></IonLabel>
+                            <IonBadge color="primary">{task&&MinerScenes[task.scenes].toUpperCase()}</IonBadge>
+                        </IonItem>
+                        <IonItem lines="none">
+                            <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
+                                e.persist();
+                                this.setShowPopover(true,e,"The current progress of the mining pool")}
+                            }/><span>{i18n.t("periods")}</span></IonLabel>
+                            <IonBadge color="secondary">{countPeriod-leftPeriod+1>countPeriod?countPeriod:countPeriod-leftPeriod+1}/{countPeriod}</IonBadge>
+                            {/*<IonText color="secondary"><span>{task?.begin} - {task?.end}</span></IonText>*/}
+                        </IonItem>
+                        <IonItem lines="none">
+                            <IonProgressBar value={countPeriod>0?(countPeriod-leftPeriod+1>countPeriod?countPeriod:countPeriod-leftPeriod+1)/countPeriod:0}/>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>{i18n.t("period")}</span></IonLabel>
-                            <IonChip color="primary">{task && new BigNumber(task.end).minus(task.begin).plus(1).toNumber()}</IonChip>
-                            <IonText color="secondary"><span>{task?.begin} - {task?.end}</span></IonText>
+                            <IonText>
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("begin")}</IonText>: {task?.begin} </span></IonText>&nbsp;&nbsp;
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("end")}</IonText>: {task?.end}</span></IonText>&nbsp;&nbsp;
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("currentPeriod")}</IonText>: {currentPeriod}</span></IonText>
+                            </IonText>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>{i18n.t("reward")}</span></IonLabel>
+                            <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
+                                e.persist();
+                                this.setShowPopover(true,e,"The reward for each period")}
+                            }/><span>{i18n.t("reward")}</span></IonLabel>
                             <IonText color="secondary"><span>{utils.fromValue(task?task.reward:0,18).toString()}</span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
                         </IonItem>
-                        {/*<IonItem>*/}
-                        {/*    <IonLabel><span>Deposit Amount</span></IonLabel>*/}
-                        {/*    <IonText><span>{task && utils.fromValue(task?task.reward:0,18).multipliedBy(new BigNumber(task.end).minus(task.begin).plus(1)).toString()}</span> <small>LIGHT </small></IonText>*/}
-                        {/*</IonItem>*/}
-                        {/*<IonItem>*/}
-                        {/*    <IonLabel><span>Settlement</span></IonLabel>*/}
-                        {/*    <IonText><span>{task&&new BigNumber(task.lastSettlement).toNumber()}</span></IonText>*/}
-                        {/*</IonItem>*/}
                         <IonItem>
-                            <IonLabel><span>{i18n.t("currentPeriod")}</span></IonLabel>
-                            <IonText color="secondary"><span>{currentPeriod}</span></IonText>
+                            <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
+                                e.persist();
+                                this.setShowPopover(true,e,"The difficulty of mining, only when someone submits more than this value, the reward will be settled")}
+                            }/><span>Difficulty</span></IonLabel>
+                            <IonText color="secondary"><span>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                         <IonItem>
-                            <IonLabel><span>{i18n.t("target")} NE</span></IonLabel>
-                            <IonText color="secondary"><span>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
+                            <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
+                                e.persist();
+                                this.setShowPopover(true,e,"The minimum NE submitted, only NEs greater than this value are valid")}
+                            }/><span>{i18n.t("min")} NE</span></IonLabel>
+                            <IonText color="secondary"><span>{utils.nFormatter(minNE,3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                     </div>
 
                     <div className="pool-info-bottom">
                         <IonRow>
-
                             <IonCol size="12">
                                 {
                                     finished?
@@ -486,17 +672,25 @@ class PoolInfo extends React.Component<any, State>{
                                 </IonCol>
                             }
 
-
                             <IonCol size="12">
-                                <IonButton expand="block" mode="ios" fill="outline" color="primary" onClick={()=>{
-                                    this.setShowModal0(true)
+                                <IonButton disabled={!(mintData && mintData.taskId)} expand="block" mode="ios" fill="outline" color="primary" onClick={()=>{
+                                    if(task&&task.owner == shortAddress){
+                                        this.setShowActionSheet(true,"share")
+                                    }else{
+                                        this.setShowModal0(true)
+                                    }
                                 }}>{i18n.t("viewCommitRecords")}</IonButton>
                             </IonCol>
                             <IonCol size="12">
-                                <IonButton mode="ios" expand="block" fill="outline" color="primary" onClick={()=>{
-                                    this.setShowModal1(true)
+                                <IonButton disabled={!(mintData && mintData.taskId)} mode="ios" expand="block" fill="outline" color="primary" onClick={()=>{
+                                    if(task&&task.owner == shortAddress){
+                                        this.setShowActionSheet(true,"payment")
+                                    }else{
+                                        this.setShowModal1(true)
+                                    }
                                 }}>{i18n.t("viewSettlementRecords")}</IonButton>
                             </IonCol>
+
                         </IonRow>
                     </div>
 
@@ -546,9 +740,9 @@ class PoolInfo extends React.Component<any, State>{
                             <div className="pool-info-content">
                                 <div className="pool-head">
                                     <IonRow>
-                                        <IonCol size="3"><small>{i18n.t("name")}</small></IonCol>
-                                        <IonCol size="3"><small>{i18n.t("amount")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("address")}</small></IonCol>
                                         <IonCol size="3"><small>{i18n.t("period")}</small></IonCol>
+                                        <IonCol size="3"><small>{i18n.t("amount")}</small></IonCol>
                                         <IonCol size="3"><small>{i18n.t("payTme")}</small></IonCol>
                                     </IonRow>
                                 </div>
@@ -557,11 +751,10 @@ class PoolInfo extends React.Component<any, State>{
                                         paymentData.map(value => {
                                             return <div className="pool-info-item">
                                                 <IonRow>
-                                                    <IonCol size="3"><small>{value.taskId}</small></IonCol>
-                                                    <IonCol size="3"><small>{utils.fromValue(value.amount,18).toString()}</small></IonCol>
+                                                    <IonCol size="3"><small>{utils.ellipsisStr(value.payee,3)}</small></IonCol>
                                                     <IonCol size="3"><small>{value.period}</small></IonCol>
+                                                    <IonCol size="3"><small className="no-wrap">{utils.fromValue(value.amount,18).toFixed(8)}</small></IonCol>
                                                     <IonCol size="3"><small>{new Date(new BigNumber(value.payTime).multipliedBy(1000).toNumber()).toLocaleDateString()}
-                                                    {/*{new Date(new BigNumber(value.payTime).multipliedBy(1000).toNumber()).toLocaleTimeString()}*/}
                                                     </small></IonCol>
                                                 </IonRow>
                                             </div>
@@ -611,17 +804,12 @@ class PoolInfo extends React.Component<any, State>{
                                     }
                                 }} onIonBlur={(e:any)=>{
                                     const v = e.target.value;
-                                    if(v && new BigNumber(v).toNumber()>0 &&
-                                        new BigNumber(begin).plus(v).minus(1).toNumber()>=currentPeriod){
-                                        this.setState({phase:v})
-                                    }else {
-                                        this.setShowToast(true,"danger",`Invalid Period : [${v}]`)
-                                    }
+                                    this.setState({phase:v})
                                 }}/>
                                 {/*<IonLabel><small></small></IonLabel>*/}
                             </IonItem>
                             <IonItem>
-                                <IonLabel> <span>{i18n.t("target")} NE</span></IonLabel>
+                                <IonLabel> <span>Difficulty</span></IonLabel>
                                 <IonInput disabled={!finished} placeholder="0" value={targetNE} type="number" color="primary" onIonChange={(e)=>{
                                     this.setState({targetNE:e.detail.value})
                                 }}/>
@@ -720,6 +908,73 @@ class PoolInfo extends React.Component<any, State>{
                     <ConfirmTransaction show={showAlert} transaction={tx} onProcess={(f) => {
                     }} onCancel={() => this.setShowAlert(false)} onOK={this.confirm}/>
 
+                    <IonActionSheet
+                        mode="ios"
+                        header="Select Period"
+                        isOpen={showActionSheet}
+                        onDidDismiss={() => this.setShowActionSheet(false,"")}
+                        cssClass='my-custom-class'
+                        buttons={optionButtons}
+                    >
+                    </IonActionSheet>
+
+                    <IonAlert
+                        mode="ios"
+                        isOpen={showAlert2}
+                        onDidDismiss={() => this.setShowAlert2(false)}
+                        cssClass='my-custom-class'
+                        header={"Customer input period"}
+                        inputs={[
+                            {
+                                name: 'period',
+                                type: 'number',
+                                placeholder:"Period",
+                                min: task?task.begin:0,
+                                max: task?task.end:0,
+                            }
+                        ]}
+                        buttons={[
+                            {
+                                text: 'Cancel',
+                                role: 'cancel',
+                                cssClass: 'secondary',
+                                handler: () => {
+                                    console.log('Confirm Cancel');
+                                }
+                            },
+                            {
+                                text: 'Ok',
+                                handler: (v:any) => {
+                                    if(op == "share"){
+                                        this.setShowLoading(true)
+                                        this.getShareByPeriod(parseInt(v["period"])).then(()=>{
+                                            this.setShowLoading(false)
+                                        }).catch(e=>{
+                                            this.setShowLoading(false)
+                                        })
+                                    }else{
+                                        this.setShowLoading(true)
+                                        this.getPaymentByPeriod(parseInt(v["period"])).then(()=>{
+                                            this.setShowLoading(false)
+                                        }).catch(e=>{
+                                            this.setShowLoading(false)
+                                        })
+                                    }
+                                }
+                            }
+                        ]}
+                    />
+
+                    <IonPopover
+                        mode="ios"
+                        event={event}
+                        isOpen={showPopover}
+                        onDidDismiss={() => this.setShowPopover(false,undefined)}
+                    >
+                        <div className="popover-customer">
+                            <small>{popMsg}</small>
+                        </div>
+                    </IonPopover>
 
                 </div>
             </IonContent>
