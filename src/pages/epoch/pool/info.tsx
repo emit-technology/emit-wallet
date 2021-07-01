@@ -624,14 +624,14 @@ class PoolInfo extends React.Component<any, State>{
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
                                 e.persist();
-                                this.setShowPopover(true,e,"The difficulty of mining, only when someone submits more than this value, the reward will be settled")}
+                                this.setShowPopover(true,e,"The difficulty of mining, rewards will only be settled if someone submits an NE that exceeds this value.")}
                             }/><span>Difficulty</span></IonLabel>
                             <IonText color="secondary"><span>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
                                 e.persist();
-                                this.setShowPopover(true,e,"The minimum NE submitted, only NEs greater than this value are valid")}
+                                this.setShowPopover(true,e,"The minimum NE can been submitted")}
                             }/><span>{i18n.t("min")} NE</span></IonLabel>
                             <IonText color="secondary"><span>{utils.nFormatter(minNE,3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>

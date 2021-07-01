@@ -59,7 +59,7 @@ initNFT();
 
 interVar.start(()=>{
     initNFT()
-},1000 * 10)
+},1000 * 30)
 
 let lastBackButtonTime = 0;
 Plugins.App.addListener("backButton",()=>{

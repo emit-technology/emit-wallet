@@ -39,6 +39,7 @@ import rpc from "../../../rpc";
 import selfStorage from "../../../utils/storage";
 import PoolMiner from "../miner/pool";
 import i18n from "../../../locales/i18n";
+import interVar from "../../../interval";
 
 interface State {
     showModal: boolean
@@ -103,12 +104,19 @@ class HashRatePool extends React.Component<any, State> {
         }).catch(e=>{
             this.setShowLoading(false)
         })
+
+        // interVar.start(()=>{
+        //     this.init().catch(e=>{
+        //         console.error(e)
+        //     })
+        // },15 * 1000)
     }
 
     init = async () => {
-        const {pageSize,pageNo} = this.state;
+        const {pageSize,pageNo,filterValue,searchText} = this.state;
         const account = await walletWorker.accountInfo()
-        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
+        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText)
+            // await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
 
         let period = await epochPoolService.currentPeriod()
         selfStorage.setItem("epochCurrentPeriod",period);
