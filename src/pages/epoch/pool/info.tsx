@@ -631,7 +631,7 @@ class PoolInfo extends React.Component<any, State>{
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
                                 e.persist();
-                                this.setShowPopover(true,e,"The minimum NE can been submitted")}
+                                this.setShowPopover(true,e,"The minimum NE can be submitted")}
                             }/><span>{i18n.t("min")} NE</span></IonLabel>
                             <IonText color="secondary"><span>{utils.nFormatter(minNE,3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
