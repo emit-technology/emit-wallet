@@ -156,6 +156,7 @@ class PoolInfo extends React.Component<any, State>{
             isPool:true,
             taskId:taskId,
             period:pImageInfo[5],
+            minNE:pImageInfo[4]
         }
         await this.state.poolMiner.init(mintData)
         const isMining= await this.state.poolMiner.isMining()
