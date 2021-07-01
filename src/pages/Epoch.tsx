@@ -30,7 +30,7 @@ import {
     IonPage,
     IonRow,
     IonTitle,
-    IonToolbar,IonText
+    IonToolbar,IonText,IonBadge
 } from '@ionic/react';
 import './Epoch.css';
 import url from "../utils/url";
@@ -42,6 +42,8 @@ import {MinerScenes} from "./epoch/miner";
 import {chevronForwardOutline, helpCircleOutline, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import rpc from "../rpc";
+import selfStorage from "../utils/storage";
+import BigNumber from "bignumber.js";
 
 class Epoch extends React.Component<any, any>{
 
@@ -98,6 +100,17 @@ class Epoch extends React.Component<any, any>{
                                     </IonLabel>
                                 </IonItem>
                             }
+
+                            <IonCard mode="ios" style={{marginTop: tips && "4px"}} onClick={() => {
+                                url.poolHashRate()
+                            }}>
+                                <IonCardContent>
+                                    <img src="./assets/img/team-mining.png" style={{width:"100vw"}}/>
+                                    <div className="mining">
+                                        <IonBadge color="danger">BETA</IonBadge>
+                                    </div>
+                                </IonCardContent>
+                            </IonCard>
 
                             <IonCard mode="ios" style={{marginTop: tips && "4px"}} onClick={() => {
                                 url.epochAltar()

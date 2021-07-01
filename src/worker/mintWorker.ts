@@ -19,6 +19,7 @@
 import {MinerScenes, MintData} from "../pages/epoch/miner";
 import altarService from 'walletService/src/mint/altar/index';
 import chaosService from 'walletService/src/mint/chaos/index';
+import poolService from 'walletService/src/mint/pool/index';
 
 class MintWorker {
 
@@ -29,6 +30,8 @@ class MintWorker {
             this.service = altarService
         }else if(scenes == MinerScenes.chaos){
             this.service = chaosService
+        }else if(scenes == MinerScenes.pool){
+            this.service = poolService
         }
     }
 
@@ -53,9 +56,9 @@ class MintWorker {
         })
     }
 
-    async mintStart() {
+    async mintStart(uKey:string) {
         return new Promise((resolve, reject)=>{
-            this.service.mintStart(function (data: any) {
+            this.service.mintStart(uKey,function (data: any) {
                 if(data.error){
                     reject(data.error);
                 }else{
@@ -80,6 +83,18 @@ class MintWorker {
     async mintStop(uKey:any) {
         return new Promise((resolve, reject)=>{
             this.service.mintStop(uKey, function (data: any) {
+                if(data.error){
+                    reject(data.error);
+                }else{
+                    resolve(data.result);
+                }
+            })
+        })
+    }
+
+    async getEpochPollKeys(){
+        return new Promise((resolve, reject)=>{
+            this.service.getEpochPollKeys(function (data: any) {
                 if(data.error){
                     reject(data.error);
                 }else{

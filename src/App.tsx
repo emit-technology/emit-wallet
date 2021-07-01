@@ -93,6 +93,8 @@ import url from "./utils/url";
 import Swap from "./pages/swap";
 import Browser from "./pages/browser/index";
 import Chart from "./pages/browser/chart";
+import HashRatePool from "./pages/epoch/pool/hashrate";
+import PoolInfo from "./pages/epoch/pool/info";
 
 
 let element = require("./img/icon/element_selected.png")
@@ -187,6 +189,8 @@ class App extends React.Component<any,State>{
                     <Route path="/epoch/chaos" component={Chaos} exact={true}/>
                     <Route path="/epoch/device/rank" component={DeviceRank} exact={true}/>
                     <Route path="/epoch/driver/rank/:scenes" component={DriverRank} exact={true}/>
+                    <Route path="/epoch/pool/hashrate" component={HashRatePool} exact={true}/>
+                    <Route path="/epoch/pool/info/:id" component={PoolInfo} exact={true}/>
 
                     <Route path="/browser/:url" component={Browser} exact={true}/>
                     <Route path="/chart/:symbol" component={Chart} exact={true}/>

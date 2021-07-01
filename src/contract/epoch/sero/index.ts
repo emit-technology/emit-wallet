@@ -1,7 +1,7 @@
 import SeroContract from "../../SeroContract";
 import {MinerScenes} from "../../../pages/epoch/miner";
 import {DeviceInfo, DriverInfo, Period, UserInfo} from "./types";
-import {CONTRACT_ADDRESS} from "../../../config";
+import {CONTRACT_ADDRESS, SERO_GAS_MUL} from "../../../config";
 import BigNumber from "bignumber.js";
 
 const ABI = [
@@ -398,7 +398,7 @@ class Index extends SeroContract {
             seroAmount = new BigNumber(rest[1])
         }
         return feeAmount.multipliedBy(
-            new BigNumber(gas).multipliedBy(new BigNumber(gasPrice))
+            new BigNumber(gas).multipliedBy(SERO_GAS_MUL).multipliedBy(new BigNumber(gasPrice))
         ).dividedBy(seroAmount).toFixed(0, 2)
     }
 
@@ -422,7 +422,6 @@ class Index extends SeroContract {
 
     lockedDevice = async (scenes: MinerScenes, from: string): Promise<DeviceInfo> => {
         const ret: any = await this.call("lockedDevice", [scenes], from)
-        console.log("locked::",ret[0])
         return ret[0]
     }
 

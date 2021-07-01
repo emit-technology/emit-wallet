@@ -18,8 +18,8 @@ export interface DeviceInfo {
     rate: string;
     gene: string;
     last: number;
-    alis?:string;
-    mode?:DeviceMode
+    alis?: string;
+    mode?: DeviceMode
 }
 
 export interface Driver {
@@ -48,46 +48,61 @@ export interface DriverInfo {
     capacity: number;
     rate: string;
     gene: string;
-    alis?:string
+    alis?: string
 }
 
-export interface Period{
-    ne:string
-    total:string
-    pool:string
+export interface Period {
+    ne: string
+    total: string
+    pool: string
 }
 
 
-export interface PositionDriverInfoRank{
-    position:number
-    data:Array<DriverInfoRank>
+export interface PositionDriverInfoRank {
+    position: number
+    data: Array<DriverInfoRank>
 
 }
 
-export interface PositionDeviceInfoRank{
-    position:number
-    data:Array<DeviceInfoRank>
+export interface PositionDeviceInfoRank {
+    position: number
+    data: Array<DeviceInfoRank>
 }
 
-export interface DriverInfoRank{
-    owner:string
-    scenes:MinerScenes
-    name:string
-    base:string
-    capacity:string
-    rate:string
-    gene:string
-    blockNum:number
+export interface DriverInfoRank {
+    owner: string
+    scenes: MinerScenes
+    name: string
+    base: string
+    capacity: string
+    rate: string
+    gene: string
+    blockNum: number
 }
 
-export interface DeviceInfoRank{
-    name:string
-    ticket:string
-    base:string
-    capacity:string
-    power:string
-    rate:string
-    gene:string
-    last:number
-    blockNum:number
+export interface DeviceInfoRank {
+    name: string
+    ticket: string
+    base: string
+    capacity: string
+    power: string
+    rate: string
+    gene: string
+    last: number
+    blockNum: number
+}
+
+export interface PoolTask {
+    taskId: number
+    owner: string
+    name: string
+    scenes: MinerScenes
+    begin: number
+    end: number
+    lastSettlement: number
+    targetNE: string
+    reward: number
+    currentTotalNE: string
+    currentPrice: string
+    currentUser: number
 }

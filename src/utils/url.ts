@@ -53,6 +53,8 @@ class Url {
         chaos : "epoch/chaos",
         deviceRank : "epoch/device/rank",
         driverRank : "epoch/driver/rank",
+        poolHashRate: "epoch/pool/hashrate",
+        poolInfo: "epoch/pool/info",
     }
 
     private browserBase = "browser"
@@ -220,6 +222,14 @@ class Url {
 
     chart(symbol:string){
         this.goTo([this.base,this.chartBase,symbol].join("/"),window.location.hash)
+    }
+
+    poolHashRate(){
+        this.goTo([this.base,this.epoch.poolHashRate].join("/"),window.location.hash)
+    }
+
+    poolInfo(id:any){
+        this.goTo([this.base,this.epoch.poolInfo,id].join("/"),window.location.hash)
     }
 }
 

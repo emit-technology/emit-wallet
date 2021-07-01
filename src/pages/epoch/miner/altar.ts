@@ -1,5 +1,5 @@
 import Miner, {MinerScenes} from "./index";
 
-const miner = new Miner(MinerScenes.altar)
+const altarMiner = new Miner(MinerScenes.altar)
 
-export default miner
+export default altarMiner

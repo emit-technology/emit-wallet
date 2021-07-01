@@ -10,7 +10,8 @@ export enum MintState {
 export enum MinerScenes {
     _,
     altar,
-    chaos
+    chaos,
+    pool
 }
 
 export interface MintData {
@@ -26,11 +27,14 @@ export interface MintData {
     nonceDes?:string
     timestamp?: number
     state?: MintState
+    isPool?:boolean
+    taskId?:number
     hashrate?: {
         h:string
         t:number
         o:number
-    }
+    },
+    period?:any
 }
 
 class Miner {
@@ -65,10 +69,10 @@ class Miner {
             if (rest.timestamp && (Date.now() - rest.timestamp) > this.timeout) {
                 rest.nonce="";// reset nonce
                 await this.miner.mintInit(rest)
-                await this.miner.mintStart()
+                await this.miner.mintStart(this.uKey())
             }
         }
-        if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address){
+        if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address || (this.scenes == MinerScenes.pool && data.period != rest.period)){
             await this.miner.mintInit(data)
         }else{
             await this.miner.mintInit(rest)
@@ -79,12 +83,17 @@ class Miner {
     start = async (data: MintData) => {
         // covert sero address by serojs getAddress;
         // data.accountId = this.accountId;
-        data.scenes=this.scenes;
-        data.accountScenes=this.uKey()
+
+        if(!data.scenes){
+            data.scenes = this.scenes;
+        }
+        if(!data.accountScenes){
+            data.accountScenes=this.uKey()
+        }
         const isMining = await this.isMining();
         if (!isMining) {
             await this.miner.mintInit(data)
-            await this.miner.mintStart()
+            await this.miner.mintStart(this.uKey())
             console.log("miner started!")
         }
     }
@@ -98,11 +107,22 @@ class Miner {
         return rest
     }
 
+    key:string = ""
+
     uKey = (k1?:string,k2?:string) =>{
+        if(this.key){
+            return this.key
+        }
         if(!k1 || !k2){
             return [this.accountId,this.scenes].join("_")
         }
-        return [k1,k2].join("_")
+        this.key = [k1,k2].join("_")
+        return this.key
+    }
+
+    getEpochPollKeys = async ()=>{
+        const taskIds = await this.miner.getEpochPollKeys()
+        return taskIds
     }
 
 }

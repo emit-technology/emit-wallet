@@ -154,7 +154,7 @@ class Wallet extends React.Component<State, any> {
         interVar.start(()=>{
             this.init().then(() => {
             }).catch()
-        },5 * 1000)
+        },10 * 1000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
