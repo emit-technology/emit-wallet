@@ -75,6 +75,7 @@ interface State {
     showPopover:boolean
     event:any
     popMsg?:string
+    currentUserNe:any
 }
 
 class PoolInfo extends React.Component<any, State>{
@@ -109,6 +110,7 @@ class PoolInfo extends React.Component<any, State>{
         minNE:"",
         showPopover:false,
         event:undefined,
+        currentUserNe:0
     }
 
 
@@ -174,8 +176,11 @@ class PoolInfo extends React.Component<any, State>{
         } else {
             interVar.stop()
         }
-
-
+        const rTask = await poolRpc.taskWithIds([task.taskId],account.addresses[ChainType.SERO])
+        let currentUserNe:any = 0 ;
+        if(rTask && rTask.length>0){
+            currentUserNe = rTask[0].currentUserTotalNE;
+        }
         this.setState({
             task:task,
             account:account,
@@ -188,7 +193,8 @@ class PoolInfo extends React.Component<any, State>{
             phase:new BigNumber(task.end).minus(task.begin).plus(1).toNumber(),
             targetNE:new BigNumber(task.targetNE).dividedBy(1E6).toNumber(),
             optionButtons:[],
-            minNE:pImageInfo[4]
+            minNE:pImageInfo[4],
+            currentUserNe:currentUserNe
         })
     }
 
@@ -536,7 +542,7 @@ class PoolInfo extends React.Component<any, State>{
         const {
             showModal,showModal1,task,paymentData,mintData,isMining,shareData,currentPeriod,depositAmount,phase,fromPeriod,
             name,showAlert,tx,showToast,showLoading,color,toastMessage,shortAddress,showModal0,targetNE,taskEnd,showActionSheet,
-            optionButtons,showAlert2,op,minNE,showPopover,event,popMsg
+            optionButtons,showAlert2,op,minNE,showPopover,event,popMsg,currentUserNe
         } = this.state;
 
         const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
@@ -586,7 +592,7 @@ class PoolInfo extends React.Component<any, State>{
                                 e.persist();
                                 this.setShowPopover(true,e,"The name of the mining pool is unique")}
                             }/><span>{i18n.t("name")}</span></IonLabel>
-                            <IonText color="primary"><span>{task&&task.name}</span></IonText>
+                            <IonText color="primary"><span><b>{task&&task.name}</b></span></IonText>
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline}
@@ -610,9 +616,9 @@ class PoolInfo extends React.Component<any, State>{
                         </IonItem>
                         <IonItem>
                             <IonText>
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("begin")}</IonText>: {task?.begin} </span></IonText>&nbsp;&nbsp;
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("end")}</IonText>: {task?.end}</span></IonText>&nbsp;&nbsp;
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("currentPeriod")}</IonText>: {currentPeriod}</span></IonText>
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("begin")}</IonText>: <b>{task?.begin}</b> </span></IonText>&nbsp;&nbsp;
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("end")}</IonText>: <b>{task?.end}</b></span></IonText>&nbsp;&nbsp;
+                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("currentPeriod")}</IonText>: <b>{currentPeriod}</b></span></IonText>
                             </IonText>
                         </IonItem>
                         <IonItem>
@@ -620,21 +626,21 @@ class PoolInfo extends React.Component<any, State>{
                                 e.persist();
                                 this.setShowPopover(true,e,"The reward for each period")}
                             }/><span>{i18n.t("reward")}</span></IonLabel>
-                            <IonText color="secondary"><span>{utils.fromValue(task?task.reward:0,18).toString()}</span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
+                            <IonText color="secondary"><span><b>{utils.fromValue(task?task.reward:0,18).toString()}</b></span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
                                 e.persist();
                                 this.setShowPopover(true,e,"The difficulty of mining, rewards will only be settled if someone submits an NE that exceeds this value.")}
                             }/><span>Difficulty</span></IonLabel>
-                            <IonText color="secondary"><span>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
+                            <IonText color="secondary"><span><b>{utils.nFormatter(new BigNumber(task?task.targetNE:0).toNumber(),3)}</b></span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
                                 e.persist();
                                 this.setShowPopover(true,e,"The minimum NE can be submitted")}
                             }/><span>{i18n.t("min")} NE</span></IonLabel>
-                            <IonText color="secondary"><span>{utils.nFormatter(minNE,3)}</span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
+                            <IonText color="secondary"><span><b>{utils.nFormatter(minNE,3)}</b></span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
                     </div>
 
@@ -663,11 +669,15 @@ class PoolInfo extends React.Component<any, State>{
                                     <div className="pool-display">
                                         <IonItem lines="none">
                                             <IonLabel><small>{i18n.t("hashRate")}</small></IonLabel>
-                                            <IonText color="danger"><small>{mintData && mintData.hashrate&&new BigNumber(mintData.hashrate.o).toFixed(0)}/s</small></IonText>
+                                            <IonBadge color="danger">{mintData && mintData.hashrate&&new BigNumber(mintData.hashrate&&mintData.hashrate.o?mintData.hashrate.o:0).toFixed(0)}/s</IonBadge>
                                         </IonItem>
                                         <IonItem lines="none">
                                             <IonLabel><small>{i18n.t("latest")} NE</small></IonLabel>
-                                            <IonText color="secondary"><small>{mintData && mintData.ne && new BigNumber(mintData.ne).toLocaleString()}</small></IonText>
+                                            <IonBadge color="secondary"><small>{mintData && mintData.ne && new BigNumber(mintData.ne?mintData.ne:0).toNumber().toLocaleString()}</small></IonBadge>
+                                        </IonItem>
+                                        <IonItem lines="none">
+                                            <IonLabel><small>{i18n.t("total")} NE</small></IonLabel>
+                                            <IonBadge color="success"><small>{utils.nFormatter(currentUserNe,3)}</small></IonBadge>
                                         </IonItem>
                                     </div>
                                 </IonCol>

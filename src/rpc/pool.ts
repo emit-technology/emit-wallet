@@ -17,8 +17,8 @@ class PoolRpc extends Base {
         return rest?rest:[];
     }
 
-    getTask = async (address: string, pageNo: number, size: number,scenes:MinerScenes,name?:string):Promise<Array<PoolTask>> => {
-        const rest:any = await this.post("epoch_getTask", [JSON.stringify({pageNo, size,scenes:scenes,name:name})], ChainType.SERO, "/" + address)
+    getTask = async (address: string, pageNo: number, size: number,scenes:MinerScenes,name?:string,sort?:number):Promise<Array<PoolTask>> => {
+        const rest:any = await this.post("epoch_getTask", [JSON.stringify({pageNo, size,scenes:scenes,name:name,sort:sort})], ChainType.SERO, "/" + address)
         return rest?rest:[];
     }
 

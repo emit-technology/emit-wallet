@@ -22,7 +22,13 @@ import {
     IonToast,
     IonToolbar, IonSearchbar, IonInfiniteScrollContent, IonInfiniteScroll
 } from "@ionic/react";
-import {addCircleOutline, chevronBack, chevronForwardOutline} from "ionicons/icons";
+import {
+    addCircleOutline, arrowDownOutline,
+    arrowUpOutline,
+    chevronBack,
+    chevronForwardOutline,
+    swapVerticalOutline
+} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
 import url from "../../../utils/url";
 import {MinerScenes} from "../miner";
@@ -64,7 +70,8 @@ interface State {
     searchText:string
     pageSize:number,
     pageNo:number,
-    noMore:boolean
+    noMore:boolean,
+    sort:number
 }
 
 class HashRatePool extends React.Component<any, State> {
@@ -90,7 +97,8 @@ class HashRatePool extends React.Component<any, State> {
         searchText:"",
         pageSize:15,
         pageNo:1,
-        noMore:true
+        noMore:true,
+        sort:0
     }
 
     componentDidMount() {
@@ -113,9 +121,9 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     init = async () => {
-        const {pageSize,pageNo,filterValue,searchText} = this.state;
+        const {pageSize,pageNo,filterValue,searchText,sort} = this.state;
         const account = await walletWorker.accountInfo()
-        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText)
+        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
             // await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
 
         let period = await epochPoolService.currentPeriod()
@@ -240,7 +248,7 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     filterData = async (v:any) =>{
-        const {account,searchText,pageSize,taskIdArray} = this.state;
+        const {account,searchText,pageSize,taskIdArray,sort} = this.state;
         if(v == "my"){
             const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
             this.setState({
@@ -268,7 +276,7 @@ class HashRatePool extends React.Component<any, State> {
             }
         }else{
             //TODO
-            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(v).toNumber(),searchText)
+            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(v).toNumber(),searchText,sort)
             this.setState({
                 data:poolTask,
                 noMore: !(poolTask && poolTask.length >= pageSize),
@@ -278,7 +286,7 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     setSearchText = async (v:string)=>{
-        const {account,filterValue,pageSize,taskIdArray} = this.state;
+        const {account,filterValue,pageSize,sort} = this.state;
         if(filterValue=="my"){
             const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
             this.setState({
@@ -289,7 +297,7 @@ class HashRatePool extends React.Component<any, State> {
         }else if(filterValue=="mining"){
 
         }else{
-            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(filterValue).toNumber(),v)
+            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(filterValue).toNumber(),v,sort)
             this.setState({
                 data:poolTask,
                 searchText:v,
@@ -300,8 +308,8 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     loadMore = async (event?:any) =>{
-        const {pageSize,pageNo,searchText,account,filterValue,data} = this.state;
-        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo+1,pageSize,new BigNumber(filterValue).toNumber(),searchText)
+        const {pageSize,pageNo,searchText,account,filterValue,data,sort} = this.state;
+        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo+1,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
         if(poolTask.length == 0){
             if(event){
                 event.target.disabled = true;
@@ -320,9 +328,18 @@ class HashRatePool extends React.Component<any, State> {
         }
     }
 
+    sortData = async (sort:number)=>{
+        const {pageSize,pageNo,searchText,account,filterValue} = this.state;
+        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
+        this.setState({
+            data:poolTask,
+            sort:sort
+        })
+    }
+
     render() {
         const {showModal, scenes, phase,depositAmount,name,searchText,taskIdArray,targetNE,filterValue, data,
-            currentPeriod,showLoading,noMore,showToast,showAlert,color,toastMessage,tx,pageNo,pageSize
+            currentPeriod,showLoading,noMore,showToast,showAlert,color,toastMessage,tx,pageNo,pageSize,sort
         } = this.state;
         return <IonPage>
             <IonHeader>
@@ -379,48 +396,72 @@ class HashRatePool extends React.Component<any, State> {
                         </IonSegmentButton>
                     </IonSegment>
                     <div>
+                        <IonRow>
+                            <IonCol size="4">
+                                <IonButton color={sort==0?"primary":"white"}  fill={sort==0?"solid":"outline"} size="small" onClick={()=>{
+                                    this.sortData(0).catch(e=>{console.error(e)})
+                                }}><IonIcon src={arrowDownOutline}/>Complex</IonButton>
+                            </IonCol>
+                            <IonCol size="4">
+                                <IonButton color={sort==1?"primary":"white"}  fill={sort==1?"solid":"outline"} size="small" onClick={()=>{
+                                    this.sortData(1).catch(e=>{console.error(e)})
+                                }}><IonIcon src={arrowDownOutline}/>Reward</IonButton>
+                            </IonCol>
+                            <IonCol size="4">
+                                <IonButton color={sort==2?"primary":"white"}  fill={sort==2?"solid":"outline"} size="small" onClick={()=>{
+                                    this.sortData(2).catch(e=>{console.error(e)})
+                                }}><IonIcon src={arrowDownOutline}/>Difficulty</IonButton>
+                            </IonCol>
+                        </IonRow>
+                    </div>
+                    <div>
                         {
                             data.map((value, index) => {
                                 return <div className="pool-item" onClick={() => {
                                     url.poolInfo(value.taskId)
                                 }}>
+                                    <div>
+                                        <span style={{fontSize:"16px"}}><IonText color="primary">{value.name}</IonText></span>
+                                    </div>
                                     <IonItem mode="ios" lines="none" detail={true} detailIcon={chevronForwardOutline}>
                                         <IonLabel className="ion-text-wrap">
                                             <IonRow>
-                                                <IonCol size="6">
+                                                <IonCol size="5">
                                                     <p>
-                                                    <IonText color="primary">
-                                                        <p><span>{value.name}</span></p>
-                                                    </IonText>
+                                                        <span><IonText color="warning">{MinerScenes[value.scenes].toUpperCase()}</IonText></span>
                                                     </p>
                                                     <IonText color="secondary">
-                                                        <p>
-                                                            <small><IonText color="primary">{i18n.t("periods")}: </IonText></small>
-                                                            <span><IonText>{new BigNumber(value.end).minus(new BigNumber(value.begin)).plus(1).toNumber()}</IonText></span>
-                                                        </p>
                                                         <p>
                                                             <span><IonText>{utils.fromValue(value.reward,18).toFixed(3,1)}</IonText></span>
                                                             <small><IonText color="medium"> L/{i18n.t("period")}</IonText></small>
                                                         </p>
+                                                        <p>
+                                                            <IonText color="secondary">
+                                                                <small><IonText color="primary">Difficulty: </IonText></small>
+                                                                <small><b>{utils.nFormatter(value.targetNE,3)}</b></small>
+                                                                <small><IonText color="medium"> NE</IonText></small>
+                                                            </IonText>
+                                                        </p>
+                                                        <p>
+                                                            <small><IonText color="primary">{i18n.t("periods")}: </IonText></small>
+                                                            <span><IonText>{new BigNumber(value.end).minus(new BigNumber(value.begin)).plus(1).toNumber()}</IonText></span>
+                                                        </p>
                                                     </IonText>
-                                                    <div>
-                                                        <IonBadge color="primary"><span>{MinerScenes[value.scenes].toUpperCase()}</span></IonBadge>
-                                                    </div>
                                                 </IonCol>
-                                                <IonCol size="6">
+                                                <IonCol size="7">
+                                                    {/*<p>*/}
+                                                    {/*    <IonText color="secondary">*/}
+                                                    {/*        <small><IonText color="primary">{i18n.t("max")} {i18n.t("reward")}: </IonText></small>*/}
+                                                    {/*        <small><b>{utils.fromValue(new BigNumber(value.reward).dividedBy(new BigNumber(value.targetNE)),18).multipliedBy(1e9).toFixed(3)}</b></small>*/}
+                                                    {/*        <small><IonText color="medium"> L/G</IonText></small>*/}
+                                                    {/*    </IonText>*/}
+                                                    {/*</p>*/}
                                                     <p>
                                                         <IonText color="secondary">
-                                                            <small><IonText color="primary">{i18n.t("price")}: </IonText></small>
-                                                            <small><b>{utils.fromValue(value.currentPrice,18).toFixed(3)}</b></small>
+                                                            <small><IonText color="primary">Revenue: </IonText></small>
+                                                            <small><b>{new BigNumber(value.currentMaxNE).comparedTo(value.targetNE) >=0?
+                                                                utils.fromValue(value.currentPrice,18).toFixed(3,1):<IonText color="danger">0</IonText>}</b></small>
                                                             <small><IonText color="medium"> L/100M</IonText></small>
-                                                        </IonText>
-                                                    </p>
-
-                                                    <p>
-                                                        <IonText color="secondary">
-                                                            <small><IonText color="primary">{i18n.t("total")}: </IonText></small>
-                                                            <small><b>{utils.nFormatter(value.currentTotalNE,3)}</b></small>
-                                                            <small><IonText color="medium"> NE</IonText></small>
                                                         </IonText>
                                                     </p>
                                                     <p>
@@ -432,11 +473,17 @@ class HashRatePool extends React.Component<any, State> {
                                                     </p>
                                                     <p>
                                                         <IonText color="secondary">
-                                                            <small><IonText color="primary">Difficulty: </IonText></small>
-                                                            <small><b>{utils.nFormatter(value.targetNE,3)}</b></small>
-                                                            <small><IonText color="medium"> NE</IonText></small>
+                                                            <small><IonText color="primary">Measure Up: </IonText></small>
+                                                            <small><b>{new BigNumber(value.currentMaxNE).comparedTo(value.targetNE) >=0?"YES":<IonText color="danger">NO</IonText>}</b></small>
                                                         </IonText>
                                                     </p>
+                                                    <p>
+                                                        <IonText color="secondary">
+                                                            <small><IonText color="primary">{i18n.t("pool")} NE: </IonText></small>
+                                                            <small><b>{utils.nFormatter(value.currentTotalNE,3)}</b></small>
+                                                        </IonText>
+                                                    </p>
+
                                                 </IonCol>
                                             </IonRow>
                                             <div className="mining">

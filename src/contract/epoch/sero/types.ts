@@ -105,4 +105,6 @@ export interface PoolTask {
     currentTotalNE: string
     currentPrice: string
     currentUser: number
+    currentMaxNE: string
+    currentUserTotalNE:string
 }
