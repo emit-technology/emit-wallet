@@ -160,6 +160,7 @@ class PoolInfo extends React.Component<any, State>{
             period:pImageInfo[5],
             minNE:pImageInfo[4]
         }
+        console.log(mintData,"mintData::")
         await this.state.poolMiner.init(mintData)
         const isMining= await this.state.poolMiner.isMining()
         if (isMining) {
@@ -286,6 +287,7 @@ class PoolInfo extends React.Component<any, State>{
         const {account} = this.state;
         const taskId = this.props.match.params.id;
         const rest = await poolRpc.getShare(parseInt(taskId),account.addresses[ChainType.SERO],1,15)
+        console.log(rest)
         this.setState({
             shareData:rest
         })
@@ -364,12 +366,49 @@ class PoolInfo extends React.Component<any, State>{
                 return
             }
 
+            const config:any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
+            const minReward = utils.fromValue(config.minReward,18).toNumber();
+            const minDifficulty = new BigNumber(config.minDifficulty).dividedBy(1e6).toNumber();
+            const minPeriod = new BigNumber(config.minPeriod).toNumber();
+
+            if(new BigNumber(depositAmount).toNumber() < minReward){
+                this.setShowToast(true,"warning",`The minimum reward per period is ${minReward} LIGHT`)
+                return
+            }
+            if(new BigNumber(phase).toNumber() < minPeriod ){
+                this.setShowToast(true,"warning",`The minimum number of periods is ${minPeriod}`)
+                return
+            }
+            if(new BigNumber(targetNE).toNumber() < minDifficulty ){
+                this.setShowToast(true,"warning",`The minimum Difficulty is ${utils.nFormatter(config.minDifficulty,3)}`)
+                return
+            }
+
+            if(!finished){
+                if(new BigNumber(targetNE).toNumber() > new BigNumber(task.targetNE).dividedBy(1e6).toNumber() ){
+                    this.setShowToast(true,"warning",`The difficulty cannot be modified to be greater than the original difficulty [${utils.nFormatter(task.targetNE,3)}]`)
+                    return
+                }
+
+                if(new BigNumber(depositAmount).toNumber() < utils.fromValue(task.reward,18).toNumber() ){
+                    this.setShowToast(true,"warning",`The reward cannot be modified to be lower than the original reward [${utils.fromValue(task.reward,18).toString()} LIGHT]`)
+                    return
+                }
+            }
+
             const targetEnd = task?new BigNumber(begin).plus(new BigNumber(phase)).minus(1).toNumber():0;
+
             let total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(task.end)).toNumber():0
+            if(new BigNumber(depositAmount).toNumber() > utils.fromValue(task.reward,18).toNumber()){
+                total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber():0
+                total = new BigNumber(total).minus(utils.fromValue(task.reward,18).multipliedBy(new BigNumber(task.end).minus(currentPeriod).plus(1)).toNumber()).toNumber()
+            }
+            console.log("targetEnd",targetEnd,total);
             if(finished && task){
                 total = new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber()
             }
-            const data = await epochPoolService.addTask(task.taskId,name,task.scenes,begin,targetEnd,utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
+            const data = await epochPoolService.addTask(task.taskId,name,task.scenes,begin,targetEnd,utils.toHex(depositAmount,18),
+                utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
             const tx: Transaction | any = {
                 from: account.addresses && account.addresses[ChainType.SERO],
                 to: epochPoolService.address,
@@ -548,7 +587,13 @@ class PoolInfo extends React.Component<any, State>{
         const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
         const begin = task ?finished?currentPeriod:task.begin:currentPeriod;
         const targetEnd = task?new BigNumber(begin).plus(new BigNumber(phase)).minus(1).toNumber():0;
+
         let total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(task.end)).toNumber():0
+        if(task && new BigNumber(depositAmount).toNumber() > utils.fromValue(task.reward,18).toNumber()){
+            total = task?new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber():0
+            total = new BigNumber(total).minus(utils.fromValue(task.reward,18).multipliedBy(new BigNumber(task.end).minus(currentPeriod).plus(1)).toNumber()).toNumber()
+        }
+
         if(finished && task){
             total = new BigNumber(depositAmount).multipliedBy(new BigNumber(targetEnd).minus(currentPeriod).plus(1)).toNumber()
         }
@@ -717,9 +762,10 @@ class PoolInfo extends React.Component<any, State>{
                                 <div className="pool-head">
                                     <IonRow>
                                         <IonCol size="3"><small>{i18n.t("address")}</small></IonCol>
-                                        <IonCol size="3"><small>{i18n.t("period")}</small></IonCol>
-                                        <IonCol size="3"><small>{i18n.t("serial")}</small></IonCol>
-                                        <IonCol size="3"><small>NE</small></IonCol>
+                                        <IonCol size="2"><small>{i18n.t("period")}</small></IonCol>
+                                        <IonCol size="2"><small>{i18n.t("serial")}</small></IonCol>
+                                        <IonCol size="2"><small>NE</small></IonCol>
+                                        <IonCol size="3"><small>Time</small></IonCol>
                                     </IonRow>
                                 </div>
                                 <div className="pool-info-detail">
@@ -727,10 +773,11 @@ class PoolInfo extends React.Component<any, State>{
                                         shareData && shareData.map(value => {
                                             return <div className="pool-info-item">
                                                 <IonRow>
-                                                    <IonCol size="4"><small>{utils.ellipsisStr(value.user,3)}</small></IonCol>
+                                                    <IonCol size="3"><small>{utils.ellipsisStr(value.user,3)}</small></IonCol>
                                                     <IonCol size="2"><small>{value.period}</small></IonCol>
                                                     <IonCol size="2"><small>{value.serial}</small></IonCol>
-                                                    <IonCol size="4"><small>{utils.nFormatter(value.ne,3)}</small></IonCol>
+                                                    <IonCol size="2"><small>{utils.nFormatter(value.ne,3)}</small></IonCol>
+                                                    <IonCol size="3"><small>{value.updateTime>0 && utils.formatDate(value.updateTime*1000)}</small></IonCol>
                                                 </IonRow>
                                             </div>
                                         })
@@ -765,7 +812,7 @@ class PoolInfo extends React.Component<any, State>{
                                                     <IonCol size="3"><small>{utils.ellipsisStr(value.payee,3)}</small></IonCol>
                                                     <IonCol size="3"><small>{value.period}</small></IonCol>
                                                     <IonCol size="3"><small className="no-wrap">{utils.fromValue(value.amount,18).toFixed(8)}</small></IonCol>
-                                                    <IonCol size="3"><small>{new Date(new BigNumber(value.payTime).multipliedBy(1000).toNumber()).toLocaleDateString()}
+                                                    <IonCol size="3"><small>{value.payTime>0 && utils.formatDate(value.payTime*1000)}
                                                     </small></IonCol>
                                                 </IonRow>
                                             </div>
@@ -798,7 +845,7 @@ class PoolInfo extends React.Component<any, State>{
                             </IonItem>
                             <IonItem>
                                 <IonLabel> <span>{i18n.t("rewardPerPeriod")}</span></IonLabel>
-                                <IonInput disabled={!finished} placeholder="0.000" value={depositAmount} color="primary" onIonChange={(e)=>{
+                                <IonInput placeholder="0.000" value={depositAmount} color="primary" onIonChange={(e)=>{
                                     this.setState({depositAmount:e.detail.value})
                                 }}/>
                                 <IonLabel><small>LIGHT</small></IonLabel>
@@ -821,7 +868,7 @@ class PoolInfo extends React.Component<any, State>{
                             </IonItem>
                             <IonItem>
                                 <IonLabel> <span>Difficulty</span></IonLabel>
-                                <IonInput disabled={!finished} placeholder="0" value={targetNE} type="number" color="primary" onIonChange={(e)=>{
+                                <IonInput placeholder="0" value={targetNE} type="number" color="primary" onIonChange={(e)=>{
                                     this.setState({targetNE:e.detail.value})
                                 }}/>
                                 <IonLabel slot="end"><small>M</small></IonLabel>
@@ -887,7 +934,7 @@ class PoolInfo extends React.Component<any, State>{
                                         this.setShowLoading(false)
                                     }).catch(e=>{
                                         const err = typeof e =="string"?e:e.message;
-                                        this.setShowToast(true,"danger",err)
+                                        this.setShowToast(true,"danger", `${err}`)
                                         this.setShowLoading(false)
                                     })
                                 }}>{i18n.t("commit")}</IonButton>

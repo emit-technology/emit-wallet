@@ -457,7 +457,8 @@ class EpochOrigin extends React.Component<Props, State> {
             {
                 scenes == MinerScenes.altar && periods.length == 2 ?
                     <div className="ctx">
-                        <IonItemDivider mode="md"><IonText color="dark">{t}</IonText> {b &&
+                        <IonItemDivider mode="md">
+                            <IonText color="dark">{t}</IonText> {b &&
                         <Countdown date={nextPeriodTime} renderer={this.renderer}/>}</IonItemDivider>
                         <IonRow>
                             <IonCol size="3"></IonCol>
@@ -490,7 +491,7 @@ class EpochOrigin extends React.Component<Props, State> {
                     :
                     scenes == MinerScenes.chaos && periods.length == 1 &&
                     <div className="ctx">
-                        <IonItemDivider mode="md"><IonText color="dark">{t}</IonText> {b &&
+                        <IonItemDivider mode="md"><IonText color="dark">{t}</IonText> <IonText color="medium"><small>{`Serial: ${userInfo?.pImage.serial}`}</small></IonText> {b &&
                         <Countdown date={nextPeriodTime} renderer={this.renderer}/>}</IonItemDivider>
                         <IonRow>
                             <IonCol size="3"></IonCol>
@@ -735,6 +736,9 @@ class EpochOrigin extends React.Component<Props, State> {
                             {/*    new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == -1&&*/}
                             {/*    <div><IonText color="warning">{i18n.t("minNE")}</IonText><IonChip color="tertiary">{minNE.toLocaleString()} NE</IonChip></div>*/}
                             {/*}*/}
+                            {
+                                userInfo && userInfo.pImage && <IonText color="primary"><span>{`Serial: ${new BigNumber(userInfo.pImage.serial).plus(1).toNumber()}`}</span></IonText>
+                            }
                             {
                                 this.renderStatic(nexPeriods, true, i18n.t("currentPeriod"), period + 1)
                             }

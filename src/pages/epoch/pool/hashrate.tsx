@@ -158,6 +158,7 @@ class HashRatePool extends React.Component<any, State> {
     commit = async ()=>{
         let {name,phase,depositAmount,fromPeriod,scenes,account,targetNE} = this.state;
 
+
         name = name.trim()
         const reg = new RegExp("^[\u0000-\u00FF]+$");
         const regEmoj= new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
@@ -170,7 +171,26 @@ class HashRatePool extends React.Component<any, State> {
             return
         }
 
-        const data = await epochPoolService.addTask(0,name,scenes,fromPeriod,(fromPeriod+parseInt(phase)-1),utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
+        const config:any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
+        const minReward = utils.fromValue(config.minReward,18).toNumber();
+        const minDifficulty = new BigNumber(config.minDifficulty).dividedBy(1e6).toNumber();
+        const minPeriod = new BigNumber(config.minPeriod).toNumber();
+
+        if(new BigNumber(depositAmount).toNumber() < minReward){
+            this.setShowToast(true,"warning",`The minimum reward per period is ${minReward} LIGHT`)
+            return
+        }
+        if(new BigNumber(phase).toNumber() < minPeriod ){
+            this.setShowToast(true,"warning",`The minimum number of periods is ${minPeriod}`)
+            return
+        }
+        if(new BigNumber(targetNE).toNumber() < minDifficulty ){
+            this.setShowToast(true,"warning",`The minimum Difficulty is ${utils.nFormatter(config.minDifficulty,3)}`)
+            return
+        }
+
+        const data = await epochPoolService.addTask(0,name,scenes,fromPeriod,(fromPeriod+parseInt(phase)-1),
+            utils.toHex(depositAmount,18),utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
         const tx: Transaction | any = {
             from: account.addresses && account.addresses[ChainType.SERO],
             to: epochPoolService.address,
@@ -398,17 +418,17 @@ class HashRatePool extends React.Component<any, State> {
                     <div>
                         <IonRow>
                             <IonCol size="4">
-                                <IonButton color={sort==0?"primary":"white"}  fill={sort==0?"solid":"outline"} size="small" onClick={()=>{
+                                <IonButton mode="ios" color={sort==0?"primary":"white"}  fill={sort==0?"solid":"outline"} size="small" onClick={()=>{
                                     this.sortData(0).catch(e=>{console.error(e)})
                                 }}><IonIcon src={arrowDownOutline}/>Complex</IonButton>
                             </IonCol>
                             <IonCol size="4">
-                                <IonButton color={sort==1?"primary":"white"}  fill={sort==1?"solid":"outline"} size="small" onClick={()=>{
+                                <IonButton mode="ios" color={sort==1?"primary":"white"}  fill={sort==1?"solid":"outline"} size="small" onClick={()=>{
                                     this.sortData(1).catch(e=>{console.error(e)})
                                 }}><IonIcon src={arrowDownOutline}/>Reward</IonButton>
                             </IonCol>
                             <IonCol size="4">
-                                <IonButton color={sort==2?"primary":"white"}  fill={sort==2?"solid":"outline"} size="small" onClick={()=>{
+                                <IonButton mode="ios" color={sort==2?"primary":"white"}  fill={sort==2?"solid":"outline"} size="small" onClick={()=>{
                                     this.sortData(2).catch(e=>{console.error(e)})
                                 }}><IonIcon src={arrowDownOutline}/>Difficulty</IonButton>
                             </IonCol>
@@ -612,7 +632,7 @@ class HashRatePool extends React.Component<any, State> {
                                     this.setShowLoading(false)
                                 }).catch(e=>{
                                     const err = typeof e =="string"?e:e.message;
-                                    this.setShowToast(true,"danger",err)
+                                    this.setShowToast(true,"danger",`${err}, or the poolName is existed!`)
                                     this.setShowLoading(false)
                                 })
                             }}>{i18n.t("commit")}</IonButton>

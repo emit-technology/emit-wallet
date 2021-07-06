@@ -78,6 +78,11 @@ const ABI = [
             },
             {
                 "internalType": "uint256",
+                "name": "reward_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
                 "name": "targetNE_",
                 "type": "uint256"
             }
@@ -88,11 +93,6 @@ const ABI = [
                 "internalType": "uint64",
                 "name": "taskId",
                 "type": "uint64"
-            },
-            {
-                "internalType": "uint256",
-                "name": "reward",
-                "type": "uint256"
             }
         ],
         "stateMutability": "payable",
@@ -186,24 +186,6 @@ const ABI = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "tokenRate",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "tokenAmount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "seroAmount",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "uint64",
@@ -241,6 +223,24 @@ const ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "tokenRate",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "tokenAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "seroAmount",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ]
 
@@ -251,9 +251,8 @@ class Pool extends SeroContract{
     }
 
     //uint64 taskId,uint256 reward
-    addTask = async (taskId:number,taskName:string,scenes:MinerScenes,beginPeriod:number,endPeriod:number,targetNE:string) : Promise<any> =>{
-        console.log([taskId, taskName,scenes,beginPeriod,endPeriod,targetNE],"Add task")
-        return this.contract.packData("addTask", [taskId, taskName,scenes,beginPeriod,endPeriod,targetNE], true)
+    addTask = async (taskId:number,taskName:string,scenes:MinerScenes,beginPeriod:number,endPeriod:number,reward:string,targetNE:string) : Promise<any> =>{
+        return this.contract.packData("addTask", [taskId, taskName,scenes,beginPeriod,endPeriod,reward,targetNE], true)
     }
 
     getTask = async (taskId:number) :Promise<PoolTask>=>{

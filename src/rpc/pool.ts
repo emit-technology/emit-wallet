@@ -3,8 +3,6 @@ import Base from "./base";
 import {EPOCH_POOL_HOST} from "../config";
 import {PoolTask} from "../contract/epoch/sero/types";
 import {MinerScenes} from "../pages/epoch/miner";
-import rpc from "../../../emit-wallet-worker/src/rpc";
-import config from "../../../emit-wallet-worker/src/config";
 
 class PoolRpc extends Base {
 
@@ -57,6 +55,10 @@ class PoolRpc extends Base {
         return rest?rest:[];
     }
 
+    epochPoolConfig = async (address:string) => {
+        const rest:any = await this.post("epoch_pageConfig",[],ChainType.SERO,"/"+address)
+        return rest;
+    }
 }
 
 export interface SumbitReq {
@@ -76,6 +78,7 @@ export interface PoolShare {
     serial:number,
     taskId:number,
     user:string
+    updateTime: number
 }
 
 
