@@ -69,6 +69,7 @@ class Miner {
         if (rest && rest.state == MintState.running) {
             if (rest.timestamp && (Date.now() - rest.timestamp) > this.timeout) {
                 rest.nonce="";// reset nonce
+                rest.minNE = data.minNE
                 await this.miner.mintInit(rest)
                 await this.miner.mintStart(this.uKey())
             }
@@ -76,6 +77,7 @@ class Miner {
         if(rest.phash != data.phash || rest.index != data.index || rest.address != data.address || (this.scenes == MinerScenes.pool && data.period != rest.period)){
             await this.miner.mintInit(data)
         }else{
+            rest.minNE = data.minNE
             await this.miner.mintInit(rest)
         }
         return
