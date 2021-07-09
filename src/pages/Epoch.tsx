@@ -106,9 +106,9 @@ class Epoch extends React.Component<any, any>{
                             }}>
                                 <IonCardContent>
                                     <img src="./assets/img/team-mining.png" style={{width:"100vw"}}/>
-                                    <div className="mining">
-                                        <IonBadge color="danger">BETA</IonBadge>
-                                    </div>
+                                    {/*<div className="mining">*/}
+                                    {/*    <IonBadge color="danger">BETA</IonBadge>*/}
+                                    {/*</div>*/}
                                 </IonCardContent>
                             </IonCard>
 
