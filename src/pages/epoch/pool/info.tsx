@@ -766,7 +766,7 @@ class PoolInfo extends React.Component<any, State>{
                             <IonItem>
                                 <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
                                     e.persist();
-                                    this.setShowPopover(true,e,"The maximum percentage of the pool's reward")}
+                                    this.setShowPopover(true,e,"The maximum reward that a single person can get in each period.")}
                                 }/><span>{i18n.t("max")} {i18n.t("reward")} </span></IonLabel>
                                 <IonText color="secondary">
                                     <span>
