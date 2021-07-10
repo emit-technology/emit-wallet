@@ -386,10 +386,12 @@ class PoolInfo extends React.Component<any, State>{
                 this.setShowToast(true,"warning","The length of the name exceeds 32 !")
                 return
             }
-            const nameExist = await poolRpc.epochNameExisted(name,account.addresses[ChainType.SERO])
-            if(nameExist){
-                this.setShowToast(true,"warning",`The pool name [${name}] already exists`)
-                return
+            if(task.name != name){
+                const nameExist = await poolRpc.epochNameExisted(name,account.addresses[ChainType.SERO])
+                if(nameExist){
+                    this.setShowToast(true,"warning",`The pool name [${name}] already exists`)
+                    return
+                }
             }
 
             const config:any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
