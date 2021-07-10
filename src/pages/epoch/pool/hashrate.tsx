@@ -10,7 +10,7 @@ import {
     IonItem,
     IonLabel,
     IonLoading,
-    IonModal,
+    IonModal,IonAvatar,
     IonPage,
     IonRow,
     IonSegment,
@@ -26,7 +26,7 @@ import {
     addCircleOutline, arrowDownOutline,
     arrowUpOutline,
     chevronBack,
-    chevronForwardOutline,
+    chevronForwardOutline, medalOutline,
     swapVerticalOutline
 } from "ionicons/icons";
 import {Plugins} from "@capacitor/core";
@@ -71,7 +71,8 @@ interface State {
     pageSize:number,
     pageNo:number,
     noMore:boolean,
-    sort:number
+    sort:number,
+    epochConfig:any
 }
 
 class HashRatePool extends React.Component<any, State> {
@@ -82,23 +83,31 @@ class HashRatePool extends React.Component<any, State> {
         showMine: false,
         data: [],
         account: {name: ""},
-        depositAmount:0,
-        phase:0,
-        fromPeriod:0,
-        name:"",
-        showAlert:false,
-        tx:{},
-        showToast:false,
-        showLoading:false,
-        filterValue:"",
-        currentPeriod:0,
-        targetNE:"",
-        taskIdArray:[],
-        searchText:"",
-        pageSize:15,
-        pageNo:1,
-        noMore:true,
-        sort:0
+        depositAmount: 0,
+        phase: 0,
+        fromPeriod: 0,
+        name: "",
+        showAlert: false,
+        tx: {},
+        showToast: false,
+        showLoading: false,
+        filterValue: "",
+        currentPeriod: 0,
+        targetNE: "",
+        taskIdArray: [],
+        searchText: "",
+        pageSize: 15,
+        pageNo: 1,
+        noMore: true,
+        sort: 0,
+        epochConfig: {
+            leagues: [],
+            minDifficulty: 0,
+            minPeriod: 0,
+            minReward: 0,
+            minSubmitNE: 0,
+            officials: [],
+        }
     }
 
     componentDidMount() {
@@ -107,9 +116,9 @@ class HashRatePool extends React.Component<any, State> {
         }).catch(e => {
         })
         this.setShowLoading(true)
-        this.init().then(()=>{
+        this.init().then(() => {
             this.setShowLoading(false)
-        }).catch(e=>{
+        }).catch(e => {
             this.setShowLoading(false)
         })
 
@@ -121,25 +130,26 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     init = async () => {
-        const {pageSize,pageNo,filterValue,searchText,sort} = this.state;
+        const {pageSize, pageNo, filterValue, searchText, sort} = this.state;
         const account = await walletWorker.accountInfo()
-        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
-            // await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
-
+        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], 1, pageSize, new BigNumber(filterValue).toNumber(), searchText, sort)
+        // await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,MinerScenes._)
+        const config: any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
         let period = await epochPoolService.currentPeriod()
-        selfStorage.setItem("epochCurrentPeriod",period);
+        selfStorage.setItem("epochCurrentPeriod", period);
 
         const poolMiner = new PoolMiner(MinerScenes.pool);
-        const taskIdArray:any = await poolMiner.getEpochPollKeys()
+        const taskIdArray: any = await poolMiner.getEpochPollKeys()
         this.setState({
-            account:account,
-            data:poolTask,
-            currentPeriod:period,
-            fromPeriod:period,
-            taskIdArray:taskIdArray.map((v:any)=>{
+            account: account,
+            data: poolTask,
+            currentPeriod: period,
+            fromPeriod: period,
+            taskIdArray: taskIdArray.map((v: any) => {
                 return parseInt(v)
             }),
-            noMore: !(poolTask && poolTask.length >= pageSize)
+            noMore: !(poolTask && poolTask.length >= pageSize),
+            epochConfig: config
         })
     }
 
@@ -155,42 +165,45 @@ class HashRatePool extends React.Component<any, State> {
         })
     }
 
-    commit = async ()=>{
-        let {name,phase,depositAmount,fromPeriod,scenes,account,targetNE} = this.state;
-
+    commit = async () => {
+        let {name, phase, depositAmount, fromPeriod, scenes, account, targetNE} = this.state;
 
         name = name.trim()
         const reg = new RegExp("^[\u0000-\u00FF]+$");
-        const regEmoj= new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
-        if(!reg.test(utils.Trim(name)) && !regEmoj.test(utils.Trim(name))){
-            this.setShowToast(true,"warning",`The name [${name}] is invalid !`)
+        const regEmoj = new RegExp(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g);
+        if (!reg.test(utils.Trim(name)) && !regEmoj.test(utils.Trim(name))) {
+            this.setShowToast(true, "warning", `The name [${name}] is invalid !`)
             return
         }
-        if(utils.toBytes(name).length > 32){
-            this.setShowToast(true,"warning","The length of the name exceeds 32 !")
+        if (utils.toBytes(name).length > 32) {
+            this.setShowToast(true, "warning", "The length of the name exceeds 32 !")
             return
         }
-
-        const config:any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
-        const minReward = utils.fromValue(config.minReward,18).toNumber();
+        const nameExist = await poolRpc.epochNameExisted(name,account.addresses[ChainType.SERO])
+        if(nameExist){
+            this.setShowToast(true,"warning",`The pool name [${name}] already exists`)
+            return
+        }
+        const config: any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
+        const minReward = utils.fromValue(config.minReward, 18).toNumber();
         const minDifficulty = new BigNumber(config.minDifficulty).dividedBy(1e6).toNumber();
         const minPeriod = new BigNumber(config.minPeriod).toNumber();
 
-        if(new BigNumber(depositAmount).toNumber() < minReward){
-            this.setShowToast(true,"warning",`The minimum reward per period is ${minReward} LIGHT`)
+        if (new BigNumber(depositAmount).toNumber() < minReward) {
+            this.setShowToast(true, "warning", `The minimum reward per period is ${minReward} LIGHT`)
             return
         }
-        if(new BigNumber(phase).toNumber() < minPeriod ){
-            this.setShowToast(true,"warning",`The minimum number of periods is ${minPeriod}`)
+        if (new BigNumber(phase).toNumber() < minPeriod) {
+            this.setShowToast(true, "warning", `The minimum number of periods is ${minPeriod}`)
             return
         }
-        if(new BigNumber(targetNE).toNumber() < minDifficulty ){
-            this.setShowToast(true,"warning",`The minimum Difficulty is ${utils.nFormatter(config.minDifficulty,3)}`)
+        if (new BigNumber(targetNE).toNumber() < minDifficulty) {
+            this.setShowToast(true, "warning", `The minimum Difficulty is ${utils.nFormatter(config.minDifficulty, 3)}`)
             return
         }
 
-        const data = await epochPoolService.addTask(0,name,scenes,fromPeriod,(fromPeriod+parseInt(phase)-1),
-            utils.toHex(depositAmount,18),utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
+        const data = await epochPoolService.addTask(0, name, scenes, fromPeriod, (fromPeriod + parseInt(phase) - 1),
+            utils.toHex(depositAmount, 18), utils.toHex(new BigNumber(targetNE).multipliedBy(1E6)))
         const tx: Transaction | any = {
             from: account.addresses && account.addresses[ChainType.SERO],
             to: epochPoolService.address,
@@ -215,24 +228,24 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     confirm = async (hash: string) => {
-        if(hash){
+        if (hash) {
             let intervalId: any = 0;
             const chain = ChainType.SERO;
             this.setShowLoading(true)
-            let count =0;
+            let count = 0;
             intervalId = setInterval(() => {
-                if (count>60){
+                if (count > 60) {
                     clearInterval(intervalId)
                     this.setShowLoading(false)
                 }
-                rpc.getTransactionByHash(hash,chain).then((rest:any) => {
+                rpc.getTransactionByHash(hash, chain).then((rest: any) => {
                     if (rest && new BigNumber(rest.blockNumber).toNumber() > 0) {
                         // this.setShowToast(true,"success","Commit Successfully!")
                         clearInterval(intervalId);
                         // url.transactionInfo(chain,hash,Currency);
                         this.setShowLoading(false)
-                        this.init().then(()=>{
-                        }).catch(e=>{
+                        this.init().then(() => {
+                        }).catch(e => {
                             console.error(e)
                         })
                     }
@@ -267,99 +280,128 @@ class HashRatePool extends React.Component<any, State> {
         })
     }
 
-    filterData = async (v:any) =>{
-        const {account,searchText,pageSize,taskIdArray,sort} = this.state;
-        if(v == "my"){
+    filterData = async (v: any) => {
+        const {account, searchText, pageSize, taskIdArray, sort} = this.state;
+        if (v == "my") {
             const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
             this.setState({
-                data:data,
-                pageNo:1,
-                noMore:true
+                data: data,
+                pageNo: 1,
+                noMore: true
             })
-        }else if(v=="mining"){
-            if(taskIdArray && taskIdArray.length==0){
+        } else if (v == "mining") {
+            if (taskIdArray && taskIdArray.length == 0) {
                 this.setState({
-                    data:[],
-                    pageNo:1,
-                    noMore:true,
+                    data: [],
+                    pageNo: 1,
+                    noMore: true,
                 })
-            }else{
+            } else {
                 // const ids = taskIdArray.map(v=>{
                 //     return new BigNumber(v).toNumber()
                 // })
-                const data = await poolRpc.taskWithIds(taskIdArray,account.addresses[ChainType.SERO])
+                const data = await poolRpc.taskWithIds(taskIdArray, account.addresses[ChainType.SERO])
                 this.setState({
-                    data:data,
-                    pageNo:1,
-                    noMore:true,
+                    data: data,
+                    pageNo: 1,
+                    noMore: true,
                 })
             }
-        }else{
+        } else {
             //TODO
-            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(v).toNumber(),searchText,sort)
+            const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], 1, pageSize, new BigNumber(v).toNumber(), searchText, sort)
             this.setState({
-                data:poolTask,
+                data: poolTask,
                 noMore: !(poolTask && poolTask.length >= pageSize),
-                pageNo:1
+                pageNo: 1
             })
         }
     }
 
-    setSearchText = async (v:string)=>{
-        const {account,filterValue,pageSize,sort} = this.state;
-        if(filterValue=="my"){
+    setSearchText = async (v: string) => {
+        const {account, filterValue, pageSize, sort} = this.state;
+        if (filterValue == "my") {
             const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
             this.setState({
-                data:data,
-                searchText:v,
-                pageNo:1
+                data: data,
+                searchText: v,
+                pageNo: 1
             })
-        }else if(filterValue=="mining"){
+        } else if (filterValue == "mining") {
 
-        }else{
-            const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],1,pageSize,new BigNumber(filterValue).toNumber(),v,sort)
+        } else {
+            const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], 1, pageSize, new BigNumber(filterValue).toNumber(), v, sort)
             this.setState({
-                data:poolTask,
-                searchText:v,
+                data: poolTask,
+                searchText: v,
                 noMore: !(poolTask && poolTask.length >= pageSize),
-                pageNo:1
+                pageNo: 1
             })
         }
     }
 
-    loadMore = async (event?:any) =>{
-        const {pageSize,pageNo,searchText,account,filterValue,data,sort} = this.state;
-        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo+1,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
-        if(poolTask.length == 0){
-            if(event){
+    loadMore = async (event?: any) => {
+        const {pageSize, pageNo, searchText, account, filterValue, data, sort} = this.state;
+        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], pageNo + 1, pageSize, new BigNumber(filterValue).toNumber(), searchText, sort)
+        if (poolTask.length == 0) {
+            if (event) {
                 event.target.disabled = true;
             }
             this.setState({
-                noMore:true
+                noMore: true
             })
-        }else{
+        } else {
             this.setState({
-                pageNo:pageNo+1,
-                data:data.concat(poolTask),
+                pageNo: pageNo + 1,
+                data: data.concat(poolTask),
             })
         }
-        if(event) {
+        if (event) {
             event.target.complete();
         }
     }
 
-    sortData = async (sort:number)=>{
-        const {pageSize,pageNo,searchText,account,filterValue} = this.state;
-        const poolTask: Array<PoolTask> =  await poolRpc.getTask(account.addresses[ChainType.SERO],pageNo,pageSize,new BigNumber(filterValue).toNumber(),searchText,sort)
+    sortData = async (sort: number) => {
+        const {pageSize, pageNo, searchText, account, filterValue} = this.state;
+        const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], 1, pageSize, new BigNumber(filterValue).toNumber(), searchText, sort)
         this.setState({
-            data:poolTask,
-            sort:sort
+            data: poolTask,
+            sort: sort
         })
     }
 
+    isOfficial = (poolId: number): boolean => {
+        const {epochConfig} = this.state;
+        const arr = epochConfig.officials
+        if(arr && arr.length>0){
+            for (let d of arr){
+                if(d.poolId == poolId){
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    isLegal = (poolId: number): boolean => {
+        const {epochConfig} = this.state;
+        const arr = epochConfig.leagues
+        if(arr && arr.length>0){
+            for (let d of arr){
+                if(d.poolId == poolId){
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+
+
     render() {
         const {showModal, scenes, phase,depositAmount,name,searchText,taskIdArray,targetNE,filterValue, data,
-            currentPeriod,showLoading,noMore,showToast,showAlert,color,toastMessage,tx,pageNo,pageSize,sort
+            currentPeriod,showLoading,noMore,showToast,showAlert,color,toastMessage,tx,pageNo,pageSize,sort,
+            epochConfig
         } = this.state;
         return <IonPage>
             <IonHeader>
@@ -430,7 +472,7 @@ class HashRatePool extends React.Component<any, State> {
                             <IonCol size="4">
                                 <IonButton mode="ios" color={sort==2?"primary":"white"}  fill={sort==2?"solid":"outline"} size="small" onClick={()=>{
                                     this.sortData(2).catch(e=>{console.error(e)})
-                                }}><IonIcon src={arrowDownOutline}/>Difficulty</IonButton>
+                                }}><IonIcon src={arrowUpOutline}/>Difficulty</IonButton>
                             </IonCol>
                         </IonRow>
                     </div>
@@ -442,6 +484,20 @@ class HashRatePool extends React.Component<any, State> {
                                 }}>
                                     <div>
                                         <span style={{fontSize:"16px"}}><IonText color="primary">{value.name}</IonText></span>
+                                        {
+                                            this.isOfficial(value.taskId) &&
+                                            <div style={{margin:"6px 0 0"}}>
+                                                <IonBadge mode="ios" color={"primary"}><IonIcon src={medalOutline}/>OFFICIAL</IonBadge>
+                                            </div>
+                                        }
+
+                                        {
+                                            this.isLegal(value.taskId) &&
+                                            <div style={{margin:"6px 0 0"}}>
+                                                <IonBadge mode="ios" color={"tertiary"}><IonIcon src={medalOutline}/>LEAGUE</IonBadge>
+                                            </div>
+                                        }
+
                                     </div>
                                     <IonItem mode="ios" lines="none" detail={true} detailIcon={chevronForwardOutline}>
                                         <IonLabel className="ion-text-wrap">

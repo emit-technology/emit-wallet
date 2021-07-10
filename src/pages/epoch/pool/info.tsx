@@ -39,6 +39,9 @@ import selfStorage from "../../../utils/storage";
 import ConfirmTransaction from "../../../components/ConfirmTransaction";
 import rpc from "../../../rpc";
 import i18n from "../../../locales/i18n";
+import epochService from "../../../contract/epoch/sero";
+import Countdown from "react-countdown";
+import {EPOCH_SETTLE_TIME} from "../../../config";
 
 interface State {
     showModal:boolean
@@ -76,6 +79,8 @@ interface State {
     event:any
     popMsg?:string
     currentUserNe:any
+    epochConfig:any
+    lastUpdateTime:any
 }
 
 class PoolInfo extends React.Component<any, State>{
@@ -110,7 +115,16 @@ class PoolInfo extends React.Component<any, State>{
         minNE:"",
         showPopover:false,
         event:undefined,
-        currentUserNe:0
+        currentUserNe:0,
+        epochConfig: {
+            leagues: [],
+            minDifficulty: 0,
+            minPeriod: 0,
+            minReward: 0,
+            minSubmitNE: 0,
+            officials: [],
+        },
+        lastUpdateTime:null
     }
 
 
@@ -133,6 +147,7 @@ class PoolInfo extends React.Component<any, State>{
     }
 
     init = async ()=>{
+        const {lastUpdateTime} = this.state;
         const taskId = this.props.match.params.id;
         const task = await this.taskInfo()
         const account = await walletWorker.accountInfo();
@@ -141,12 +156,13 @@ class PoolInfo extends React.Component<any, State>{
             //await epochPoolService.taskPImage(taskId,"")//account.addresses[ChainType.SERO]
         task.taskId = new BigNumber(taskId).toNumber()
         //address owner,uint16 scenes_,uint64 serial,bytes32 phash
-
+        const config: any = await poolRpc.epochPoolConfig(account.addresses[ChainType.SERO])
         console.log("pImageInfo::",pImageInfo)
         let period = selfStorage.getItem("epochCurrentPeriod");
         if(period && typeof period == "string"){
             period = parseInt(period)
         }
+        const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
 
         const mintData:MintData = {
             phash: pImageInfo[3],
@@ -158,9 +174,8 @@ class PoolInfo extends React.Component<any, State>{
             isPool:true,
             taskId:taskId,
             period:pImageInfo[5],
-            minNE:pImageInfo[4]
+            minNE:pImageInfo[4],
         }
-        console.log(mintData,"mintData::")
         await this.state.poolMiner.init(mintData)
         const isMining= await this.state.poolMiner.isMining()
         if (isMining) {
@@ -195,8 +210,14 @@ class PoolInfo extends React.Component<any, State>{
             targetNE:new BigNumber(task.targetNE).dividedBy(1E6).toNumber(),
             optionButtons:[],
             minNE:pImageInfo[4],
-            currentUserNe:currentUserNe
+            currentUserNe:currentUserNe,
+            epochConfig:config,
         })
+        if(!lastUpdateTime){
+            this.setState({
+                lastUpdateTime: <Countdown date={new BigNumber(altarInfo.lastUpdateTime).plus(EPOCH_SETTLE_TIME).multipliedBy(1000).toNumber()} renderer={this.renderer}/>
+            })
+        }
     }
 
     start = async () => {
@@ -363,6 +384,11 @@ class PoolInfo extends React.Component<any, State>{
             }
             if(utils.toBytes(name).length > 32){
                 this.setShowToast(true,"warning","The length of the name exceeds 32 !")
+                return
+            }
+            const nameExist = await poolRpc.epochNameExisted(name,account.addresses[ChainType.SERO])
+            if(nameExist){
+                this.setShowToast(true,"warning",`The pool name [${name}] already exists`)
                 return
             }
 
@@ -577,11 +603,50 @@ class PoolInfo extends React.Component<any, State>{
         })
     }
 
+    maxReward = (poolId: number): number => {
+        const {epochConfig} = this.state;
+        let arr = epochConfig.officials
+        if(arr && arr.length>0){
+            for (let d of arr){
+                if(d.poolId == poolId){
+                    return d.maxRewardRate
+                }
+            }
+        }
+        arr = epochConfig.leagues
+        if(arr && arr.length>0){
+            for (let d of arr){
+                if(d.poolId == poolId){
+                    return d.maxRewardRate
+                }
+            }
+        }
+        return 0
+    }
+
+    // @ts-ignore
+    renderer = ({hours, minutes, seconds, completed}) => {
+        if (completed) {
+            return <span></span>
+        }
+        let h = hours, m = minutes, s = seconds;
+        if (new BigNumber(hours).toNumber() <= 9) {
+            h = "0" + hours;
+        }
+        if (new BigNumber(minutes).toNumber() <= 9) {
+            m = "0" + minutes;
+        }
+        if (new BigNumber(seconds).toNumber() <= 9) {
+            s = "0" + seconds;
+        }
+        return <div className="pool-countdown countdown" ><IonText color="primary"><IonBadge>{h}:{m}:{s}</IonBadge></IonText></div>;
+    };
+
     render() {
         const {
             showModal,showModal1,task,paymentData,mintData,isMining,shareData,currentPeriod,depositAmount,phase,fromPeriod,
             name,showAlert,tx,showToast,showLoading,color,toastMessage,shortAddress,showModal0,targetNE,taskEnd,showActionSheet,
-            optionButtons,showAlert2,op,minNE,showPopover,event,popMsg,currentUserNe
+            optionButtons,showAlert2,op,minNE,showPopover,event,popMsg,currentUserNe,lastUpdateTime
         } = this.state;
 
         const finished = task && new BigNumber(task.end).minus(currentPeriod).toNumber()<0;
@@ -657,14 +722,23 @@ class PoolInfo extends React.Component<any, State>{
                             {/*<IonText color="secondary"><span>{task?.begin} - {task?.end}</span></IonText>*/}
                         </IonItem>
                         <IonItem lines="none">
-                            <IonProgressBar value={countPeriod>0?(countPeriod-leftPeriod+1>countPeriod?countPeriod:countPeriod-leftPeriod+1)/countPeriod:0}/>
-                        </IonItem>
-                        <IonItem>
-                            <IonText>
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("begin")}</IonText>: <b>{task?.begin}</b> </span></IonText>&nbsp;&nbsp;
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("end")}</IonText>: <b>{task?.end}</b></span></IonText>&nbsp;&nbsp;
-                                <IonText color="secondary"><span><IonText color="primary">{i18n.t("currentPeriod")}</IonText>: <b>{currentPeriod}</b></span></IonText>
-                            </IonText>
+                            <IonLabel className="ion-text-wrap">
+
+                                <p>
+                                    <IonProgressBar value={countPeriod>0?(countPeriod-leftPeriod+1>countPeriod?countPeriod:countPeriod-leftPeriod+1)/countPeriod:0}/>
+                                </p>
+                                <div >
+                                    {lastUpdateTime}
+                                </div>
+                                <p>
+                                    <IonText>
+                                        <IonText color="secondary"><span><IonText color="primary">{i18n.t("begin")}</IonText>: <b>{task?.begin}</b> </span></IonText>&nbsp;&nbsp;
+                                        <IonText color="secondary"><span><IonText color="primary">{i18n.t("end")}</IonText>: <b>{task?.end}</b></span></IonText>&nbsp;&nbsp;
+                                        <IonText color="secondary"><span><IonText color="primary">{i18n.t("currentPeriod")}</IonText>: <b>{currentPeriod}</b></span></IonText>
+                                    </IonText>
+                                </p>
+                            </IonLabel>
+
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
@@ -687,6 +761,21 @@ class PoolInfo extends React.Component<any, State>{
                             }/><span>{i18n.t("min")} NE</span></IonLabel>
                             <IonText color="secondary"><span><b>{utils.nFormatter(minNE,3)}</b></span></IonText>&nbsp;<span><IonText color="medium">NE</IonText></span>
                         </IonItem>
+                        {
+                            task && this.maxReward(task.taskId)>0 &&
+                            <IonItem>
+                                <IonLabel><IonIcon src={helpCircleOutline}  onClick={(e)=>{
+                                    e.persist();
+                                    this.setShowPopover(true,e,"The maximum percentage of the pool's reward")}
+                                }/><span>{i18n.t("max")} {i18n.t("reward")} </span></IonLabel>
+                                <IonText color="secondary">
+                                    <span>
+                                        <b>{utils.fromValue(task.reward,18).multipliedBy(this.maxReward(task.taskId)).dividedBy(100).toString()}</b> <IonText color="medium">LIGHT</IonText> (<b>{task && this.maxReward(task.taskId)}%</b>)
+                                    </span>
+                                </IonText>
+                            </IonItem>
+                        }
+
                     </div>
 
                     <div className="pool-info-bottom">

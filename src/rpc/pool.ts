@@ -10,24 +10,38 @@ class PoolRpc extends Base {
         super(host);
     }
 
-    getMyTask = async (address: string):Promise<Array<PoolTask>> => {
-        const rest:any = await this.post("epoch_getTask", [], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    getMyTask = async (address: string): Promise<Array<PoolTask>> => {
+        const rest: any = await this.post("epoch_getTask", [], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    getTask = async (address: string, pageNo: number, size: number,scenes:MinerScenes,name?:string,sort?:number):Promise<Array<PoolTask>> => {
-        const rest:any = await this.post("epoch_getTask", [JSON.stringify({pageNo, size,scenes:scenes,name:name,sort:sort})], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    getTask = async (address: string, pageNo: number, size: number, scenes: MinerScenes, name?: string, sort?: number): Promise<Array<PoolTask>> => {
+        const rest: any = await this.post("epoch_getTask", [JSON.stringify({
+            pageNo,
+            size,
+            scenes: scenes,
+            name: name,
+            sort: sort
+        })], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    getPayment = async (taskId:number,address: string, pageNo: number, size: number) :Promise<Array<PoolPayment>> => {
-        const rest:any = await this.post("epoch_getPayment", [JSON.stringify({taskId,pageNo, size})], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    getPayment = async (taskId: number, address: string, pageNo: number, size: number): Promise<Array<PoolPayment>> => {
+        const rest: any = await this.post("epoch_getPayment", [JSON.stringify({
+            taskId,
+            pageNo,
+            size
+        })], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    getShare = async (taskId:number,address: string, pageNo: number, size: number) :Promise<Array<PoolShare>> => {
-        const rest:any = await this.post("epoch_getShare", [JSON.stringify({taskId,pageNo, size})], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    getShare = async (taskId: number, address: string, pageNo: number, size: number): Promise<Array<PoolShare>> => {
+        const rest: any = await this.post("epoch_getShare", [JSON.stringify({
+            taskId,
+            pageNo,
+            size
+        })], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
     submitWork = async (address: string, req: SumbitReq): Promise<any> => {
@@ -35,30 +49,36 @@ class PoolRpc extends Base {
         return rest;
     }
 
-    taskImage = async (taskId:number,address: string) :Promise<Array<any>> => {
-        const rest:any = await this.post("epoch_taskImage", [taskId], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    taskImage = async (taskId: number, address: string): Promise<Array<any>> => {
+        const rest: any = await this.post("epoch_taskImage", [taskId], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    taskWithIds = async (ids:Array<number>,address:string):Promise<Array<PoolTask>> => {
-        const rest:any = await this.post("epoch_taskWithIds", [ids], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    taskWithIds = async (ids: Array<number>, address: string): Promise<Array<PoolTask>> => {
+        const rest: any = await this.post("epoch_taskWithIds", [ids], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    epochTaskShare = async (taskId:number,period:number,address:string):Promise<Array<PoolShare>> => {
-        const rest:any = await this.post("epoch_taskShare", [taskId,period], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    epochTaskShare = async (taskId: number, period: number, address: string): Promise<Array<PoolShare>> => {
+        const rest: any = await this.post("epoch_taskShare", [taskId, period], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    epochTaskPayment = async (taskId:number,period:number,address:string):Promise<Array<PoolPayment>> => {
-        const rest:any = await this.post("epoch_taskPayment", [taskId,period], ChainType.SERO, "/" + address)
-        return rest?rest:[];
+    epochTaskPayment = async (taskId: number, period: number, address: string): Promise<Array<PoolPayment>> => {
+        const rest: any = await this.post("epoch_taskPayment", [taskId, period], ChainType.SERO, "/" + address)
+        return rest ? rest : [];
     }
 
-    epochPoolConfig = async (address:string) => {
-        const rest:any = await this.post("epoch_pageConfig",[],ChainType.SERO,"/"+address)
+    epochPoolConfig = async (address: string) => {
+        const rest: any = await this.post("epoch_pageConfig", [], ChainType.SERO, "/" + address)
         return rest;
     }
+
+    epochNameExisted = async (name: string, address: string) => {
+        const rest: any = await this.post("epoch_nameExists", [name], ChainType.SERO, "/" + address)
+        return rest;
+    }
+
 }
 
 export interface SumbitReq {
@@ -75,9 +95,9 @@ export interface PoolShare {
     period: number,
     phash: string,
     scenes: MinerScenes,
-    serial:number,
-    taskId:number,
-    user:string
+    serial: number,
+    taskId: number,
+    user: string
     updateTime: number
 }
 
