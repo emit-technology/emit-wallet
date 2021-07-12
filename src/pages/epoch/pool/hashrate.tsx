@@ -45,7 +45,6 @@ import rpc from "../../../rpc";
 import selfStorage from "../../../utils/storage";
 import PoolMiner from "../miner/pool";
 import i18n from "../../../locales/i18n";
-import interVar from "../../../interval";
 
 interface State {
     showModal: boolean

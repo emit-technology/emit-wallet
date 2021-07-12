@@ -23,10 +23,6 @@ import * as serviceWorker from './serviceWorker';
 import './index.css';
 import { Plugins,StatusBarStyle } from '@capacitor/core';
 import url from "./utils/url";
-import interVar from "./interval/nft";
-import rpc from "./rpc";
-import walletWorker from "./worker/walletWorker";
-import {ChainType} from "./types";
 import selfStorage from "./utils/storage";
 
 const accountId = selfStorage.getItem("accountId");
@@ -41,25 +37,7 @@ setTimeout(()=>{
 
 },1000)
 
-const initNFT = ()=>{
-    walletWorker.accountInfo().then(account=>{
-        const address = account && account.addresses[ChainType.SERO]
-        if(address){
-            rpc.getTicketSero(address).catch(e=>{
-                console.error(e)
-            })
-            rpc.getTicketEth(account.addresses[ChainType.ETH]).catch(e=>{
-                console.error(e)
-            })
-        }
-    })
-}
 
-initNFT();
-
-interVar.start(()=>{
-    initNFT()
-},1000 * 30)
 
 let lastBackButtonTime = 0;
 Plugins.App.addListener("backButton",()=>{

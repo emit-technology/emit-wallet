@@ -33,7 +33,7 @@ import * as utils from "../../../utils"
 import {AccountModel, ChainType, Transaction} from "../../../types";
 import walletWorker from "../../../worker/walletWorker";
 import PoolMiner from "../miner/pool";
-import interVar from "../../../interval";
+import {interVarEpoch as interVar} from "../../../interval";
 import BigNumber from "bignumber.js";
 import selfStorage from "../../../utils/storage";
 import ConfirmTransaction from "../../../components/ConfirmTransaction";

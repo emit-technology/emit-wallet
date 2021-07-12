@@ -15,7 +15,6 @@ import {ChainType, NftInfo} from "../types";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
-import interVar from "../interval/index";
 import i18n from "../locales/i18n";
 
 class NFT extends React.Component<any, any> {
@@ -32,12 +31,10 @@ class NFT extends React.Component<any, any> {
 
     componentDidMount() {
 
-        interVar.start(()=>{
-            this.init().then(() => {
-            }).catch(e=>{
-                console.error(e)
-            })
-        },10*1000)
+        this.init().then(() => {
+        }).catch(e=>{
+            console.error(e)
+        })
     }
 
     init = async () => {
@@ -68,59 +65,19 @@ class NFT extends React.Component<any, any> {
             ticketMap.set(key,wrapTicket);
         }
 
-        // const styles = ["ax",
-        //     "axe",
-        //     "baseball",
-        //     "bone",
-        //     "boomerang",
-        //     "bow",
-        //     "broom",
-        //     "claw",
-        //     "crossbow",
-        //     "darts",
-        //     "fork",
-        //     "grenade",
-        //     "hammer",
-        //     "hammerball",
-        //     "lightsaber",
-        //     "magic",
-        //     "massage",
-        //     "nail",
-        //     "pistol",
-        //     "poniard",
-        //     "samurai",
-        //     "saucepan",
-        //     "saw",
-        //     "shovel",
-        //     "sickle",
-        //     "spear",
-        //     "staff",
-        //     "sword",
-        //     "syringe",
-        //     "trident",
-        //     "whip",
-        //     "wooden",
-        //     "wrench"]
-        //
-        // if(ticketMap.has("DEVICES")){
-        //     // @ts-ignore
-        //     const da:Array<NftInfo> = ticketMap.get("DEVICES")
-        //     for(let s of styles){
-        //         const d = JSON.parse(JSON.stringify(da[0]))
-        //         if(d.meta){
-        //             d.meta.image = `./assets/img/epoch/device/${s}.png`
-        //             da.push(d)
-        //         }
-        //     }
-        //     ticketMap.set("DEVICES",da)
-        // }
-
         this.setState({
             ticketMap: ticketMap,
         })
+
+        this.initNFT()
     }
 
     setTab = (v:any)=>{
+
+        this.init().then(() => {
+        }).catch(e=>{
+            console.error(e)
+        })
 
         const {ticketMap} = this.state;
 
@@ -134,22 +91,19 @@ class NFT extends React.Component<any, any> {
         // })
     }
 
-    // initDriver = async (v:any ) =>{
-    //     if(v == "DRIVER"){
-    //         const account = await walletWorker.accountInfo();
-    //         const drivers:any = {};
-    //         for(let k in MinerScenes){
-    //             const scene = parseInt(k);
-    //             if(scene && scene !== 0){
-    //                 const rest = await epochService.userInfo(scene, account.addresses[ChainType.SERO])
-    //                 drivers[scene]=rest
-    //             }
-    //         }
-    //         this.setState({
-    //             drivers:drivers
-    //         })
-    //     }
-    // }
+    initNFT = ()=>{
+        walletWorker.accountInfo().then(account=>{
+            const address = account && account.addresses[ChainType.SERO]
+            if(address){
+                rpc.getTicketSero(address).catch(e=>{
+                    console.error(e)
+                })
+                rpc.getTicketEth(account.addresses[ChainType.ETH]).catch(e=>{
+                    console.error(e)
+                })
+            }
+        })
+    }
 
     render() {
         const {ticketMap,tab,drivers} = this.state;

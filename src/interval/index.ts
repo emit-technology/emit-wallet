@@ -32,9 +32,10 @@ class Interval {
 
 const interVar = new Interval("homeIntervalId");
 const interVarSwap = new Interval("swapIntervalId");
+const interVarEpoch = new Interval("interVarEpochId");
 
 export default interVar
 
 export {
-    interVarSwap
+    interVarSwap,interVarEpoch
 }

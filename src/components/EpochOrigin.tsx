@@ -41,7 +41,7 @@ import walletWorker from "../worker/walletWorker";
 import altarMiner from "../pages/epoch/miner/altar";
 import chaosMiner from "../pages/epoch/miner/chaos";
 
-import interVar from "../interval";
+import {interVarEpoch} from "../interval";
 import './EpochOrigin.scss';
 import {EPOCH_SETTLE_TIME} from "../config";
 import EpochAttribute from "./EpochAttribute";
@@ -203,14 +203,14 @@ class EpochOrigin extends React.Component<Props, State> {
         }
 
         if (isMining) {
-            interVar.start(() => {
+            interVarEpoch.start(() => {
                 this.mintState().then(() => {
                 }).catch(e => {
                     console.error(e)
                 })
             }, 1 * 1000)
         } else {
-            interVar.stop()
+            interVarEpoch.stop()
         }
     }
 
@@ -491,7 +491,7 @@ class EpochOrigin extends React.Component<Props, State> {
                     :
                     scenes == MinerScenes.chaos && periods.length == 1 &&
                     <div className="ctx">
-                        <IonItemDivider mode="md"><IonText color="dark">{t}</IonText> <IonText color="medium"><small>{`Serial: ${userInfo?.pImage.serial}`}</small></IonText> {b &&
+                        <IonItemDivider mode="md"><IonText color="dark">{t}</IonText> {b &&
                         <Countdown date={nextPeriodTime} renderer={this.renderer}/>}</IonItemDivider>
                         <IonRow>
                             <IonCol size="3"></IonCol>
@@ -514,7 +514,7 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     onSelectDevice = async (value: string) => {
-        interVar.stop()
+        interVarEpoch.stop()
         if (value) {
             const ticket = value.split("$")[0];
             const alis = value.split("$")[1]
@@ -530,7 +530,7 @@ class EpochOrigin extends React.Component<Props, State> {
                 selectAxe: value
             })
         }
-        interVar.start(() => {
+        interVarEpoch.start(() => {
             this.mintState().then(() => {
             }).catch(e => {
                 console.error(e)
