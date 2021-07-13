@@ -38,6 +38,9 @@ class NFT extends React.Component<any, any> {
     }
 
     init = async () => {
+
+        this.initNFT()
+
         const account = await walletWorker.accountInfo()
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const seroTicket = await rpc.getTicket(ChainType.SERO, account.addresses[ChainType.SERO])
@@ -48,14 +51,14 @@ class NFT extends React.Component<any, any> {
             let wrapTicket: Array<NftInfo> = [];
             const ethSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["ETH"];
             const seroSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"];
-            if(seroSymbol){
+            if(seroSymbol && seroTicket){
                 const data:Array<NftInfo> = seroTicket[seroSymbol];
                 if(data && data.length>0){
                     wrapTicket = wrapTicket.concat(data)
                 }
             }
 
-            if(ethSymbol){
+            if(ethSymbol && ethTicket){
                 const data:Array<NftInfo> = ethTicket[ethSymbol];
                 if(data && data.length>0){
                     wrapTicket = wrapTicket.concat(data)
@@ -69,7 +72,7 @@ class NFT extends React.Component<any, any> {
             ticketMap: ticketMap,
         })
 
-        this.initNFT()
+
     }
 
     setTab = (v:any)=>{
