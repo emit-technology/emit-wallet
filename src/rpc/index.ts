@@ -85,6 +85,20 @@ class RPC {
         return item
     }
 
+    initNFT = ()=>{
+        walletWorker.accountInfo().then(account=>{
+            const address = account && account.addresses[ChainType.SERO]
+            if(address){
+                rpc.getTicketSero(address).catch(e=>{
+                    console.error(e)
+                })
+                rpc.getTicketEth(account.addresses[ChainType.ETH]).catch(e=>{
+                    console.error(e)
+                })
+            }
+        })
+    }
+
     getTicketEth = async (address: string) => {
         const tKey = utils.ticketKey(ChainType.ETH);
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);

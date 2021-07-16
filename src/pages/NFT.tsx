@@ -39,7 +39,7 @@ class NFT extends React.Component<any, any> {
 
     init = async () => {
 
-        this.initNFT()
+        rpc.initNFT();
 
         const account = await walletWorker.accountInfo()
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
@@ -92,20 +92,6 @@ class NFT extends React.Component<any, any> {
         // this.initDriver(v).catch(e=>{
         //     console.log(e)
         // })
-    }
-
-    initNFT = ()=>{
-        walletWorker.accountInfo().then(account=>{
-            const address = account && account.addresses[ChainType.SERO]
-            if(address){
-                rpc.getTicketSero(address).catch(e=>{
-                    console.error(e)
-                })
-                rpc.getTicketEth(account.addresses[ChainType.ETH]).catch(e=>{
-                    console.error(e)
-                })
-            }
-        })
     }
 
     render() {

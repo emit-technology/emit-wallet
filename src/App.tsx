@@ -96,7 +96,6 @@ import Chart from "./pages/browser/chart";
 import HashRatePool from "./pages/epoch/pool/hashrate";
 import PoolInfo from "./pages/epoch/pool/info";
 
-
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
 let epoch = require("./img/icon/epoch.png")

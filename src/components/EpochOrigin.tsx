@@ -384,6 +384,8 @@ class EpochOrigin extends React.Component<Props, State> {
     };
 
     getDevice = async ():Promise<Array<NftInfo>> => {
+        rpc.initNFT();
+
         const rest:any = selfStorage.getItem(utils.ticketKey(ChainType.SERO))
         return rest ?rest["EMIT_AX"]:[]
     }
@@ -675,7 +677,7 @@ class EpochOrigin extends React.Component<Props, State> {
                                 <>
                                     <IonItem>
                                         <IonLabel><span className="font-md">{i18n.t("changeAxe")}</span></IonLabel>
-                                        <IonSelect mode="ios" value={selectAxe} onIonChange={(e: any) => {
+                                        <IonSelect mode="md" value={selectAxe} onIonChange={(e: any) => {
                                             this.onSelectDevice(e.detail.value).catch(e => {
                                                 console.error(e)
                                             })
