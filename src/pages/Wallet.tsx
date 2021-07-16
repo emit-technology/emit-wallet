@@ -151,6 +151,8 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
+        rpc.initNFT();
+
         interVar.start(()=>{
             this.init().then(() => {
             }).catch()
