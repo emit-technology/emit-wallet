@@ -344,7 +344,7 @@ class HashRatePool extends React.Component<any, State> {
         const poolTask: Array<PoolTask> = await poolRpc.getTask(account.addresses[ChainType.SERO], pageNo + 1, pageSize, new BigNumber(filterValue).toNumber(), searchText, sort)
         if (poolTask.length == 0) {
             if (event) {
-                event.target.disabled = true;
+                // event.target.disabled = true;
             }
             this.setState({
                 noMore: true
