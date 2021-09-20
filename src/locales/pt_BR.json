@@ -177,5 +177,22 @@
   "thePeriodsIs": "Os períodos são",
   "neTips": "Pelo menos uma pessoa na sua piscina mineira precisa de enviar mais de $$ NE, então a recompensa será automaticamente liquidada",
   "returnTips": "Receberá $$ LIGHT para devolução",
-  "depositTips": "Depositará $$ LIGHT para recompensa"
+  "depositTips": "Depositará $$ LIGHT para recompensa",
+  "seal": "Selo",
+  "unseal": "Desvincular",
+  "tokenId": "Token Id",
+  "attribute": "Atributo",
+  "trade": "Comércio",
+  "relics": "Relíquias",
+  "market": "Mercado",
+  "sell": "Venda",
+  "records": "Registos",
+  "buy": "Comprar",
+  "style": "Categoria",
+  "estimate": "Estimativa",
+  "fee": "Tarifa",
+  "history": "História",
+  "owner": "Proprietário",
+  "offShelf": "Fora de prateleira",
+  "forgeBurnLight": "Forjar um novo machado só suporta queimaduras LIGHT!"
 }

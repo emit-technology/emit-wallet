@@ -21,22 +21,15 @@ import {Redirect, Route, Switch} from 'react-router-dom';
 import {
     IonApp,
     IonIcon,
-    IonLabel,IonImg,
+    IonLabel, IonImg,
     IonRouterOutlet,
     IonTabBar,
     IonTabButton,
-    IonTabs
+    IonTabs, IonSplitPane
 } from '@ionic/react';
-import {IonReactRouter, IonReactHashRouter} from '@ionic/react-router';
+import {IonReactHashRouter} from '@ionic/react-router';
 import {
-    ellipse,
-    square,
-    triangle,
-    gitCompareOutline,
-    sunnyOutline,
-    walletOutline,
-    appsOutline,
-    settingsOutline, swapHorizontalOutline
+    appsOutline, swapHorizontalOutline,
 } from 'ionicons/icons';
 import Wallet from './pages/Wallet';
 import Epoch from './pages/Epoch';
@@ -88,169 +81,196 @@ import embed from "./utils/embed";
 import {DeviceInfo, Plugins} from "@capacitor/core";
 import DeviceRank from "./pages/epoch/device/rank";
 import DriverRank from "./pages/epoch/driver/rank";
-import walletWorker from "./worker/walletWorker";
-import url from "./utils/url";
 import Swap from "./pages/swap";
 import Browser from "./pages/browser/index";
 import Chart from "./pages/browser/chart";
 import HashRatePool from "./pages/epoch/pool/hashrate";
 import PoolInfo from "./pages/epoch/pool/info";
+import NFTMarketPlace from "./pages/market/NFTMarketPlace";
+import MenuNFT from "./components/menus/NFT";
+import Trade from "./pages/trade/Trade";
+import Freeze from "./pages/epoch/remains/freeze";
+import Unfreeze from "./pages/epoch/remains/unfreeze";
+import NFTMarketSearch from "./pages/market/NFTMarketSearch";
+import EpochStyle from "./pages/epoch/style";
+import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
 let epoch = require("./img/icon/epoch.png")
 let setting = require("./img/icon/setting.png")
 
-interface State{
-    deviceInfo?:DeviceInfo
-    selected:boolean
+interface State {
+    deviceInfo?: DeviceInfo
+    selected: string
 }
 
-class App extends React.Component<any,State>{
+class App extends React.Component<any, State> {
 
-    state:State = {
-        selected:false
+    state: State = {
+        selected: "wallet"
     }
 
     componentDidMount() {
-        // const urlHash = window.location.hash;
-        // if(urlHash.indexOf("account") == -1 && urlHash.indexOf("slide") == -1){
-        //     walletWorker.isLocked().then(ret=>{
-        //         if(ret && urlHash.indexOf("account/unlock") == -1){
-        //             url.accountUnlock()
-        //         }
-        //     })
-        // }
 
-        this.init().catch(e=>{
+        this.init().catch(e => {
             console.log(e)
         })
     }
 
-    init = async ()=>{
-        if(utils.isEmbedPopup()){
-            selfStorage.setItem("embed","popup")
-            embed.initPopup().catch(e=>{
+    init = async () => {
+        if (utils.isEmbedPopup()) {
+            selfStorage.setItem("embed", "popup")
+            embed.initPopup().catch(e => {
                 console.error(e)
             })
         }
 
-        const info:DeviceInfo = await Plugins.Device.getInfo()
+        const info: DeviceInfo = await Plugins.Device.getInfo()
         this.setState({
-            deviceInfo:info
+            deviceInfo: info
         })
     }
 
-    resetIcon = (v:any)=>{
-        this.setState({selected:v})
+    resetIcon = (v: any) => {
+        console.log(v)
+        this.setState({selected: v})
         element = require("./img/icon/element.png")
         nft = require("./img/icon/NFT.png")
         epoch = require("./img/icon/epoch.png")
         setting = require("./img/icon/setting.png")
-        if(v == "wallet"){
+        if (v == "wallet") {
             element = require("./img/icon/element_selected.png")
-        }else if(v == "nft"){
+        } else if (v == "nft") {
             nft = require("./img/icon/NFT_selected.png")
-        }else if(v == "epoch"){
+        } else if (v == "epoch") {
             epoch = require("./img/icon/epoch_selected.png")
-        }else if(v == "settings"){
+        } else if (v == "settings") {
             setting = require("./img/icon/setting_selected.png")
+        } else if (v == "settings") {
+
         }
     }
 
     render() {
-        const {deviceInfo} = this.state;
+        const {deviceInfo, selected} = this.state;
         return (
             <IonApp>
                 <IonReactHashRouter>
                     {/*<IonRouterOutlet>*/}
-                    {/*  <Switch>*/}
-                    <Route path="/slide" component={Slides} exact={true}/>
-                    <Route path="/tunnel-nft/:symbol/:chain/:tokenId" component={TunnelNFT} exact={true}/>
-                    <Route path="/tunnel/:cy/:chain1/:chain2" component={Tunnel} exact={true}/>
-                    <Route path="/manage/about" component={About} exact={true}/>
-                    <Route path="/account/create" component={CreateAccount} exact={true}/>
-                    <Route path="/account/backup" component={Backup} exact={true}/>
-                    <Route path="/account/confirm" component={Confirm} exact={true}/>
-                    <Route path="/account/import" component={ImportAccount} exact={true}/>
-                    <Route path="/account/unlock" component={Unlock} exact={true}/>
-                    <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
-                    <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
-                    <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>
-                    <Route path="/account/receive/:address/:chain" component={Receive} exact={true}/>
-                    <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
-                    <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
-                    <Route path="/scan" component={Scan} exact={true}/>
-                    <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
-                    <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
+                    <Switch>
+                        <Route path="/slide" component={Slides} exact={true}/>
+                        <Route path="/tunnel-nft/:symbol/:chain/:tokenId" component={TunnelNFT} exact={true}/>
+                        <Route path="/tunnel/:cy/:chain1/:chain2" component={Tunnel} exact={true}/>
+                        <Route path="/manage/about" component={About} exact={true}/>
+                        <Route path="/account/create" component={CreateAccount} exact={true}/>
+                        <Route path="/account/backup" component={Backup} exact={true}/>
+                        <Route path="/account/confirm" component={Confirm} exact={true}/>
+                        <Route path="/account/import" component={ImportAccount} exact={true}/>
+                        <Route path="/account/unlock" component={Unlock} exact={true}/>
+                        <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
+                        <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
+                        <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>
+                        <Route path="/account/receive/:address/:chain" component={Receive} exact={true}/>
+                        <Route path="/transaction/list/:chain/:cy" component={TransactionList} exact={true}/>
+                        <Route path="/transaction/info/:chain/:hash" component={TransactionInfo} exact={true}/>
+                        <Route path="/scan" component={Scan} exact={true}/>
+                        <Route path="/tron/frozen" component={TronFrozenBalance} exact={true}/>
+                        <Route path="/swap/eth/:op" component={ExchangeWETH} exact={true}/>
 
-                    <Route path="/epoch/altar" component={Altar} exact={true}/>
-                    <Route path="/epoch/chaos" component={Chaos} exact={true}/>
-                    <Route path="/epoch/device/rank" component={DeviceRank} exact={true}/>
-                    <Route path="/epoch/driver/rank/:scenes" component={DriverRank} exact={true}/>
-                    <Route path="/epoch/pool/hashrate" component={HashRatePool} exact={true}/>
-                    <Route path="/epoch/pool/info/:id" component={PoolInfo} exact={true}/>
+                        <Route path="/epoch/altar" component={Altar} exact={true}/>
+                        <Route path="/epoch/chaos" component={Chaos} exact={true}/>
+                        <Route path="/epoch/device/rank" component={DeviceRank} exact={true}/>
+                        <Route path="/epoch/driver/rank/:scenes" component={DriverRank} exact={true}/>
+                        <Route path="/epoch/pool/hashrate" component={HashRatePool} exact={true}/>
+                        <Route path="/epoch/pool/info/:id" component={PoolInfo} exact={true}/>
+                        <Route path="/epoch/freeze/:tkt/:category" component={Freeze} exact={true}/>
+                        <Route path="/epoch/unfreeze/:tkt/:category" component={Unfreeze} exact={true}/>
 
-                    <Route path="/browser/:url" component={Browser} exact={true}/>
-                    <Route path="/chart/:symbol" component={Chart} exact={true}/>
+                        <Route path="/epoch/style" component={EpochStyle} exact={true}/>
 
-                    <Route path="/" render={() => {
-                        const viewedSlide = selfStorage.getItem('viewedSlide');
-                        if (!viewedSlide && !utils.isEmbedPopup() && deviceInfo && deviceInfo.platform != "web") {
-                            return <Redirect to="/slide"/>
-                        }
-                        const accountId = selfStorage.getItem('accountId');
-                        if (!accountId || accountId === "undefined") {
-                            return <Redirect to="/account/create"/>
-                        }
-                        return <Redirect to="/tabs/wallet"/>
-                    }} exact={true}/>
-                    {/*</Switch>*/}
-                    <Route
-                        path="/tabs"
-                        render={() => (
-                            <IonTabs onIonTabsDidChange={v=>{
-                                this.resetIcon(v.detail.tab);
-                            }}>
-                                <IonRouterOutlet>
-                                    <Route path="/tabs/wallet" component={Wallet} exact={true}/>
-                                    <Route path="/tabs/epoch" component={Epoch} exact={true}/>
-                                    <Route path="/tabs/settings" component={Settings} exact={true}/>
-                                    <Route path="/tabs/nft" component={NFT} exact={true}/>
-                                    <Route path="/tabs/swap" component={Swap} exact={true}/>
-                                </IonRouterOutlet>
-                                <IonTabBar mode="ios" slot="bottom" selectedTab="wallet" className="toolbar-cust">
-                                    <IonTabButton tab="wallet" href="/tabs/wallet">
-                                        <IonImg src={element}  className="toolbar-icon"/>
-                                        <IonLabel className="text-small-x2">{i18n.t("wallet")}</IonLabel>
-                                    </IonTabButton>
-                                    <IonTabButton tab="nft" href="/tabs/nft">
-                                        <IonImg src={nft} className="toolbar-icon"/>
-                                        <IonLabel className="text-small-x2">{i18n.t("NFT")}</IonLabel>
-                                    </IonTabButton>
-                                    {
-                                        !utils.isEmbedPopup() &&
-                                        <IonTabButton tab="epoch" href="/tabs/epoch">
-                                            <IonImg src={epoch} className="toolbar-icon"/>
-                                            <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
+                        <Route path="/browser/:url" component={Browser} exact={true}/>
+                        <Route path="/chart/:symbol" component={Chart} exact={true}/>
+                        <Route path="/trade/swap" component={Swap} exact={true}/>
+
+                        <Route path="/" render={() => {
+                            const viewedSlide = selfStorage.getItem('viewedSlide');
+                            if (!viewedSlide && !utils.isEmbedPopup() && deviceInfo && deviceInfo.platform != "web") {
+                                return <Redirect to="/slide"/>
+                            }
+                            const accountId = selfStorage.getItem('accountId');
+                            if (!accountId || accountId === "undefined") {
+                                return <Redirect to="/account/create"/>
+                            }
+                            return <Redirect to="/tabs/wallet"/>
+                        }} exact={true}/>
+                        <Route path="/trade/market/search" component={NFTMarketSearch} exact={true}/>
+                        <Route path="/trade/market/statics" component={NFTMarketStatics} exact={true}/>
+                        <Route path="/trade/market/:ticket" component={NFTMarketPlace} exact={true}/>
+                        <Route path="/trade/market" component={NFTMarketPlace} exact={true}/>
+                        {/*<Route*/}
+                        {/*    render={() => (*/}
+                        {/*        <IonSplitPane contentId="main">*/}
+                        {/*            <MenuNFT/>*/}
+                        {/*            <IonRouterOutlet id="main">*/}
+                        {/*                <Switch>*/}
+                        {/*                    <Route path="/trade/market" component={NFTMarketPlace} exact={true}/>*/}
+                        {/*                </Switch>*/}
+                        {/*            </IonRouterOutlet>*/}
+                        {/*        </IonSplitPane>*/}
+                        {/*    )}*/}
+                        {/*    path="/trade/market"*/}
+                        {/*/>*/}
+
+
+                        <Route
+                            path="/tabs"
+                            render={() => (
+                                <IonTabs onIonTabsDidChange={v => {
+                                    this.resetIcon(v.detail.tab);
+                                }}>
+                                    <IonRouterOutlet>
+                                        <Switch>
+                                            <Route path="/tabs/wallet" component={Wallet} exact={true}/>
+                                            <Route path="/tabs/epoch" component={Epoch} exact={true}/>
+                                            <Route path="/tabs/settings" component={Settings} exact={true}/>
+                                            <Route path="/tabs/nft" component={NFT} exact={true}/>
+                                            <Route path="/tabs/trade" component={Trade} exact={true}/>
+                                        </Switch>
+                                    </IonRouterOutlet>
+                                    <IonTabBar mode="ios" slot="bottom" selectedTab={selected}
+                                               className="toolbar-cust">
+                                        <IonTabButton tab="wallet" href="/tabs/wallet">
+                                            <IonImg src={element} className="toolbar-icon"/>
+                                            <IonLabel className="text-small-x2">{i18n.t("wallet")}</IonLabel>
                                         </IonTabButton>
-                                    }
-                                    {
-                                        !utils.isEmbedPopup() &&
-                                        <IonTabButton tab="swap" href="/tabs/swap">
-                                            <IonIcon src={swapHorizontalOutline}/>
-                                            <IonLabel className="text-small-x2">{i18n.t("swap")}</IonLabel>
+                                        <IonTabButton tab="nft" href="/tabs/nft">
+                                            <IonImg src={nft} className="toolbar-icon"/>
+                                            <IonLabel className="text-small-x2">{i18n.t("NFT")}</IonLabel>
                                         </IonTabButton>
-                                    }
-
-                                    <IonTabButton tab="settings" href="/tabs/settings">
-                                        <IonImg src={setting} className="toolbar-icon"/>
-                                        <IonLabel className="text-small-x2">{i18n.t("settings")}</IonLabel>
-                                    </IonTabButton>
-                                </IonTabBar>
-                            </IonTabs>
-                        )}
-                    />
+                                        {
+                                            !utils.isEmbedPopup() &&
+                                            <IonTabButton tab="epoch" href="/tabs/epoch">
+                                                <IonImg src={epoch} className="toolbar-icon"/>
+                                                <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
+                                            </IonTabButton>
+                                        }
+                                        {
+                                            !utils.isEmbedPopup() &&
+                                            <IonTabButton tab="trade" href="/tabs/trade">
+                                                <IonIcon src={swapHorizontalOutline}/>
+                                                <IonLabel className="text-small-x2">{i18n.t("trade")}</IonLabel>
+                                            </IonTabButton>
+                                        }
+                                        <IonTabButton tab="settings" href="/tabs/settings">
+                                            <IonImg src={setting} className="toolbar-icon"/>
+                                            <IonLabel className="text-small-x2">{i18n.t("settings")}</IonLabel>
+                                        </IonTabButton>
+                                    </IonTabBar>
+                                </IonTabs>
+                            )}
+                        />
+                    </Switch>
                     {/*</IonRouterOutlet>*/}
                 </IonReactHashRouter>
             </IonApp>

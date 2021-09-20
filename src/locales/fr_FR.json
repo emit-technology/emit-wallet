@@ -177,5 +177,23 @@
   "thePeriodsIs": "Les périodes sont",
   "neTips": "Au moins une personne de votre pool minier doit soumettre plus de $$ NE, puis la récompense sera automatiquement réglée.",
   "returnTips": "Vous recevrez $$ LIGHT pour la récompense",
-  "depositTips": "Vous déposerez $$ LIGHT pour la récompense"
+  "depositTips": "Vous déposerez $$ LIGHT pour la récompense",
+
+  "seal": "Sceller",
+  "unseal": "Déverrouiller",
+  "tokenId": "Token Id",
+  "attribute": "Attribut",
+  "trade": "Commerce",
+  "relics": "Reliques",
+  "market": "Marché",
+  "sell": "Vendre",
+  "records": "Records",
+  "buy": "Acheter",
+  "style": "Catégorie",
+  "estimate": "Estimation",
+  "fee": "Frais",
+  "history": "Historique",
+  "owner": "Propriétaire",
+  "offShelf": "En dehors de l'étagère",
+  "forgeBurnLight": "Forger une nouvelle hache ne supporte que les brûlures de la LIGHT"
 }

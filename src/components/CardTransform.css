@@ -11,10 +11,9 @@
 }
 
 .n-card {
-  margin: 15px;
-  position: relative;
-  height: calc(100vw + 150px);
+  margin: 12px 6px 0;
   color: #000;
+  padding: 0 12px;
 }
 
 .card-foo {
@@ -22,10 +21,10 @@
   bottom: 0;
   text-align: center;
   width: 100%;
+  background: #ddd;
 }
 
 .row-line {
-  border: 1px solid #555;
   text-align: center;
 }
 
@@ -46,20 +45,17 @@
   /* height: 305.938px; */
   transform: rotateY(180deg);
   margin: auto;
+  max-width: 512px;
 }
 
 .card-front {
-  position: absolute;
   z-index: 10;
   transform: rotateY(0deg) perspective(1529.69px);
   backface-visibility: visible;
   transform: perspective(1529.69px);
   overflow: hidden;
   transition: transform 1s cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  box-shadow: 0 0 5px 1px #ddd;
-  border-radius: 0.375em;
   backface-visibility: hidden;
-  padding: 30px;
 }
 
 .card-back {
@@ -71,7 +67,7 @@
   box-shadow: 0 0 5px 1px #ddd;
   border-radius: 0.375em;
   backface-visibility: hidden;
-  padding: 30px;
+  border: 1px solid #ddd;
 }
 
 .card-back-f {
@@ -86,17 +82,83 @@
 }
 
 .dark-element-bg {
-  background-image: -webkit-radial-gradient(circle, #000 5%, #960404 65%, #000 80%);
+  background-image: -webkit-radial-gradient(circle, #000 5%, #960404 65%, #000 70%);
+  border-radius: 5px 5px 0 0;
+  max-width: 512px;
 }
 
 .light-element-bg {
   background: -webkit-radial-gradient(circle, #fff 5%, #fff 65%, #152955 70%);
+  border-radius: 5px 5px 0 0;
+  max-width: 512px;
+}
+
+.pd-35 {
+  padding: 12%;
+}
+
+.card-desc-default {
+  background-color: #fff;
+  text-align: center;
+}
+
+.card-desc-light {
+  background-color: #1a2952;
+  color: #fff;
+  text-align: center;
+}
+
+.card-desc-dark {
+  background-color: #000 !important;
+  color: #fff;
+  text-align: center;
 }
 
 @keyframes pulsate1 {
   50% {
     box-shadow: 0 0 10px #fff, 10px 0 25px #f0f, -10px 0 25px #00ffff, inset 0 0 15px #fff, inset -15px 0 25px #f0f, inset 15px 0 25px #0ff, inset -15px 0 100px #f0f, inset 15px 0 100px #0ff;
   }
+}
+.description {
+  position: relative;
+  margin: 0 auto;
+  padding: 1em;
+  max-width: 23em;
+  background: rgba(255, 255, 255, 0.25) border-box;
+  overflow: hidden;
+  border-radius: 0.3em;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3) inset, 0 0.5em 1em rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.description::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: -30px;
+  z-index: -1;
+  -webkit-filter: blur(20px);
+  filter: blur(20px);
+}
+
+.nft-card-name {
+  text-align: center;
+  width: 100%;
+  font-weight: 500;
+  font-size: 14px;
+  overflow: hidden;
+  word-break: normal;
+  word-wrap: normal;
+  color: #fff;
+}
+
+.nft-star {
+  position: absolute;
+  top: 15px;
+  right: 20px;
 }
 
 /*# sourceMappingURL=CardTransform.css.map */

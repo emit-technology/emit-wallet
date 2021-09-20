@@ -17,7 +17,15 @@
  */
 
 import axios from "axios";
-import {CHAIN_PARAMS, CHAIN_PARAMS_BSC, CONTRACT_ADDRESS, EMIT_HOST, EPOCH_DEVICE_CATEGORY, META_TEMP} from "../config"
+import {
+    CHAIN_PARAMS,
+    CHAIN_PARAMS_BSC,
+    CONTRACT_ADDRESS,
+    EMIT_HOST,
+    EPOCH_DEVICE_CATEGORY,
+    EPOCH_WRAPPED_DEVICE_CATEGORY,
+    META_TEMP
+} from "../config"
 import {ChainType, NftInfo, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
@@ -26,8 +34,10 @@ import Erc721 from "../contract/erc721/meta/eth";
 import * as utils from "../utils"
 import epochNameService from "../contract/epoch/sero/name";
 import epochService from "../contract/epoch/sero/index";
-import {DeviceInfo} from "../contract/epoch/sero/types";
+import {DeviceInfo, WrappedDevice} from "../contract/epoch/sero/types";
 import url from "../utils/url";
+import epochRemainsService from "../contract/epoch/sero/remains";
+import BigNumber from "bignumber.js";
 
 class RPC {
 
@@ -85,18 +95,13 @@ class RPC {
         return item
     }
 
-    initNFT = ()=>{
-        walletWorker.accountInfo().then(account=>{
-            const address = account && account.addresses[ChainType.SERO]
-            if(address){
-                rpc.getTicketSero(address).catch(e=>{
-                    console.error(e)
-                })
-                rpc.getTicketEth(account.addresses[ChainType.ETH]).catch(e=>{
-                    console.error(e)
-                })
-            }
-        })
+    initNFT = async ()=>{
+       const account = await walletWorker.accountInfo();
+        const address = account && account.addresses[ChainType.SERO]
+        if(address){
+            await rpc.getTicketSero(address)
+            await rpc.getTicketEth(account.addresses[ChainType.ETH])
+        }
     }
 
     getTicketEth = async (address: string) => {
@@ -166,6 +171,31 @@ class RPC {
                         device.alis = meta.alis;
                         meta.image = `./assets/img/epoch/device/${device.mode.style}.png`
                         meta.attributes = device;
+                    }else if(EPOCH_WRAPPED_DEVICE_CATEGORY.indexOf(category) > -1 ){
+                        // const ax = await walletWorker.accountInfo();
+                        const wrappedDevice = await epochRemainsService.wrappedDevice(tokenId,"");
+                        if(!wrappedDevice || !wrappedDevice.category){
+                            continue
+                        }
+                        meta.alis = wrappedDevice.name;
+                        const stylePath = utils.isDark(wrappedDevice.gene)?"dark":"light";
+                        const mode = utils.calcStyle(wrappedDevice.gene)
+                        meta.image = mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${mode.style}.png`
+                        const attr:WrappedDevice = {
+                            base:wrappedDevice.base,
+                            capacity:wrappedDevice.capacity,
+                            category:wrappedDevice.category,
+                            current:wrappedDevice.current,
+                            freezeFee:wrappedDevice.freezeFee,
+                            freezeStartPeriod:wrappedDevice.freezeStartPeriod,
+                            gene:wrappedDevice.gene,
+                            name:wrappedDevice.name,
+                            power:wrappedDevice.power,
+                            rate:wrappedDevice.rate,
+                            ticket:wrappedDevice.ticket,
+                            srcTkt:wrappedDevice.srcTkt
+                        }
+                        meta.attributes = attr;
                     }
                     const token = {
                         chain:ChainType.SERO,

@@ -47,6 +47,7 @@ import GasPriceActionSheet from "../components/GasPriceActionSheet";
 import Erc721 from "../contract/erc721/meta/eth";
 import GasFeeProxyNFT from "../contract/gasFeeProxy/NFT";
 import { GAS_FEE_PROXY_ADDRESS} from "../config";
+import CardTransform from "../components/CardTransform";
 
 class TransferNFT extends React.Component<any, any> {
 
@@ -116,6 +117,7 @@ class TransferNFT extends React.Component<any, any> {
                 balance:balance,
                 gasPrice:defaultGasPrice,
                 metaData:ticket.meta,
+                ticket:ticket
             })
         } else {
             // window.location.href = "#/"
@@ -124,7 +126,7 @@ class TransferNFT extends React.Component<any, any> {
     }
 
     check = async ()=>{
-        const {to,chain,account,realCy,gasPrice,cy,balance,gas} = this.state;
+        const {to,chain,account,realCy,gasPrice,cy,balance,gas,ticket} = this.state;
         if (!to) {
             this.setShowToast(true,"","To is required!")
             return;
@@ -249,7 +251,7 @@ class TransferNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {metaData, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet,showLoading} = this.state;
+        const {ticket, chain, showProgress,gasPrice,tx, to, showToast,toastMessage,color,showAlert,showActionSheet,showLoading} = this.state;
 
         return <IonPage>
             <IonHeader>
@@ -262,35 +264,10 @@ class TransferNFT extends React.Component<any, any> {
 
             <IonContent fullscreen>
 
-                <IonGrid>
-                    <IonRow>
-                        <IonCol size={"7"} >
-                            <div style={{height:"30vh",border:"#ddd 1px solid"}}>
-                                <img src={metaData&&metaData.image}/>
-                            </div>
-                        </IonCol>
-                        <IonCol size={"5"} style={{height:"30vh"}}>
-                            <IonList>
-                                <IonItemDivider mode="md">
-                                    Name
-                                </IonItemDivider>
-                                <IonItem lines="none">
-                                    <small>
-                                        {metaData&&metaData.name}
-                                    </small>
-                                </IonItem>
-                                <IonItemDivider mode="md">
-                                    Token Id
-                                </IonItemDivider>
-                                <IonItem lines="none">
-                                    <div style={{width:"100%"}}>
-                                        <small>{this.props.match.params.value}</small>
-                                    </div>
-                                </IonItem>
-                            </IonList>
-                        </IonCol>
-                    </IonRow>
-                </IonGrid>
+                <div style={{height:"60vh",overflowY:"scroll",border:"1px solid #ddd",borderRadius:"5px",margin:"12px"}}>
+                    {ticket && <CardTransform info={ticket} hideButton={true}/>}
+                </div>
+
                 <IonList>
                     {/*<IonItem mode="ios" className="form-padding">*/}
                     {/*    <IonLabel position="stacked">{i18n.t("from")}</IonLabel>*/}

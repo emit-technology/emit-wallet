@@ -1,0 +1,116 @@
+.card-front-mkt {
+  position: absolute;
+  z-index: 10;
+  transform: rotateY(
+                  0deg
+  ) perspective(1529.69px);
+  backface-visibility: visible;
+  transform: perspective(1529.69px);
+
+  overflow: hidden;
+  transition: transform 1s cubic-bezier(.445, .05, .55, .95);
+  border-radius: calc(min(16.37vw,90px));
+  backface-visibility: hidden;
+
+  //background-color: #ca70f9;
+  //box-shadow: 0 0 30px 1px #ca70f9;
+  //border: 3px solid #ca70f9;
+  //box-shadow: 0 0 5px 1px #fbd834;
+  //animation: shinePurple 3s infinite;
+  //box-shadow: 0 0 25px #9d33bc;
+}
+
+.card-back-mkt {
+  position: absolute;
+  z-index: 9;
+  transform: rotateY(
+                  180deg
+  );
+  overflow: hidden;
+  transition: transform 1s cubic-bezier(.445, .05, .55, .95);
+  border-radius: calc(min(16.37vw,90px));
+  backface-visibility: hidden;
+  border: 1px solid #ddd;
+
+}
+
+.card-back-f-mkt {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: #FFF;
+  opacity: 0.9;
+  overflow: scroll;
+  //transform: rotateY(180deg);
+}
+
+
+@keyframes  shineGreen {
+  from { box-shadow: 0 0 5px 1px #c4ff94; }
+  50% { box-shadow: 0 0 10px 1px #c4ff94; }
+  to { box-shadow: 0 0 5px 1px #c4ff94; }
+}
+
+@keyframes  shineBlue {
+  from { box-shadow: 0 0 5px 1px #7bc1f8; }
+  50% { box-shadow: 0 0 20px 5px #7bc1f8; }
+  to { box-shadow: 0 0 5px 1px #7bc1f8; }
+}
+
+@keyframes  shinePurple {
+  from { box-shadow: 0 0 5px 1px #ca70f9; }
+  50% { box-shadow: 0 0 40px 20px #ca70f9; }
+  to { box-shadow: 0 0 5px 1px #ca70f9; }
+}
+
+@keyframes  shineGold {
+  from { box-shadow: 0 0 5px 1px #fbd834; }
+  50% { box-shadow: 0 0 20px 5px #fbd834; }
+  to { box-shadow: 0 0 5px 1px #fbd834; }
+}
+
+.nft-mkt-attr{
+  background-color: rgba(21, 178, 229, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgb(21, 178, 229);
+  padding: 6px 5px;
+  text-align: center;
+  width: 120px;
+  float: left;
+  margin: 6px;
+}
+
+.nft-mkt-attr div:nth-child(1){
+  color: #1d8eff;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.nft-mkt-attr div:nth-child(2){
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nft-mkt-name{
+  font-size: 30px;
+  font-weight: 600;
+  max-width: 100%;
+  width: 588px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+  margin-top: 12px;
+  height: 60px;
+}
+
+.nft-mkt-desc{
+  max-height: 20vh;
+  overflow-y: scroll;
+  color: #1e2023 !important;
+  font-size: 14px;
+}

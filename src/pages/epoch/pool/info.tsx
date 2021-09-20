@@ -419,7 +419,7 @@ class PoolInfo extends React.Component<any, State>{
                 }
 
                 if(new BigNumber(depositAmount).toNumber() < utils.fromValue(task.reward,18).toNumber() ){
-                    this.setShowToast(true,"warning",`The reward cannot be modified to be lower than the original reward [${utils.fromValue(task.reward,18).toString()} LIGHT]`)
+                    this.setShowToast(true,"warning",`The reward cannot be modified to be lower than the original reward [${utils.fromValue(task.reward,18).toString(10)} LIGHT]`)
                     return
                 }
             }
@@ -747,7 +747,7 @@ class PoolInfo extends React.Component<any, State>{
                                 e.persist();
                                 this.setShowPopover(true,e,"The reward for each period")}
                             }/><span>{i18n.t("reward")}</span></IonLabel>
-                            <IonText color="secondary"><span><b>{utils.fromValue(task?task.reward:0,18).toString()}</b></span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
+                            <IonText color="secondary"><span><b>{utils.fromValue(task?task.reward:0,18).toString(10)}</b></span> <small><IonText color="medium">LIGHT / Period</IonText></small></IonText>
                         </IonItem>
                         <IonItem>
                             <IonLabel><IonIcon src={helpCircleOutline} onClick={(e)=>{
@@ -772,7 +772,7 @@ class PoolInfo extends React.Component<any, State>{
                                 }/><span>{i18n.t("max")} {i18n.t("reward")} </span></IonLabel>
                                 <IonText color="secondary">
                                     <span>
-                                        <b>{utils.fromValue(task.reward,18).multipliedBy(this.maxReward(task.taskId)).dividedBy(100).toString()}</b> <IonText color="medium">LIGHT</IonText> (<b>{task && this.maxReward(task.taskId)}%</b>)
+                                        <b>{utils.fromValue(task.reward,18).multipliedBy(this.maxReward(task.taskId)).dividedBy(100).toString(10)}</b> <IonText color="medium">LIGHT</IonText> (<b>{task && this.maxReward(task.taskId)}%</b>)
                                     </span>
                                 </IonText>
                             </IonItem>

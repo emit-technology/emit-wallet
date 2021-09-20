@@ -108,3 +108,18 @@ export interface PoolTask {
     currentMaxNE: string
     currentUserTotalNE:string
 }
+
+export interface WrappedDevice {
+    name:string
+    category:string
+    ticket:string
+    base:string
+    capacity:string
+    power:string
+    rate:string
+    gene:string
+    freezeStartPeriod:number
+    freezeFee:string
+    current:string
+    srcTkt:string
+}

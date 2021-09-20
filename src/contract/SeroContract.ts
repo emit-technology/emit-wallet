@@ -59,6 +59,7 @@ class SeroContract{
         return await rpc.post("sero_estimateGas",[params],ChainType.SERO);
     }
 
+
 }
 
 export default SeroContract

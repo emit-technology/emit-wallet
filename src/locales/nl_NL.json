@@ -177,5 +177,23 @@
   "thePeriodsIs": "De termijnen zijn",
   "neTips": "Minstens één persoon in je mining pool moet meer dan $$ NE inleveren, dan wordt de beloning automatisch verrekend",
   "returnTips": "U ontvangt $$ LIGHT als beloning",
-  "depositTips": "U stort $$ LIGHT voor beloning"
+  "depositTips": "U stort $$ LIGHT voor beloning",
+
+  "seal": "Verzegelen",
+  "unseal": "Unseal",
+  "tokenId": "Token Id",
+  "attribute": "Attribuut",
+  "trade": "Handel",
+  "relics": "Relieken",
+  "market": "Markt",
+  "sell": "Verkopen",
+  "records": "Records",
+  "buy": "Kopen",
+  "style": "Categorie",
+  "estimate": "Schatting",
+  "fee": "Kosten",
+  "history": "Geschiedenis",
+  "owner": "Eigenaar",
+  "offShelf": "Van de plank",
+  "forgeBurnLight": "Smeden van een nieuwe bijl ondersteunt alleen het branden van LIGHT"
 }

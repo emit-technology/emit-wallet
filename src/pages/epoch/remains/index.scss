@@ -1,0 +1,144 @@
+.nft-mkt-card-p{
+  max-width: 300px;
+  position: relative;
+  margin: 15px 0 0 0;
+  animation: showFlow 3s linear 1 0s;
+  //name duration timing-function delay iteration-count direction fill-mode play-state;
+}
+
+.nft-mkt-card-img{
+  box-shadow: 0 0 5px 1px #ddd;
+  border-radius: 20px;
+}
+
+.box-center{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  //align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@keyframes moveOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(300px);
+  }
+}
+
+@keyframes showFlow {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.origin-move{
+  animation: moveOut 3s linear 1 0s;
+}
+
+.nft-attr-item{
+  border-radius: 25px;
+  background: rgba(0,0,0,0.5);
+  padding: 10px 15px;
+  color: #fff;
+  margin: 6px 0
+}
+
+.nft-attr-item div:nth-child(1){
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+
+@mixin chaos-absolute {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin chaos-element{
+  border: #fff;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow:$show-customer;
+}
+
+$color-boll:#fff;
+
+$show-customer:
+        0vw -12vh 0px 0.75px $color-boll,
+        6vw -8vh 0px 0.75px $color-boll,
+        14vw -9vh 0px -2.25px $color-boll,
+          //15vw -6vh 0px -4.25px $color-boll,
+          //38vw -15vh 0px -4.25px $color-boll,
+          //29vw -14vh 0px -5.25px $color-boll,
+        16vw -12vh 0px -1.25px $color-boll,
+        20vw -9vh 0px -3.25px $color-boll,
+        8vw -3vh 0px 1.75px $color-boll,
+          //29vw -11vh 0px -3.25px $color-boll,
+          //35vw -9vh 0px -4.25px $color-boll,
+          //35vw -12vh 0px -4.25px $color-boll,
+        29vw -7vh 0px -2.25px $color-boll,
+          //25vw -9vh 0px -6.25px $color-boll,
+        9vw -13vh 0px -2.25px $color-boll,
+          //23vw -15vh 0px -4.25px $color-boll,
+        22vw -12vh 0px -6.25px #fff;
+
+.seal-move{
+  position: absolute;
+  bottom: 46px;
+  left: 55px;
+}
+
+.seal-move div{
+  @include chaos-absolute;
+  @include chaos-element;
+}
+
+
+@keyframes star-move-out-mkt {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(100vw) translateY(0vh) scale(0.2) ;
+    opacity: 0;
+  }
+}

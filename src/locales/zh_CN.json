@@ -182,6 +182,23 @@
   "thePeriodsIs": "周期是",
   "neTips": "你的矿池中需要至少有一个人提交超过$$ NE，那么奖励就会自动结算。",
   "returnTips": "你将收到$$ LIGHT的返还",
-  "depositTips": "你将存入$$ LIGHT作为挖矿奖励"
+  "depositTips": "你将存入$$ LIGHT作为挖矿奖励",
 
+  "seal":"封存",
+  "unseal":"解封",
+  "tokenId":"Token Id",
+  "attribute":"属性",
+  "trade":"交易",
+  "relics":"遗迹",
+  "market":"市场",
+  "sell":"卖出",
+  "records":"记录",
+  "buy":"买入",
+  "style":"类型",
+  "estimate": "估算",
+  "fee": "费用",
+  "history": "记录",
+  "owner":"拥有者",
+  "offShelf":"下架",
+  "forgeBurnLight": "锻造新的斧子只支持LIGHT"
 }

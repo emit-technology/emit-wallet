@@ -179,5 +179,23 @@
   "thePeriodsIs": "사이클은입니다",
   "neTips": "적어도 한 사람이 $$ NE 이상을 제출 해야하는 경우 보상이 자동으로 해결됩니다",
   "returnTips": "$$ LIGHT의 수익을 받게됩니다",
-  "depositTips": "$$ LIGHT를 광산 보상으로 저장합니다"
+  "depositTips": "$$ LIGHT를 광산 보상으로 저장합니다",
+
+  "seal": "보관소",
+  "unseal": "차단 해제",
+  "tokenId": "Token Id",
+  "attribute": "속성",
+  "trade": "거래",
+  "relics": "유적",
+  "market": "시장",
+  "sell": "팔다",
+  "records": "기록",
+  "buy": "구매",
+  "style": "유형",
+  "estimate": "추정",
+  "fee": "비용",
+  "history": "기록",
+  "owner": "소유자",
+  "offShelf": "기성품",
+  "forgeBurnLight": "새 도끼를 단조하면 LIGHT만 지원됩니다"
 }

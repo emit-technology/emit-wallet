@@ -180,5 +180,23 @@
   "thePeriodsIs": "週期是",
   "neTips": "你的礦池中需要至少有一個人提交超過$$ NE，那麼獎勵就會自動結算。",
   "returnTips": "你將收到$$ LIGHT的返還",
-  "depositTips": "你將存入$$ LIGHT作為挖礦獎勵"
+  "depositTips": "你將存入$$ LIGHT作為挖礦獎勵",
+
+  "seal": "封存",
+  "unseal": "解封 ",
+  "tokenId": "Token Id",
+  "attribute": "屬性",
+  "trade": "交易",
+  "relics": "遺跡",
+  "market": "市場",
+  "sell": "賣出",
+  "records": "記錄",
+  "buy": "買入",
+  "style": "類型",
+  "estimate": "估算",
+  "fee": "費用",
+  "history": "記錄",
+  "owner": "擁有者",
+  "offShelf": "下架",
+  "forgeBurnLight": "鍛造新的斧子只支持LIGHT"
 }

@@ -30,12 +30,14 @@ import {
     META_TEMP,
     NOT_CROSS_TOKEN
 } from "../config"
-import {ChainId, ChainType, DeviceMode, GasPriceLevel, NftInfo} from "../types";
+import {ChainId, ChainType, DeviceMode, GasPriceLevel, MetaInfo, NftInfo} from "../types";
 import rpc from "../rpc";
 import * as utils from "../utils"
 import selfStorage from "./storage";
 import {DeviceCategory, DeviceStyle} from "./device-style";
-import {DeviceInfo, DeviceInfoRank} from "../contract/epoch/sero/types";
+import {DeviceInfo, DeviceInfoRank, WrappedDevice} from "../contract/epoch/sero/types";
+import {MarketItem} from "../rpc/epoch/market";
+import {bookmarkOutline, colorWandOutline, constructOutline, ellipseOutline, ribbonOutline} from "ionicons/icons";
 
 const utf8 = require("utf8");
 
@@ -467,6 +469,7 @@ export function nFormatter(n: number | BigNumber | string | undefined, digits: n
 }
 
 export function calcDark(dna: string): number {
+    // return 4;
     if (!dna || dna=="0x0000000000000000000000000000000000000000000000000000000000000000") {
         return 0
     }
@@ -478,6 +481,7 @@ export function calcDark(dna: string): number {
 }
 
 export function isDark(dna: string): boolean {
+    // return true;
     if (!dna || dna=="0x0000000000000000000000000000000000000000000000000000000000000000") {
         return false
     }
@@ -555,6 +559,58 @@ export const convertDeviceToNFTInfo = (device:DeviceInfo)=>{
         tokenId:device.ticket,
         meta:data
     }
+}
+
+export const convertWrappedDeviceToDevice = (wrappedDevice:WrappedDevice):DeviceInfo=>{
+    const device:DeviceInfo = {
+        category: wrappedDevice.category,
+        ticket: wrappedDevice.srcTkt,
+        base: new BigNumber(wrappedDevice.base).toNumber(),
+        capacity:  new BigNumber(wrappedDevice.capacity).toNumber(),
+        power:  new BigNumber(wrappedDevice.power).toNumber(),
+        rate: wrappedDevice.rate,
+        gene: wrappedDevice.gene,
+        last: wrappedDevice.freezeStartPeriod,
+        mode:utils.calcStyle(wrappedDevice.gene)
+    }
+    return device
+}
+
+export const convertDeviceToRemains = (info:NftInfo)=>{
+    const nftInfo:NftInfo = JSON.parse(JSON.stringify(info))
+    const meta = nftInfo.meta;
+
+    const deviceInfo:DeviceInfo = convertWrappedDeviceToDevice(meta.attributes)
+    const stylePath = deviceInfo && deviceInfo.gene && isDark(deviceInfo.gene)?"dark":"light";
+    meta.image = deviceInfo && deviceInfo.mode && deviceInfo.mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${deviceInfo.mode?.style}.png`
+    meta.attributes = deviceInfo;
+    return {
+        chain:ChainType.SERO,
+        category:"WRAPPED_EMIT_AX",
+        symbol: "WRAPPED_DEVICES",
+        tokenId:info.tokenId,
+        meta:meta
+    }
+}
+
+export const convertMarketItemToNFTInfo = (item:MarketItem):NftInfo=>{
+    const deviceInfo:DeviceInfo = JSON.parse(JSON.stringify(item.device));
+    deviceInfo.category = item.category;
+    deviceInfo.mode = utils.calcStyle(item.device.gene)
+
+    const meta = JSON.parse(JSON.stringify(META_TEMP["DEVICES"]))
+    const stylePath = utils.isDark(deviceInfo.gene)?"dark":"light";
+    meta.image = deviceInfo && deviceInfo.mode && deviceInfo.mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${deviceInfo.mode.style}.png`
+    meta.attributes = deviceInfo;
+    meta.alis=item.name;
+    const info:NftInfo = {
+        chain: ChainType.SERO,
+        category:item.category,
+        symbol: "WRAPPED_EMIT_AX" == item.category?"WRAPPED_DEVICES":"",
+        tokenId: item.ticket,
+        meta: meta
+    }
+    return  info;
 }
 
 export const convertDeviceRankInfoToNFTInfo = (device:DeviceInfoRank):NftInfo=>{
@@ -640,4 +696,47 @@ export function addressScanInfo(address:string,chain:ChainType){
         }
     }
     return `${EXPLORER_URL.ADDRESS[ChainType[chain]]}${address}`
+}
+
+export function frozeAbleBySymbol(symbol: string): boolean {
+    return CONTRACT_ADDRESS.ERC721[symbol]["FROZE_ABLE"];
+}
+
+export function unFrozenAbleBySymbol(symbol: string): boolean {
+    return CONTRACT_ADDRESS.ERC721[symbol]["UNFROZEN_ABLE"];
+}
+
+export function isNumber(str:any){
+    const partner = /^\d+(\.\d+)?$/
+    return partner.test(str);
+}
+
+export const reColor = (v:string)=>{
+    const keys = Object.keys(DeviceCategory)
+    if(v == keys[3]){
+        return "success"
+    }else if(v == keys[2]){
+        return "tertiary"
+    }else if(v == keys[1]){
+        return "danger"
+    }else if(v == keys[0]){
+        return "warning"
+    }else{
+        return "medium"
+    }
+}
+
+export const reIcon = (v:string)=>{
+    const keys = Object.keys(DeviceCategory)
+    if(v == keys[3]){
+        return bookmarkOutline
+    }else if(v == keys[2]){
+        return colorWandOutline
+    }else if(v == keys[1]){
+        return constructOutline
+    }else if(v == keys[0]){
+        return ribbonOutline
+    }else{
+        return ellipseOutline
+    }
 }

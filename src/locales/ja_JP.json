@@ -178,5 +178,23 @@
   "thePeriodsIs": "そのサイクルは",
   "neTips": "あなたのプールに少なくとも1人の人が$$ NE以上を提出する必要があり、その後、報酬は自動的に決済されます",
   "returnTips": "あなたは$$ LIGHTを返してもらいます",
-  "depositTips": "マイニング報酬として$$ LIGHTを入金します"
+  "depositTips": "マイニング報酬として$$ LIGHTを入金します",
+
+  "seal": "密閉型",
+  "unseal": "ブロック解除",
+  "tokenId": "トークンID",
+  "attribute": "プロパティ",
+  "trade": "トランザクション",
+  "relics": "レリック",
+  "market": "マーケット",
+  "sell": "売る",
+  "records": "レコード",
+  "buy": "購入",
+  "style": "タイプ",
+  "estimate": "見積もり",
+  "fee": "料金",
+  "history": "レコード",
+  "owner": "所有者",
+  "offShelf": "オフ・ザ・シェルフ",
+  "forgeBurnLight": "新しい斧の鍛造は、LIGHTにのみ対応しています"
 }

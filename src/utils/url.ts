@@ -55,8 +55,9 @@ class Url {
         driverRank : "epoch/driver/rank",
         poolHashRate: "epoch/pool/hashrate",
         poolInfo: "epoch/pool/info",
+        freeze: "epoch/freeze",
+        unfreeze: "epoch/unfreeze",
     }
-
     private browserBase = "browser"
 
     private chartBase = "chart"
@@ -66,6 +67,13 @@ class Url {
     private scan = "scan";
 
     private swapWEth = "swap/eth";
+
+    private exchange = {
+        market:"trade/market",
+        swap:"trade/swap",
+        marketSearch:"trade/market/search",
+        marketStatics: "trade/market/statics"
+    }
 
     constructor() {
     }
@@ -141,7 +149,11 @@ class Url {
     }
 
     accountUnlock() {
-        this.goTo([this.base, this.account.unlock].join("/"), "");
+        if (process.env.NODE_ENV == "development"){
+            walletWorker.unlockWallet("12345678")
+        }else{
+            this.goTo([this.base, this.account.unlock].join("/"), "");
+        }
     }
 
     receive(address: string,chain:ChainType) {
@@ -174,8 +186,8 @@ class Url {
         return
     }
 
-    transactionInfo(chain: ChainType, hash: string, cy: string) {
-        this.goTo([this.base, this.transaction.info, chain, hash].join("/"), [this.base, this.transaction.list, ChainType[chain], cy].join("/"));
+    transactionInfo(chain: ChainType, hash: string, cy: string,pre?:string) {
+        this.goTo([this.base, this.transaction.info, chain, hash].join("/"),pre?pre: [this.base, this.transaction.list, ChainType[chain], cy].join("/"));
         return
     }
 
@@ -231,6 +243,30 @@ class Url {
     poolInfo(id:any){
         this.goTo([this.base,this.epoch.poolInfo,id].join("/"),window.location.hash)
     }
+
+    tradeNftMarket = (ticket?:string) => {
+        this.goTo([this.base,this.exchange.market,ticket?ticket:""].join("/"),[this.base,"tabs/trade"].join("/"));
+    }
+
+    tradeTokenSwap = () => {
+        this.goTo([this.base,this.exchange.swap].join("/"),window.location.hash);
+    }
+
+    epochFreeze =(tkt:string,category:string)=>{
+        this.goTo([this.base,this.epoch.freeze,tkt,category].join("/"),window.location.hash);
+    }
+
+    epochUnFreeze =(tkt:string,category:string)=>{
+        this.goTo([this.base,this.epoch.unfreeze,tkt,category].join("/"),window.location.hash);
+    }
+
+    tradeMarketSearch = ()=>{
+        this.goTo([this.base,this.exchange.marketSearch].join("/"),[this.base,this.exchange.market].join("/"))
+    }
+    tradeMarketStatics = ()=>{
+        this.goTo([this.base,this.exchange.marketStatics].join("/"),[this.base,this.exchange.market].join("/"))
+    }
+
 }
 
 const url = new Url();

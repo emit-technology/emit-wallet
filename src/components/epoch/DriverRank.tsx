@@ -3,10 +3,10 @@ import {
     IonAvatar,
     IonIcon,
     IonItem,
-    IonLabel,IonInfiniteScroll,IonInfiniteScrollContent,
-    IonModal,IonList,
+    IonLabel, IonInfiniteScroll, IonInfiniteScrollContent,
+    IonModal, IonList,
     IonProgressBar,
-    IonText
+    IonText, IonButton
 } from '@ionic/react'
 
 import {DriverInfo, DriverInfoRank, PositionDriverInfoRank} from "../../contract/epoch/sero/types";
@@ -28,7 +28,7 @@ interface Props{
     drivers: Array<DriverInfoRank>
     myDriversRank?:PositionDriverInfoRank
     mainPKr:string
-    loadMore?:(e:any)=>void;
+    loadMore?:(e?:any)=>void;
     pageSize:number
     position?:number
 }
@@ -160,7 +160,16 @@ class DriverRank extends React.Component<Props, State>{
                                 </IonItem>
                             })
                         }
+                        {
+                            drivers && drivers.length == 10 && <div>
+                                <IonButton expand="block" color="light" fill="outline" mode="ios" onClick={()=>{
+                                    // @ts-ignore
+                                    this.props.loadMore()
+                                }}>SHOW TOP 100</IonButton>
+                            </div>
+                        }
                     </IonList>
+
                 </div>
             }
 

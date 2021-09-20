@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
     IonAvatar,
     IonList,
-    IonCol,
+    IonCol,IonButton,
     IonIcon,
     IonItem,
     IonLabel,
@@ -31,7 +31,7 @@ interface Props{
     devices:Array<DeviceInfoRank>
     position?:number
     ticket?:string
-    loadMore?:(e:any)=>void;
+    loadMore?:(e?:any)=>void;
     pageSize:number
     myDevices?:Array<string>
     isModal?:boolean
@@ -163,17 +163,27 @@ class DeviceRank extends React.Component<Props, State>{
                             </IonItem>
                         })
                     }
+                    {
+                        devices && devices.length == 10 && <div>
+                            <IonButton expand="block" color="light" fill="outline" mode="ios" onClick={()=>{
+                                // @ts-ignore
+                                this.props.loadMore()
+                            }}>SHOW TOP 100</IonButton>
+                        </div>
+                    }
+
                 </IonList>
+                {
+                    !isModal && <IonInfiniteScroll onIonInfinite={(e)=> this.props.loadMore&&this.props.loadMore(e)}>
+                        <IonInfiniteScrollContent
+                            loadingSpinner="bubbles"
+                            loadingText="Loading more data..."
+                        >
+                        </IonInfiniteScrollContent>
+                    </IonInfiniteScroll>
+                }
             </div>
-            {
-                !isModal && <IonInfiniteScroll threshold="30%" onIonInfinite={(e)=> this.props.loadMore&&this.props.loadMore(e)}>
-                    <IonInfiniteScrollContent
-                        loadingSpinner="bubbles"
-                        loadingText="Loading more data..."
-                    >
-                    </IonInfiniteScrollContent>
-                </IonInfiniteScroll>
-            }
+
             <ModifyName show={showModify} device={selectDevice} onDidDismiss={(f)=>this.setShowModify(f)} defaultName={selectDevice?.alis}/>
 
             <IonModal

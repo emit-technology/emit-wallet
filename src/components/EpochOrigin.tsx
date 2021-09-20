@@ -176,7 +176,7 @@ class EpochOrigin extends React.Component<Props, State> {
 
         const estimateLight = await this.convertPeriod(device,nexPeriods,scenes,fromAddress)
         const minNE = await epochService.minPowNE()
-        const minValue = new BigNumber(minNE).plus(utils.toValue(5000000,0)).toString(10)
+        const minValue = new BigNumber(minNE).plus(utils.toValue(5000000,0)).toString(10);//.plus(utils.toValue(5000000,0))
         this.setState({
             isMining: isMining,
             userInfo: userInfo,
@@ -241,26 +241,34 @@ class EpochOrigin extends React.Component<Props, State> {
     }
 
     prepare = async () => {
-        const {mintData,amount,minNE} = this.state;
+        const {mintData,amount,minNE,selectAxe,device,userInfo} = this.state;
         this.setShowLoading(true)
-
-        if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
-            if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
-                const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
-                await this.do(data)
-            }else{
-                if(new BigNumber(amount).toNumber()>0){
-                    const data = await epochService.prepare(this.props.scenes, "0")
-                    await this.do(data)
-                }else{
-                    return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
-                }
-            }
-        }else{
+        console.log(userInfo)
+        const isNewAxe = mintData.scenes == MinerScenes.altar && !selectAxe && (!device || !device.category || new BigNumber(device.ticket).toNumber() == 0 && device.category && userInfo && userInfo.currentPeriod != userInfo.settlementPeriod);
+        if(isNewAxe && (!amount || new BigNumber(amount).toNumber()==0)){
+            return Promise.reject(i18n.t("forgeBurnLight"))
+        }
+        if(isNewAxe && amount && new BigNumber(amount).toNumber()>0){
             const data = await epochService.prepare(this.props.scenes, "0")
             await this.do(data)
+        }else{
+            if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
+                if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
+                    const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
+                    await this.do(data)
+                }else{
+                    if(new BigNumber(amount).toNumber()>0){
+                        const data = await epochService.prepare(this.props.scenes, "0")
+                        await this.do(data)
+                    }else{
+                        return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
+                    }
+                }
+            }else{
+                const data = await epochService.prepare(this.props.scenes, "0")
+                await this.do(data)
+            }
         }
-
     }
 
     do = async (data: string) => {

@@ -1,0 +1,54 @@
+.discovery-content {
+  padding: 12px;
+}
+
+.discovery-box {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.discovery-banner {
+  max-width: 512px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.discovery-banner img {
+  border-radius: 15px;
+}
+
+.discovery-dapp {
+  text-align: center;
+}
+
+.discovery-dapp-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.ex-item div:nth-child(1) {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ex-item div:nth-child(3) {
+  color: #585656;
+}
+
+.ex-item-avatar {
+  border-radius: 15px;
+  width: 60px;
+  height: 60px;
+}
+
+/*# sourceMappingURL=index.css.map */

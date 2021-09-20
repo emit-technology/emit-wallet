@@ -177,5 +177,23 @@
   "thePeriodsIs": "I periodi sono",
   "neTips": "Almeno una persona nel tuo pool di minatori deve inviare più di $$ NE, poi la ricompensa sarà automaticamente liquidata",
   "returnTips": "Riceverai $$ LIGHT per la ricompensa",
-  "depositTips": "Depositerai $$ LIGHT per la ricompensa"
+  "depositTips": "Depositerai $$ LIGHT per la ricompensa",
+
+  "seal": "Sigillare",
+  "unseal": "Unseal",
+  "tokenId": "Token Id",
+  "attribute": "Attributo",
+  "trade": "Commercio",
+  "relics": "Reliquie",
+  "market": "Mercato",
+  "sell": "Vendere",
+  "records": "Dischi",
+  "buy": "Comprare",
+  "style": "Categoria",
+  "estimate": "Stima",
+  "fee": "Tassa",
+  "history": "Storia",
+  "owner": "Proprietario",
+  "offShelf": "Fuori scaffale",
+  "forgeBurnLight": "Forgia una nuova ascia supporta solo bruciare la LIGHT"
 }

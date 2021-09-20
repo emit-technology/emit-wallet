@@ -177,5 +177,23 @@
   "thePeriodsIs": "Die Fristen sind",
   "neTips": "Mindestens eine Person in Ihrem Mining-Pool muss mehr als $$ NE einreichen, dann wird die Belohnung automatisch abgerechnet",
   "returnTips": "Sie erhalten $$ LIGHT für die Belohnung",
-  "depositTips": "Sie werden $$ LIGHT für die Belohnung einzahlen"
+  "depositTips": "Sie werden $$ LIGHT für die Belohnung einzahlen",
+
+  "seal": "Versiegeln",
+  "unseal": "Entsiegeln",
+  "tokenId": "Token Id",
+  "attribute": "Attribut",
+  "trade": "Handel",
+  "relics": "Reliquien",
+  "market": "Markt",
+  "sell": "Verkaufen",
+  "records": "Aufzeichnungen",
+  "buy": "Kaufen",
+  "style": "Kategorie",
+  "estimate": "Schätzung",
+  "fee": "Gebühr",
+  "history": "Geschichte",
+  "owner": "Eigentümer",
+  "offShelf": "Aus dem Regal",
+  "forgeBurnLight": "Schmiede eine neue Axt nur unterstützt brennen LIGHT"
 }

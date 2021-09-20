@@ -184,5 +184,23 @@
 
   "neTips": "At least one person in your mining pool needs to submit more than $$ NE, then the reward will be automatically settled",
   "returnTips": "You will receive $$ LIGHT for return",
-  "depositTips": "You will deposit $$ LIGHT for reward"
+  "depositTips": "You will deposit $$ LIGHT for reward",
+
+  "seal":"Seal",
+  "unseal":"Unseal",
+  "tokenId":"Token Id",
+  "attribute":"Attribute",
+  "trade":"Trade",
+  "relics":"Relics",
+  "market":"Market",
+  "sell":"Sell",
+  "records":"Records",
+  "buy":"Buy",
+  "style":"Category",
+  "estimate": "Estimate",
+  "fee": "Fee",
+  "history": "History",
+  "owner":"Owner",
+  "offShelf":"Off Shelf",
+  "forgeBurnLight": "Forge a new axe only supports burn LIGHT!"
 }

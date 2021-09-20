@@ -68,15 +68,17 @@ class Rank extends React.Component<any, State> {
         this.setState({showLoading: f})
     }
 
-    loadMore = (event: any) => {
+    loadMore = (event?: any) => {
         this.setState({
             pageSize: 100,
             showLoading: true
         })
         this.init(100).then(() => {
             this.setShowLoading(false)
-            event.target.disabled = true;
-            event.target.complete();
+            // event.target.disabled = true;
+            if(event){
+                event.target.complete();
+            }
         }).catch(e => {
             this.setShowLoading(false)
             console.error(e)

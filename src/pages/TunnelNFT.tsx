@@ -59,6 +59,7 @@ import CrossNFTSero from "../contract/cross/sero/crossNFT";
 import CrossNFTEth from "../contract/cross/eth/crossNFT";
 import SRC721CrossFee from "../contract/cross/sero/crossNFTFee";
 import GasFeeProxyNFT from "../contract/gasFeeProxy/NFT";
+import CardTransform from "../components/CardTransform";
 
 class TunnelNFT extends React.Component<any, any> {
 
@@ -142,7 +143,7 @@ class TunnelNFT extends React.Component<any, any> {
         this.setState({
             feeCy: rest[0],
             crossFee: rest[1],
-            metaData: ticket.meta,
+            ticket: ticket,
             gasPrice: await utils.defaultGasPrice(chain),
             allowance: allowance,
             address: account.addresses[utils.getChainIdByName(crossMode[1])],
@@ -393,8 +394,9 @@ class TunnelNFT extends React.Component<any, any> {
     }
 
     render() {
-        const {feeCy, metaData, gasPrice, color, showLoading, tx, showActionSheet, crossFee, address, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
+        const {feeCy, ticket, gasPrice, color, showLoading, tx, showActionSheet, crossFee, address, showProgress, showProgress1, allowance, crossMode, passwordAlert, balance, showToast, toastMessage} = this.state;
 
+        const metaData = ticket && ticket.meta;
         // let amountValue: any = initAllowanceAmount ? allowance : amount;
         // if(new BigNumber(amountValue).toNumber() == 0){
         //     amountValue = "";
@@ -416,110 +418,87 @@ class TunnelNFT extends React.Component<any, any> {
                     {showProgress && <IonProgressBar type="indeterminate"/>}
                 </IonHeader>
                 <IonContent fullscreen>
-                    <IonChip color="warning" style={{lineHeight:"1.5"}}>
+                    <IonChip color="warning" style={{lineHeight:"1.5",marginTop:"12px"}}>
                         You are transferring NFT from the {TOKEN_DESC[crossMode[0]]} to the {TOKEN_DESC[crossMode[1]]}
                         </IonChip>
-                    <IonGrid>
+                    <div style={{height:"60vh",overflowY:"scroll",border:"1px solid #ddd",borderRadius:"5px",margin:"12px"}}>
+                        {ticket && <CardTransform info={ticket} hideButton={true}/>}
+                    </div>
+                    <div>
                         <IonRow>
-                            <IonCol size={"7"}>
-                                <div style={{height: "30vh", border: "#ddd 1px solid"}}>
-                                    <img src={metaData && metaData.image}/>
-                                </div>
-                            </IonCol>
-                            <IonCol size={"5"} style={{height: "30vh"}}>
-                                <IonList>
-                                    <IonItemDivider mode="md">
-                                        Name
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <small>
-                                            {metaData && metaData.name}
-                                        </small>
-                                    </IonItem>
-                                    <IonItemDivider mode="md">
-                                        Token Id
-                                    </IonItemDivider>
-                                    <IonItem lines="none">
-                                        <div style={{width:"100%"}}>
-                                            <small>{this.props.match.params.tokenId}</small>
-                                        </div>
-                                    </IonItem>
-                                </IonList>
+                            <IonCol size="12">
+                                {
+                                    (crossMode[0] != "ETH" || new BigNumber(allowance).toNumber() > 0) &&
+                                    <div>
+                                        <IonItem mode="ios" lines="none">
+                                            <IonLabel mode="ios" color="medium">{i18n.t("crossFee")}</IonLabel>
+                                            <IonBadge mode="ios"
+                                                      color="light">{crossFee} {feeCy}</IonBadge>
+                                        </IonItem>
+                                    </div>
+                                }
                             </IonCol>
                         </IonRow>
-                    </IonGrid>
-                    <IonRow>
-                        <IonCol size="12">
-                            {
-                                (crossMode[0] != "ETH" || new BigNumber(allowance).toNumber() > 0) &&
-                                <div>
-                                    <IonItem mode="ios" lines="none">
-                                        <IonLabel mode="ios" color="medium">{i18n.t("crossFee")}</IonLabel>
-                                        <IonBadge mode="ios"
-                                                  color="light">{crossFee} {feeCy}</IonBadge>
-                                    </IonItem>
-                                </div>
-                            }
-                        </IonCol>
-                    </IonRow>
-                    <IonItem mode="ios" lines="none" onClick={() => {
-                        this.setShowActionSheet(true);
-                    }}>
-                        <IonLabel  color="medium">{i18n.t("gasPrice")}</IonLabel>
-                        <IonText slot="end">
-                            {gasPrice} {utils.gasUnit(chain)}
-                        </IonText>
-                        {chain == ChainType.ETH &&
-                        <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
-                    </IonItem>
+                        <IonItem mode="ios" lines="none" onClick={() => {
+                            this.setShowActionSheet(true);
+                        }}>
+                            <IonLabel  color="medium">{i18n.t("gasPrice")}</IonLabel>
+                            <IonText slot="end">
+                                {gasPrice} {utils.gasUnit(chain)}
+                            </IonText>
+                            {chain == ChainType.ETH &&
+                            <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
+                        </IonItem>
 
-                    <IonRow>
-                        <IonCol>
-                            {
-                                utils.needApproved(utils.getChainIdByName(crossMode[0])) ?
-                                    <IonGrid>
-                                        <IonRow>
-                                            <IonCol size="6">
-                                                {utils.needApproved(utils.getChainIdByName(crossMode[0]))
-                                                && new BigNumber(allowance).toNumber() > 0 ?
-                                                    <IonButton mode="ios" expand="block" fill="outline"
-                                                               disabled={showProgress} onClick={() => {
-                                                        this.approve("cancel").catch(e => {
-                                                            const err = typeof e == "string" ? e : e.message;
-                                                            this.setShowToast(true, "danger", err)
-                                                            console.error(e)
-                                                        })
-                                                    }}>
-                                                        {i18n.t("cancelApprove")}</IonButton>
-                                                    :
-                                                    <IonButton mode="ios" expand="block" fill="outline"
-                                                               disabled={showProgress1} onClick={() => {
-                                                        this.approve("approve").catch(e => {
-                                                            const err = typeof e == "string" ? e : e.message;
-                                                            this.setShowToast(true, "danger", err)
-                                                            console.error(e)
-                                                        })
-                                                    }}>{i18n.t("approve")}</IonButton>}
-                                            </IonCol>
-                                            <IonCol size="6">
-                                                <IonButton mode="ios" expand="block" color="primary"
-                                                           disabled={showProgress || showProgress1 || !address || new BigNumber(allowance).toNumber() == 0}
-                                                           onClick={() => {
-                                                               this.commit()
-                                                           }}>{i18n.t("confirm")}</IonButton>
-                                            </IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                    :
-                                    <IonButton mode="ios" expand="block" color="primary"
-                                               disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH"
-                                               && new BigNumber(allowance).toNumber() == 0}
-                                               onClick={() => {
-                                                   this.commit()
-                                               }}>{i18n.t("confirm")}</IonButton>
-                            }
-                        </IonCol>
-                    </IonRow>
+                        <IonRow>
+                            <IonCol>
+                                {
+                                    utils.needApproved(utils.getChainIdByName(crossMode[0])) ?
+                                        <IonGrid>
+                                            <IonRow>
+                                                <IonCol size="6">
+                                                    {utils.needApproved(utils.getChainIdByName(crossMode[0]))
+                                                    && new BigNumber(allowance).toNumber() > 0 ?
+                                                        <IonButton mode="ios" expand="block" fill="outline"
+                                                                   disabled={showProgress} onClick={() => {
+                                                            this.approve("cancel").catch(e => {
+                                                                const err = typeof e == "string" ? e : e.message;
+                                                                this.setShowToast(true, "danger", err)
+                                                                console.error(e)
+                                                            })
+                                                        }}>
+                                                            {i18n.t("cancelApprove")}</IonButton>
+                                                        :
+                                                        <IonButton mode="ios" expand="block" fill="outline"
+                                                                   disabled={showProgress1} onClick={() => {
+                                                            this.approve("approve").catch(e => {
+                                                                const err = typeof e == "string" ? e : e.message;
+                                                                this.setShowToast(true, "danger", err)
+                                                                console.error(e)
+                                                            })
+                                                        }}>{i18n.t("approve")}</IonButton>}
+                                                </IonCol>
+                                                <IonCol size="6">
+                                                    <IonButton mode="ios" expand="block" color="primary"
+                                                               disabled={showProgress || showProgress1 || !address || new BigNumber(allowance).toNumber() == 0}
+                                                               onClick={() => {
+                                                                   this.commit()
+                                                               }}>{i18n.t("confirm")}</IonButton>
+                                                </IonCol>
+                                            </IonRow>
+                                        </IonGrid>
+                                        :
+                                        <IonButton mode="ios" expand="block" color="primary"
+                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH"
+                                                   && new BigNumber(allowance).toNumber() == 0}
+                                                   onClick={() => {
+                                                       this.commit()
+                                                   }}>{i18n.t("confirm")}</IonButton>
+                                }
+                            </IonCol>
+                        </IonRow>
+                    </div>
+
 
                 </IonContent>
                 <IonToast

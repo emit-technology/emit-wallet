@@ -118,6 +118,7 @@ class HashRatePool extends React.Component<any, State> {
         this.init().then(() => {
             this.setShowLoading(false)
         }).catch(e => {
+            console.error(e)
             this.setShowLoading(false)
         })
 
@@ -280,7 +281,8 @@ class HashRatePool extends React.Component<any, State> {
     }
 
     filterData = async (v: any) => {
-        const {account, searchText, pageSize, taskIdArray, sort} = this.state;
+        const {searchText, pageSize, taskIdArray, sort} = this.state;
+        const account = await walletWorker.accountInfo()
         if (v == "my") {
             const data = await poolRpc.getMyTask(account.addresses[ChainType.SERO])
             this.setState({

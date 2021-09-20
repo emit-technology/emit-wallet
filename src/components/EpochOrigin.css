@@ -111,10 +111,12 @@
   }
 }
 .content-ion {
-  background: url("../pages/epoch/img/background.png");
+  background-image: url("../pages/epoch/img/background.png");
   background-size: 100%;
   min-height: calc(100vh - 44px);
   height: auto;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 .heard-bg {
@@ -250,6 +252,7 @@
   --border-radius: 15px;
   --background:#fff;
   overflow-y: scroll;
+  --max-width: 600px;
 }
 
 .epoch-md {
@@ -525,17 +528,13 @@ div.starfield .moving-3 {
   font-family: Epilogue, sans-serif;
 }
 
-.content-ion * {
-  font-family: Epilogue, sans-serif;
-}
-
 .display-n {
   display: none;
 }
 
 .dark-star {
   color: darkred;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .bottom-button-group {

@@ -69,7 +69,7 @@ class EpochAttribute extends React.Component<Props, State>{
 
 
     render() {
-        const {device,driver,showDevice,showDriver,scenes,hiddenButton} = this.props
+        const {device,driver,showDevice,showDriver,scenes,hiddenButton,color} = this.props
         const {showModal,myRankDevice,position,showDriverModify} = this.state;
         const health:any = device && (new BigNumber(device.capacity).toNumber()>0 ? new BigNumber(device.power).dividedBy(new BigNumber(device.capacity)).toNumber() : 0);
         return <>
@@ -77,12 +77,12 @@ class EpochAttribute extends React.Component<Props, State>{
                 showDevice && device ?
                 <div className="progress" style={{minHeight:"80px"}}>
                     <IonRow>
-                        <IonCol size="7">
-                            <IonText color="white" className="text-little">
+                        <IonCol size="7" style={{    paddingLeft:"0"}}>
+                            <IonText color={color?color:"white"} className="text-little">
                                 AXE{device?.category && device.alis?`(${device.alis})`:`(${utils.ellipsisStr(device.ticket,5)})`}
                                 &nbsp;&nbsp;
                                 {
-                                    !hiddenButton && <IonIcon src={statsChartOutline}  size="small" color="white" onClick={(e)=>{
+                                    !hiddenButton && <IonIcon src={statsChartOutline}  size="small" color={color?color:"white"} onClick={(e)=>{
                                         e.stopPropagation();
                                         this.queryMyRank(device.ticket).catch(e=>{
                                             console.error(e)
@@ -94,25 +94,25 @@ class EpochAttribute extends React.Component<Props, State>{
                         </IonCol>
                         <IonCol size="5">
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{i18n.t("health")}: {device && `${utils.fromValue(device.power,18).toFixed(2,1)}/${utils.fromValue(device.capacity,18).toFixed(2,1)}`}</IonText>
+                                <IonText color={color?color:"white"} className="text-little">{i18n.t("health")}: {device && `${utils.fromValue(device.power,18).toFixed(2,1)}/${utils.fromValue(device.capacity,18).toFixed(2,1)}`}</IonText>
                             </div>
                         </IonCol>
                     </IonRow>
-                    <div style={{padding:"0 12px"}}>
+                    <div style={{padding:"0 12px 0 0"}}>
                         <IonProgressBar className={health<0.33?"progress-background-health-red":health>0.66?"progress-background-health":"progress-background"} value={health}/>
                         <div style={{padding:"2px 0"}}></div>
                         <IonProgressBar className="progress-background" value ={device && utils.fromValue(device.rate,18).toNumber()}/>
                         <IonRow>
-                            <IonCol size="7">
+                            <IonCol size="5">
                                 <div style={{textAlign:"left"}}>
                                     {utils.renderDarkStar(device.gene).map(v=>{
                                         return <IonIcon src={star} className="dark-star"/>
                                     })}
                                 </div>
                             </IonCol>
-                            <IonCol size="5">
+                            <IonCol size="7">
                                 <div style={{textAlign: "right"}}>
-                                    <IonText color="white" className="text-little">{i18n.t("rate")}: {utils.getDeviceLv(device && device.rate)}%</IonText>
+                                    <IonText color={color?color:"white"} className="text-little">{i18n.t("rate")}: {utils.getDeviceLv(device && device.rate)}%</IonText>
                                 </div>
                             </IonCol>
                         </IonRow>
@@ -120,22 +120,24 @@ class EpochAttribute extends React.Component<Props, State>{
                     </div>
                 </div>:
                     showDevice && <div className="progress" style={{minHeight:"80px"}}>
-                        <IonRow>
-                            <IonCol size="7">
-                                <IonText color="white" className="text-little">AXE</IonText>
-                            </IonCol>
-                            <IonCol size="5">
-                                <div style={{textAlign: "right"}}>
-                                    <IonText color="white" className="text-little">{i18n.t("health")}: 0</IonText>
-                                </div>
-                            </IonCol>
-                        </IonRow>
-                        <div style={{padding:"0 12px"}}>
+                        <div>
+                            <IonRow>
+                                <IonCol size="7" style={{    paddingLeft:"0"}}>
+                                    <IonText color={color?color:"white"} className="text-little">AXE</IonText>
+                                </IonCol>
+                                <IonCol size="5">
+                                    <div style={{textAlign: "right"}}>
+                                        <IonText color={color?color:"white"} className="text-little">{i18n.t("health")}: 0</IonText>
+                                    </div>
+                                </IonCol>
+                            </IonRow>
+                        </div>
+                        <div style={{padding:"0 12px 0 0"}}>
                             <IonProgressBar className="progress-background-health" value={0}/>
                             <div style={{padding:"2px 0"}}></div>
                             <IonProgressBar className="progress-background" value={0}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{i18n.t("rate")}: 0.00%</IonText>
+                                <IonText color={color?color:"white"} className="text-little">{i18n.t("rate")}: 0.00%</IonText>
                             </div>
                         </div>
                     </div>
@@ -145,9 +147,9 @@ class EpochAttribute extends React.Component<Props, State>{
                 showDriver && driver ?
                     <div className="progress" style={{minHeight:"45px"}}>
                         <IonRow>
-                            <IonCol size="7">
-                                <IonText color="white" className="text-little">DRIVER{driver.alis?`:${driver.alis}`:""}&nbsp;&nbsp;
-                                    {scenes && <IonIcon src={createOutline} size="small" color="white" onClick={(e)=>{
+                            <IonCol size="7" style={{    paddingLeft:"0"}}>
+                                <IonText color={color?color:"white"} className="text-little">DRIVER{driver.alis?`:${driver.alis}`:""}&nbsp;&nbsp;
+                                    {scenes && <IonIcon src={createOutline} size="small" color={color?color:"white"} onClick={(e)=>{
                                         e.stopPropagation();
                                         this.setShowDriverModify(true)
                                     }}/>}
@@ -156,27 +158,27 @@ class EpochAttribute extends React.Component<Props, State>{
                             </IonCol>
                             <IonCol size="5">
                                 <div style={{textAlign: "right"}}>
-                                    <IonText color="white" className="text-little">{i18n.t("capacity")}: {utils.fromValue(driver.capacity,18).toFixed(2,1)}</IonText>
+                                    <IonText color={color?color:"white"} className="text-little">{i18n.t("capacity")}: {utils.fromValue(driver.capacity,18).toFixed(2,1)}</IonText>
                                 </div>
                             </IonCol>
                         </IonRow>
-                        <div style={{padding:"0 12px"}}>
+                        <div style={{padding:"0 12px 0 0"}}>
                             <IonProgressBar className="progress-background" value={driver && utils.fromValue(driver.rate,16).toNumber() > 0 ? (utils.fromValue(driver.rate,16).div(100).toNumber()) : 0}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{i18n.t("rate")}: {driver && utils.getDeviceLv(driver.rate)}%</IonText>
+                                <IonText color={color?color:"white"} className="text-little">{i18n.t("rate")}: {driver && utils.getDeviceLv(driver.rate)}%</IonText>
                             </div>
                         </div>
                     </div>:
                     showDriver &&  <div className="progress" style={{minHeight:"45px"}}>
                         <IonRow>
                             <IonCol size="7">
-                                <IonText color="white" className="text-little">DRIVER</IonText>
+                                <IonText color={color?color:"white"} className="text-little">DRIVER</IonText>
                             </IonCol>
                         </IonRow>
-                        <div style={{padding:"0 12px"}}>
+                        <div style={{padding:"0 12px 0 0"}}>
                             <IonProgressBar className="progress-background" value={0}/>
                             <div style={{textAlign: "right"}}>
-                                <IonText color="white" className="text-little">{i18n.t("rate")}: 0.00%</IonText>
+                                <IonText color={color?color:"white"} className="text-little">{i18n.t("rate")}: 0.00%</IonText>
                             </div>
                         </div>
                     </div>

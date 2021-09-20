@@ -1,0 +1,21 @@
+.input-price {
+  border-radius: 10px;
+  border: inherit !important;
+  background: #f7f7f7;
+  height: 30px;
+  text-align: center;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none !important;
+}
+
+.btn-bottom-menu {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding: 5px;
+  background: #fff;
+}
+
+/*# sourceMappingURL=index.css.map */

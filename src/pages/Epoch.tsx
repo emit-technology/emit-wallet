@@ -55,6 +55,7 @@ class Epoch extends React.Component<any, any>{
     }
 
     componentDidMount() {
+        rpc.initNFT();
         this.init().catch(e=>{
             console.error(e)
         })

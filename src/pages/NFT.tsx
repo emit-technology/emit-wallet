@@ -16,12 +16,14 @@ import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import NFCRender from "../components/NFCRender";
 import i18n from "../locales/i18n";
+import url from "../utils/url";
+import CardTransform from "../components/CardTransform";
 
 class NFT extends React.Component<any, any> {
 
     state: any = {
         wrapTicket: [],
-        tab:"MEDAL",
+        tab:"DEVICES",
         drivers:{}
     }
 
@@ -30,7 +32,7 @@ class NFT extends React.Component<any, any> {
     }
 
     componentDidMount() {
-
+        rpc.initNFT();
         this.init().then(() => {
         }).catch(e=>{
             console.error(e)
@@ -100,46 +102,43 @@ class NFT extends React.Component<any, any> {
             <IonHeader mode="ios">
                 <IonToolbar color="primary" mode="ios">
                     <IonTitle>{i18n.t("NFT")}</IonTitle>
+                    {/*<IonLabel slot="end" onClick={()=>{*/}
+                    {/*    url.exchangeRemains();*/}
+                    {/*}}>*/}
+                    {/*    MARKET*/}
+                    {/*</IonLabel>*/}
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen >
                 <div style={{padding:"12px 12px 0"}}>
                     <IonSegment mode="ios"value={tab} onIonChange={e => this.setTab(e.detail.value)}>
-                        <IonSegmentButton mode="ios" value="MEDAL">
-                            <IonLabel>Medal</IonLabel>
-                        </IonSegmentButton>
                         {/*<IonSegmentButton mode="ios" value="DRIVER">*/}
                         {/*    <IonLabel>Driver</IonLabel>*/}
                         {/*</IonSegmentButton>*/}
                         <IonSegmentButton value="DEVICES">
                             <IonLabel>Devices</IonLabel>
                         </IonSegmentButton>
+                        <IonSegmentButton value="WRAPPED_DEVICES">
+                            <IonLabel>Relics</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton mode="ios" value="MEDAL">
+                            <IonLabel>Medal</IonLabel>
+                        </IonSegmentButton>
                     </IonSegment>
                 </div>
-                {["MEDAL","DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
-                    <NFCRender data={ticketMap.get(tab)}/>
-                //     :
-                // <div className="card-page">
-                //     <div className="card-inset">
-                //
-                //     { drivers && Object.keys(drivers).map((k:any)=>{
-                //         const userInfo:UserInfo = drivers[k];
-                //         return <div className="progress">
-                //             <div>
-                //                 <IonRow>
-                //                     <IonCol>
-                //                         <IonText style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{MinerScenes[k]}</IonText>
-                //                     </IonCol>
-                //                 </IonRow>
-                //             </div>
-                //             <IonProgressBar className="progress-background" value={userInfo && userInfo.driver && utils.fromValue(userInfo.driver.rate,16).toNumber() > 0 ? (utils.fromValue(userInfo.driver.rate,16).div(100).toNumber()) : 0}/>
-                //             <div style={{textAlign: "right"}}>
-                //                 <IonText  style={{textTransform:"uppercase",fontWeight:"800"}} className="text-little">{userInfo && userInfo.driver && `${utils.fromValue(userInfo.driver.rate,16).toFixed(0,1)}/100`}</IonText>
-                //             </div>
-                //         </div>
-                //     })}
-                //     </div>
-                // </div>
+                {["MEDAL","DEVICES","WRAPPED_DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
+                    <div className="card-page">
+                    <div className="card-inset">
+                    {
+                        ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {
+                            //lines={index == data.length-1?"none":"inset"}
+                            // const meta = v.metaData?v.metaData:{};
+                            return <CardTransform info={v}/>
+                        })
+                    }
+
+                    </div>
+                    </div>
                 }
             </IonContent>
         </IonPage>;

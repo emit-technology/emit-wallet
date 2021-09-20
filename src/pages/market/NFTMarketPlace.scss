@@ -1,0 +1,147 @@
+.nft-mkt-box{
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  //align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  text-align: center;
+
+  //border: 1px solid #dddddd;
+  //border-radius: 6px;
+}
+
+.nft-mkt-card{
+  position: relative;
+  //padding: 6px;
+  //max-width: 280px;
+}
+
+.nft-mkt-axe{
+  position: absolute;
+  top: 0;
+}
+
+.nft-mkt-modal{
+  --width: 90%;
+  --height: 80%;
+  --border-radius: 15px;
+  --background:#fff;
+  overflow-y: scroll;
+  --max-width: 512px;
+}
+
+.nft-mkt-modal-info{
+  --width: 80%;
+  --height: 80%;
+  --border-radius: 15px;
+  --background:#fff;
+  overflow-y: scroll;
+  --max-width: 512px;
+}
+
+.nft-card-background{
+  //background-color: #edcc67d9;
+  border: 5px solid #edcc67d9;
+  border-radius: 70px;
+}
+
+@-webkit-keyframes  shineRed {
+  from { -webkit-box-shadow: 0 0 5px #bbb; }
+  50% { -webkit-box-shadow: 0 0 10px red; }
+  to { -webkit-box-shadow: 0 0 5px #bbb; }
+}
+@-webkit-keyframes shineBlue {
+  from { -webkit-box-shadow: 0 0 9px #333; }
+  50% { -webkit-box-shadow: 0 0 18px blue; }
+  to { -webkit-box-shadow: 0 0 9px #333; }
+}
+.shine_red {
+  -webkit-animation-name: shineRed;
+  -webkit-animation-duration: 3s;
+  -webkit-animation-iteration-count: infinite;
+}
+
+.light-background{
+  --background: transparent;
+  --background-activated-opacity:0;
+  --color: #fff;
+  --padding-top:0;
+  --padding-bottom: 0;
+}
+
+.nft-mkt-info{
+  position: absolute;
+  bottom: 0;
+  padding: 12px 18px 6px 0;
+  width: 100%;
+  float: left;
+}
+
+.nft-mkt-info-2{
+  padding: 12px;
+  width: 100%;
+  float: left;
+}
+
+.nft-mkt-info div:nth-child(1){
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  //color: rgba(243,244,246,1);
+  font-family: Epilogue,sans-serif;
+}
+
+.check-item{
+  border: 2px solid
+}
+
+.nft-mkt-state{
+  position: absolute;
+  top: 45%;
+  right: 10px;
+  transform: rotate(
+                  90deg
+  );
+}
+
+.input-price{
+  border-radius: 10px;
+  border: inherit !important;
+  background: #f7f7f7;
+  height: 30px;
+  text-align: center;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  outline:none !important;
+}
+
+.btn-bottom-menu{
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding: 5px;
+  background: #fff;
+}
+
+.nft-mkt-remark{
+  margin: 6px 0;
+  padding: 6px;
+  text-align: left;
+  color: #194381;
+  font-weight: 500;
+  border-radius: 10px;
+  border: 1px dashed #dbe4f1;
+}
+
+.nft-mkt-item{
+  border: 1px solid #fff;
+  box-shadow: 0 0 3px 1px #ddd;
+  border-radius: 15px;
+  margin: 6px;
+  background: rgba(0,0,0,0.3);
+}

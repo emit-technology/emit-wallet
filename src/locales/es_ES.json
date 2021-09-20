@@ -176,5 +176,23 @@
   "thePeriodsIs": "Los períodos son",
   "neTips": "Es necesario que al menos una persona de su pool minero presente más de $$ NE, entonces la recompensa se liquidará automáticamente",
   "returnTips": "Recibirás $$ LIGHT para la recompensa",
-  "depositTips": "Usted depositará $$ LIGHT para la recompensa"
+  "depositTips": "Usted depositará $$ LIGHT para la recompensa",
+
+  "seal": "Sellar",
+  "unseal": "Desprecintar",
+  "tokenId": "Token Id",
+  "attribute": "Atributo",
+  "trade": "Comercio",
+  "relics": "Reliquias",
+  "market": "Mercado",
+  "sell": "Vender",
+  "records": "Registros",
+  "buy": "Comprar",
+  "style": "Categoría",
+  "estimate": "Estimación",
+  "fee": "Tarifa",
+  "history": "Historia",
+  "owner": "Propietario",
+  "offShelf": "Fuera del estante",
+  "forgeBurnLight": "¡Forjar un nuevo hacha sólo admite quemar la LIGHT"
 }

@@ -19,7 +19,6 @@
 import service from 'walletService/src/index';
 import {AccountModel, ChainType} from "../types";
 import selfStorage from "../utils/storage";
-import url from "../utils/url";
 
 class WalletWorker {
 
@@ -157,6 +156,7 @@ class WalletWorker {
                     }
                     resolve(data);
                 }
+
                 service.accountInfo(accountId,function (data:any){
                     if(data.error){
                         reject(data.error);
@@ -168,7 +168,13 @@ class WalletWorker {
                     }
                 })
             }else{
-                reject("Account not asset!")
+                service.accounts(function (accounts:Array<AccountModel>){
+                    if(accounts && accounts.length>0){
+                        resolve(accounts[0])
+                    }else{
+                        reject("Account not asset!")
+                    }
+                })
             }
         })
     }

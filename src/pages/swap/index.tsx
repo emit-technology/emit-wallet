@@ -18,7 +18,14 @@ import {
     IonToolbar
 } from "@ionic/react";
 import './index.scss'
-import {arrowDownOutline, optionsOutline, statsChartOutline, swapHorizontal, timerOutline} from "ionicons/icons";
+import {
+    arrowDownOutline,
+    chevronBack,
+    optionsOutline,
+    statsChartOutline,
+    swapHorizontal,
+    timerOutline
+} from "ionicons/icons";
 import url from "../../utils/url";
 import rpc from "../../rpc";
 import {ChainType, Transaction} from "../../types";
@@ -498,6 +505,7 @@ class Swap extends React.Component<any, State> {
         return <IonPage>
             <IonHeader mode="ios">
                 <IonToolbar color="primary" mode="ios">
+                    <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
                     <IonTitle>{i18n.t("swap")}</IonTitle>
                     <IonIcon slot="end" src={statsChartOutline} style={{fontSize: "24px", marginRight: "15px"}}
                              onClick={() => {
