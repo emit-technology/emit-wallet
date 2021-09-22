@@ -18,6 +18,7 @@ import NFCRender from "../components/NFCRender";
 import i18n from "../locales/i18n";
 import url from "../utils/url";
 import CardTransform from "../components/CardTransform";
+import {Plugins} from "@capacitor/core";
 
 class NFT extends React.Component<any, any> {
 
@@ -32,6 +33,9 @@ class NFT extends React.Component<any, any> {
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
         rpc.initNFT();
         this.init().then(() => {
         }).catch(e=>{

@@ -55,6 +55,9 @@ class Epoch extends React.Component<any, any>{
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
         rpc.initNFT();
         this.init().catch(e=>{
             console.error(e)

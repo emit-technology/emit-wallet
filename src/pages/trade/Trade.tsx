@@ -21,6 +21,7 @@ import url from "../../utils/url";
 import i18n from "../../locales/i18n";
 import epochMarketRpc, {VolumeOf24h} from "../../rpc/epoch/market";
 import {fromValue, nFormatter} from "../../utils";
+import {Plugins} from "@capacitor/core";
 
 interface State{
     marketVolume?:VolumeOf24h
@@ -31,6 +32,9 @@ class Trade extends React.Component<any, State>{
     }
 
     componentDidMount() {
+        Plugins.StatusBar.setBackgroundColor({
+            color: "#194381"
+        })
         this.init()
     }
 
