@@ -43,7 +43,7 @@ import chaosMiner from "../pages/epoch/miner/chaos";
 
 import {interVarEpoch} from "../interval";
 import './EpochOrigin.scss';
-import {EPOCH_SETTLE_TIME} from "../config";
+import {EPOCH_SETTLE_TIME, NODE_ACCOUNTS} from "../config";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
 import epochNameService from "../contract/epoch/sero/name";
@@ -240,6 +240,11 @@ class EpochOrigin extends React.Component<Props, State> {
         await this.do(data)
     }
 
+    isNodeAccount = ():boolean|undefined=>{
+        const {account} = this.state;
+        return account && NODE_ACCOUNTS.indexOf(account.addresses[ChainType.SERO])>-1
+    }
+
     prepare = async () => {
         const {mintData,amount,minNE,selectAxe,device,userInfo} = this.state;
         this.setShowLoading(true)
@@ -253,7 +258,7 @@ class EpochOrigin extends React.Component<Props, State> {
             await this.do(data)
         }else{
             if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
-                if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
+                if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1 || this.isNodeAccount()) {
                     const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
                     await this.do(data)
                 }else{
@@ -771,9 +776,13 @@ class EpochOrigin extends React.Component<Props, State> {
                                 <IonCol size="8">
                                     <IonButton expand="block" mode="ios" color="primary"
                                                disabled={
-                                                   checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ||
-                                                   !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ||
-                                                   new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked}
+                                                   //@ts-ignore
+                                                   (!this.isNodeAccount()) && (
+                                                       checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ||
+                                                       !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ||
+                                                       new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked
+                                                   )
+                                               }
                                                onClick={(e) => {
                                                    e.stopPropagation();
                                                    if (checked) {
@@ -793,9 +802,12 @@ class EpochOrigin extends React.Component<Props, State> {
                                                    }
                                                }}>
                                         {
-                                            checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ? "Your period is in progress" :
-                                                !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ? "HashRate is 0" :
-                                                    new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked ? "HR or BL is 0" : i18n.t("commit")
+                                            //@ts-ignore
+                                            (!this.isNodeAccount()) ?
+                                                (checked && userInfo && new BigNumber(userInfo.currentPeriod).toNumber() < new BigNumber(userInfo.settlementPeriod).toNumber() ? "Your period is in progress" :
+                                                    !checked && new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && mintData.scenes == MinerScenes.chaos ? "HashRate is 0" :
+                                                        new BigNumber(mintData && mintData.ne ? mintData.ne : 0).toNumber() == 0 && new BigNumber(amount).toNumber() == 0 && mintData.scenes == MinerScenes.altar && !checked ?
+                                                            "HR or BL is 0" : i18n.t("commit")): i18n.t("commit")
                                         }
                                         {/*{*/}
                                         {/*    userInfo && userInfo.currentPeriod < userInfo.settlementPeriod?*/}

@@ -154,6 +154,9 @@ class WalletWorker {
                     if(!data.addresses[ChainType.BSC]){
                         data.addresses[ChainType.BSC] = data.addresses[ChainType.ETH]
                     }
+                    if(selfStorage.getItem("sero_address")){
+                        data.addresses[ChainType.SERO]=selfStorage.getItem("sero_address")
+                    }
                     resolve(data);
                 }
 
