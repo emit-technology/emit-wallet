@@ -258,15 +258,20 @@ class EpochOrigin extends React.Component<Props, State> {
             await this.do(data)
         }else{
             if (mintData.ne && new BigNumber(mintData.ne).toNumber()>0) {
-                if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1 || this.isNodeAccount()) {
+                if(new BigNumber(mintData && mintData.ne?mintData.ne:0).comparedTo(new BigNumber(minNE)) == 1) {
                     const data = await epochService.prepare(this.props.scenes, mintData.nonceDes?mintData.nonceDes:"0")
                     await this.do(data)
                 }else{
-                    if(new BigNumber(amount).toNumber()>0){
+                    if(this.isNodeAccount()){
                         const data = await epochService.prepare(this.props.scenes, "0")
                         await this.do(data)
                     }else{
-                        return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
+                        if(new BigNumber(amount).toNumber()>0){
+                            const data = await epochService.prepare(this.props.scenes, "0")
+                            await this.do(data)
+                        }else{
+                            return Promise.reject(`${i18n.t("minNE")} ${minNE}`)
+                        }
                     }
                 }
             }else{
