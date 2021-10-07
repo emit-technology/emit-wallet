@@ -221,11 +221,11 @@ class NFTMarketSearch extends React.Component<any, State>{
                         </IonItem>
                     </IonList>
                     <IonList id="inbox-list" mode="md">
-                        <IonListHeader>Rate</IonListHeader>
+                        <IonListHeader>Rate(%)</IonListHeader>
                         <IonItem>
                             <IonRow>
                                 <IonCol><input size={15} className="input-price"   onChange={(e)=>{
-                                    const value = toValue(e.target.value,18).toString(10)
+                                    const value = toValue(e.target.value,16).toString(10)
                                     if(queryFilter.rate){
                                         queryFilter.rate.min = value;
                                     }else{
@@ -237,7 +237,7 @@ class NFTMarketSearch extends React.Component<any, State>{
                                 }}/></IonCol>
                                 <IonCol>-</IonCol>
                                 <IonCol><input  size={15} className="input-price"  onChange={(e)=>{
-                                    const value = toValue(e.target.value,18).toString(10)
+                                    const value = toValue(e.target.value,16).toString(10)
                                     if(queryFilter.rate){
                                         queryFilter.rate.max = value;
                                     }else{

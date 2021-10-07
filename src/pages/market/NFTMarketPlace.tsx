@@ -430,8 +430,8 @@ class NFTMarketPlace extends React.Component<any, State> {
                 return <IonChip color="warning" style={{border:"1px solid "}} onClick={()=>{
                     delete queryLocal.rate;
                     this.setStorage(queryLocal);
-                }}>Healthy: {rate.min ? nFormatter(utils.fromValue(rate.min,18).toFixed(8,1),2):0}
-                    {rate.max && `-${nFormatter(utils.fromValue(rate.max,18).toFixed(8,1),2)}`}<IonIcon icon={close}/></IonChip>
+                }}>Rate: {rate.min ? nFormatter(utils.fromValue(rate.min,16).toFixed(8,1),2):0}
+                    {rate.max && `-${nFormatter(utils.fromValue(rate.max,16).toFixed(8,1),2)}`}%<IonIcon icon={close}/></IonChip>
             }
         }else if(key == "ticket"){
             const ticket = queryLocal.ticket;
