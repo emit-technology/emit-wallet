@@ -35,6 +35,7 @@ class Tron{
         const eventServer = new HttpProvider(TRON_API_HOST.fullNode);
         const tronWeb = new TronWeb(fullNode,solidityNode,eventServer,"67cf7062cc23b5165d5b47578e2afcfab8eeb3e906d92fc5ea7ea816e7b51831");
         this.tronWeb = tronWeb;
+        this.tronWeb.feeLimit = 150000000;
     }
 
     transfer = async (to:string,value:number,from:string)=>{
