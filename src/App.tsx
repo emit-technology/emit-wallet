@@ -94,6 +94,7 @@ import Unfreeze from "./pages/epoch/remains/unfreeze";
 import NFTMarketSearch from "./pages/market/NFTMarketSearch";
 import EpochStyle from "./pages/epoch/style";
 import NFTMarketStatics from "./pages/market/NFTMarketStatics";
+import rpc from "./rpc";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -130,6 +131,9 @@ class App extends React.Component<any, State> {
         this.setState({
             deviceInfo: info
         })
+
+        rpc.initBalance().catch(e=>console.error(e));
+        rpc.initNFT().catch(e=>console.error(e));
     }
 
     resetIcon = (v: any) => {
@@ -228,6 +232,8 @@ class App extends React.Component<any, State> {
                             render={() => (
                                 <IonTabs onIonTabsDidChange={v => {
                                     this.resetIcon(v.detail.tab);
+                                    rpc.initBalance().catch(e=>console.error(e));
+                                    rpc.initNFT().catch(e=>console.error(e));
                                 }}>
                                     <IonRouterOutlet>
                                         <Switch>

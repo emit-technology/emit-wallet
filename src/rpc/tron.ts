@@ -1,7 +1,8 @@
-import {TRON_API_HOST,CONTRACT_ADDRESS} from "../config";
+import {CONTRACT_ADDRESS, TRON_API_HOST} from "../config";
 import BigNumber from "bignumber.js";
 import {ChainType} from "../types";
 import selfStorage from "../utils/storage";
+import rpc from "./index";
 
 /**
  * Copyright 2020 EMIT Foundation.
@@ -35,7 +36,25 @@ class Tron{
         const eventServer = new HttpProvider(TRON_API_HOST.fullNode);
         const tronWeb = new TronWeb(fullNode,solidityNode,eventServer,"67cf7062cc23b5165d5b47578e2afcfab8eeb3e906d92fc5ea7ea816e7b51831");
         this.tronWeb = tronWeb;
-        this.tronWeb.feeLimit = 150000000;
+        this.tronWeb.feeLimit = 100000000;
+
+        this.init().catch(e=>{
+            console.log(e)
+        })
+    }
+
+    init = async ()=>{
+        setTimeout(()=>{
+            rpc.getChainConfig(ChainType.TRON).then(rest=>{
+                this.tronWeb.feeLimit = rest["feeLimit"];
+            })
+        },5000);
+
+        setInterval(()=>{
+            rpc.getChainConfig(ChainType.TRON).then(rest=>{
+                this.tronWeb.feeLimit = rest["feeLimit"];
+            })
+        },30*1000)
     }
 
     transfer = async (to:string,value:number,from:string)=>{

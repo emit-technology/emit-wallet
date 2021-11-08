@@ -36,7 +36,6 @@ class NFT extends React.Component<any, any> {
         Plugins.StatusBar.setBackgroundColor({
             color: "#194381"
         })
-        rpc.initNFT();
         this.init().then(() => {
         }).catch(e=>{
             console.error(e)
@@ -44,8 +43,6 @@ class NFT extends React.Component<any, any> {
     }
 
     init = async () => {
-
-        rpc.initNFT();
 
         const account = await walletWorker.accountInfo()
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);

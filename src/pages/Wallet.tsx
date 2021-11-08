@@ -151,12 +151,11 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
-        rpc.initNFT();
+        // rpc.initNFT().catch(e=>console.error(e));
+        // rpc.initBalance().catch(e=>console.error(e));
 
-        interVar.start(()=>{
-            this.init().then(() => {
-            }).catch()
-        },10 * 1000)
+        this.init().then(() => {
+        }).catch()
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
@@ -191,18 +190,22 @@ class Wallet extends React.Component<State, any> {
 
     init = async () => {
         const account = await walletWorker.accountInfo();
-        const lockedWallet = await walletWorker.isLocked();
-        // if(lockedWallet){
-        //     url.accountUnlock()
-        //     return
-        // }
+        const lockedWallet = await walletWorker.lockWallet();
         const assets: any = {};
         const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);
         if (account && account.addresses && account.addresses[2]) {
-            const seroBalance = await rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO])
-            const ethBalance = await rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH])
-            const tronBalance:any = account.addresses[ChainType.TRON]?await rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON]):{}
-            const bscBalance = await rpc.getBalance(ChainType.BSC, account.addresses[ChainType.BSC])
+            const allBalance = await Promise.all([
+                rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO]),
+                rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH]),
+                account.addresses[ChainType.TRON]?rpc.getBalance(ChainType.TRON, account.addresses[ChainType.TRON]):new Promise((resolve)=>{resolve({})}),
+                rpc.getBalance(ChainType.BSC, account.addresses[ChainType.BSC])
+            ]);
+
+            const seroBalance:any = allBalance[0];
+            const ethBalance:any = allBalance[1];
+            const tronBalance:any = allBalance[2];
+            const bscBalance:any = allBalance[3];
+
             for (let cy of currencies) {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}

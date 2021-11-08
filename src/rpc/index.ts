@@ -26,7 +26,7 @@ import {
     EPOCH_WRAPPED_DEVICE_CATEGORY,
     META_TEMP
 } from "../config"
-import {ChainType, NftInfo, Transaction} from "../types";
+import {AccountModel, ChainType, NftInfo, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
 import tron from "./tron";
@@ -96,6 +96,7 @@ class RPC {
     }
 
     initNFT = async ()=>{
+        console.log("init NFT...")
        const account = await walletWorker.accountInfo();
         const address = account && account.addresses[ChainType.SERO]
         if(address){
@@ -217,24 +218,47 @@ class RPC {
     getBalance = async (chain: ChainType, address: string, localOnly?: boolean) => {
         const key = ["balance", chain].join("_");
         let rest: any = selfStorage.getItem(key);
-        let prefix = utils.getPrefix(chain)
         if (!rest) {
-            rest = await this.post([prefix, "getBalance"].join("_"), [address], chain)
-            selfStorage.setItem(key, rest);
+            return await this.getBalanceFromServer(address,chain)
         } else {
-            if (!localOnly) {
-                if (chain == ChainType.TRON) {
-                    tron.getBalance(address).then((balance: any) => {
-                        selfStorage.setItem(key, balance);
-                    })
-                } else {
-                    this.post([prefix, "getBalance"].join("_"), [address], chain).then(balance => {
-                        selfStorage.setItem(key, balance);
-                    })
+            // if (!localOnly) {
+            //     this.getBalanceFromServer(address,chain).catch(e=>{
+            //         console.error(e)
+            //     })
+            // }
+        }
+        return rest;
+    }
+
+    getBalanceFromServer = async (address:string,chain:ChainType)=>{
+        const prefix = utils.getPrefix(chain)
+        const key = ["balance", chain].join("_");
+        if (chain == ChainType.TRON) {
+            const balance = await tron.getBalance(address);
+            selfStorage.setItem(key, balance);
+            return balance
+        } else {
+            const balance = await this.post([prefix, "getBalance"].join("_"), [address], chain)
+            selfStorage.setItem(key, balance);
+            return balance
+        }
+    }
+
+    initBalance = async ()=>{
+        console.log("initBalance...");
+        const account = await walletWorker.accountInfo();
+        const pArr = [];
+        const keys = Object.keys(ChainType)
+        for (let key of keys) {
+            if (isNaN(Number(key))) {
+                const chain:any = utils.getChainIdByName(key);
+                if(account.addresses[chain] && key != "_"){
+                    const rq = this.getBalanceFromServer(account.addresses[chain],chain);
+                    pArr.push(rq)
                 }
             }
         }
-        return rest;
+        await Promise.all(pArr)
     }
 
     getTransactions = async (chain: ChainType, address: string, cy: string, hash: string, pageSize: number, pageNo: number, fingerprint?: string) => {
@@ -252,6 +276,12 @@ class RPC {
     getEvents = async (chain: ChainType, txHash: string, depositNonce: string, originChainID: string, resourceID: string) => {
         const prefix = utils.getPrefix(chain)
         const rest: any = await this.post([prefix, "getEvents"].join("_"), [txHash, depositNonce, originChainID, resourceID], chain)
+        return rest;
+    }
+
+    getChainConfig = async (chain: ChainType) =>{
+        const prefix = utils.getPrefix(chain)
+        const rest: any = await this.post([prefix, "getChainConfig"].join("_"), [], chain)
         return rest;
     }
 
