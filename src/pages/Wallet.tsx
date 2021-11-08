@@ -190,7 +190,7 @@ class Wallet extends React.Component<State, any> {
 
     init = async () => {
         const account = await walletWorker.accountInfo();
-        const lockedWallet = await walletWorker.lockWallet();
+        const lockedWallet = await walletWorker.isLocked();
         const assets: any = {};
         const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);
         if (account && account.addresses && account.addresses[2]) {
