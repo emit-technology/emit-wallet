@@ -18,8 +18,7 @@
 
 import BigNumber from 'bignumber.js'
 import {
-    BRIDGE_CURRENCY,
-    BRIDGE_NFT_RESOURCE_ID,
+    BRIDGE_CURRENCY, BRIDGE_NFT,
     CONTRACT_ADDRESS,
     DECIMAL_CURRENCY,
     DISPLAY_NAME,
@@ -30,7 +29,7 @@ import {
     META_TEMP,
     NOT_CROSS_TOKEN
 } from "../config"
-import {ChainId, ChainType, DeviceMode, GasPriceLevel, MetaInfo, NftInfo} from "../types";
+import {Attribute, ChainId, ChainType, DeviceMode, GasPriceLevel, MetaInfo, NftInfo} from "../types";
 import rpc from "../rpc";
 import * as utils from "../utils"
 import selfStorage from "./storage";
@@ -119,15 +118,15 @@ export function getResourceId(cy: string, from: string, to: string) {
     return BRIDGE_CURRENCY[cy][from]["RESOURCE_ID"][to];
 }
 
-export function getNFTResourceId(symbol: string) {
-    return BRIDGE_NFT_RESOURCE_ID[symbol];
+export function getNFTResourceId(symbol: string,from:string,to:string) {
+    return BRIDGE_NFT[symbol][from]["RESOURCE_ID"][to];
 }
 
-export function getCrossTargetAddress(resourceId: string, destinationChainID: any) {
-    const keys = Object.keys(BRIDGE_NFT_RESOURCE_ID)
-    for (let k of keys) {
-        if (BRIDGE_NFT_RESOURCE_ID[k] == resourceId) {
-            return CONTRACT_ADDRESS.ERC721[k]["ADDRESS"][ChainId[destinationChainID]]
+export function getCrossTargetAddress(fromChain:ChainType,resourceId: string, destinationChainID: any) {
+    const symbols = Object.keys(BRIDGE_NFT)
+    for (let symbol of symbols) {
+        if (BRIDGE_NFT[symbol][ChainType[fromChain]]["RESOURCE_ID"][ChainId[destinationChainID]] == resourceId) {
+            return CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"][ChainId[destinationChainID]]
         }
     }
     return ""
@@ -417,6 +416,27 @@ export function getCrossChainByCy(cy: string): Array<any> {
     return [{}]
 }
 
+
+export function getCrossNFTBySymbol(symbol: string): Array<any> {
+    const obj = BRIDGE_NFT[symbol];
+    if (obj) {
+        const keys = Object.keys(obj)
+        const arr = []
+        for (let k of keys) {
+            for (let j of keys) {
+                if (k !== j && (!obj[k].EXCEPT || obj[k].EXCEPT.indexOf(j) == -1)) {
+                    arr.push({
+                        from: k,
+                        to: j
+                    })
+                }
+            }
+        }
+        return arr;
+    }
+    return [{}]
+}
+
 export function getChainFullName(chain: ChainType) {
     if (FULL_NAME[ChainType[chain]]) {
         return FULL_NAME[ChainType[chain]]
@@ -579,7 +599,9 @@ export const convertWrappedDeviceToDevice = (wrappedDevice:WrappedDevice):Device
 export const convertDeviceToRemains = (info:NftInfo)=>{
     const nftInfo:NftInfo = JSON.parse(JSON.stringify(info))
     const meta = nftInfo.meta;
-
+    if(!meta.attributes){
+        return
+    }
     const deviceInfo:DeviceInfo = convertWrappedDeviceToDevice(meta.attributes)
     const stylePath = deviceInfo && deviceInfo.gene && isDark(deviceInfo.gene)?"dark":"light";
     meta.image = deviceInfo && deviceInfo.mode && deviceInfo.mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${deviceInfo.mode?.style}.png`
@@ -739,4 +761,29 @@ export const reIcon = (v:string)=>{
     }else{
         return ellipseOutline
     }
+}
+
+export function metaAttributesToWrappedDevice(attributes:Array<Attribute>):WrappedDevice{
+    function getAttr(trait:string){
+        for (let attr of attributes){
+            if(attr.trait_type == trait){
+                return attr.value
+            }
+        }
+    }
+    const wrpDivice:WrappedDevice = {
+        name:getAttr("name"),
+        category:getAttr("category"),
+        ticket:getAttr("ticket"),
+        base:getAttr("base"),
+        capacity:getAttr("capacity"),
+        power:getAttr("power"),
+        rate:getAttr("rate"),
+        gene:getAttr("gene"),
+        freezeStartPeriod:getAttr("freezeStartPeriod"),
+        freezeFee:getAttr("freezeFee"),
+        current:getAttr("current"),
+        srcTkt:getAttr("srcTkt"),
+    }
+    return wrpDivice;
 }

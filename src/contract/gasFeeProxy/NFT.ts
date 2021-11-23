@@ -101,6 +101,7 @@ class GasFeeProxyNFT extends SeroContract {
     }
 
     depositNFT = async (destinationChainID:number,resourceId: string, recipient:string): Promise<string> => {
+        console.log(destinationChainID,resourceId,recipient,"depositNFT")
         return this.contract.packData("depositNFT", [destinationChainID,resourceId,recipient], true)
     }
 

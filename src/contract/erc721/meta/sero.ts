@@ -1,4 +1,5 @@
 import SeroContract from "../../SeroContract";
+import {CONTRACT_ADDRESS} from "../../../config";
 
 const ABI = [
     {
@@ -137,4 +138,8 @@ class Sero extends SeroContract {
 
 }
 
+const wrappedEmitAxSero = new Sero(CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.SERO)
+export {
+    wrappedEmitAxSero
+}
 export default Sero

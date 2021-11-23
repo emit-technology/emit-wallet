@@ -14,9 +14,7 @@ import walletWorker from "../worker/walletWorker";
 import {ChainType, NftInfo} from "../types";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
-import NFCRender from "../components/NFCRender";
 import i18n from "../locales/i18n";
-import url from "../utils/url";
 import CardTransform from "../components/CardTransform";
 import {Plugins} from "@capacitor/core";
 
@@ -44,16 +42,19 @@ class NFT extends React.Component<any, any> {
 
     init = async () => {
 
+        rpc.initNFT();
         const account = await walletWorker.accountInfo()
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const seroTicket = await rpc.getTicket(ChainType.SERO, account.addresses[ChainType.SERO])
         const ethTicket = await rpc.getTicket(ChainType.ETH, account.addresses[ChainType.ETH])
+        const bscTicket = await rpc.getTicket(ChainType.BSC, account.addresses[ChainType.BSC])
         const ticketMap: Map<string,Array<NftInfo>> = new Map<string, Array<NftInfo>>()
 
         for (let key of keys) {
             let wrapTicket: Array<NftInfo> = [];
             const ethSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["ETH"];
             const seroSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["SERO"];
+            const bscSymbol = CONTRACT_ADDRESS.ERC721[key]["SYMBOL"]["BSC"];
             if(seroSymbol && seroTicket){
                 const data:Array<NftInfo> = seroTicket[seroSymbol];
                 if(data && data.length>0){
@@ -67,6 +68,14 @@ class NFT extends React.Component<any, any> {
                     wrapTicket = wrapTicket.concat(data)
                 }
             }
+
+            if(bscSymbol && bscTicket){
+                const data:Array<NftInfo> = bscTicket[bscSymbol];
+                if(data && data.length>0){
+                    wrapTicket = wrapTicket.concat(data)
+                }
+            }
+
             wrapTicket.reverse()
             ticketMap.set(key,wrapTicket);
         }

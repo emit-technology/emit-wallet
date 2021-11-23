@@ -26,7 +26,7 @@ import {
     EPOCH_WRAPPED_DEVICE_CATEGORY,
     META_TEMP
 } from "../config"
-import {AccountModel, ChainType, NftInfo, Transaction} from "../types";
+import {AccountModel, ChainType, Meta, NftInfo, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
 import tron from "./tron";
@@ -52,6 +52,11 @@ class RPC {
     req = async (url: string, data: any) => {
         const resp = await axios.post(this.host, data)
         return resp.data;
+    }
+
+    get = async (url:string) => {
+        const resp = await axios.get(url);
+        return resp.data
     }
 
     async post(method: any, params: any, chain: ChainType) {
@@ -102,10 +107,11 @@ class RPC {
         if(address){
             await rpc.getTicketSero(address)
             await rpc.getTicketEth(account.addresses[ChainType.ETH])
+            await rpc.getTicketBSC(account.addresses[ChainType.BSC])
         }
     }
 
-    getTicketEth = async (address: string) => {
+    getTicketEth = async (owner: string) => {
         const tKey = utils.ticketKey(ChainType.ETH);
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const ret: any = {}
@@ -113,22 +119,95 @@ class RPC {
             if (!CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"]["ETH"]) {
                 continue
             }
-            const contract: Erc721 = new Erc721(CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"]["ETH"], ChainType.ETH);
-            const balance: number = await contract.balanceOf(address)
+            const contractAddress =CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"]["ETH"];
+            const contract: Erc721 = new Erc721(contractAddress, ChainType.ETH);
+            const balance: number = await contract.balanceOf(owner)
             const category = await contract.symbol()
-            const tokenArr: Array<NftInfo> = [];
-            for (let i = 0; i < balance; i++) {
-                const tokenId = await contract.tokenOfOwnerByIndex(address, i)
-                // const uri = await contract.tokenURI(tokenId)
-                tokenArr.push({
-                    chain:ChainType.ETH,
-                    symbol: symbol,
-                    tokenId: tokenId,
-                    meta: META_TEMP[symbol],
-                    category:category
-                })
+            if(contractAddress == CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.ETH){
+                const tokenArr: Array<NftInfo> = [];
+                console.log(balance,"ticketETH")
+                for (let i = 0; i < balance; i++) {
+                    const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
+                    const uri = await contract.tokenURI(tokenId)
+                    console.log("ETH URI",uri)
+                    if(uri){
+                        const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
+                        const metadata:Meta = await rpc.get(`${uri}/all`)
+
+                        const wrappedDevice = utils.metaAttributesToWrappedDevice(metadata.attributes);
+                        const stylePath = utils.isDark(wrappedDevice.gene)?"dark":"light";
+                        const mode = utils.calcStyle(wrappedDevice.gene)
+                        meta.image = mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${mode.style}.png`
+                        meta.attributes =wrappedDevice;
+
+                        tokenArr.push({
+                            chain:ChainType.ETH,
+                            symbol: symbol,
+                            tokenId: tokenId,
+                            meta: meta,
+                            category:category
+                        })
+                    }
+                }
+                ret[category] = tokenArr
+            }else{
+                const tokenArr: Array<NftInfo> = [];
+                for (let i = 0; i < balance; i++) {
+                    const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
+                    // const uri = await contract.tokenURI(tokenId)
+                    tokenArr.push({
+                        chain:ChainType.ETH,
+                        symbol: symbol,
+                        tokenId: tokenId,
+                        meta: META_TEMP[symbol],
+                        category:category
+                    })
+                }
+                ret[category] = tokenArr
             }
-            ret[category] = tokenArr
+        }
+        selfStorage.setItem(tKey, ret)
+    }
+
+    getTicketBSC = async (owner: string) => {
+        const tKey = utils.ticketKey(ChainType.BSC);
+        const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
+        const ret: any = {}
+        for (let symbol of keys) {
+            if (!CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"]["BSC"]) {
+                continue
+            }
+            const contractAddress = CONTRACT_ADDRESS.ERC721[symbol]["ADDRESS"]["BSC"];
+            const contract: Erc721 = new Erc721(contractAddress, ChainType.BSC);
+            const balance: number = await contract.balanceOf(owner)
+            const category = await contract.symbol()
+            if(contractAddress == CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.BSC){
+                const tokenArr: Array<NftInfo> = [];
+                console.log(balance,"ticketBSC")
+                for (let i = 0; i < balance; i++) {
+                    const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
+                    const uri = await contract.tokenURI(tokenId)
+                    if(uri){
+                        const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
+                        const metadata:Meta = await rpc.get(`${uri}/all`)
+
+                        const wrappedDevice = utils.metaAttributesToWrappedDevice(metadata.attributes);
+                        const stylePath = utils.isDark(wrappedDevice.gene)?"dark":"light";
+                        const mode = utils.calcStyle(wrappedDevice.gene)
+                        meta.image = mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${mode.style}.png`
+                        meta.attributes =wrappedDevice;
+
+                        tokenArr.push({
+                            chain:ChainType.BSC,
+                            symbol: symbol,
+                            tokenId: tokenId,
+                            meta: meta,
+                            category:category
+                        })
+                    }
+                }
+                ret[category] = tokenArr
+            }
         }
         selfStorage.setItem(tKey, ret)
     }

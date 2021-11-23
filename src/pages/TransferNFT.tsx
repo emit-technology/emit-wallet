@@ -107,7 +107,7 @@ class TransferNFT extends React.Component<any, any> {
             }
             // const ticket = await rpc.getTicket(chainId, account.addresses[chainId]);
             const defaultGasPrice = await utils.defaultGasPrice(chainId);
-            const cy = chainId == ChainType.SERO ? "LIGHT" : ChainType[chainId];
+            const cy = chainId == ChainType.SERO ? "LIGHT" : utils.defaultCy(chainId);
             this.setState({
                 feeCy:cy,
                 cy: cy,
@@ -140,7 +140,7 @@ class TransferNFT extends React.Component<any, any> {
             gasPrice: "0x"+new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: chain,
             amount: "0x0",
-            feeCy:ChainType[ChainType.ETH]
+            feeCy:utils.defaultCy(chain)
         }
 
         const symbol = this.props.match.params.category;
@@ -150,13 +150,13 @@ class TransferNFT extends React.Component<any, any> {
         const contractAddress = utils.getAddressBySymbol(symbol,chainName)
 
         //ETH ERC20
-        if(chain == ChainType.ETH){
+        if(chain == ChainType.ETH || chain == ChainType.BSC){
             const contract: Erc721 = new Erc721(contractAddress,chain);
             tx.value = "0x0";
             tx.data = await contract.transferFrom(tx.from,to,tokenId);
             tx.to = contractAddress;
             tx.gas = await contract.estimateGas(tx)
-            tx.feeCy = ChainType[ChainType.ETH];
+            tx.feeCy = utils.defaultCy(chain);
         }else if(chain == ChainType.SERO){
             const feeCy = "LIGHT";
             const gasFeeProxy: GasFeeProxyNFT = new GasFeeProxyNFT(GAS_FEE_PROXY_ADDRESS[feeCy]);
@@ -264,7 +264,7 @@ class TransferNFT extends React.Component<any, any> {
 
             <IonContent fullscreen>
 
-                <div style={{height:"60vh",overflowY:"scroll",border:"1px solid #ddd",borderRadius:"5px",margin:"12px"}}>
+                <div className="trf-box">
                     {ticket && <CardTransform info={ticket} hideButton={true}/>}
                 </div>
 
@@ -291,7 +291,7 @@ class TransferNFT extends React.Component<any, any> {
                         <IonText slot="end">
                             {gasPrice} {utils.gasUnit(chain)}
                         </IonText>
-                        {chain == ChainType.ETH && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
+                        {(chain == ChainType.ETH || chain == ChainType.BSC) && <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
                     </IonItem>
                 </IonList>
                 <div className="form-button-div">

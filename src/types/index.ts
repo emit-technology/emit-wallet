@@ -99,3 +99,21 @@ export interface MetaInfo {
     attributes: any
     alis: string
 }
+
+export interface Meta {
+    name: string
+    description: string
+    image: string
+    attributes: Array<Attribute>
+
+    image_data?:string
+    external_url?:string;//refer url for NFT Platform,it refer to link another url
+    background_color?:string;
+    animation_url?:string;
+}
+
+export interface Attribute {
+    trait_type:string
+    display_type:string;//boost_number,boost_percentage,number,date
+    value:any
+}

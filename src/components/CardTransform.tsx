@@ -1,24 +1,38 @@
 import * as React from 'react';
-import {IonButton, IonCol, IonGrid, IonIcon, IonChip,IonLabel, IonProgressBar,IonBadge, IonRow, IonText, IonToast} from '@ionic/react'
+import {
+    IonBadge,
+    IonButton,
+    IonCol,
+    IonGrid,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonPopover,
+    IonRow,
+    IonText,
+    IonToast
+} from '@ionic/react'
 
 import "./CardTransform.scss"
 import url from "../utils/url";
 import {ChainType, NftInfo} from "../types";
 import * as utils from "../utils"
-import {DeviceInfo, DeviceInfoRank, WrappedDevice} from "../contract/epoch/sero/types";
+import {DeviceInfo, WrappedDevice} from "../contract/epoch/sero/types";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
 import copy from 'copy-to-clipboard';
 import {
-    bookmarkOutline, colorWandOutline,
-    constructOutline,
+    arrowForwardOutline,
+    chevronForwardOutline,
     copyOutline,
-    createOutline, ellipseOutline,
-    ribbonOutline,
+    createOutline,
+    chevronForward,
+    swapVerticalOutline, repeatOutline, swapHorizontalOutline
 } from "ionicons/icons";
 import ModifyName from "./epoch/ModifyName";
-import {DeviceCategory} from "../utils/device-style";
 import BigNumber from "bignumber.js";
+import {BRIDGE_NFT} from "../config";
 
 interface Props {
     info:NftInfo
@@ -33,6 +47,8 @@ interface State {
     deg:number
     showToast:boolean
     showModify:boolean
+    crossArray:Array<string>
+    popoverState:any
 }
 
 class CardTransform extends React.Component<Props, State> {
@@ -41,6 +57,8 @@ class CardTransform extends React.Component<Props, State> {
         deg:0,
         showToast:false,
         showModify:false,
+        crossArray:[],
+        popoverState:""
     }
 
     constructor(props: Props) {
@@ -79,7 +97,18 @@ class CardTransform extends React.Component<Props, State> {
         })
     }
 
-
+    setShowPopover = (symbol:string,e:any,f:boolean,tokenId:any)=>{
+        const crossArray: Array<string> = Object.keys(BRIDGE_NFT[symbol])
+        const ret:any = {};
+        ret[tokenId] = {
+            event:e,
+            showPopover:f
+        }
+        this.setState({
+            crossArray:crossArray,
+            popoverState: ret
+        })
+    }
 
     renderDeviceInfo = ()=>{
         const {info,hideButton,showSimple} = this.props;
@@ -133,6 +162,9 @@ class CardTransform extends React.Component<Props, State> {
 
     renderWrappedDeviceInfo = ()=>{
         const {info,showSimple} = this.props;
+        if(!info.meta.attributes){
+            return <></>
+        }
         let device:DeviceInfo = utils.convertWrappedDeviceToDevice(info.meta.attributes);
         // const mode = utils.calcStyle(device.gene)
         const isDark = device && device.gene && utils.isDark(device.gene);
@@ -161,11 +193,14 @@ class CardTransform extends React.Component<Props, State> {
                         {
                             !showSimple &&
                             <div className="nft-card-name" style={{color:"#5b451a"}}>
-                                {info.meta&&info.meta.alis?info.meta.alis:utils.ellipsisStr(info.tokenId,5)}
+                                <div>{info.meta&&info.meta.alis?info.meta.alis:utils.ellipsisStr(info.tokenId,5)}</div>
+
                             </div>
                         }
                     </div>
-
+                    {!showSimple&&<div style={{position:"absolute",right:"0",writingMode:"vertical-rl",opacity: 0.8}}>
+                        {info.chain == ChainType.BSC ?<img src={require("../img/BSC.png")}/>:info.chain==ChainType.ETH?<img src={require("../img/ETH.png")} width="48px"/>:<img src={require("../img/SERO.png")}/>}
+                    </div>}
                 </div>
                 }
             </div>
@@ -174,7 +209,7 @@ class CardTransform extends React.Component<Props, State> {
     }
 
     render() {
-        const {deg,showToast,showModify} = this.state;
+        const {deg,showToast,showModify,popoverState} = this.state;
         const {info,hideButton,showSimple} = this.props;
         let device:DeviceInfo | undefined;
         let wrappedDevice:WrappedDevice | undefined;
@@ -200,6 +235,7 @@ class CardTransform extends React.Component<Props, State> {
                     }}>
                         <div className="card-front ">
                             {cardDesc}
+
                         </div>
                         <div className={`card-back`}>
                             <div>
@@ -309,16 +345,44 @@ class CardTransform extends React.Component<Props, State> {
                                 {
                                     utils.crossAbleBySymbol(info.symbol) &&
                                     <IonCol>
-                                        <IonButton mode="ios" fill="outline" expand="block" color="primary" size="small"  onClick={()=>{
-                                            url.tunnelNFT(info.symbol,info.chain,info.tokenId)
-                                        }}>{i18n.t("cross")}</IonButton>
+                                        <IonButton size="small" fill="outline" expand="block" mode="ios" onClick={(e:any) => {
+                                            e.persist();
+                                            this.setShowPopover(info.symbol,e,true,info.tokenId);
+                                            e.stopPropagation();
+                                        }} >{i18n.t("cross")}&nbsp;<IonIcon src={repeatOutline}/>
+                                        </IonButton>
+                                        <IonPopover
+                                            mode="ios"
+                                            cssClass='my-custom-class'
+                                            event={popoverState[info.tokenId] && popoverState[info.tokenId].event}
+                                            isOpen={popoverState[info.tokenId] && popoverState[info.tokenId].showPopover}
+                                            onDidDismiss={() => this.setShowPopover(info.symbol,undefined,false,info.tokenId)}
+                                        >
+                                            <IonList>
+                                                {
+                                                    utils.getCrossNFTBySymbol(info.symbol).map((v:any) => {
+                                                        if(ChainType[info.chain] !== v.from){
+                                                           return <></>
+                                                        }
+                                                        return <IonItem onClick={()=>{
+                                                            url.tunnelNFT(info.symbol,v.from,info.tokenId,v.to)
+                                                        }}>
+                                                            <IonText>{utils.getCyDisplayName(v.from)}</IonText>
+                                                            <IonIcon icon={arrowForwardOutline} size={"small"}/>
+                                                            <IonText>{v.to}</IonText>
+                                                            <IonIcon icon={chevronForwardOutline} slot="end" color="medium" size={"small"}/>
+                                                        </IonItem>
+                                                    })
+                                                }
+                                            </IonList>
+                                        </IonPopover>
                                     </IonCol>
                                 }
 
                                 <IonCol>
                                     <IonButton mode="ios" fill="outline" expand="block" color="primary"  size="small" onClick={() => {
                                         url.transferNFT(info.symbol,info.chain,info.tokenId)
-                                    }}>{i18n.t("transfer")}</IonButton>
+                                    }}>{i18n.t("transfer")}&nbsp;<IonIcon src={swapHorizontalOutline}/></IonButton>
                                 </IonCol>
                                 {
                                     utils.frozeAbleBySymbol(info.symbol) &&
@@ -330,7 +394,7 @@ class CardTransform extends React.Component<Props, State> {
                                 }
 
                                 {
-                                    utils.unFrozenAbleBySymbol(info.symbol) &&
+                                    info.chain == ChainType.SERO && utils.unFrozenAbleBySymbol(info.symbol) &&
                                     <IonCol>
                                         <IonButton mode="ios" fill="outline" expand="block" color="primary" size="small"  onClick={()=>{
                                             url.epochUnFreeze(info.tokenId,info.symbol)

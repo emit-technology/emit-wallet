@@ -85,14 +85,14 @@ class TunnelNFT extends React.Component<any, any> {
 
     componentDidMount() {
         //const {crossMode} = this.state;
-        const symbol = this.props.match.params.symbol;
-        const chainName = this.props.match.params.chain;
+        // const symbol = this.props.match.params.symbol;
+        const fromChainName = this.props.match.params.from_chain;
+        const toChainName = this.props.match.params.to_chain;
         const tokenId = this.props.match.params.tokenId;
 
-        const crossMode: Array<string> = Object.keys(CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"])
-        if (crossMode && crossMode[1] == chainName) {
-            crossMode.reverse()
-        }
+        const crossMode: Array<string> = [fromChainName,toChainName];
+
+        // Object.keys(CONTRACT_ADDRESS.ERC721[symbol]["SYMBOL"])
         this.setState({
             crossMode: crossMode,
             tokenId: tokenId
@@ -111,23 +111,13 @@ class TunnelNFT extends React.Component<any, any> {
 
         const contractAddress = utils.getAddressBySymbol(symbol, crossMode[0])
         let allowance = 0;
-        if (chain == ChainType.ETH) {
+        if (chain == ChainType.ETH || chain == ChainType.BSC) {
             const contract: Erc721 = new Erc721(contractAddress,chain);
             const address = await contract.getApproved(tokenId);
-            if (address.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT.ETH.HANDLE.toLowerCase()) {
+            if (address.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT[ChainType[chain]].HANDLE.toLowerCase()) {
                 allowance = 1;
             }
         }
-        // let metaData: any = {};
-        // if (chain == ChainType.ETH) {
-        //     const contract: Erc721 = new Erc721(contractAddress,chain);
-        //     const uri = await contract.tokenURI(tokenId)
-        //     metaData = await rpc.req(uri, {})
-        // } else if (chain == ChainType.SERO) {
-        //     const contract: Src721 = new Src721(contractAddress);
-        //     const uri = await contract.tokenURI(tokenId)
-        //     metaData = await rpc.req(uri, {})
-        // }
         const ticketObj = await rpc.getTicket(chain,account.addresses[chain])
         const tickets = ticketObj[utils.getCategoryBySymbol(symbol,ChainType[chain])]
         let ticket = null;
@@ -154,13 +144,14 @@ class TunnelNFT extends React.Component<any, any> {
         const symbol = this.props.match.params.symbol;
         const {crossMode, targetCoin} = this.state;
         const chain = utils.getChainIdByName(crossMode[0])
+        const toChain = utils.getChainIdByName(crossMode[1])
         let crossFee: any = 0;
-        let feeCy: any = "";
+        let feeCy: any = utils.defaultCy(chain);
         if (chain == ChainType.ETH) {
-            feeCy = "ETH"
-        } else if (chain == ChainType.SERO) {
+        } else if(chain == ChainType.BSC){
+        }else if (chain == ChainType.SERO) {
             const contract = new SRC721CrossFee(CONTRACT_ADDRESS.CROSS_NFT.SERO.FEE)
-            const rest = await contract.getFeeInfo(utils.getNFTResourceId(symbol))
+            const rest = await contract.getFeeInfo(utils.getNFTResourceId(symbol,crossMode[0],crossMode[1]))
             feeCy = rest[0];
             const decimal = utils.getCyDecimal(feeCy, ChainType[chain])
             crossFee = utils.fromValue(rest[1], decimal).toString(10)
@@ -200,14 +191,15 @@ class TunnelNFT extends React.Component<any, any> {
             from: account.addresses && account.addresses[fromChain],
             to: utils.getAddressBySymbol(symbol, crossMode[0]),
             value: "0x0",
-            cy: ChainType[fromChain],
+            cy: utils.defaultCy(fromChain),
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: fromChain,
             amount: "0x0",
-            feeCy: ChainType[fromChain]
+            feeCy: utils.defaultCy(fromChain)
         }
-        if (fromChain == ChainType.ETH) {
-            let approveTo = config.CONTRACT_ADDRESS.CROSS_NFT.ETH.HANDLE;
+
+        if(fromChain == ChainType.BSC || fromChain == ChainType.ETH){
+            let approveTo = config.CONTRACT_ADDRESS.CROSS_NFT[ChainType[fromChain]].HANDLE;
             if (op == "cancel") {
                 approveTo = "0x0000000000000000000000000000000000000000";
             }
@@ -215,7 +207,6 @@ class TunnelNFT extends React.Component<any, any> {
             tx.data = await contract.approve(approveTo, tokenId)
             tx.gas = await contract.estimateGas(tx)
         }
-
         this.setState({
             tx: tx,
             passwordAlert: true
@@ -242,14 +233,14 @@ class TunnelNFT extends React.Component<any, any> {
             from: from,
             to: config.CONTRACT_ADDRESS.CROSS_NFT[crossMode[0]].BRIDGE,
             value: "0x0",
-            cy: "ETH",
+            cy: utils.defaultCy(fromChain),
             gasPrice: "0x" + new BigNumber(gasPrice).multipliedBy(1e9).toString(16),
             chain: fromChain,
             amount: "0x0",
-            feeCy: ChainType[fromChain]
+            feeCy: utils.defaultCy(fromChain)
         }
-        const ethCross: CrossNFTEth = new CrossNFTEth(config.CONTRACT_ADDRESS.CROSS_NFT.ETH.BRIDGE);
-        tx.data = await ethCross.depositNFT(ChainId.SERO, utils.getNFTResourceId(symbol),
+        const ethCross: CrossNFTEth = new CrossNFTEth(config.CONTRACT_ADDRESS.CROSS_NFT[crossMode[0]].BRIDGE,fromChain);
+        tx.data = await ethCross.depositNFT(ChainId.SERO, utils.getNFTResourceId(symbol,crossMode[0],crossMode[1]),
             utils.bs58ToHex(account.addresses && account.addresses[toChain]),
             tokenId)
         tx.gas = await ethCross.estimateGas(tx)
@@ -290,7 +281,7 @@ class TunnelNFT extends React.Component<any, any> {
         }
 
         const gasFeeProxy: GasFeeProxyNFT = new GasFeeProxyNFT(config.GAS_FEE_PROXY_ADDRESS[feeCy]);
-        tx.data = await gasFeeProxy.depositNFT(destinationChainID, utils.getNFTResourceId(symbol), account.addresses[toChainId]);
+        tx.data = await gasFeeProxy.depositNFT(destinationChainID, utils.getNFTResourceId(symbol,crossMode[0],crossMode[1]), account.addresses[toChainId]);
         tx.gas = await gasFeeProxy.estimateGas(tx)
         const tokenRate = await gasFeeProxy.tokenRate()
         if(tx.gas && tx.gasPrice){
@@ -421,14 +412,14 @@ class TunnelNFT extends React.Component<any, any> {
                     <IonChip color="warning" style={{lineHeight:"1.5",marginTop:"12px"}}>
                         You are transferring NFT from the {TOKEN_DESC[crossMode[0]]} to the {TOKEN_DESC[crossMode[1]]}
                         </IonChip>
-                    <div style={{height:"60vh",overflowY:"scroll",border:"1px solid #ddd",borderRadius:"5px",margin:"12px"}}>
+                    <div  className="trf-box">
                         {ticket && <CardTransform info={ticket} hideButton={true}/>}
                     </div>
                     <div>
                         <IonRow>
                             <IonCol size="12">
                                 {
-                                    (crossMode[0] != "ETH" || new BigNumber(allowance).toNumber() > 0) &&
+                                    (crossMode[0] != "ETH" || crossMode[0] != "BSC" || new BigNumber(allowance).toNumber() > 0) &&
                                     <div>
                                         <IonItem mode="ios" lines="none">
                                             <IonLabel mode="ios" color="medium">{i18n.t("crossFee")}</IonLabel>
@@ -446,7 +437,7 @@ class TunnelNFT extends React.Component<any, any> {
                             <IonText slot="end">
                                 {gasPrice} {utils.gasUnit(chain)}
                             </IonText>
-                            {chain == ChainType.ETH &&
+                            {(chain == ChainType.ETH || chain == ChainType.BSC ) &&
                             <IonIcon slot="end" src={chevronForwardOutline} size="small" color='medium'/>}
                         </IonItem>
 
@@ -489,7 +480,7 @@ class TunnelNFT extends React.Component<any, any> {
                                         </IonGrid>
                                         :
                                         <IonButton mode="ios" expand="block" color="primary"
-                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH"
+                                                   disabled={showProgress || showProgress1 || !address || crossMode[0] == "ETH" || crossMode[0] == "BSC"
                                                    && new BigNumber(allowance).toNumber() == 0}
                                                    onClick={() => {
                                                        this.commit()

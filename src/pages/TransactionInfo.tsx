@@ -157,7 +157,7 @@ class TransactionInfo extends React.Component<any, any> {
                         nft.address=nftAddress;
                     }
                 }
-            }else if(chain == ChainType.ETH){
+            }else if(chain == ChainType.ETH || chain == ChainType.BSC){
                 const rest:any = await this.getTransactionByHash(txHash,chain);
                 if(utils.isNFTAddress(rest.to,ChainType[chain])){
                     const contact = new ERC721(rest.to,chain);
@@ -166,10 +166,10 @@ class TransactionInfo extends React.Component<any, any> {
                         nft.ticket = decodeResult.tokenId;
                         nft.address = rest.to;
                     }
-                } else if(rest.to.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT.ETH.BRIDGE.toLowerCase()){
-                    const contact = new CrossNFT(rest.to);
+                } else if(rest.to.toLowerCase() == CONTRACT_ADDRESS.CROSS_NFT[ChainType[chain]].BRIDGE.toLowerCase()){
+                    const contact = new CrossNFT(rest.to,chain);
                     const decodeResult = await contact.decodeTransferFromParams(rest.input);
-                    const nftAddress = utils.getCrossTargetAddress(decodeResult.resourceID,decodeResult.destinationChainID)
+                    const nftAddress = utils.getCrossTargetAddress(chain,decodeResult.resourceID,decodeResult.destinationChainID)
                     if(nftAddress){
                         const contract = new SRC721(nftAddress);
                         const value = await contract.ticket(decodeResult.amount)

@@ -192,7 +192,7 @@ class ImportAccount extends React.Component<any, State> {
 
                             <IonItem mode="ios">
                                 <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
-                                <IonInput mode="ios" value={name} onIonChange={(e:any) => {
+                                <IonInput mode="ios" autocomplete="off"  value={name} onIonChange={(e:any) => {
                                     this.setState({
                                         name:e.target.value!
                                     })
@@ -200,7 +200,7 @@ class ImportAccount extends React.Component<any, State> {
                             </IonItem>
                             <IonItem mode="ios">
                                 <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
-                                <IonInput mode="ios" type="password" value={password} onIonChange={(e: any) => {
+                                <IonInput mode="ios" autocomplete="new-password"  type="password" value={password} onIonChange={(e: any) => {
                                     this.setState({
                                         password:e.target.value!
                                     })
@@ -215,7 +215,7 @@ class ImportAccount extends React.Component<any, State> {
                             </div>}
                             <IonItem mode="ios">
                                 <IonLabel position="stacked"><IonText color="medium">{i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
-                                <IonInput mode="ios" type="password" value={rePassword} onIonChange={(e: any) => {
+                                <IonInput mode="ios" autocomplete="new-password"  type="password" value={rePassword} onIonChange={(e: any) => {
                                     this.setState({
                                         rePassword:e.target.value!
                                     })

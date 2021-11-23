@@ -52,8 +52,8 @@ const ABI = [
 
 class CrossNFT extends EthContract {
 
-    constructor(address:string) {
-        super(address,ABI,ChainType.ETH);
+    constructor(address:string,chain:ChainType) {
+        super(address,ABI,chain);
     }
 
     depositNFT = async (destinationChainID:number,resourceId: string, recipient:string,tokenId:string): Promise<string> => {

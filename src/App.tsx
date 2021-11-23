@@ -164,7 +164,7 @@ class App extends React.Component<any, State> {
                     {/*<IonRouterOutlet>*/}
                     <Switch>
                         <Route path="/slide" component={Slides} exact={true}/>
-                        <Route path="/tunnel-nft/:symbol/:chain/:tokenId" component={TunnelNFT} exact={true}/>
+                        <Route path="/tunnel-nft/:symbol/:from_chain/:tokenId/:to_chain" component={TunnelNFT} exact={true}/>
                         <Route path="/tunnel/:cy/:chain1/:chain2" component={Tunnel} exact={true}/>
                         <Route path="/manage/about" component={About} exact={true}/>
                         <Route path="/account/create" component={CreateAccount} exact={true}/>

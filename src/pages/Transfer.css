@@ -23,3 +23,12 @@
     z-index: 999;
     background-color: #fff;
 }
+
+.trf-box{
+    height: 60vh ;
+    overflow-y: scroll;
+    border: 1px solid rgb(221, 221, 221);
+    border-radius: 5px ;
+    margin: 12px ;
+    padding: 12px 24px;
+}
