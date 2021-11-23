@@ -199,7 +199,7 @@ class CardTransform extends React.Component<Props, State> {
                         }
                     </div>
                     {!showSimple&&<div style={{position:"absolute",right:"0",writingMode:"vertical-rl",opacity: 0.8}}>
-                        {info.chain == ChainType.BSC ?<img src={require("../img/BSC.png")}/>:info.chain==ChainType.ETH?<img src={require("../img/ETH.png")} width="48px"/>:<img src={require("../img/SERO.png")}/>}
+                        {info.chain == ChainType.BSC ?<img src={require("../img/BSC.png")} width="48px"/>:info.chain==ChainType.ETH?<img src={require("../img/ETH.png")} width="48px"/>:<img src={require("../img/SERO.png")} width="48px"/>}
                     </div>}
                 </div>
                 }
@@ -349,7 +349,7 @@ class CardTransform extends React.Component<Props, State> {
                                             e.persist();
                                             this.setShowPopover(info.symbol,e,true,info.tokenId);
                                             e.stopPropagation();
-                                        }} >{i18n.t("cross")}&nbsp;<IonIcon src={repeatOutline}/>
+                                        }} >{i18n.t("cross")}
                                         </IonButton>
                                         <IonPopover
                                             mode="ios"
@@ -382,7 +382,7 @@ class CardTransform extends React.Component<Props, State> {
                                 <IonCol>
                                     <IonButton mode="ios" fill="outline" expand="block" color="primary"  size="small" onClick={() => {
                                         url.transferNFT(info.symbol,info.chain,info.tokenId)
-                                    }}>{i18n.t("transfer")}&nbsp;<IonIcon src={swapHorizontalOutline}/></IonButton>
+                                    }}>{i18n.t("transfer")}</IonButton>
                                 </IonCol>
                                 {
                                     utils.frozeAbleBySymbol(info.symbol) &&
