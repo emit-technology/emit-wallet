@@ -57,6 +57,7 @@ class Url {
         poolInfo: "epoch/pool/info",
         freeze: "epoch/freeze",
         unfreeze: "epoch/unfreeze",
+        stargrid: "epoch/starGrid",
     }
     private browserBase = "browser"
 
@@ -267,6 +268,9 @@ class Url {
         this.goTo([this.base,this.exchange.marketStatics].join("/"),[this.base,this.exchange.market].join("/"))
     }
 
+    starGrid(){
+        this.goTo([this.base,this.epoch.stargrid].join("/"),window.location.hash)
+    }
 }
 
 const url = new Url();

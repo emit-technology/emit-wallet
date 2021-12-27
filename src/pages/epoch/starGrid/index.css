@@ -1,0 +1,248 @@
+.wrapped {
+  width: 100%;
+  height: 100%;
+  transform: translate(0, 0) !important;
+}
+
+svg {
+  overflow: scroll !important;
+}
+
+svg g:hover text {
+  fill-opacity: 1;
+}
+
+svg g text {
+  font-size: 1px;
+  fill: #fff;
+}
+
+svg path {
+  fill: none;
+  stroke: yellowgreen;
+  stroke-width: 0.02em;
+  stroke-opacity: 0.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0.5;
+}
+
+.hexagon-head-svg polygon {
+  stroke: #938200;
+  stroke-width: 1px;
+  stroke-dasharray: 3;
+  stroke-opacity: 0.5;
+}
+
+.hexagon {
+  font-size: 1pt;
+}
+
+.content-grid {
+  background: #000;
+  background-image: url("./icons/galaxy.jpg");
+}
+
+/*BACKGROUND*/
+#gradient {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  z-index: 2;
+}
+
+.gis-info {
+  position: fixed;
+  bottom: 80px;
+  padding: 12px;
+  color: #fff;
+  background: rgba(58, 164, 71, 0.6);
+}
+
+.self-info {
+  position: fixed;
+  bottom: 0;
+  left: 10px;
+  padding: 12px;
+  color: #fff;
+  background: rgba(58, 164, 71, 0.6);
+}
+
+.target-info {
+  position: fixed;
+  top: 100px;
+  left: 10px;
+  padding: 12px;
+  color: #fff;
+  background: rgba(58, 164, 71, 0.6);
+}
+
+@media (min-width: 576px) {
+  .counter-info {
+    width: 100vw;
+  }
+
+  .cap-info {
+    width: 50% !important;
+  }
+}
+@media (min-width: 768px) {
+  .counter-info {
+    width: 100vw;
+  }
+
+  .cap-info {
+    width: 50% !important;
+  }
+}
+@media (min-width: 992px) {
+  .counter-info {
+    width: 80vw;
+    transform: translateX(10vw);
+  }
+
+  .avatar-l {
+    width: 100px !important;
+  }
+
+  .cap-info {
+    width: 50% !important;
+  }
+
+  .avatar-l .hex-head {
+    min-width: 100px;
+    min-height: 100px;
+  }
+}
+@media (min-width: 1200px) {
+  .counter-info {
+    width: 60vw;
+    transform: translateX(20vw);
+  }
+
+  .avatar-l .hex-head {
+    min-width: 100px;
+    min-height: 100px;
+  }
+}
+@media (min-width: 1500px) {
+  .counter-info {
+    width: 60vw;
+    transform: translateX(20vw);
+  }
+
+  .avatar-l .hex-head {
+    min-width: 100px;
+    min-height: 100px;
+  }
+}
+.counter-info {
+  position: fixed;
+  min-height: 100px;
+  overflow: hidden;
+  height: auto;
+  display: flex;
+  z-index: 10;
+  opacity: 0.9;
+}
+
+.owner-info {
+  background: linear-gradient(#011a60, #475067);
+  flex: 1;
+  position: relative;
+}
+
+.owner-info .cap-info {
+  float: left;
+}
+
+.avatar-l {
+  float: left;
+  width: 40%;
+}
+
+.avatar-l .hex-head {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 0 1px 1px #dddddd;
+}
+
+.cap-info {
+  font-size: 16px;
+  font-weight: 800;
+  color: #f1d204;
+  text-shadow: 2px 2px 2px #000;
+}
+
+.cap-info div {
+  border: 1px solid #96bf9b;
+  min-height: 25px;
+  min-width: 60px;
+  margin: 0px 12px 3px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.cap-info div img {
+  position: absolute;
+  top: 2px;
+}
+
+.cap-info div span {
+  padding-left: 25px;
+}
+
+.cap-info div span img {
+  position: absolute;
+  right: 5px;
+}
+
+.enemy-info {
+  flex: 1;
+  background: linear-gradient(#560817, #674750);
+}
+
+.enemy-info .avatar-l {
+  float: right;
+}
+
+.avatar-l .attr {
+  width: 100%;
+  display: flex;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 3px 2px 2px #000;
+  text-align: center;
+}
+
+.avatar-l .attr div {
+  flex: 1;
+}
+
+.enemy-info .cap-info {
+  float: right;
+}
+
+.eye {
+  position: absolute;
+  right: 4px;
+  bottom: 5px;
+}
+
+.bg-select {
+  flood-color: #f0f;
+  animation: bgShadow 3s linear infinite alternate;
+}
+
+@keyframes bgShadow {
+  from {
+    flood-color: #0ff;
+  }
+  to {
+    flood-color: #f0f;
+  }
+}
+
+/*# sourceMappingURL=index.css.map */

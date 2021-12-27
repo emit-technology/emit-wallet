@@ -283,7 +283,7 @@ abstract class Erc721 {
 
     abstract getApproved(tokenId: string): Promise<string>;
 
-    abstract setApprovalForAll(operator: string, approved: string): Promise<string>;
+    abstract setApprovalForAll(operator: string, approved: boolean): Promise<string>;
 
     abstract isApprovedForAll(owner: string, operator: string): Promise<boolean>;
 

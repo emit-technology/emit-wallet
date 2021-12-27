@@ -95,6 +95,7 @@ import NFTMarketSearch from "./pages/market/NFTMarketSearch";
 import EpochStyle from "./pages/epoch/style";
 import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 import rpc from "./rpc";
+import StarGrid from "./pages/epoch/starGrid";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -192,6 +193,7 @@ class App extends React.Component<any, State> {
                         <Route path="/epoch/unfreeze/:tkt/:category" component={Unfreeze} exact={true}/>
 
                         <Route path="/epoch/style" component={EpochStyle} exact={true}/>
+                        <Route path="/epoch/starGrid" component={StarGrid} exact={true}/>
 
                         <Route path="/browser/:url" component={Browser} exact={true}/>
                         <Route path="/chart/:symbol" component={Chart} exact={true}/>

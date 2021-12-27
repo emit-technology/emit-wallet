@@ -102,11 +102,11 @@ class RPC {
 
     initNFT = async ()=>{
         console.log("init NFT...")
-       const account = await walletWorker.accountInfo();
+        const account = await walletWorker.accountInfo();
         const address = account && account.addresses[ChainType.SERO]
         if(address){
-            await rpc.getTicketSero(address)
-            await rpc.getTicketEth(account.addresses[ChainType.ETH])
+            // await rpc.getTicketSero(address)
+            // await rpc.getTicketEth(account.addresses[ChainType.ETH])
             await rpc.getTicketBSC(account.addresses[ChainType.BSC])
         }
     }
@@ -181,33 +181,33 @@ class RPC {
             const contract: Erc721 = new Erc721(contractAddress, ChainType.BSC);
             const balance: number = await contract.balanceOf(owner)
             const category = await contract.symbol()
-            if(contractAddress == CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.BSC){
-                const tokenArr: Array<NftInfo> = [];
-                console.log(balance,"ticketBSC")
-                for (let i = 0; i < balance; i++) {
-                    const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
-                    const uri = await contract.tokenURI(tokenId)
-                    if(uri){
-                        const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
-                        const metadata:Meta = await rpc.get(`${uri}/all`)
 
+            const tokenArr: Array<NftInfo> = [];
+            console.log(balance,"ticketBSC")
+            for (let i = 0; i < balance; i++) {
+                const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
+                const uri = await contract.tokenURI(tokenId)
+                const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
+                if(uri){
+                    const metadata:Meta = await rpc.get(`${uri}/all`)
+                    if(contractAddress == CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.BSC){
                         const wrappedDevice = utils.metaAttributesToWrappedDevice(metadata.attributes);
                         const stylePath = utils.isDark(wrappedDevice.gene)?"dark":"light";
                         const mode = utils.calcStyle(wrappedDevice.gene)
                         meta.image = mode.style=="ax"?"":`./assets/img/epoch/remains/device/${stylePath}/${mode.style}.png`
                         meta.attributes =wrappedDevice;
-
-                        tokenArr.push({
-                            chain:ChainType.BSC,
-                            symbol: symbol,
-                            tokenId: tokenId,
-                            meta: meta,
-                            category:category
-                        })
                     }
                 }
-                ret[category] = tokenArr
+                tokenArr.push({
+                    chain:ChainType.BSC,
+                    symbol: symbol,
+                    tokenId: tokenId,
+                    meta: meta,
+                    category:category
+                })
             }
+            ret[category] = tokenArr
+
         }
         selfStorage.setItem(tKey, ret)
     }

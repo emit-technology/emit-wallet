@@ -402,7 +402,7 @@ class Eth extends EthContract implements Erc721 {
     getApproved = async (tokenId: string): Promise<string> => {
         return await this.contract.methods.getApproved(tokenId).call()
     }
-    setApprovalForAll = async (operator: string, approved: string): Promise<string> => {
+    setApprovalForAll = async (operator: string, approved:boolean ): Promise<string> => {
         return await this.contract.methods.setApprovalForAll(operator, approved).encodeABI()
     }
     isApprovedForAll = async (owner: string, operator: string): Promise<boolean> => {

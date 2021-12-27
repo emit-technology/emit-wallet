@@ -83,10 +83,10 @@ class Trade extends React.Component<any, State>{
                                     <IonText color="secondary">
                                         <p style={{lineHeight:"1.5em"}}>
                                             24H Vol:&nbsp;&nbsp;<IonText color="secondary" className="font-weight-800">{marketVolume.count}</IonText><br/>
-                                            24H Total: {marketVolume.amounts.map(v=>{
+                                            24H Total: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
                                             return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.amount,18),3)} {v.cy}</IonText>
                                         })}<br/>
-                                            24H High: {marketVolume.amounts.map(v=>{
+                                            24H High: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
                                             return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.high,18),3)} {v.cy}</IonText>
                                         })}
                                         </p>

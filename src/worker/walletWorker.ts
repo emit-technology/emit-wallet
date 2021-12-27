@@ -157,6 +157,12 @@ class WalletWorker {
                     if(selfStorage.getItem("sero_address")){
                         data.addresses[ChainType.SERO]=selfStorage.getItem("sero_address")
                     }
+                    if(selfStorage.getItem("bsc_address")){
+                        data.addresses[ChainType.BSC]=selfStorage.getItem("bsc_address")
+                    }
+                    if(selfStorage.getItem("eth_address")){
+                        data.addresses[ChainType.ETH]=selfStorage.getItem("eth_address")
+                    }
 
                     resolve(data);
                 }

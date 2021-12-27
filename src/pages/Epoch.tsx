@@ -103,6 +103,16 @@ class Epoch extends React.Component<any, any>{
                                     </IonLabel>
                                 </IonItem>
                             }
+                            <IonCard mode="ios" style={{marginTop: tips && "4px"}} onClick={() => {
+                                url.starGrid()
+                            }}>
+                                <IonCardContent>
+                                    <img src="./assets/img/stargrid.png" style={{width:"100vw"}}/>
+                                    {/*<div className="mining">*/}
+                                    {/*    <IonBadge color="danger">BETA</IonBadge>*/}
+                                    {/*</div>*/}
+                                </IonCardContent>
+                            </IonCard>
 
                             <IonCard mode="ios" style={{marginTop: tips && "4px"}} onClick={() => {
                                 url.poolHashRate()
