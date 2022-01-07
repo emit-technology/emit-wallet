@@ -34,6 +34,8 @@ export interface HexagonProps {
   movable?:boolean
   focus?:boolean
   flag?:boolean
+  approval?:boolean
+  marker?:boolean
 }
 interface CounterStyle{
   backgroundColor:Array<string>//rgb range
@@ -49,11 +51,13 @@ export const Hexagon: FC<HexagonProps> = ({
   children,
   colorStyle,
   counter,
-                                            block,
-                                            attack,
-    focus,
-    movable,
-    flag,
+  block,
+  attack,
+  focus,
+  movable,
+  flag,
+  approval,
+  marker,
   ...pointerEvents
 }) => {
   const {
@@ -72,7 +76,6 @@ export const Hexagon: FC<HexagonProps> = ({
   }, [orientation, origin, hexSize, spacing, coordinates]);
 
   const fillId = patternFill ? `url(#${patternFill})` : "";
-
   const events = Object.keys(pointerEvents).reduce(
       (prev, key) => ({
         ...prev,
@@ -122,10 +125,17 @@ export const Hexagon: FC<HexagonProps> = ({
           </>
         }
         {movable&&!attack && <polygon points={pointsWalk} style={{...cellStyle,opacity:"0.2",filter:`url("#walk")`}} />}
+        {/*{movable && <polygon points={pointsWalk} style={{...cellStyle}} className="cap-polygon"/>}*/}
         {block&&!attack && <polygon points={pointsWalk} style={{...cellStyle,opacity:"1",filter:`url("#walk")`}} />}
         {attack && <polygon points={points} style={{...cellStyle,opacity:"1",filter:`url("#attack")`}} />}
-        {flag && <polygon points={points} style={{...cellStyle,filter:`url(#coordinate)`}} /> }
-
+        {flag && <>
+          <polygon points={points} style={{...cellStyle,filter:`url(#coordinate)`}} />
+        </> }
+        {marker && <polygon points={points} style={{...cellStyle,filter:`url(#coordinateMarker)`}} /> }
+        {approval && <polygon points={points} style={{...cellStyle,filter:`url(#coordinateApproval)`}} /> }
+        { focus && <>
+          <polygon points={pointsDropShadow} style={{...cellStyle,filter:`url("#flag")`}} />
+        </> }
         {children}
       </g>
     </g>

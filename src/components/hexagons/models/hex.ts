@@ -32,5 +32,10 @@ export class Hex implements Hex {
 export interface HexInfo {
     hex:Hex
     land?:Land
-    counter?:Counter
+    counter?: Counter
+    opType?: COUNTER_OP_TYPE
+}
+
+export enum COUNTER_OP_TYPE {
+
 }

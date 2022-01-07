@@ -18,11 +18,11 @@ class CounterSvg extends React.Component<Props, any>{
         const {counter,land} = this.props;
         const hexSize = 40;
         const rate = Math.floor(utils.fromValue( counter.rate,16).toNumber());
-        const bg = calcCounterRgb(rate);
+        const bg = calcCounterRgb(rate,counter.enType == StarGridType.EARTH);
         const backgroundColor = [ `rgb(${bg[0]})`,`rgb(${bg[1]})`];
 
         const piece = {
-            style:counter.type == StarGridType.WATER?"white":"black",
+            style:counter.enType == StarGridType.WATER?"white":"black",
             backgroundColor: backgroundColor
         }
         const cornerCoords = calculateCoordinates(ORIENTATIONS_CONSTS.flat, hexSize*0.8);
@@ -33,9 +33,9 @@ class CounterSvg extends React.Component<Props, any>{
         let landStyle = ""
         if(land){
             const i = Math.floor(utils.fromValue(land.capacity,18).toNumber())
-            if(land.type == StarGridType.WATER){
+            if(land.enType == StarGridType.WATER){
                 landStyle = blueColors[i]
-            }else if(land.type == StarGridType.EARTH){
+            }else if(land.enType == StarGridType.EARTH){
                 landStyle = yellowColors[i]
             }
         }

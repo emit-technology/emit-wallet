@@ -1,6 +1,7 @@
 import {Hex, HexInfo, Orientation, Point} from "../models";
 import { ORIENTATIONS_CONSTS, OrientationsEnum } from "./orientation";
 import BigNumber from "bignumber.js";
+import BN from "bn.js";
 
 const linearInterpolation = (a: number, b: number, t: number): number => a + ((b - a) * t);
 
@@ -42,14 +43,14 @@ export const reachableHexes = (movement:number,powerMap:Map<string,number>,pathH
   const movementMap:Map<string, number> = new Map<string, number>()
 
   if(pathHexes && pathHexes.length>1){
-    for(let i=0;i<pathHexes.length;i++){
+    for(let i=1;i<pathHexes.length;i++){
       const hex = pathHexes[i].hex;
       const power = powerMap.has(hex.uKey())?powerMap.get(hex.uKey()):1;
       movement -= power;
     }
-    movement +=1;
   }
   movementMap.set(start.uKey(),movement);
+  console.log(movementMap,"movementMap>")
   for(let k = 1 ;k<=movement;k++){
     fringes.push([]);
     for(let hex of fringes[k-1]){
@@ -57,7 +58,7 @@ export const reachableHexes = (movement:number,powerMap:Map<string,number>,pathH
         // @ts-ignore
         const neighbor = neighboor(hex,dir);
         if(powerMap){
-          const hexMove = movementMap.get(hex.uKey());
+          const hexMove = movementMap.has(hex.uKey())?movementMap.get(hex.uKey()):1;
           const neighborPower = powerMap.has(neighbor.uKey())?powerMap.get(neighbor.uKey()):1;
           if(!movementMap.has(neighbor.uKey())||(hexMove-neighborPower)> movementMap.get(neighbor.uKey())){
             movementMap.set(neighbor.uKey(),hexMove-neighborPower);
@@ -167,7 +168,7 @@ export function testHexGrids(){
   const hex = toAxial(new BigNumber(13500517).toString(10));
   const hex2 = toAxial(new BigNumber(5636153).toString(10));
   const hex3 = toAxial(new BigNumber(5636239).toString(10));
-  console.log(hex,hex2,hex3,"tessssss")
+  console.log(hex,hex2,hex3,"tessssss",toOpCode([1,2,3,4],4))
 }
 
 export const rgbToHex = function(color) {
@@ -204,24 +205,23 @@ export const isBlankLand = (hex:HexInfo):boolean =>{
 }
 
 export const noCounter = (hex:HexInfo):boolean =>{
-  return !hex.land || !hex.land.operator
+  return !hex.land || !hex.land.counter
 }
 
 export const calcCounterRgb = (rate:number,black:boolean = false)=>{
   if(black){
-    const rgba = [0,136,207];
-    const rgbb = [47,187,246];//7d11ef    f265ff
-    const rgbA = [125,17,239];
-    const rgbB = [242,101,255];
-
-    const start = convertRgb(rgba,rgbA,rate);
-    const end = convertRgb(rgbb,rgbB,rate)
-    return [start,end]
-  }else{
     const rgba = [217,122,0];
     const rgbb = [248,194,31];//7d11ef    f265ff
     const rgbA = [226,208,0];
     const rgbB = [229,229,152];
+    const start = convertRgb(rgba,rgbA,rate);
+    const end = convertRgb(rgbb,rgbB,rate)
+    return [start,end]
+  }else{
+    const rgba = [0,136,207];
+    const rgbb = [47,187,246];//7d11ef    f265ff
+    const rgbA = [125,17,239];
+    const rgbB = [242,101,255];
 
     const start = convertRgb(rgba,rgbA,rate);
     const end = convertRgb(rgbb,rgbB,rate)
@@ -235,4 +235,32 @@ const convertRgb = (rgba:Array<number>,rgbA:Array<number>,rate:number)=>{
     arr.push(Math.floor((rgba[i]*rate+rgbA[i]*(100-rate))/100))
   }
   return arr
+}
+
+export const toOpCode = (arr:Array<number>,len:number) =>{
+  const jArr:Array<string> = arr.map(v=>{return binary(v,len)})
+  return jArr.join("")
+}
+
+function binary(num:number, bits:number):string {
+  let resArry = [];
+  let xresArry:Array<string> = [];
+  let i = 0;
+  for (; num > 0;) {
+    resArry.push(num % 2);
+    num = parseInt(String(num / 2));
+    i++;
+  }
+  for (let j = i - 1; j >= 0; j--) {
+    xresArry.push(resArry[j]);
+  }
+  if (bits < xresArry.length) {
+    xresArry = xresArry.slice(xresArry.length-bits)
+  }
+  if (bits) {
+    for (let r = xresArry.length; r < bits; r++) {
+      xresArry.unshift("0");
+    }
+  }
+  return xresArry.join().replace(/,/g, "");
 }

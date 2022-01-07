@@ -16,23 +16,19 @@ import {
 
 import "./CardTransform.scss"
 import url from "../utils/url";
-import {ChainType, NftInfo} from "../types";
+import {ChainType, Counter, NftInfo, StarGridType} from "../types";
 import * as utils from "../utils"
 import {DeviceInfo, WrappedDevice} from "../contract/epoch/sero/types";
 import EpochAttribute from "./EpochAttribute";
 import i18n from "../locales/i18n";
 import copy from 'copy-to-clipboard';
-import {
-    arrowForwardOutline,
-    chevronForwardOutline,
-    copyOutline,
-    createOutline,
-    chevronForward,
-    swapVerticalOutline, repeatOutline, swapHorizontalOutline
-} from "ionicons/icons";
+import {arrowForwardOutline, chevronForwardOutline, copyOutline, createOutline,} from "ionicons/icons";
 import ModifyName from "./epoch/ModifyName";
 import BigNumber from "bignumber.js";
 import {BRIDGE_NFT} from "../config";
+import {calcCounterRgb} from "./hexagons/utils";
+import CounterAttribute from "./epoch/CounterAttribute";
+import CounterSvg from "../pages/epoch/starGrid/counter-svg";
 
 interface Props {
     info:NftInfo
@@ -152,6 +148,36 @@ class CardTransform extends React.Component<Props, State> {
         return cardDesc;
     }
 
+    renderCounterInfo = ()=>{
+        const {info,hideButton,showSimple} = this.props;
+        let counter:Counter | undefined = info.meta.attributes;
+        // if(counter){
+        //     const isEarth = counter.typ == StarGridType.EARTH;
+        //     let img = counter && isEarth ?"black":"white";
+        //     const bg = calcCounterRgb(Math.floor(utils.fromValue(counter.rate,16).toNumber()),isEarth);
+        //     if(counter.accumulated && new BigNumber(counter.accumulated).toNumber()>0){
+        //         img = `./assets/img/epoch/stargrid/piece/${img}Sword`;
+        //     }
+        // }
+        const cardDesc = <div>
+            <div className={`pd-35`}>
+                {/*<img src={info.meta.image}/>*/}
+                <CounterSvg counter={counter}/>
+            </div>
+            <div>
+                <div className={`card-desc-default`}>
+                    <div>
+                        {!showSimple && <span style={{fontSize:"16px",fontWeight:600}}>{info.meta.name} &nbsp;&nbsp;</span>}
+                        <div style={{marginTop:"12px"}}>
+                            <IonText>({utils.ellipsisStr(info.tokenId)})</IonText>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        return cardDesc;
+    }
+
     renderStar = (num:number)=>{
         const starElement = [];
         for(let i=1;i<=num;i++){
@@ -213,17 +239,22 @@ class CardTransform extends React.Component<Props, State> {
         const {info,hideButton,showSimple} = this.props;
         let device:DeviceInfo | undefined;
         let wrappedDevice:WrappedDevice | undefined;
+        let counter:Counter | undefined;
+        let  cardDesc = this.renderDeviceInfo();
         if(info.symbol == "DEVICES"){
             device=info.meta.attributes
-        }
-        if(info.symbol == "WRAPPED_DEVICES"){
+            // cardDesc = this.renderDeviceInfo();
+        }else if(info.symbol == "WRAPPED_DEVICES"){
             wrappedDevice = info.meta.attributes;
             if(wrappedDevice){
                 device = utils.convertWrappedDeviceToDevice(wrappedDevice)
             }
+            cardDesc = this.renderWrappedDeviceInfo();
+        }else if(info.symbol == "COUNTER"){
+            counter = info.meta.attributes;
+            cardDesc = this.renderCounterInfo();
         }
 
-        const cardDesc = info && info.symbol=="WRAPPED_DEVICES"?this.renderWrappedDeviceInfo():this.renderDeviceInfo()
         return <>
             <div>
                 <div className="n-card">
@@ -235,7 +266,6 @@ class CardTransform extends React.Component<Props, State> {
                     }}>
                         <div className="card-front ">
                             {cardDesc}
-
                         </div>
                         <div className={`card-back`}>
                             <div>
@@ -272,6 +302,12 @@ class CardTransform extends React.Component<Props, State> {
                                                 <div className="font-md">{utils.calcDark(device.gene)*100/4}%</div>
                                             </IonCol>
                                         }
+                                        {
+                                            counter && <IonCol className="col-line">
+                                                <div className="font-sm">TYPE</div>
+                                                <div className="font-md">{StarGridType[counter.enType]}</div>
+                                            </IonCol>
+                                        }
                                     </IonRow>
 
                                     <IonRow className="row-line" style={{minHeight:"100px"}}>
@@ -279,6 +315,10 @@ class CardTransform extends React.Component<Props, State> {
                                             { device ?
                                                 <EpochAttribute device={device} showDevice={true} showDriver={false} hiddenButton={hideButton}/>
                                                 :
+                                                counter ?
+                                                    <>
+                                                        <CounterAttribute counter={counter}/>
+                                                    </>:
                                                 info.meta.description
                                             }
                                         </IonCol>
@@ -323,6 +363,27 @@ class CardTransform extends React.Component<Props, State> {
                                                             e.stopPropagation();
                                                             device && copy(device.gene);
                                                             device && copy(device.gene);
+                                                            this.setState({
+                                                                showToast:true
+                                                            })
+                                                        }}/>
+                                                    </div>
+                                                </div>
+                                            </IonCol>
+                                        </IonRow>
+                                    }
+                                    {
+                                        counter && counter.gene && counter.gene != "0x0000000000000000000000000000000000000000000000000000000000000000"
+                                        && <IonRow className="row-line">
+                                            <IonCol className="col-line">
+                                                <div style={{fontWeight:600,fontSize:"16px"}}>DNA</div>
+                                                <div>
+                                                    <IonText>{utils.ellipsisStr(counter.gene)}</IonText>
+                                                    <div>
+                                                        <IonIcon src={copyOutline} size="small"  onClick={(e:any)=>{
+                                                            e.stopPropagation();
+                                                            counter && copy(counter.gene);
+                                                            counter && copy(counter.gene);
                                                             this.setState({
                                                                 showToast:true
                                                             })

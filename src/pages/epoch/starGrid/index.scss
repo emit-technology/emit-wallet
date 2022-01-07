@@ -174,6 +174,8 @@ svg path {
   background: linear-gradient(#011a60,#475067);
   flex: 1;
   position: relative;
+  text-align: left;
+  display: flex;
 }
 
 .owner-info .cap-info {
@@ -184,7 +186,7 @@ svg path {
   width: 40%;
 }
 .avatar-l .hex-head{
-
+  position:relative;
   //max-width: 100px;
   //max-height:100px;
   //margin:0 3px;
@@ -196,6 +198,9 @@ svg path {
 .owner-info .avatar-l .hex-head{
   //border: 5px solid #395bb7;
   //border-bottom: 1px solid #395bb7;
+}
+.avatar-l .attr {
+  min-height: 23px;
 }
 .cap-info {
   //width: 50%;
@@ -227,9 +232,12 @@ svg path {
 .enemy-info {
   flex: 1;
   background: linear-gradient(#560817, #674750);
+  display: flex;
 }
 .enemy-info .avatar-l{
   float: right;
+  right: 0;
+  position: relative;
 }
 
 .enemy-info .avatar-l .hex-head{
@@ -268,7 +276,17 @@ svg path {
   right: 4px;
   bottom: 5px;
 }
-
+.hex-head .coo{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  color: #000000;
+  font-size: 10px;
+  text-align: center;
+  font-weight: 800;
+  background: #f7f7f7;
+  opacity: 0.7;
+}
 .bg-select{
   flood-color: #f0f;
   animation: bgShadow 3s linear infinite alternate;
@@ -283,3 +301,55 @@ svg path {
   }
 }
 
+.btn-div{
+  position: absolute;
+  z-index: 1;
+  color: #fff;
+}
+
+.counter-list-modal {
+  --height: 70vh;
+  --width: 90vw;
+  --max-width: 512px;
+  --border-radius:15px;
+  overflow-y: scroll;
+}
+
+.counter-list-md{
+  max-height: 90%;
+  overflow-y: scroll;
+}
+
+.op-box{
+  position:absolute;
+  top:20%;
+  right:0;
+  padding: 6px;
+  z-index: 10;
+  border-radius: 15px;
+  background: rgba(26,41,82,0.6);
+  color:#fff;
+  font-size: 10px;
+}
+
+.attribution-input {
+  width: 50px;
+  border: 1px solid;
+  border-radius: 5px;
+  margin: 2px;
+  height: 30px;
+}
+.counter-list{
+  max-height: 20vh;
+  overflow-y: scroll;
+  border: 1px solid #ddd;
+  padding: 6px;
+  margin: 6px 12px 0;
+  border-radius: 15px;
+}
+.operator-btn{
+  position: absolute !important;
+  bottom: 0;
+  border: none !important;
+  //right: 0;
+}

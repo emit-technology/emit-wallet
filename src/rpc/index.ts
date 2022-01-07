@@ -26,7 +26,7 @@ import {
     EPOCH_WRAPPED_DEVICE_CATEGORY,
     META_TEMP
 } from "../config"
-import {AccountModel, ChainType, Meta, NftInfo, Transaction} from "../types";
+import {ChainType, Counter, Meta, NftInfo, StarGridType, Transaction} from "../types";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
 import tron from "./tron";
@@ -37,7 +37,7 @@ import epochService from "../contract/epoch/sero/index";
 import {DeviceInfo, WrappedDevice} from "../contract/epoch/sero/types";
 import url from "../utils/url";
 import epochRemainsService from "../contract/epoch/sero/remains";
-import BigNumber from "bignumber.js";
+import starGridRpc from "./epoch/stargrid";
 
 class RPC {
 
@@ -125,11 +125,9 @@ class RPC {
             const category = await contract.symbol()
             if(contractAddress == CONTRACT_ADDRESS.ERC721.WRAPPED_DEVICES.ADDRESS.ETH){
                 const tokenArr: Array<NftInfo> = [];
-                console.log(balance,"ticketETH")
                 for (let i = 0; i < balance; i++) {
                     const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
                     const uri = await contract.tokenURI(tokenId)
-                    console.log("ETH URI",uri)
                     if(uri){
                         const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
                         const metadata:Meta = await rpc.get(`${uri}/all`)
@@ -198,9 +196,18 @@ class RPC {
                         meta.attributes =wrappedDevice;
                     }
                 }
+                if(contractAddress == CONTRACT_ADDRESS.ERC721.COUNTER.ADDRESS.BSC){
+                    const counter:Counter = await starGridRpc.counterInfo(tokenId);
+                    if(counter){
+                        const style = counter.enType == StarGridType.EARTH ? "black":"white";
+                        meta.image = `./assets/img/epoch/stargrid/piece/${style}.png`
+                        meta.attributes = counter;
+                    }
+                }
+
                 tokenArr.push({
                     chain:ChainType.BSC,
-                    symbol: symbol,
+                    symbol: category,
                     tokenId: tokenId,
                     meta: meta,
                     category:category
@@ -297,7 +304,7 @@ class RPC {
     getBalance = async (chain: ChainType, address: string, localOnly?: boolean) => {
         const key = ["balance", chain].join("_");
         let rest: any = selfStorage.getItem(key);
-        if (!rest) {
+        if (!rest && address) {
             return await this.getBalanceFromServer(address,chain)
         } else {
             // if (!localOnly) {

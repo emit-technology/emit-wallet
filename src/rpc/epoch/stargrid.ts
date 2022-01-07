@@ -1,6 +1,6 @@
 import Base from "../base";
-import {Land, Counter, DriverStarGrid, Position} from "../../types";
-import {EVENT_HOST_SERO} from "../../config";
+import {Land, Counter, DriverStarGrid, Position, UserPosition, StargridApproveInfo} from "../../types";
+import {EVENT_HOST_BSC} from "../../config";
 
 class StarGrid extends Base {
 
@@ -8,28 +8,29 @@ class StarGrid extends Base {
         super(host);
     }
 
-    rangeLand = async (c1: string, c2: string): Promise<Array<Land>> => {
-        const rest:any = await this.post("star_rangeLand",[c1,c2])
+    rangeLand = async (owner:string,c1: string, c2: string): Promise<Array<Land>> => {
+        // @ts-ignore
+        const rest:Array<Land> = await this.post("star_rangePlanet",[owner,c1,c2])
         return rest
     }
 
-    piecePositions = async (id: string, max: number): Promise<Array<Counter>> => {
-        const rest:any = await this.post("star_operatorPositions",[id,max])
+    counterPositions = async (id: string, max: number): Promise<Array<Counter>> => {
+        const rest:any = await this.post("star_counterPositions",[id,max])
         return rest
     }
 
-    userPositions = async (address:string,max:number): Promise<Array<Position>> => {
+    userPositions = async (address:string,max:number): Promise<UserPosition> => {
         const rest:any = await this.post("star_userPositions",[address,max])
         return rest
     }
 
     landInfo = async (landId:string): Promise<Land> => {
-        const rest:any = await this.post("star_landInfo",[landId])
+        const rest:any = await this.post("star_planetInfo",[landId])
         return rest
     }
 
-    counter = async (id: string): Promise<Counter> => {
-        const rest:any = await this.post("star_operatorInfo",[id])
+    counterInfo = async (id: string): Promise<Counter> => {
+        const rest:any = await this.post("star_counterInfo",[id])
         return rest
     }
 
@@ -38,7 +39,17 @@ class StarGrid extends Base {
         return rest
     }
 
+    myApproved = async (address:string,skip:number,limit:number):Promise<Array<StargridApproveInfo>> =>{
+        const rest:any = await this.post("star_myApproved",[address,skip,limit]);
+        return rest;
+    }
+
+    //[0-marker,1-owner,2-maker&owner]
+    myPlanet = async (address:string,planetType:number,skip:number,limit:number):Promise<Array<StargridApproveInfo>> => {
+        const rest: any = await this.post("star_myPlanet", [address,planetType, skip, limit]);
+        return rest;
+    }
 }
-const starGridRpc = new StarGrid(EVENT_HOST_SERO)
+const starGridRpc = new StarGrid(EVENT_HOST_BSC)
 
 export default starGridRpc

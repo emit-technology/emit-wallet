@@ -19,9 +19,9 @@ class LandSvg extends React.Component<Props, any>{
         let landStyle = ""
         if(land){
             const i = Math.floor(utils.fromValue(land.capacity,18).toNumber())
-            if(land.type == StarGridType.WATER){
+            if(land.enType == StarGridType.WATER){
                 landStyle = blueColors[i]
-            }else if(land.type == StarGridType.EARTH){
+            }else if(land.enType == StarGridType.EARTH){
                 landStyle = yellowColors[i]
             }
         }

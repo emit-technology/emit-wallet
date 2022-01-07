@@ -41,7 +41,7 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
     >
         <defs>
             <filter id="shadow2">
-                <feDropShadow dx="0" dy="0" stdDeviation={0.2} className="bg-select">
+                <feDropShadow dx="0" dy="0" stdDeviation={0.5} className="bg-select">
                     {/*<animate attributeName="stdDeviation" values="0;0.3;0.6;0.2;0.1;" dur="2s"*/}
                     {/*         repeatCount="indefinite" />*/}
                 </feDropShadow>
@@ -57,7 +57,7 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
                 return <filter id={`spotlight_${v}`} filterUnits="objectBoundingBox">
                     <feImage href={`./assets/img/epoch/stargrid/yellow/${y}.png`} result="ffImg"/>
                     <feFlood result="floodFill"  floodColor={`#${v}`} floodOpacity="1" width="100%" height="100%"/>
-                    <feBlend in="ffImg" mode="luminosity" in2="floodFill" result="fBle"/>
+                    <feBlend in="ffImg" mode="overlay" in2="floodFill" result="fBle"/>
                     <feComposite in2="ffImg" operator="in"/>
                 </filter>
             })}
@@ -66,7 +66,7 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
                 return <filter id={`spotlight_${v}`} filterUnits="objectBoundingBox">
                     <feImage href={`./assets/img/epoch/stargrid/blue/${y}.png`} result="ffImg"/>
                     <feFlood result="floodFill"  floodColor={`#${v}`} floodOpacity="1" width="100%" height="100%"/>
-                    <feBlend in="ffImg" mode="luminosity" in2="floodFill" result="fBle"/>
+                    <feBlend in="ffImg" mode="overlay" in2="floodFill" result="fBle"/>
                     <feComposite in2="ffImg" operator="in"/>
                 </filter>
             })}
@@ -81,8 +81,14 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
             <filter id="line">
                 <feImage href="./assets/img/epoch/stargrid/line.png"/>
             </filter>
-            <filter id="coordinate" x="50%" width="30%" height="30%">
+            <filter id="coordinate" x="55%" y="5%" width="30%" height="30%">
                 <feImage href="./assets/img/epoch/stargrid/coordinate.png"/>
+            </filter>
+            <filter id="coordinateMarker" x="75%" y="30%" width="30%" height="30%">
+                <feImage href="./assets/img/epoch/stargrid/coordinateMarker.png"/>
+            </filter>
+            <filter id="coordinateApproval" x="55%" y="55%" width="30%" height="30%">
+                <feImage href="./assets/img/epoch/stargrid/coordinateApproval.png"/>
             </filter>
             <filter id="thinLine">
                 <feImage href="./assets/img/epoch/stargrid/thinLine.png"/>
@@ -110,6 +116,9 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
             </filter>
             <filter id="walk" >
                 <feImage href="./assets/img/epoch/stargrid/walk.png"/>
+            </filter>
+            <filter id="flag" x="30%" y="15%"  width="50%" height="50%">
+                <feImage href="./assets/img/epoch/stargrid/flag.png"/>
             </filter>
         </defs>
       <Layout {...layoutProps}>{children}</Layout>

@@ -42,7 +42,6 @@ class NFT extends React.Component<any, any> {
 
     init = async () => {
 
-        rpc.initNFT();
         const account = await walletWorker.accountInfo()
         const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
         const seroTicket = await rpc.getTicket(ChainType.SERO, account.addresses[ChainType.SERO])
@@ -101,6 +100,7 @@ class NFT extends React.Component<any, any> {
         this.setState({
             ticketMap:tmp
         })
+        console.log(tmp)
         // this.initDriver(v).catch(e=>{
         //     console.log(e)
         // })
@@ -126,23 +126,27 @@ class NFT extends React.Component<any, any> {
                         {/*    <IonLabel>Driver</IonLabel>*/}
                         {/*</IonSegmentButton>*/}
                         <IonSegmentButton value="DEVICES">
-                            <IonLabel>Devices</IonLabel>
+                            <IonLabel>DEVICES</IonLabel>
                         </IonSegmentButton>
                         <IonSegmentButton value="WRAPPED_DEVICES">
-                            <IonLabel>Relics</IonLabel>
+                            <IonLabel>RELICS</IonLabel>
                         </IonSegmentButton>
                         <IonSegmentButton mode="ios" value="MEDAL">
-                            <IonLabel>Medal</IonLabel>
+                            <IonLabel>MEDAL</IonLabel>
+                        </IonSegmentButton>
+                        <IonSegmentButton mode="ios" value="COUNTER">
+                            <IonLabel>COUNTER</IonLabel>
                         </IonSegmentButton>
                     </IonSegment>
                 </div>
-                {["MEDAL","DEVICES","WRAPPED_DEVICES"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
+                {["MEDAL","DEVICES","WRAPPED_DEVICES","COUNTER"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
                     <div className="card-page">
                     <div className="card-inset">
                     {
                         ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {
                             //lines={index == data.length-1?"none":"inset"}
                             // const meta = v.metaData?v.metaData:{};
+                            console.log(v,"nftinfo")
                             return <CardTransform info={v}/>
                         })
                     }
