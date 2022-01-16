@@ -1,5 +1,12 @@
 import Base from "../base";
-import {Land, Counter, DriverStarGrid, Position, UserPosition, StargridApproveInfo} from "../../types";
+import {
+    Land,
+    Counter,
+    DriverStarGrid,
+    UserPosition,
+    StarGridType,
+    StarGridTrustInfo, UserDeposit
+} from "../../types";
 import {EVENT_HOST_BSC} from "../../config";
 
 class StarGrid extends Base {
@@ -39,16 +46,23 @@ class StarGrid extends Base {
         return rest
     }
 
-    myApproved = async (address:string,skip:number,limit:number):Promise<Array<StargridApproveInfo>> =>{
+    myApproved = async (address:string,skip:number,limit:number):Promise<StarGridTrustInfo> =>{
         const rest:any = await this.post("star_myApproved",[address,skip,limit]);
         return rest;
     }
 
-    //[0-marker,1-owner,2-maker&owner]
-    myPlanet = async (address:string,planetType:number,skip:number,limit:number):Promise<Array<StargridApproveInfo>> => {
-        const rest: any = await this.post("star_myPlanet", [address,planetType, skip, limit]);
+    //[0-marker,1-owner,2-maker&owner,3-WATER,4-EARTH]
+    //user,queryType[0-marker,1-owner,2-maker&owner], planetType[0-all,1-water,2-earth],skil,limit
+    myPlanet = async (address:string,queryType:number,planetType:StarGridType,skip:number,limit:number):Promise<Array<Land>> => {
+        const rest: any = await this.post("star_myPlanet", [address,queryType,planetType, skip, limit]);
         return rest;
     }
+
+    userDeposit = async (address:string,skip:number,limit:number):Promise<Array<UserDeposit>> => {
+        const rest: any = await this.post("star_userDeposit", [address, skip, limit]);
+        return rest;
+    }
+
 }
 const starGridRpc = new StarGrid(EVENT_HOST_BSC)
 

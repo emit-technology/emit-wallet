@@ -1,5 +1,5 @@
 import EthContract from "../../EthContract";
-import {ChainType, Counter, Land, LockedInfo, StarGridType} from "../../../types";
+import {ChainType, Counter, ENDetails, Land, LockedInfo, StarGridType, UserInfo} from "../../../types";
 import {CONTRACT_ADDRESS} from "../../../config"
 import BigNumber from "bignumber.js";
 const ABI = [
@@ -15,12 +15,17 @@ const ABI = [
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "baseCost",
+                "name": "createBaseCost",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "attachCost",
+                "name": "createAttachCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "feeRate",
                 "type": "uint256"
             }
         ],
@@ -48,6 +53,11 @@ const ABI = [
                 "internalType": "uint256",
                 "name": "attachAmountIn_",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "defaultCoordinate_",
+                "type": "uint256"
             }
         ],
         "name": "capture",
@@ -60,6 +70,21 @@ const ABI = [
             {
                 "internalType": "uint256",
                 "name": "attachCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createBaseCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createAttachCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "feeRate",
                 "type": "uint256"
             }
         ],
@@ -102,6 +127,11 @@ const ABI = [
                 "internalType": "uint256",
                 "name": "terms_",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "defaultCoordinate_",
+                "type": "uint256"
             }
         ],
         "name": "prepare",
@@ -114,6 +144,11 @@ const ABI = [
             {
                 "internalType": "uint256",
                 "name": "attachCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "feeRate",
                 "type": "uint256"
             }
         ],
@@ -176,9 +211,9 @@ const ABI = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-];
+]
 
-const ABI_QUERY = [
+const ABI_QUERY =[
     {
         "inputs": [
             {
@@ -266,8 +301,232 @@ const ABI_QUERY = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "lockedInfo",
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "counterId_",
+                "type": "uint256"
+            }
+        ],
+        "name": "counterUserInfo",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "counterType",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "enType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "counterId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "base",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "level",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "capacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "move",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "defense",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "force",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "luck",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "life",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "gene",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint64",
+                        "name": "nextOpTime",
+                        "type": "uint64"
+                    }
+                ],
+                "internalType": "struct IStarGridQuery.CounterUserInfo",
+                "name": "ret",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user_",
+                "type": "address"
+            }
+        ],
+        "name": "currentENDetails",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "inputEN",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "driverCapacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "driverRate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "driverOutEN",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "counterCapacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "counterRate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "counterOutEN",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "planetCapacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "planetOutEN",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalPower",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "output",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IStarGridQuery.ENDetails",
+                "name": "ret",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user_",
+                "type": "address"
+            }
+        ],
+        "name": "driverInfo",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "base",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "capacity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "rate",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "gene",
+                        "type": "bytes32"
+                    }
+                ],
+                "internalType": "struct IStarGridQuery.DriverInfo",
+                "name": "ret",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user_",
+                "type": "address"
+            }
+        ],
+        "name": "getUserInfo",
         "outputs": [
             {
                 "components": [
@@ -344,19 +603,24 @@ const ABI_QUERY = [
                         "type": "tuple"
                     },
                     {
-                        "internalType": "uint64",
-                        "name": "currentPeriod",
-                        "type": "uint64"
+                        "internalType": "uint256",
+                        "name": "lightCanUsed",
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "uint64",
-                        "name": "nextSettlementPeriod",
-                        "type": "uint64"
+                        "internalType": "uint256",
+                        "name": "earthCanUsed",
+                        "type": "uint256"
                     },
                     {
-                        "internalType": "uint64",
-                        "name": "endPeriod",
-                        "type": "uint64"
+                        "internalType": "uint256",
+                        "name": "darkCanUsed",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "waterCanUsed",
+                        "type": "uint256"
                     },
                     {
                         "components": [
@@ -364,6 +628,21 @@ const ABI_QUERY = [
                                 "internalType": "uint8",
                                 "name": "enType",
                                 "type": "uint8"
+                            },
+                            {
+                                "internalType": "uint64",
+                                "name": "nextSettlementPeriod",
+                                "type": "uint64"
+                            },
+                            {
+                                "internalType": "uint64",
+                                "name": "endPeriod",
+                                "type": "uint64"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "unsettlement",
+                                "type": "uint256"
                             },
                             {
                                 "components": [
@@ -388,11 +667,6 @@ const ABI_QUERY = [
                                                 "internalType": "uint256",
                                                 "name": "totalNE",
                                                 "type": "uint256"
-                                            },
-                                            {
-                                                "internalType": "uint256",
-                                                "name": "totalEN",
-                                                "type": "uint256"
                                             }
                                         ],
                                         "internalType": "struct IStarGridQuery.PeriodNE",
@@ -410,21 +684,11 @@ const ABI_QUERY = [
                                                 "internalType": "uint256",
                                                 "name": "totalNE",
                                                 "type": "uint256"
-                                            },
-                                            {
-                                                "internalType": "uint256",
-                                                "name": "totalEN",
-                                                "type": "uint256"
                                             }
                                         ],
                                         "internalType": "struct IStarGridQuery.PeriodNE",
                                         "name": "attach",
                                         "type": "tuple"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "UserEN",
-                                        "type": "uint256"
                                     }
                                 ],
                                 "internalType": "struct IStarGridQuery.PeriodUserNE[]",
@@ -433,150 +697,13 @@ const ABI_QUERY = [
                             },
                             {
                                 "internalType": "uint256",
-                                "name": "baseCanUsed",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "attachCanUsed",
+                                "name": "currentOutput",
                                 "type": "uint256"
                             }
                         ],
                         "internalType": "struct IStarGridQuery.UserNEInfo",
                         "name": "userNEInfo",
                         "type": "tuple"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "uint8",
-                                "name": "enType",
-                                "type": "uint8"
-                            },
-                            {
-                                "internalType": "uint64",
-                                "name": "period",
-                                "type": "uint64"
-                            },
-                            {
-                                "components": [
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "userNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalEN",
-                                        "type": "uint256"
-                                    }
-                                ],
-                                "internalType": "struct IStarGridQuery.PeriodNE",
-                                "name": "base",
-                                "type": "tuple"
-                            },
-                            {
-                                "components": [
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "userNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalEN",
-                                        "type": "uint256"
-                                    }
-                                ],
-                                "internalType": "struct IStarGridQuery.PeriodNE",
-                                "name": "attach",
-                                "type": "tuple"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "UserEN",
-                                "type": "uint256"
-                            }
-                        ],
-                        "internalType": "struct IStarGridQuery.PeriodUserNE[]",
-                        "name": "current",
-                        "type": "tuple[]"
-                    },
-                    {
-                        "components": [
-                            {
-                                "internalType": "uint8",
-                                "name": "enType",
-                                "type": "uint8"
-                            },
-                            {
-                                "internalType": "uint64",
-                                "name": "period",
-                                "type": "uint64"
-                            },
-                            {
-                                "components": [
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "userNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalEN",
-                                        "type": "uint256"
-                                    }
-                                ],
-                                "internalType": "struct IStarGridQuery.PeriodNE",
-                                "name": "base",
-                                "type": "tuple"
-                            },
-                            {
-                                "components": [
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "userNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalNE",
-                                        "type": "uint256"
-                                    },
-                                    {
-                                        "internalType": "uint256",
-                                        "name": "totalEN",
-                                        "type": "uint256"
-                                    }
-                                ],
-                                "internalType": "struct IStarGridQuery.PeriodNE",
-                                "name": "attach",
-                                "type": "tuple"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "UserEN",
-                                "type": "uint256"
-                            }
-                        ],
-                        "internalType": "struct IStarGridQuery.PeriodUserNE[]",
-                        "name": "last",
-                        "type": "tuple[]"
                     },
                     {
                         "components": [
@@ -602,11 +729,6 @@ const ABI_QUERY = [
                     },
                     {
                         "internalType": "uint256",
-                        "name": "unsettlement",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
                         "name": "userCoordinate",
                         "type": "uint256"
                     },
@@ -622,13 +744,392 @@ const ABI_QUERY = [
                     },
                     {
                         "internalType": "uint64",
-                        "name": "nextCaptureTime",
+                        "name": "nextOpTime",
+                        "type": "uint64"
+                    }
+                ],
+                "internalType": "struct IStarGridQuery.UserInfo",
+                "name": "ret",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user_",
+                "type": "address"
+            }
+        ],
+        "name": "lockedInfo",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint64",
+                        "name": "currentPeriod",
                         "type": "uint64"
                     },
                     {
-                        "internalType": "uint64",
-                        "name": "nextOpTime",
-                        "type": "uint64"
+                        "components": [
+                            {
+                                "internalType": "uint64",
+                                "name": "period",
+                                "type": "uint64"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedLight",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedEarth",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedDark",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedWater",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "totalEN",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "waterOutput",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "earthOutput",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedLight",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedEarth",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedDark",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedWater",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IStarGridQuery.GlobalInfo",
+                        "name": "current",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint64",
+                                "name": "period",
+                                "type": "uint64"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedLight",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedEarth",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedDark",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "burnedWater",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "totalEN",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "waterOutput",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "earthOutput",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedLight",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedEarth",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedDark",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userBurnedWater",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct IStarGridQuery.GlobalInfo",
+                        "name": "last",
+                        "type": "tuple"
+                    },
+                    {
+                        "components": [
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "counterType",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint8",
+                                        "name": "enType",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "counterId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "base",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "level",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "capacity",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "rate",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "move",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "defense",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "force",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "luck",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "life",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "bytes32",
+                                        "name": "gene",
+                                        "type": "bytes32"
+                                    }
+                                ],
+                                "internalType": "struct IStarGridQuery.CounterInfo",
+                                "name": "counter",
+                                "type": "tuple"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "lightCanUsed",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "earthCanUsed",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "darkCanUsed",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "waterCanUsed",
+                                "type": "uint256"
+                            },
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "uint8",
+                                        "name": "enType",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint64",
+                                        "name": "nextSettlementPeriod",
+                                        "type": "uint64"
+                                    },
+                                    {
+                                        "internalType": "uint64",
+                                        "name": "endPeriod",
+                                        "type": "uint64"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "unsettlement",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "components": [
+                                            {
+                                                "internalType": "uint8",
+                                                "name": "enType",
+                                                "type": "uint8"
+                                            },
+                                            {
+                                                "internalType": "uint64",
+                                                "name": "period",
+                                                "type": "uint64"
+                                            },
+                                            {
+                                                "components": [
+                                                    {
+                                                        "internalType": "uint256",
+                                                        "name": "userNE",
+                                                        "type": "uint256"
+                                                    },
+                                                    {
+                                                        "internalType": "uint256",
+                                                        "name": "totalNE",
+                                                        "type": "uint256"
+                                                    }
+                                                ],
+                                                "internalType": "struct IStarGridQuery.PeriodNE",
+                                                "name": "base",
+                                                "type": "tuple"
+                                            },
+                                            {
+                                                "components": [
+                                                    {
+                                                        "internalType": "uint256",
+                                                        "name": "userNE",
+                                                        "type": "uint256"
+                                                    },
+                                                    {
+                                                        "internalType": "uint256",
+                                                        "name": "totalNE",
+                                                        "type": "uint256"
+                                                    }
+                                                ],
+                                                "internalType": "struct IStarGridQuery.PeriodNE",
+                                                "name": "attach",
+                                                "type": "tuple"
+                                            }
+                                        ],
+                                        "internalType": "struct IStarGridQuery.PeriodUserNE[]",
+                                        "name": "userNEs",
+                                        "type": "tuple[]"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "currentOutput",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IStarGridQuery.UserNEInfo",
+                                "name": "userNEInfo",
+                                "type": "tuple"
+                            },
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "uint8",
+                                        "name": "enType",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "user",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "total",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "internalType": "struct IStarGridQuery.ResourceInfo[]",
+                                "name": "resources",
+                                "type": "tuple[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userCoordinate",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userDefaultWaterCoordinate",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userDefaultEarthCoordinate",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint64",
+                                "name": "nextOpTime",
+                                "type": "uint64"
+                            }
+                        ],
+                        "internalType": "struct IStarGridQuery.UserInfo",
+                        "name": "userInfo",
+                        "type": "tuple"
                     }
                 ],
                 "internalType": "struct IStarGridQuery.LockedInfo",
@@ -790,6 +1291,16 @@ const ABI_QUERY = [
                 "internalType": "int32",
                 "name": "maxs",
                 "type": "int32"
+            },
+            {
+                "internalType": "int32",
+                "name": "minq",
+                "type": "int32"
+            },
+            {
+                "internalType": "int32",
+                "name": "mins",
+                "type": "int32"
             }
         ],
         "stateMutability": "view",
@@ -802,12 +1313,27 @@ const ABI_OP = [
         "inputs": [
             {
                 "internalType": "uint8",
-                "name": "typ_",
+                "name": "enType_",
                 "type": "uint8"
             },
             {
                 "internalType": "uint256",
-                "name": "count",
+                "name": "count_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "depositType_",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "maxCost_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deadline_",
                 "type": "uint256"
             }
         ],
@@ -828,27 +1354,24 @@ const ABI_OP = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "depositTime",
-        "outputs": [
-            {
-                "internalType": "uint64",
-                "name": "",
-                "type": "uint64"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "uint8",
-                "name": "typ_",
+                "name": "enType_",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "count_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "depositType_",
                 "type": "uint8"
             }
         ],
-        "name": "estimate",
+        "name": "estimateCreate",
         "outputs": [
             {
                 "internalType": "string",
@@ -862,94 +1385,7 @@ const ABI_OP = [
             },
             {
                 "internalType": "uint256",
-                "name": "cost_unit",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "count",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "index_",
-                "type": "uint256"
-            }
-        ],
-        "name": "getRecords",
-        "outputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "address",
-                        "name": "creator",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint8",
-                        "name": "typ",
-                        "type": "uint8"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "luidityToken",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "counterId",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "unit",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "totalAmount",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint64",
-                        "name": "create",
-                        "type": "uint64"
-                    }
-                ],
-                "internalType": "struct IOperatorFactory.Record",
-                "name": "",
-                "type": "tuple"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "length",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "requiredeBase",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
+                "name": "cost",
                 "type": "uint256"
             }
         ],
@@ -965,31 +1401,51 @@ const ABI_OP = [
             },
             {
                 "internalType": "uint256",
-                "name": "counterId",
+                "name": "counterId_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minBacked",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "deadline_",
                 "type": "uint256"
             }
         ],
         "name": "withDraw",
-        "outputs": [],
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cost",
+                "type": "uint256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     }
-];
-
+]
 class StarGrid extends EthContract{
 
     constructor(address:string,abi:any) {
         super(address,abi,ChainType.BSC)
     }
 
-    // return (baseCost,attachCost)
-    capture = async (operatorId:string,coordinate:string,baseAmountId:BigNumber, attachAmountIn:BigNumber,from?:string):Promise<string|Array<string>> =>{
+    // return (baseCost,attachCost,createBaseCost,createAttachCost,feeRate)
+    capture = async (operatorId:string,coordinate:string,baseAmountId:BigNumber, attachAmountIn:BigNumber,defaultCoordinate:string,from?:string):Promise<string|Array<string>> =>{
         if(from){
-           return  await this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10)).call({from:from})
+           return  await this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).call({from:from})
         }
-        return this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10)).encodeABI()
+        return this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).encodeABI()
     }
-    //hex 0000111 byte32, return (baseCost,attachCost)
+    //hex 0000111 byte32, return (baseCost,attachCost,feeRate)
     active = async (cmd:string,from?:string):Promise<string|Array<string>> =>{
         if(from){
             return await this.contract.methods.active(cmd).call({from:from})
@@ -1001,11 +1457,12 @@ class StarGrid extends EthContract{
         return this.contract.methods.moveTo(cooridnate).encodeABI()
     }
 
-    prepare = async (baseAmountIn:BigNumber,attachAmountIn:BigNumber,terms:number,from?:string):Promise<string|Array<string>> =>{
+    //baseCost,attachCost,feeRate
+    prepare = async (baseAmountIn:BigNumber,attachAmountIn:BigNumber,terms:number,defaultCoordinate:string,from?:string):Promise<string|Array<string>> =>{
         if(from){
-            return await this.contract.methods.prepare(baseAmountIn.toString(10), attachAmountIn.toString(10) ,terms).call({from:from});
+            return await this.contract.methods.prepare(baseAmountIn.toString(10), attachAmountIn.toString(10) ,terms,defaultCoordinate).call({from:from});
         }
-        return this.contract.methods.prepare(baseAmountIn.toString(10), attachAmountIn.toString(10) ,terms).encodeABI()
+        return this.contract.methods.prepare(baseAmountIn.toString(10), attachAmountIn.toString(10) ,terms,defaultCoordinate).encodeABI()
     }
     //hex 0000111 byte32 16 bytes,  1 move, 2 defense, 3 attack , 4 luck
     updateCounter = async (routes:string) =>{
@@ -1036,17 +1493,29 @@ class OperatorFactoryProxy extends EthContract{
     constructor(address:string,abi:any) {
         super(address,abi,ChainType.BSC)
     }
-    // function create(uint8 typ_) external returns(uint256);
+    // function create(uint8 typ_) external (string memory symbol,uint256 cost)
 
-    create = async (type:StarGridType,count:number,from?:string) =>{
+    //depositType 0: create with Lp ; 1: create With BUSD
+    //returns (string memory symbol,uint256 cost);
+    create = async (type:StarGridType,count:number,depositType:number,maxCost:BigNumber,deadline:number,from?:string) =>{
         if(from){
-           return await this.contract.methods.create(type,count).call({from:from})
+           return await this.contract.methods.create(type,count,depositType,maxCost.toString(10),deadline).call({from:from})
         }
-        return this.contract.methods.create(type,count).encodeABI()
+        return this.contract.methods.create(type,count,depositType,maxCost.toString(10),deadline).encodeABI()
     }
 
-    withDraw = async (type:StarGridType,counterId:string) =>{
-        return this.contract.methods.withDraw(type,counterId).encodeABI()
+    //returns(string memory symbol,uint256 cost);
+    withDraw = async (type:StarGridType,counterId:string,minBacked:BigNumber,deadline:number,from?:string) =>{
+        if(from){
+            return this.contract.methods.withDraw(type,counterId,minBacked.toString(10),deadline).call({from:from})
+        } else{
+            return this.contract.methods.withDraw(type,counterId,minBacked.toString(10),deadline).encodeABI()
+        }
+    }
+
+    // returns(string memory symbol,uint256 balance,uint256 cost);
+    estimateCreate = async (enType:StarGridType,count:number,depositType:number,from:string) =>{
+        return await this.contract.methods.estimateCreate(enType,count,depositType).call({from:from})
     }
 
 }
@@ -1070,8 +1539,17 @@ class StarGridQuery extends EthContract{
     }
 
     lockedInfo = async (from:string):Promise<LockedInfo> =>{
-        return await this.contract.methods.lockedInfo().call({from:from});
+        return await this.contract.methods.lockedInfo(from).call({from:from});
     }
+
+    getUserInfo = async (from:string):Promise<UserInfo> =>{
+        return await this.contract.methods.lockedInfo(from).call({from:from});
+    }
+
+    currentENDetails = async (from:string):Promise<ENDetails> =>{
+        return await this.contract.methods.currentENDetails(from).call({from:from});
+    }
+
 }
 
 const epochStarGrid = new StarGrid(CONTRACT_ADDRESS.EPOCH.BSC.STAR_GRID_PROXY,ABI)

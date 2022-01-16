@@ -151,9 +151,6 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
-        // rpc.initNFT().catch(e=>console.error(e));
-        // rpc.initBalance().catch(e=>console.error(e));
-
         this.init().then(() => {
         }).catch()
 

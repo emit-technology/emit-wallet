@@ -36,6 +36,9 @@ export interface HexagonProps {
   flag?:boolean
   approval?:boolean
   marker?:boolean
+  owner?:boolean
+  inRange?:boolean
+  isHomeless?:boolean
 }
 interface CounterStyle{
   backgroundColor:Array<string>//rgb range
@@ -56,8 +59,11 @@ export const Hexagon: FC<HexagonProps> = ({
   focus,
   movable,
   flag,
+    owner,
   approval,
   marker,
+    inRange,
+    isHomeless,
   ...pointerEvents
 }) => {
   const {
@@ -115,18 +121,21 @@ export const Hexagon: FC<HexagonProps> = ({
         </> }
         {colorStyle ?<>
           <polygon points={points} fill={fillId} style={{...cellStyle,filter:`url(#spotlight_${colorStyle})`}} />
-          <polygon points={points} fill={fillId} style={{...cellStyle,filter:'url(#line)'}} />
+              <polygon points={points} fill={fillId} style={{...cellStyle,filter:'url(#line)'}} />
+              {isHomeless&&<polygon points={pointsWalk} fill={fillId} style={{...cellStyle,filter:'url(#homeless)'}} />}
           </>:
-            <polygon points={points} fill={fillId} style={{...cellStyle,filter:'url(#thinLine)'}} />
+            inRange ?<polygon points={points} fill={fillId} style={{...cellStyle,filter:'url(#thinLine)'}} />:
+                <polygon points={points} fill={fillId} style={{...cellStyle,filter:'url(#thinLine2)',opacity:"0.8"}} />
         }
         {counter&&<>
             <polygon points={pointsFlag}  style={{fill:`url('#${rgbToHex(counter.backgroundColor[0])}_${rgbToHex(counter.backgroundColor[1])}')`}}/>
             <polygon points={pointsFlag} style={{...cellStyle,filter:`url(#${counter.style})`}} />
           </>
         }
-        {movable&&!attack && <polygon points={pointsWalk} style={{...cellStyle,opacity:"0.2",filter:`url("#walk")`}} />}
+        {movable&&!attack && <polygon points={pointsWalk} style={{...cellStyle,filter:`url("#movable")`}} />}
         {/*{movable && <polygon points={pointsWalk} style={{...cellStyle}} className="cap-polygon"/>}*/}
         {block&&!attack && <polygon points={pointsWalk} style={{...cellStyle,opacity:"1",filter:`url("#walk")`}} />}
+
         {attack && <polygon points={points} style={{...cellStyle,opacity:"1",filter:`url("#attack")`}} />}
         {flag && <>
           <polygon points={points} style={{...cellStyle,filter:`url(#coordinate)`}} />
@@ -136,6 +145,7 @@ export const Hexagon: FC<HexagonProps> = ({
         { focus && <>
           <polygon points={pointsDropShadow} style={{...cellStyle,filter:`url("#flag")`}} />
         </> }
+        {owner&&!focus && <polygon points={pointsWalk} style={{...cellStyle,opacity:"1",filter:`url("#focalPoint")`}} />}
         {children}
       </g>
     </g>

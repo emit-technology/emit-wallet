@@ -2,19 +2,24 @@ import * as React from 'react'
 import * as utils from "../../../utils";
 import CounterSvg from "./counter-svg";
 import {Hex, HexInfo} from "../../../components/hexagons/models";
-import LandSvg from "./land-svg";
-import {IonIcon,IonButton} from "@ionic/react";
+import {IonIcon,IonButton,IonProgressBar,IonText} from "@ionic/react";
 import {eyeOffOutline, eyeOutline} from "ionicons/icons";
-import {LockedInfo} from "../../../types";
+import {Counter, LockedInfo} from "../../../types";
+import BigNumber from "bignumber.js";
+import {CountDown} from "../../../components/countdown";
+import {toAxial} from "../../../components/hexagons/utils";
 interface Props{
     sourceHexInfo: HexInfo;
     attackHexInfo?: HexInfo;
     onShowDistribute?: ()=>void;
-    onMove?:()=>void;
+    onMove?:(setTag:boolean,createPlanet:boolean)=>void;
     onMoveTo?:(hex:Hex)=>void;
     onCapture?:()=>void;
     lockedInfo?:LockedInfo;
-    hasCounters?:boolean
+    hasCounters?:boolean;
+    showSimple?:boolean;
+    onShowDetail?:(address:string) =>void;
+    owner?:string
 }
 
 class HexInfoCard extends React.Component<Props, any>{
@@ -24,30 +29,88 @@ class HexInfoCard extends React.Component<Props, any>{
         eyeOffAttack:false
     }
 
+    getLevel = (counter:Counter) =>{
+        const accumulate = utils.fromValue(counter.level,0).minus(4).toNumber()
+        // .minus(new BigNumber(counter.force))
+        // .minus(new BigNumber(counter.defense))
+        // .minus(new BigNumber(counter.luck))
+        // .minus(new BigNumber(counter.move)).toNumber();
+        return accumulate>0?accumulate:0
+    }
+    getAccum = (counter:Counter) =>{
+        const accumulate = utils.fromValue(counter.level,0)
+        .minus(new BigNumber(counter.force))
+        .minus(new BigNumber(counter.defense))
+        .minus(new BigNumber(counter.luck))
+        .minus(new BigNumber(counter.move)).toNumber();
+        return accumulate>0?accumulate:0
+    }
+
+    isHomeless = (hex:Hex):boolean =>{
+        const {lockedInfo} = this.props;
+        if(lockedInfo && (
+            toAxial(lockedInfo.userInfo.userDefaultEarthCoordinate).equalHex(hex)
+            || toAxial(lockedInfo.userInfo.userDefaultWaterCoordinate).equalHex(hex)
+        )){
+            return true;
+        }
+        return false;
+    }
     render() {
 
         const {eyeOff,eyeOffAttack} = this.state;
-        const {sourceHexInfo,attackHexInfo,onMoveTo,onMove,onShowDistribute,onCapture,lockedInfo,hasCounters} = this.props;
+        const {sourceHexInfo,attackHexInfo,onMoveTo,onMove,onShowDistribute,onCapture,lockedInfo,hasCounters,showSimple,owner,
+            onShowDetail} = this.props;
         const sourceCounter = sourceHexInfo.counter;
-        const sourceLand = sourceHexInfo.land;
+        const sourceLand = sourceHexInfo.land && sourceHexInfo.land.capacity !="0"?sourceHexInfo.land:undefined;
         const sourceHex = sourceHexInfo.hex;
 
-        const attackCounter = attackHexInfo.counter;
-        const attackLand = attackHexInfo.land;
-        const attackHex = attackHexInfo.hex;
+        const attackCounter = attackHexInfo && attackHexInfo.counter && attackHexInfo.counter.capacity !="0"?attackHexInfo.counter:undefined;
+        const attackLand = attackHexInfo && attackHexInfo.land && attackHexInfo.land.capacity!="0"?attackHexInfo.land:undefined;
+        const attackHex = attackHexInfo && attackHexInfo.hex;
 
+        const sourceCountdown = sourceCounter ? new BigNumber(sourceCounter.nextOpTime).multipliedBy(1000).toNumber():lockedInfo?
+            new BigNumber(lockedInfo.userInfo.nextOpTime).multipliedBy(1000).toNumber():0;
+        const attackCountdown = attackCounter ? new BigNumber(attackCounter.nextOpTime).multipliedBy(1000).toNumber():0;
+        const now = Date.now();
+
+        const isMarker = sourceLand && sourceLand.marker == owner;
+        const isOwner = sourceLand && sourceLand.owner == owner;
+        const isHome = sourceLand && lockedInfo && (sourceLand.coordinate == lockedInfo.userInfo.userDefaultWaterCoordinate || sourceLand.coordinate == lockedInfo.userInfo.userDefaultEarthCoordinate);
+
+        console.log(isMarker,isOwner,isHome,sourceLand);
+        const isMarkerAttack = attackLand && attackLand.marker == owner;
+        const isOwnerAttack = attackLand && attackLand.owner == owner;
+        const isHomeAttack = attackLand && lockedInfo && (attackLand.coordinate == lockedInfo.userInfo.userDefaultWaterCoordinate || attackLand.coordinate == lockedInfo.userInfo.userDefaultEarthCoordinate);
+
+        const ctime = sourceCountdown>now && <div className="ctime">
+            <img src="./assets/img/epoch/stargrid/icons/time.png" width={20}/><CountDown time={sourceCountdown} className="op-countdown"/>
+        </div>;
+
+        const attackTime = attackCountdown>now && <div className="ctime">
+            <img src="./assets/img/epoch/stargrid/icons/time.png" width={20}/><CountDown time={attackCountdown} className="op-countdown"/>
+        </div>;
+        const isMineCounter = lockedInfo && sourceCounter && lockedInfo.userInfo.counter.counterId == sourceCounter.counterId;
         return (
             <>
                 {
                     sourceCounter && !eyeOff ?
                     <div className="owner-info">
                         <div className="avatar-l">
-                            <div className="hex-head">
-                                <CounterSvg counter={sourceCounter} land={sourceLand}/>
-                                <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>
+                            <div className="hex-head" onClick={()=>{
+                                if(onShowDetail){
+                                    onShowDetail(sourceLand.owner)
+                                }
+                            }}>
+                                <CounterSvg counter={sourceCounter} land={sourceLand}  isHomeless={isHome} isOwner={isOwner} isApproval={sourceLand&&sourceLand.canCapture} isMarker={isMarker}/>
+                                {!showSimple&&sourceHex && <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>}
+                                <div className="counter-id">{sourceCounter.counterId}</div>
                             </div>
                             <div className="attr">
-                                <div><img src="./assets/img/epoch/stargrid/icons/sword.png" width={20}/></div>
+                                {
+                                    sourceCounter && new BigNumber(sourceCounter.force).toNumber()>0
+                                    && <div><img src="./assets/img/epoch/stargrid/icons/sword.png" width={20}/></div>
+                                }
                                 <div><img src="./assets/img/epoch/stargrid/icons/defense.png" width={20}/></div>
                                 <div><img src="./assets/img/epoch/stargrid/icons/shot.png" width={20}/></div>
                                 <div><img src="./assets/img/epoch/stargrid/icons/lucky.png" width={20}/></div>
@@ -60,93 +123,138 @@ class HexInfoCard extends React.Component<Props, any>{
                             </div>
                         </div>
                         <div className="cap-info">
-                            <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceCounter.capacity,18).toFixed(2,2)}</span></div>
-                            <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceCounter.life,18).toFixed(2,2)}</span></div>
+                            <div className="life"><IonProgressBar className="life-progress" value={utils.fromValue(sourceCounter.life,18).dividedBy(new BigNumber(sourceCounter.defense)).toNumber()}/>
+                                <div className="life-value">{utils.fromValue(sourceCounter.life,16).dividedBy(new BigNumber(sourceCounter.defense)).toFixed(2)}</div>
+                            </div>
+                            <div className="capacity">
+                                <img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceCounter.capacity,18).toFixed(2,2)}</span>
+                            </div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(sourceCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute" onClick={()=>{
-                                if(onShowDistribute){
+                                if(onShowDistribute && isMineCounter){
                                     onShowDistribute()
                                 }
                             }}><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/>
-                                <span>{sourceCounter.level}<img src="./assets/img/epoch/stargrid/icons/add.png" width={20}/></span>
+                                <span>LV{this.getLevel(sourceCounter)}&nbsp;{ isMineCounter && this.getAccum(sourceCounter)>0&&<span><IonText color="secondary">[+{this.getAccum(sourceCounter)}]</IonText></span>}</span>
                             </div>
+                            {ctime}
+                            {
+                                sourceLand && sourceLand.capacity!="0" && sourceLand.marker != owner && sourceCounter && lockedInfo && lockedInfo.userInfo &&
+                                sourceLand.coordinate == lockedInfo.userInfo.userCoordinate &&  <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
+                                   onMove(true,false)
+                                }}>Mark</IonButton>
+                            }
                         </div>
                         <div className="eye">
-                           <IonIcon src={eyeOutline} color="light" onClick={()=>{
+                           <IonIcon src={eyeOutline} color="light" onClick={(e)=>{
+                               e.stopPropagation();
                                this.setState({
-                                   eyeOff:true
+                                   eyeOff:!eyeOff
                                })
                            }}/>
                         </div>
                     </div>
                         :
-                        sourceLand && (eyeOff || !sourceCounter)?
+                        sourceLand&&sourceLand.capacity!="0" && (eyeOff || !sourceCounter || sourceCounter.capacity=="0")?
                             <div className="owner-info">
                                 <div className="avatar-l">
-                                    <div className="hex-head">
-                                       <LandSvg land={sourceLand} />
-                                       <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>
+                                    <div className="hex-head" onClick={()=>{
+                                        if(onShowDetail){
+                                            onShowDetail(sourceLand.owner)
+                                        }
+                                    }}>
+                                        <CounterSvg land={sourceLand} isHomeless={isHome} isOwner={isOwner} isApproval={sourceLand&&sourceLand.canCapture} isMarker={isMarker}/>
+                                        {!showSimple&&sourceHex && <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>}
                                     </div>
-                                    <div className="attr"></div>
-                                    <div className="attr"></div>
+                                    {!showSimple && <div className="attr">
+                                        <div><img src="./assets/img/epoch/stargrid/icons/ldefense.png" width={20}/></div>
+                                    </div> }
+                                    {!showSimple && <div className="attr">
+                                        <div>-{new BigNumber(sourceLand.level).toNumber()>0?sourceLand.level:new BigNumber(sourceLand.level).plus(1).toNumber()}</div>
+                                    </div> }
                                 </div>
                                 <div className="cap-info">
                                     <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceLand.capacity,18).toFixed(2,2)}</span></div>
-                                    <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(sourceLand.level,16).toFixed(2,2)}%</span></div>
+                                    <div className="rate"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/><span>LV{sourceLand.level}</span></div>
                                     {
-                                        lockedInfo&&lockedInfo.counter.counterId!="0" ? sourceLand && sourceLand.canCapture && <div className="operator-btn">
-                                            <IonButton size="small" color="success" onClick={()=>{
+                                        lockedInfo&&lockedInfo.userInfo.counter.counterId!="0" ? (sourceLand && sourceLand.canCapture||isMarker) && !sourceCounter && onMoveTo && <div className="operator-btn">
+                                            <IonButton size="small" color="success" disabled={sourceCountdown>now} onClick={()=>{
                                                 onMoveTo(sourceHex)
-                                            }}>Move to the land</IonButton>
+                                            }}>Move</IonButton>
                                         </div>:
+                                            onCapture && hasCounters && (isMarker||sourceLand&&sourceLand.canCapture) &&
                                             <div className="operator-btn">
-                                                <IonButton size="small" color="warning" onClick={()=>{
+                                                <IonButton size="small" color="warning" disabled={sourceCountdown>now} onClick={()=>{
                                                     onCapture()
-                                                }}>{hasCounters?"Capture":"Create COUNTERS"}</IonButton>
+                                                }}>Capture</IonButton>
                                             </div>
                                     }
-
+                                    {ctime}
                                 </div>
-                                <div className="eye">
-                                    <IonIcon src={eyeOffOutline} color="light"  onClick={()=>{
-                                        this.setState({
-                                            eyeOff:false
-                                        })
-                                    }}/>
-                                </div>
+                                {
+                                    !showSimple &&
+                                    <div className="eye">
+                                        <IonIcon src={eyeOffOutline} color="light"  onClick={(e)=>{
+                                            e.stopPropagation();
+                                            this.setState({
+                                                eyeOff:!eyeOff
+                                            })
+                                        }}/>
+                                    </div>
+                                }
                             </div>
                             :
                             <div className="owner-info">
                                 <div className="avatar-l">
                                     <div className="hex-head" style={{backgroundColor:"#000"}}>
-                                        <LandSvg />
-                                        <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>
+                                        <CounterSvg/>
+                                        {sourceHex && <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>}
                                     </div>
                                     <div className="attr"></div>
                                     <div className="attr"></div>
                                 </div>
                                 <div className="cap-info">
                                     <div style={{border:"none"}}></div>
+                                    {ctime}
                                     {
-                                        (!lockedInfo || lockedInfo.counter.counterId == "0") &&
+                                        (!lockedInfo || lockedInfo.userInfo.counter.counterId == "0") && onCapture && hasCounters &&
                                         <div className="operator-btn">
-                                            <IonButton size="small" color="warning" onClick={()=>{
+                                            <IonButton size="small" disabled={sourceCountdown>now} color="warning" onClick={()=>{
                                                 onCapture()
-                                            }}>{hasCounters?"Capture":"Create COUNTERS"}</IonButton>
+                                            }}>Capture</IonButton>
                                         </div>
                                     }
                                 </div>
+                                {
+                                    !showSimple &&
+                                    <div className="eye">
+                                        <IonIcon src={eyeOffOutline} color="light"  onClick={(e)=>{
+                                            e.stopPropagation();
+                                            this.setState({
+                                                eyeOff: !eyeOff
+                                            })
+                                        }}/>
+                                    </div>
+                                }
                             </div>
                 }
                 {
                     attackCounter && !eyeOffAttack ? <div className="enemy-info">
                             <div className="avatar-l">
-                                <div className="hex-head">
-                                    <CounterSvg counter={attackCounter} land={attackLand}/>
-                                    <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>
+                                <div className="hex-head" onClick={()=>{
+                                    if(onShowDetail){
+                                        onShowDetail(attackLand.owner)
+                                    }
+                                }}>
+                                    <CounterSvg counter={attackCounter} land={attackLand} isHomeless={isHomeAttack} isOwner={isOwnerAttack} isApproval={attackLand&&attackLand.canCapture} isMarker={isMarkerAttack}/>
+                                    {attackHex && <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>}
+                                    <div className="counter-id">{attackCounter.counterId}</div>
                                 </div>
                                 <div className="attr">
+                                    {
+                                        attackCounter && new BigNumber(attackCounter.force).toNumber()>0 &&
                                     <div><img src="./assets/img/epoch/stargrid/icons/sword.png" width={20}/></div>
+                                    }
                                     <div><img src="./assets/img/epoch/stargrid/icons/defense.png" width={20}/></div>
                                     <div><img src="./assets/img/epoch/stargrid/icons/shot.png" width={20}/></div>
                                     <div><img src="./assets/img/epoch/stargrid/icons/lucky.png" width={20}/></div>
@@ -159,51 +267,76 @@ class HexInfoCard extends React.Component<Props, any>{
                                 </div>
                             </div>
                         <div className="cap-info">
+                            <div className="life"><IonProgressBar className="life-progress" value={utils.fromValue(attackCounter.life,18).dividedBy(new BigNumber(attackCounter.defense)).toNumber()}/>
+                            <div className="life-value">{utils.fromValue(attackCounter.life,16).dividedBy(new BigNumber(attackCounter.defense)).toFixed(2)}</div>
+                            </div>
                             <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackCounter.capacity,18).toFixed(2,2)}</span></div>
-                            <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackCounter.life,18).toFixed(2,2)}</span></div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(attackCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/>
-                                <span>{sourceCounter.level}<img src="./assets/img/epoch/stargrid/icons/add.png" width={20}/></span>
+                                <span>LV{this.getLevel(attackCounter)}&nbsp;<b><IonText color="secondary">[{this.getAccum(attackCounter)}]</IonText></b></span>
                             </div>
                             <div className="operator-btn">
-                                <IonButton size="small" color="danger" onClick={()=>{
-                                    onMove()
-                                }}>Attack</IonButton>
+                                {
+                                    onMove &&sourceCounter && new BigNumber(sourceCounter.move).toNumber()>0 && <IonButton size="small" disabled={sourceCountdown>now} color="danger" onClick={()=>{
+                                        onMove(false,false)
+                                    }}>Attack</IonButton>
+                                }
                             </div>
+                            {attackTime}
                         </div>
 
                         <div className="eye">
-                            <IonIcon src={eyeOutline} color="light" onClick={()=>{
+                            <IonIcon src={eyeOutline} color="light" onClick={(e)=>{
+                                e.stopPropagation();
                                 this.setState({
-                                    eyeOffAttack:true
+                                    eyeOffAttack:!eyeOffAttack
                                 })
                             }}/>
                         </div>
                     </div>:
-                        attackLand ? <div className="enemy-info">
+                        attackLand && attackLand.capacity != "0" && (eyeOffAttack || !attackCounter || attackCounter.capacity=="0") ? <div className="enemy-info">
                             <div className="avatar-l">
-                                <div className="hex-head">
-                                    <LandSvg land={attackLand} />
-                                    <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>
+                                <div className="hex-head" onClick={()=>{
+                                    if(onShowDetail){
+                                        onShowDetail(attackLand.owner)
+                                    }
+                                }}>
+                                    <CounterSvg land={attackLand} isHomeless={isHomeAttack} isOwner={isOwnerAttack} isApproval={attackLand&&attackLand.canCapture} isMarker={isMarkerAttack}/>
+                                    {attackHex && <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>}
                                 </div>
-                                <div className="attr">
-                                </div>
-                                <div className="attr"></div>
+                                {!showSimple && <div className="attr">
+                                    <div><img src="./assets/img/epoch/stargrid/icons/ldefense.png" width={20}/></div>
+                                </div> }
+                                {!showSimple && <div className="attr">
+                                    <div>-{new BigNumber(attackLand.level).toNumber()>0?sourceLand.level:new BigNumber(attackLand.level).plus(1).toNumber()}</div>
+                                </div> }
                             </div>
                             <div className="cap-info">
                                 <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackLand.capacity,18).toFixed(2,2)}</span></div>
-                                <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(attackLand.level,16).toFixed(2,2)}%</span></div>
+                                <div className="rate"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/><span>{attackLand.level}</span></div>
                                 <div className="operator-btn">
-                                    <IonButton size="small" color={attackCounter?"danger":"success"} onClick={()=>{
-                                        onMove()
-                                    }}>{attackCounter?"ATTACK":"MOVE"}</IonButton>
+                                    {
+                                        onMove && sourceCounter && new BigNumber(sourceCounter.move).toNumber()>0 &&
+                                            <>
+                                                <IonButton size="small" disabled={sourceCountdown>now} color={attackCounter?"danger":"success"} onClick={()=>{
+                                                    onMove(false,false)
+                                                }}>{attackCounter?"ATTACK":"MOVE"}</IonButton>
+                                                {!attackCounter && attackLand && attackLand.capacity!="0" && attackLand.marker != owner &&
+                                                <IonButton size="small" disabled={sourceCountdown>now} color={"secondary"} onClick={()=>{
+                                                    onMove(true,false)
+                                                }}>Move&Mark</IonButton>
+                                                }
+                                        </>
+
+                                    }
                                 </div>
                             </div>
 
                             <div className="eye">
-                                <IonIcon src={eyeOffOutline} color="light" onClick={()=>{
+                                <IonIcon src={eyeOffOutline} color="light" onClick={(e)=>{
+                                    e.stopPropagation();
                                     this.setState({
-                                        eyeOffAttack:false
+                                        eyeOffAttack:!eyeOffAttack
                                     })
                                 }}/>
                             </div>
@@ -212,8 +345,8 @@ class HexInfoCard extends React.Component<Props, any>{
                             <div className="enemy-info">
                                 <div className="avatar-l">
                                     <div className="hex-head" style={{backgroundColor:"#000"}}>
-                                        <LandSvg />
-                                        <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>
+                                        <CounterSvg/>
+                                        {attackHex && <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>}
                                     </div>
                                     <div className="attr"></div>
                                     <div className="attr"></div>
@@ -221,12 +354,28 @@ class HexInfoCard extends React.Component<Props, any>{
                                 <div className="cap-info">
                                     <div style={{border:"none"}}></div>
                                     <div className="operator-btn">
-                                        <IonButton size="small" color="success" onClick={()=>{
-                                            onMove()
-                                        }}>Move</IonButton>
+                                        {
+                                            onMove && (!attackCounter || attackCounter.counterId =="0") && new BigNumber(sourceCounter.move).toNumber()>0 && <>
+                                                <IonButton size="small" disabled={sourceCountdown>now} color="success" onClick={()=>{
+                                                    onMove(false,false)
+                                                }}>Move</IonButton>
+                                                <IonButton size="small" disabled={sourceCountdown>now} color="tertiary" onClick={()=>{
+                                                    onMove(false,true)
+                                                }}>Move&Create Planet</IonButton>
+                                            </>
+                                        }
                                     </div>
                                 </div>
+                                <div className="eye">
+                                    <IonIcon src={eyeOffOutline} color="light" onClick={(e)=>{
+                                        e.stopPropagation();
+                                        this.setState({
+                                            eyeOffAttack:!eyeOffAttack
+                                        })
+                                    }}/>
+                                </div>
                             </div>:
+                            !showSimple &&
                             <div style={{flex:1}}>
 
                             </div>

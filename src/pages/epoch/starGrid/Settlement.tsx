@@ -4,143 +4,368 @@ import {
     IonLabel,
     IonItem,
     IonModal,
-    IonButton,
-    IonCol, IonRow, IonAvatar, IonRadio, IonItemDivider,IonText
+    IonButton,IonListHeader,
+    IonCol, IonRow, IonAvatar, IonSegment, IonItemDivider,IonText,IonSegmentButton
 } from "@ionic/react"
-import {LockedInfo, StarGridType} from "../../../types";
+import {ENDetails, GlobalInfo, LockedInfo, PeriodUserNE, StarGridType} from "../../../types";
 import CounterSvg from "./counter-svg";
 import * as utils from "../../../utils";
+import {enType2Cy, enType2ProductCy} from "../../../utils/stargrid";
+import {nFormatter} from "../../../utils";
 import {CountDown} from "../../../components/countdown";
+import BigNumber from "bignumber.js";
+import {Converter} from "./Converter";
 
 interface Props{
+    title?:string
     show:boolean
     onOk?:()=>void;
     onCancel?:()=>void;
     onPrepare?:()=>void;
-    lockedInfo:LockedInfo
+    lockedInfo:LockedInfo;
+    isOwner?:boolean;
+    enDetails?:ENDetails
+}
+interface TokenBurned {
+    user:BigNumber
+    total:BigNumber
 }
 
-
-export const Settlement:React.FC<Props> = ({show,onOk,onCancel,onPrepare,lockedInfo})=>{
-
-    return (<>
-        <IonModal
-            isOpen={show}
-            onDidDismiss={() => onCancel()}
-            swipeToClose={true}
-            mode="ios"
-            cssClass="epoch-modal"
-        >
-            <div className="epoch-md">
-                <IonList>
-                    <IonItem>
-                        <IonAvatar>
-                            <CounterSvg counter={lockedInfo.counter}/>
-                        </IonAvatar>
-                        <IonLabel>
-                            <p>
-                                ID:[{lockedInfo.counter.counterId}]<br/>
-                                TYPE: {StarGridType[lockedInfo.counter.enType]}<br/>
-                            </p>
-                        </IonLabel>
-                        <IonRadio slot="end" value={lockedInfo.counter.counterId} />
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>
-                            Current Period
-                        </IonLabel>
-                        <IonLabel>
-                            {lockedInfo.currentPeriod}
-                        </IonLabel>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>
-                            End Period
-                        </IonLabel>
-                        <IonLabel>
-                            {lockedInfo.endPeriod}
-                        </IonLabel>
-                        <IonButton size="small" onClick={()=>{
-                            onPrepare()
-                        }}>Prepare</IonButton>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>
-                            nextCaptureTime
-                        </IonLabel>
-                        <IonLabel>
-                            <CountDown second={utils.toValue(lockedInfo.nextCaptureTime,0).toNumber()}/>
-                        </IonLabel>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>
-                            nextOpTime
-                        </IonLabel>
-                        <IonLabel>
-                            <CountDown second={utils.toValue(lockedInfo.nextOpTime,0).toNumber()}/>
-                        </IonLabel>
-                    </IonItem>
-                    <IonItem>
-                        <IonLabel>
-                            nextSettlementPeriod
-                        </IonLabel>
-                        <IonLabel>
-                            {lockedInfo.nextSettlementPeriod}
-                        </IonLabel>
-                    </IonItem>
-
-                    <IonItemDivider>Current Info</IonItemDivider>
-                    <IonItem>
-                        <IonLabel className="ion-text-wrap">
-                            <IonRow>
-                                <IonCol><IonText color="medium">Token</IonText></IonCol>
-                                <IonCol><IonText color="medium">NE</IonText></IonCol>
-                                <IonCol><IonText color="medium">Total</IonText></IonCol>
-                                <IonCol><IonText color="medium">Estimate</IonText></IonCol>
-                            </IonRow>
-                            {lockedInfo.current.map(v=>{
-                                return <IonRow>
-                                    <IonCol>{StarGridType[v.enType]}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.UserEN,18),3)}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.period,18),3)}</IonCol>
-                                    <IonCol>{utils.fromValue(v.attach.userNE,18).toString(10)}</IonCol>
+export class Settlement extends React.Component<Props, any> {
+    state = {
+        tab:"current"// last , future;
+    }
+    genPeriodNEItem = (v:PeriodUserNE) =>{
+        const cyType = enType2Cy(v.enType)
+        return <IonItem lines="none">
+            <IonLabel className="ion-text-wrap">
+                <div className="settle-box">
+                    <div className="bt">
+                        <IonRow>
+                            <IonCol>Period: <IonText color="tertiary"><b>{v.period}</b></IonText></IonCol>
+                            <IonCol><IonText color="primary"><b>{StarGridType[v.enType]}</b></IonText></IonCol>
+                        </IonRow>
+                    </div>
+                    <div className="bc">
+                        <IonRow>
+                            <IonCol size="3"><IonText color="medium">Burned</IonText></IonCol>
+                            <IonCol size="9">
+                                <IonRow>
+                                    <IonCol><IonText color="medium">Mine NE</IonText></IonCol>
+                                    <IonCol><IonText color="medium">Total NE</IonText></IonCol>
                                 </IonRow>
-                                //`${utils.nFormatter(utils.fromValue(v.ne,18),3)} ${v.pool} ${v.total} ${StarGridType[v.typ]}`
-                            })}
-                        </IonLabel>
-                    </IonItem>
-                    <IonItemDivider>Last Info</IonItemDivider>
-                    <IonItem>
-                        <IonLabel className="ion-text-wrap">
-                            <IonRow>
-                                <IonCol><IonText color="medium">Token</IonText></IonCol>
-                                <IonCol><IonText color="medium">NE</IonText></IonCol>
-                                <IonCol><IonText color="medium">Total</IonText></IonCol>
-                                <IonCol><IonText color="medium">Estimate</IonText></IonCol>
-                            </IonRow>
-                            {lockedInfo.last.map(v=>{
-                                return <IonRow>
-                                    <IonCol>{StarGridType[v.enType]}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.UserEN,18),3)}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.period,18),3)}</IonCol>
-                                    <IonCol>{utils.fromValue(v.attach.userNE,18).toString(10)}</IonCol>
+                            </IonCol>
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="3">{cyType.base}</IonCol>
+                            <IonCol size="9">
+                                <IonRow>
+                                    <IonCol>{utils.nFormatter(utils.fromValue(v.base.userNE,18),3)}</IonCol>
+                                    <IonCol>{utils.nFormatter(utils.fromValue(v.base.totalNE,18),3)}</IonCol>
                                 </IonRow>
-                            })}
-                        </IonLabel>
-                    </IonItem>
-                </IonList>
-            </div>
+                            </IonCol>
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="3">{cyType.attach}</IonCol>
+                            <IonCol size="9">
+                                <IonRow>
+                                    <IonCol>{utils.nFormatter(utils.fromValue(v.attach.userNE,18),3)}</IonCol>
+                                    <IonCol>{utils.nFormatter(utils.fromValue(v.attach.totalNE,18),3)}</IonCol>
+                                </IonRow>
+                            </IonCol>
+                        </IonRow>
+                    </div>
+                </div>
+            </IonLabel>
+        </IonItem>
+    }
 
+    renderGlobal = (v:GlobalInfo,showEnDetails?:boolean) =>{
+        const {lockedInfo,enDetails} = this.props;
+
+        let minNE = 0 ;
+        const ubl = utils.fromValue(v.userBurnedLight,18);
+        const ubd = utils.fromValue(v.userBurnedDark,18);
+        const ubw = utils.fromValue(v.userBurnedWater,18);
+        const ube = utils.fromValue(v.userBurnedDark,18);
+        const arr = [ubl,ubd,ubw,ube];
+        const filterArr = arr.filter(v=> v.toNumber() >0);
+        if(filterArr && filterArr.length>0){
+            minNE = filterArr[0].toNumber();
+            for(let o of filterArr){
+                if(minNE > o.toNumber()){
+                    minNE = o.toNumber();
+                }
+            }
+        }
+        return <IonItem lines="none">
+            <IonLabel className="ion-text-wrap">
+                <div className="settle-box">
+                    <div className="bt" style={{textAlign:"left"}}>
+                        <IonRow>
+                            <IonCol size="3"><b><small>EN Per Day (TPD)</small></b></IonCol>
+                            <IonCol size="9">
+                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.totalEN,18),3)}</b></IonText><small><IonText color="medium">&nbsp;EN</IonText></small></IonCol>
+                            </IonCol>
+                        </IonRow>
+                        <IonRow>
+                            <IonCol size="3"><b><small>Element Per EN (EPE)</small></b></IonCol>
+                            <IonCol size="9">
+                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.waterOutput,23),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
+                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.earthOutput,23),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
+                            </IonCol>
+                        </IonRow>
+                    </div>
+                    <div className="bt" style={{textAlign:"left"}}>
+                        <IonRow>
+                            <IonCol size="3"><div  style={{display:"flex",alignItems:"center",height:"100%",fontWeight:800}}><small>Burned</small></div></IonCol>
+                            <IonCol size="9">
+                                <IonRow>
+                                    <IonCol><IonText color="medium"><b>Total</b></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><b>Mine</b></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><b>Percent</b></IonText></IonCol>
+                                </IonRow>
+                                <IonRow>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedLight,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bLIGHT</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bLIGHT</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,0).dividedBy(utils.fromValue(v.burnedLight,0).toNumber()>0?utils.fromValue(v.burnedLight,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                </IonRow>
+                                <IonRow>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedDark,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bDARK</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bDARK</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,0).dividedBy(utils.fromValue(v.burnedDark,0).toNumber()>0?utils.fromValue(v.burnedDark,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                </IonRow>
+                                <IonRow>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedWater,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,0).dividedBy(utils.fromValue(v.burnedWater,0).toNumber()>0?utils.fromValue(v.burnedWater,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                </IonRow>
+                                <IonRow>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedEarth,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
+                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,0).dividedBy(utils.fromValue(v.burnedEarth,0).toNumber()>0?utils.fromValue(v.burnedEarth,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                </IonRow>
+                            </IonCol>
+                        </IonRow>
+                    </div>
+                    {
+
+                        showEnDetails && enDetails && lockedInfo && lockedInfo.userInfo &&
+                        <div className="bc" style={{textAlign:"left"}}>
+                            <IonRow>
+                                <IonCol>
+                                    <Converter enDetail={enDetails} symbol={StarGridType._!=lockedInfo.userInfo.counter.enType && StarGridType[lockedInfo.userInfo.counter.enType]}/>
+                                </IonCol>
+                            </IonRow>
+                        </div>
+                    }
+
+                </div>
+            </IonLabel>
+        </IonItem>
+    }
+
+
+    render() {
+        const {show,onOk,onCancel,onPrepare,title,lockedInfo} = this.props;
+        const {tab} = this.state;
+
+
+        const countdown = lockedInfo ? new BigNumber(lockedInfo.userInfo.nextOpTime).multipliedBy(1000).toNumber():0;
+        const now = Date.now();
+        const ctime = countdown>now && <div className="ctime">
             <IonRow>
-                <IonCol size="4">
-                    <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
-                </IonCol>
-                <IonCol  size="8">
-                    <IonButton expand="block" onClick={() => {
-                        onOk()
-                    }} color="primary">OK</IonButton>
-                </IonCol>
+                <IonCol><img src="./assets/img/epoch/stargrid/icons/time.png" width={20}/></IonCol>
+                <IonCol className="pd-in"><CountDown time={countdown} className="op-countdown-2"/></IonCol>
             </IonRow>
-        </IonModal>
-    </>)
+        </div>;
+
+        return  (<>
+            <IonModal
+                isOpen={show}
+                onDidDismiss={() => onCancel()}
+                mode="ios"
+                cssClass="epoch-modal settle-modal"
+                swipeToClose={false}
+            >
+                <div className="epoch-md">
+                    <IonList>
+                        {title && <IonListHeader mode="ios">{title}</IonListHeader>}
+                        <IonItemDivider mode="md"/>
+                        <IonItemDivider sticky color="primary">Counter Info</IonItemDivider>
+                        <IonItem lines="none">
+                            <IonAvatar>
+                                <CounterSvg counter={lockedInfo.userInfo.counter}/>
+                            </IonAvatar>
+                            <IonLabel className="ion-text-wrap">
+                                <p>
+                                    <IonText>
+                                        ID: [{lockedInfo.userInfo.counter.counterId}]
+                                    </IonText>
+                                </p>
+                            </IonLabel>
+                        </IonItem>
+                        <IonItemDivider sticky color="primary">Planet Capacity</IonItemDivider>
+                        <IonItem lines="none">
+                            <IonLabel className="ion-text-wrap">
+                                <IonRow>
+                                    <IonCol><IonText color="medium"><small>Type</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>Total</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>Mine</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>Percent</small></IonText></IonCol>
+                                </IonRow>
+                                {
+                                    lockedInfo.userInfo.resources.map(v=>{
+                                        return <IonRow>
+                                            <IonCol><IonText color="primary"><b><small>{StarGridType[v.enType]}</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.total,18),3)}</b></IonText></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.user,18),3)}</b></IonText></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{utils.fromValue(v.user,0).dividedBy(utils.fromValue(v.total,0)).multipliedBy(100).toFixed(3)} %</b></IonText></IonCol>
+                                        </IonRow>
+                                    })
+                                }
+                            </IonLabel>
+                        </IonItem>
+                        <IonItemDivider sticky color="primary">
+                            User Info {ctime}
+                        </IonItemDivider>
+                        <IonItem lines="none">
+                            <IonLabel className="ion-text-wrap">
+                                <div className="settle-box">
+                                    <div className="bc" style={{textAlign:"center"}}>
+                                        <IonRow>
+                                            <IonCol size="3"><div style={{display:"flex",alignItems:"center",height:"100%"}}><b>Temporary materials (TM)</b></div></IonCol>
+                                            <IonCol size="9">
+                                                <IonRow>
+                                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.lightCanUsed,18),3)}</b></IonText><small><IonText color="medium"> bLIGHT</IonText></small></IonCol>
+                                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.darkCanUsed,18),3)}</b></IonText><small><IonText color="medium"> bDARK</IonText></small></IonCol>
+                                                </IonRow>
+                                                <IonRow>
+                                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.waterCanUsed,18),3)}</b></IonText><small><IonText color="medium"> WATER</IonText></small></IonCol>
+                                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.earthCanUsed,18),3)}</b></IonText><small><IonText color="medium"> EARTH</IonText></small></IonCol>
+                                                </IonRow>
+                                            </IonCol>
+                                        </IonRow>
+                                    </div>
+                                </div>
+                                <div className="settle-box">
+                                    <div className="bt">
+                                        <IonRow>
+                                            <IonCol size="8">
+                                                {lockedInfo.userInfo.counter.counterId != "0" &&
+                                                <div style={{display:"flex",alignItems:"center",height:"100%"}} >
+                                                    <b>
+                                                        Unsettle:&nbsp;
+                                                        <IonText color="secondary">
+                                                            {nFormatter(utils.fromValue(lockedInfo.userInfo.userNEInfo.unsettlement,18),3)}
+                                                        </IonText>
+                                                    </b>
+                                                    <small><IonText color="medium">&nbsp;{enType2ProductCy(lockedInfo.userInfo.counter.enType)}</IonText></small>
+                                                </div>}
+                                            </IonCol>
+                                            <IonCol size="4">
+                                                {
+                                                    onOk && utils.fromValue(lockedInfo.userInfo.userNEInfo.unsettlement,18).toNumber()>0
+                                                    && <IonButton expand="block" fill="outline" size="small" onClick={()=>{
+                                                        onOk()
+                                                    }}>Withdraw</IonButton>
+                                                }
+                                            </IonCol>
+                                        </IonRow>
+                                    </div>
+                                    <div className="bc">
+                                        <IonRow>
+                                            <IonCol></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>Last</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>Current</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>End</small></b></IonText></IonCol>
+                                        </IonRow>
+                                        <IonRow>
+                                            <IonCol><div style={{display:"flex",alignItems:"center"}}><b>Period</b></div></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{lockedInfo.userInfo.userNEInfo.nextSettlementPeriod}</b></IonText></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{lockedInfo.currentPeriod}</b></IonText></IonCol>
+                                            <IonCol> <IonText color="secondary"><b>{lockedInfo.userInfo.userNEInfo.endPeriod}</b></IonText></IonCol>
+                                        </IonRow>
+
+                                    </div>
+                                </div>
+
+                            </IonLabel>
+                        </IonItem>
+
+                        <IonItemDivider sticky color="primary">Period Info</IonItemDivider>
+                        <IonSegment mode="md" value={tab} onIonChange={e => {
+                            e.stopPropagation();
+                            this.setState({tab:e.detail.value})
+                        }}>
+                            <IonSegmentButton value="current">
+                                <IonLabel>Current [{lockedInfo.currentPeriod}]</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton value="last">
+                                <IonLabel>Last [{lockedInfo.last.period}]</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton value="future">
+                                <IonLabel>Future</IonLabel>
+                            </IonSegmentButton>
+                        </IonSegment>
+
+                        {
+                            tab == "current" && <>
+                                {lockedInfo && this.renderGlobal(lockedInfo.current,true)}
+                            </>
+                        }
+                        {
+                            tab == "last" &&
+                            <>
+                                {lockedInfo && this.renderGlobal(lockedInfo.last,false)}
+                            </>
+                        }
+                        {
+                            tab == "future" &&
+                            <>
+                                {
+                                    lockedInfo.userInfo.userNEInfo && lockedInfo.userInfo.userNEInfo.userNEs.length > 0 ?
+                                        <>
+                                            {
+                                                lockedInfo.userInfo.userNEInfo.userNEs.map(v=>{
+                                                    if(v.period != lockedInfo.currentPeriod){
+                                                        return this.genPeriodNEItem(v)
+                                                    }
+                                                })
+                                            }
+                                        </>
+                                        :<div>
+                                            <div style={{textAlign:"center",padding:"12px"}}>
+                                                <img src="./assets/img/common/no-data.png" style={{width:"100px",opacity:"0.1"}}/>
+                                                <div style={{color:"#ddd",marginTop:"12px"}}>No Data</div>
+                                            </div>
+                                        </div>
+                                }
+
+                            </>
+                        }
+                    </IonList>
+                </div>
+
+                {
+                    onOk && lockedInfo.userInfo.counter.capacity!="0" ? <IonRow>
+                        <IonCol size="4">
+                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                        </IonCol>
+                        <IonCol  size="8">
+                            <IonButton expand="block" onClick={() => {
+                                onPrepare();
+                            }} color="primary">Prepare</IonButton>
+                        </IonCol>
+                    </IonRow>
+                        :
+                    onCancel && <IonRow>
+                        <IonCol size="12">
+                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">Close</IonButton>
+                        </IonCol>
+                    </IonRow>
+                }
+            </IonModal>
+        </>)
+    }
 }

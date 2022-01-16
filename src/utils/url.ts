@@ -19,6 +19,7 @@
 import {ChainType} from "../types";
 import {MinerScenes} from "../pages/epoch/miner";
 import walletWorker from "../worker/walletWorker";
+import interVar from "../interval";
 
 class Url {
     private base = "#"
@@ -88,6 +89,7 @@ class Url {
      * @param delay seconds
      */
     goTo(path: string, pre: string, delay?: number) {
+        interVar.latestOpTime = Date.now();
         const data: any = sessionStorage.getItem("history");
         if (pre) {
             const pathArr = data && JSON.parse(data);
@@ -111,6 +113,7 @@ class Url {
     }
 
     back() {
+        interVar.latestOpTime = Date.now();
         const data: any = sessionStorage.getItem("history");
         const pathArr = data && JSON.parse(data)
         if (pathArr && pathArr.length > 0) {
@@ -125,6 +128,7 @@ class Url {
 
 
     home() {
+        interVar.latestOpTime = Date.now();
         this.goTo(this.base, "/#/");
         return
     }

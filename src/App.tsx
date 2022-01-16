@@ -96,6 +96,7 @@ import EpochStyle from "./pages/epoch/style";
 import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 import rpc from "./rpc";
 import StarGrid from "./pages/epoch/starGrid";
+import interVar from "./interval";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -118,6 +119,15 @@ class App extends React.Component<any, State> {
         this.init().catch(e => {
             console.log(e)
         })
+
+        interVar.start(()=>{
+            rpc.initNFT().catch(e=>{
+                console.error(e);
+            })
+            rpc.initBalance().catch(e=>{
+                console.error(e)
+            })
+        },10 * 1000,true)
     }
 
     init = async () => {
@@ -133,8 +143,6 @@ class App extends React.Component<any, State> {
             deviceInfo: info
         })
 
-        rpc.initBalance().catch(e=>console.error(e));
-        rpc.initNFT().catch(e=>console.error(e));
     }
 
     resetIcon = (v: any) => {
@@ -234,8 +242,7 @@ class App extends React.Component<any, State> {
                             render={() => (
                                 <IonTabs onIonTabsDidChange={v => {
                                     this.resetIcon(v.detail.tab);
-                                    rpc.initBalance().catch(e=>console.error(e));
-                                    rpc.initNFT().catch(e=>console.error(e));
+                                    interVar.latestOpTime = Date.now();
                                 }}>
                                     <IonRouterOutlet>
                                         <Switch>

@@ -2,6 +2,7 @@ import {Hex, HexInfo, Orientation, Point} from "../models";
 import { ORIENTATIONS_CONSTS, OrientationsEnum } from "./orientation";
 import BigNumber from "bignumber.js";
 import BN from "bn.js";
+import {Land} from "../../../types";
 
 const linearInterpolation = (a: number, b: number, t: number): number => a + ((b - a) * t);
 
@@ -28,7 +29,7 @@ export const distanceBetweenHexes = (begin: Hex, end: Hex): number => {
   return length;
 }
 export const reachableHexes = (movement:number,powerMap:Map<string,number>,pathHexes:Array<HexInfo>,maxPower?:number) =>{
-  if(pathHexes.length == 0 || movement==0 ){
+  if(pathHexes.length == 0 || movement<=0 ){
     return []
   }
   if(movement>maxPower){
@@ -49,8 +50,10 @@ export const reachableHexes = (movement:number,powerMap:Map<string,number>,pathH
       movement -= power;
     }
   }
+  if(movement<=0){
+    return visited;
+  }
   movementMap.set(start.uKey(),movement);
-  console.log(movementMap,"movementMap>")
   for(let k = 1 ;k<=movement;k++){
     fringes.push([]);
     for(let hex of fringes[k-1]){
@@ -75,8 +78,8 @@ export const reachableHexes = (movement:number,powerMap:Map<string,number>,pathH
   return visited;
 }
 
-export const reachableHexesNeighbor = (movement:number,powerMap:Map<string,number>,pathHexes:Array<HexInfo>) =>{
-  if(pathHexes.length == 0 || movement == 0 ){
+export const reachableHexesNeighbor = (movement:number,powerMap:Map<string,number>,pathHexes:Array<HexInfo>,langArr:Array<Land>) =>{
+  if(pathHexes.length == 0 || movement < 0 ){
     return []
   }
   const visited:Array<Hex> = [];
@@ -85,8 +88,18 @@ export const reachableHexesNeighbor = (movement:number,powerMap:Map<string,numbe
     const power = powerMap.has(hex.uKey())?powerMap.get(hex.uKey()):1;
     movement -= power;
   }
+  if(movement < 0 ){
+    return [];
+  }
   if(movement ==0){
-    return []
+    for(let dir =0;dir<6;dir++){
+      const neighbor = neighboor(pathHexes[pathHexes.length-1].hex,dir as Directions)
+      const arr = langArr && langArr.length>0 && langArr.filter(v=> v.coordinate == toUINT256(neighbor) && v.counter && v.counter.capacity!="0")
+      if(arr && arr.length>0){
+        visited.push(neighbor)
+      }
+    }
+    return visited
   }
   // movement += 1;
   for(let dir =0;dir<6;dir++){
@@ -165,7 +178,7 @@ export function testHexGrids(){
   // const b = new Hex(1,0, -1 );
   // console.log(distanceBetweenHexes(center,axialCoordinatesToCube(65539,-65538)))
   // const id = toUINT256(axialCoordinatesToCube(65536,-65536))
-  const hex = toAxial(new BigNumber(13500517).toString(10));
+  const hex = toAxial(new BigNumber(8589082611).toString(10));
   const hex2 = toAxial(new BigNumber(5636153).toString(10));
   const hex3 = toAxial(new BigNumber(5636239).toString(10));
   console.log(hex,hex2,hex3,"tessssss",toOpCode([1,2,3,4],4))

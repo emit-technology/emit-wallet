@@ -331,7 +331,6 @@ class RPC {
     }
 
     initBalance = async ()=>{
-        console.log("initBalance...");
         const account = await walletWorker.accountInfo();
         const pArr = [];
         const keys = Object.keys(ChainType)

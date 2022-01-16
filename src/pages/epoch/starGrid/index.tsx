@@ -3,7 +3,7 @@ import {createRef} from "react";
 import {
     axialCoordinatesToCube,
     calcCounterRgb,
-    containHex,
+    containHex, distanceBetweenHexes,
     gridGenerator,
     Hex,
     Hexagon,
@@ -23,6 +23,8 @@ import {
 } from "../../../components/hexagons";
 import {
     IonButton,
+    IonChip,
+    IonCol,
     IonContent,
     IonFab,
     IonFabButton,
@@ -33,9 +35,11 @@ import {
     IonItemDivider,
     IonLabel,
     IonList,
+    IonListHeader,
     IonLoading,
     IonModal,
     IonPage,
+    IonRow,
     IonText,
     IonTitle,
     IonToast,
@@ -48,18 +52,29 @@ import {
     arrowDownCircleOutline,
     arrowForwardCircleOutline,
     arrowUpCircleOutline,
-    cardOutline,
     cashOutline,
     chevronBack,
     expandOutline,
+    listOutline,
     logOut,
+    personAddOutline, planet,
     remove,
     search,
 } from 'ionicons/icons';
 import './index.scss';
 import starGridRpc from "../../../rpc/epoch/stargrid";
 import walletWorker from "../../../worker/walletWorker";
-import {AccountModel, ChainType, Counter, Land, LockedInfo, NftInfo, StarGridType, Transaction} from "../../../types";
+import {
+    AccountModel,
+    ChainType,
+    Counter, ENDetails,
+    Land,
+    LockedInfo,
+    NftInfo, StarGridTrustInfo,
+    StarGridType,
+    Transaction,
+    UserPosition
+} from "../../../types";
 import url from "../../../utils/url";
 import EthToken from "../../../contract/erc20/eth";
 import * as config from "../../../config";
@@ -69,19 +84,19 @@ import Erc721 from "../../../contract/erc721/meta/eth";
 import BigNumber from "bignumber.js";
 import rpc from "../../../rpc";
 import {epochStarGrid, epochStarGridOperator, epochStarGridQuery} from "../../../contract/epoch/bsc";
-import interVar from "../../../interval";
+import {interVarEpoch} from "../../../interval";
 import HexInfoCard from "./hex-info";
 import EthContract from "../../../contract/EthContract";
 import {CounterList} from "./CounterList";
 import {CounterAdd} from "./CounterAdd";
 import {FeeModal} from "./FeeModal";
 import {Settlement} from "./Settlement";
-import {ApprovalUsersModal} from "./ApprovalUsers";
 import {Prepare} from "./Prepare";
 import selfStorage from "../../../utils/storage";
 import {PowerDistribution} from "./PowerDistrbution";
-import Countdown from "react-countdown";
-import {CountDown} from "../../../components/countdown";
+import {PlanetList} from "./PlanetList";
+import {ApprovedList} from "./ApprovedList";
+import {enType2Cy} from "../../../utils/stargrid";
 
 interface ApproveState{
     bLIGHT:boolean
@@ -112,35 +127,46 @@ interface State{
     showPosition:boolean
     showApproveAllModal:boolean
     txs:Array<Transaction>
-    userPositions:Map<string,boolean>
+    userPositions?:UserPosition
     account?:AccountModel
     btnRef:any
-    showCounterList:boolean
+    showCaptureModal:boolean
     showCounterAdd:boolean
     feeData?:any;
     feeOk?:any;
     feeCancel?:any;
     lockedInfo?:LockedInfo
-    showApprovalUserModal:boolean
     showSettlementModal:boolean
     showPrepareModal:boolean
     mp:Map<string,number>
     activeLeft:boolean
     activeBottom:boolean
     showPowerDistribution:boolean,
+    showMyPlanetModal:boolean
+    myPlanetArr:Array<Land>;
 
     dragXY:Array<number>
 
     amountTitle1?:any,
     amountTitle2?:any,
 
-    balanceMap?: any
+    balanceMap?: any,
+    showApprovedList:boolean,
+    approvedInfo?: StarGridTrustInfo,
+    showDetailModal:boolean
+    lockedUserInfo?:LockedInfo
+    lockedUserAddress?:string
+    defaultPlanet?:Land
+    showSelectPlanetModal:boolean
+
+    method?:string
+    enDetails?:ENDetails
+    planetTab?:string
 }
 export const yellowColors = ["e8dda7","e8dda6","e8dca5","e7dca4","e7dba3","e7dba2","e6daa1","e6d99f","e5d99e","e5d89c","e4d79b","e4d799","e4d698","e3d696","e3d595","e3d594","e3d593","e3d492","e2d492","e2d391","e2d390","e2d290","e2d290","e2d190","e1d190","e1d090","e0d090","e0cf91","dfcf91","dfce92","decd92","decd93","ddcc93","dccb94","dccb94","dbca95","dac995","d9c896","d9c896","d8c796","d7c696","d7c596","d6c596","d6c496","d5c396","d5c396","d4c296","d4c295","d3c195","d3c194","d3c094","d2c093","d2bf93","d2bf92","d1be92","d1be91","d0bd91","d0bd90","d0bc90","cfbc8f","cfbb8f","cfbb8f","cebb8e","ceba8e","cdba8d","cdb98d","cdb98c","ccb98c","ccb88b","ccb88b","ccb78a","cbb78a","cbb789","cbb689","cbb688","cab588","cab587","cab487","c9b486","c9b386","c8b285","c8b285","c7b184","c7b184","c7b083","c6af82","c6af81","c5ae81","c5ad80","c5ad80","c5ac7f","c5ac7e","c5ab7e","c5ab7d","c5aa7d","c5aa7d","c5a97c","c5a97c","c5a87b","c5a87b","c5a87b","c5a77b","c5a77b","c5a67a","c5a67a","c5a67a","c5a679","c5a579","c5a578","c6a578","c6a578","c7a577","c7a577","c8a576","c8a476","c9a475","c9a475","caa474","caa373","caa373","cba372","cba272","cba271","cba171","cba170","cba06f","cba06e","ca9f6e","ca9e6d","ca9e6c","ca9d6b","c99c6b","c99b6a","c99a69","c89969","c89868","c89767","c79667","c79566","c69465","c59364","c59264","c49163","c39062","c28f61","c18e61","c08c60","be8b5f","bd8a5f","bc895e","bb885d","ba875d","b8855c","b7845c","b6835b","b4825b","b3815a","b1805a","b07f5a","ae7e59","ad7d59","ab7c59","aa7b58","a87a58","a77957","a57857","a37857","a27757","a07657","9e7557","9d7557","9b7457","9a7357","997357","977256","967156","957055","946f55","926f54","916e54","906c53","8f6b53","8e6a52","8c6952","8b6851","8a6750","886650","87654f","86644e","84634e","83624d","82614c","80604c","7f5f4b","7e5e4a","7c5d4a","7b5c49","7a5b48","795a48","785a47","775946","765846","755745","745745","745644","735644","735543","725543","725442","725442","725341","725341","725240","725240","72513f","72513f","73503e","734f3d","734f3d","744e3c","744d3b","754d3a","754c3a","754b39","764a38","764937","764936","764835","764735","764634","754633","754532","744432","734431","724331","714230","704230","6f412f","6e412f","6d402e","6b3f2e","6a3f2d","693e2c","683d2c","673d2b","663c2a","653b2a","653b29","643a28","633a28","633927","623926","623826","613725","613725","613724"];
 export const blueColors = ["c4cadc","c4cadb","c3c9db","c2c9da","c1c8da","c1c8da","c0c7d9","bec7d9","bdc6d9","bcc6d9","bbc5d9","b9c5d9","b8c4d9","b6c4d9","b5c3d9","b3c3d9","b2c2d9","b0c2d9","afc1d9","adc1d9","acc0d9","aac0d9","a9bfd9","a8bed9","a6bed9","a5bdd9","a4bdd9","a3bcd9","a2bbd9","a0bbd9","9fbad9","9ebad9","9dbad9","9bb9d9","9ab9d9","99b8d9","97b8d9","96b8d9","94b7d8","93b7d8","92b7d8","90b7d8","8fb7d8","8eb6d8","8db6d8","8bb5d8","8ab5d8","89b4d8","88b4d8","87b3d8","86b3d8","85b3d8","84b2d8","83b2d8","82b1d8","80b1d8","7fb0d8","7eb0d8","7dafd8","7cafd8","7baed8","7aaed8","78add8","77add8","76add8","74acd8","73acd8","72acd9","71abd9","70abd9","6fabd9","6eabd9","6dabd9","6caad9","6baad9","6aa9d9","69a9d8","69a9d8","68a8d8","67a8d8","66a7d8","65a7d8","65a7d8","64a6d8","63a6d8","62a6d8","61a5d8","60a5d8","5fa5d8","5ea4d8","5ea4d8","5da4d8","5ca4d8","5ca4d8","5ba3d8","5aa3d8","5aa2d8","59a2d8","58a2d8","58a1d8","57a1d8","56a0d8","56a0d8","55a0d8","549fd8","549fd8","539fd8","529ed8","519ed8","519ed8","509ed8","4f9ed8","4f9dd8","4e9dd8","4e9dd8","4d9cd8","4d9cd8","4c9bd8","4c9bd8","4b9bd8","4b9ad8","4b9ad8","4a9ad8","4a99d8","4999d8","4999d8","4998d8","4898d8","4797d8","4797d8","4696d8","4696d8","4596d8","4496d8","4495d8","4395d8","4394d8","4294d8","4293d8","4293d8","4192d8","4191d8","4091d8","3f90d8","3f8fd8","3e8ed8","3e8dd8","3d8cd8","3c8bd8","3c8ad8","3b89d8","3a88d8","3a86d8","3985d8","3884d8","3782d8","3781d8","367fd8","357dd8","357bd8","3479d8","3377d8","3375d8","3273d8","3270d8","316ed8","316cd8","306bd8","2f69d8","2f67d9","2e66d9","2e64d9","2d62d9","2d61d9","2c60d9","2c5fd9","2c5ed9","2b5dd9","2b5cd9","2b5bd9","2b5ad9","2a5ad9","2a59d9","2a58d9","2958d9","2957d9","2957d9","2956d9","2856d9","2856d9","2855d9","2855d8","2754d8","2754d8","2754d8","2753d8","2653d8","2653d8","2652d8","2652d8","2552d8","2551d8","2551d8","2550d8","2450d8","244fd8","244fd8","244ed8","234ed8","234dd8","234dd8","224dd8","224cd8","224cd8","224cd8","214bd8","214bd8","214bd8","214bd8","204ad8","204ad8","204ad8","1f49d8","1f49d8","1e48d8","1e48d8","1d47d8","1d47d8","1c47d8","1c46d8","1b46d8","1b45d8","1b45d8","1a45d8","1a44d8","1944d8","1944d8","1843d8","1843d8","1743d8","1742d8","1642d8","1642d8","1542d8","1542d8","1441d8","1441d8","1341d8","1341d8","1240d8","1140d8","1140d8","1040d8","0f40d8","0f40d8","0e40d8"];
 const chain = ChainType.BSC;
 const centerHex = axialCoordinatesToCube(0x10000,-0x10000);
-let lastOpTime = Date.now();
 const defaultHexSize = 3;
 class StarGrid extends React.Component<any, State>{
 
@@ -157,7 +183,7 @@ class StarGrid extends React.Component<any, State>{
         hexSize:defaultHexSize,
         targetHex:[],
         absoluteHex: selfStorage.getItem("absoluteHex")?selfStorage.getItem("absoluteHex"):centerHex,
-        recRange:[(6-defaultHexSize)*3,(6-defaultHexSize)*3],
+        recRange:[(8-defaultHexSize)*3,(8-defaultHexSize)*3],
         rangeLand:[],
         approvedStarGridState:{
             bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LQ":false,"WATER-BUSD-LQ":false
@@ -175,76 +201,91 @@ class StarGrid extends React.Component<any, State>{
         showInfo:false,
         showApproveAllModal:false,
         txs:[],
-        userPositions:new Map<string, boolean>(),
         btnRef:<></>,
-        showCounterList:false,
+        showCaptureModal:false,
         showCounterAdd:false,
-        showApprovalUserModal:false,
         showSettlementModal:false,
         showPrepareModal:false,
         mp:new Map<string, number>(),
         activeLeft:true,
-        activeBottom:false,
+        activeBottom:true,
         showPowerDistribution:false,
         dragXY:[0,0],
+        showMyPlanetModal:false,
+        myPlanetArr:[],
+        showApprovedList:false,
+        showDetailModal:false,
+        showSelectPlanetModal:false,
+        planetTab:"owner"
     }
     componentDidMount() {
-        testHexGrids()
-
-        this.init().then(()=>{
-            interVar.start(()=>{
-                if(Date.now() - lastOpTime  < 1000 * 60 * 1){
-                    this.init().catch(e=>{
-                        console.error(e)
-                    })
-                }
-            },5*1000)
-        }).catch(e=>{
-            console.error(e)
-        })
-
+        interVarEpoch.start(()=>{
+            this.init().catch(e=>{
+                console.error(e)
+            })
+        },5*1000,true)
     }
 
     init = async ()=>{
-        let {absoluteHex,recRange,hexSize} = this.state;
+        let {absoluteHex,hexSize,showApproveAllModal,approvedStarGridState,approvedStarGrid} = this.state;
         const account = await walletWorker.accountInfo();
         const owner = account.addresses[chain];
         const userPosition = await starGridRpc.userPositions(owner,10);
         // console.log(userPosition,"userPosition");
         const uMap:Map<string,boolean> = new Map<string, boolean>()
         if(userPosition ){
-
             if(centerHex.equalHex(absoluteHex)){
                 absoluteHex = axialCoordinatesToCube(userPosition.recommendation.maxQ,userPosition.recommendation.maxS)
             }
-
             if(userPosition.positions && userPosition.positions.length>0){
                 if(centerHex.equalHex(absoluteHex)){
                     absoluteHex = toAxial(userPosition.positions[0].coordinate)
                 }
-                for(let p of userPosition.positions){
-                    uMap.set(toAxial(p.coordinate).uKey(),true)
-                }
             }
-
         }
-        const rang = [(6-hexSize)*3,(6-hexSize)*3];
-
+        const rang = [(8-hexSize)*3,(8-hexSize)*3];
         const leftBottom = axialCoordinatesToCube(absoluteHex.x-rang[0],absoluteHex.z+rang[1]);
         const rightTop = axialCoordinatesToCube(absoluteHex.x+rang[0],absoluteHex.z-rang[1]);
 
         const rangeLandPromise = starGridRpc.rangeLand(owner,toUINT256(leftBottom),toUINT256(rightTop));
         const lockedInfoPromise = epochStarGridQuery.lockedInfo(owner)
         const countersPromise =  this.getCounters()
-        const rest = await Promise.all([rangeLandPromise,lockedInfoPromise,countersPromise])
-        const approveRest:Array<any> = await this.queryApprove();
+        const enDetailsPromise = epochStarGridQuery.currentENDetails(owner);
+        const rest = await Promise.all([rangeLandPromise,lockedInfoPromise,countersPromise,enDetailsPromise])
 
-        console.log(rest);
+        let approveRest:Array<any> = [approvedStarGrid,approvedStarGridState,false];
+        if(!showApproveAllModal){
+            approveRest = await this.queryApprove();
+        }
+
         const balance = await rpc.getBalance(chain,"");
+        // const rangeLands:Array<Land> = rest[0];
+        // const newTargetHex: Array<HexInfo> = [];
+        // if(targetHex && targetHex.length>0 && rangeLands && rangeLands.length>0){
+        //     for(let i=0;i<targetHex.length;i++){
+        //         const t = targetHex[i];
+        //         const rs = rangeLands.filter(v=> v.coordinate == toUINT256(t.hex));
+        //         let flag = false;
+        //         if(rs && rs.length>0){
+        //             const v = rs[0];
+        //             if(t.counter && (!v.counter || v.counter.counterId == "0") ||
+        //                 v.counter && (!t.counter || t.counter.counterId == "0") ||
+        //                 t.counter && v.counter && t.counter.counterId!= "0" && v.counter.counterId!="0"
+        //                 && t.counter.counterId != v.counter.counterId){
+        //                 flag = true
+        //             }
+        //         }
+        //         if(flag){
+        //             newTargetHex.push({hex:t.hex,counter:rs[0].counter,land:rs[0]})
+        //         }else{
+        //             newTargetHex.push(t)
+        //         }
+        //     }
+        // }
         this.setState({
             absoluteHex:absoluteHex,
             rangeLand:rest[0],
-            userPositions:uMap,
+            userPositions:userPosition,
             account:account,
             counters:rest[2],
             approvedStarGrid:approveRest[0],
@@ -252,7 +293,9 @@ class StarGrid extends React.Component<any, State>{
             showModalApprove:approveRest[2],
             lockedInfo:rest[1],
             recRange:rang,
-            balanceMap:balance
+            balanceMap:balance,
+            // targetHex:newTargetHex,
+            enDetails: rest[3]
         })
         rpc.initNFT();
     }
@@ -287,31 +330,36 @@ class StarGrid extends React.Component<any, State>{
     }
 
     queryApprove = async ()=>{
-        const {approvedStarGridState} = this.state;
-        const keys = Object.keys(approvedStarGridState);
-        const account = await walletWorker.accountInfo();
-        let approved = true;
-        const owner = account.addresses[chain];
-        for(let cy of keys){
-            const token: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.BSC[cy], chain);
-            {
-                const rest: any = await token.allowance(owner, config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER);
-                const allowance = utils.fromValue(rest, utils.getCyDecimal(cy, ChainType[chain])).toNumber();
-                if(allowance>0){
-                    approvedStarGridState[cy]=true
+        try{
+            const {approvedStarGridState} = this.state;
+            const keys = Object.keys(approvedStarGridState);
+            const account = await walletWorker.accountInfo();
+            let approved = true;
+            const owner = account.addresses[chain];
+            for(let cy of keys){
+                const token: EthToken = new EthToken(config.CONTRACT_ADDRESS.ERC20.BSC[cy], chain);
+                {
+                    const rest: any = await token.allowance(owner, config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER);
+                    const allowance = utils.fromValue(rest, utils.getCyDecimal(cy, ChainType[chain])).toNumber();
+                    if(allowance>0){
+                        approvedStarGridState[cy]=true
+                    }
                 }
             }
-        }
-        const contract: Erc721 = new Erc721(config.CONTRACT_ADDRESS.ERC721.COUNTER.ADDRESS.BSC,chain);
-        const approveAll = await contract.isApprovedForAll(owner,config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER)
-        for(let cy of keys){
-           if(!approvedStarGridState[cy]){
-               approved = false
-               break;
-           }
-        }
+            const contract: Erc721 = new Erc721(config.CONTRACT_ADDRESS.ERC721.COUNTER.ADDRESS.BSC,chain);
+            const approveAll = await contract.isApprovedForAll(owner,config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER)
+            for(let cy of keys){
+                if(!approvedStarGridState[cy]){
+                    approved = false
+                    break;
+                }
+            }
 
-        return [approveAll,approvedStarGridState,!approved || !approveAll]
+            return [approveAll,approvedStarGridState,!approved || !approveAll]
+        }catch (e){
+            console.error(e)
+            return Promise.reject("Query Error")
+        }
     }
 
     genTx = async (contract:EthContract,data:string) =>{
@@ -353,7 +401,7 @@ class StarGrid extends React.Component<any, State>{
             tx:tx,
             showConfirm:true,
         })
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
     approveToStarGrid = async ()=>{
         const tx = await this.genApproveTx();
@@ -362,7 +410,7 @@ class StarGrid extends React.Component<any, State>{
             showConfirm:true,
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     approveAll = async ()=>{
@@ -382,19 +430,21 @@ class StarGrid extends React.Component<any, State>{
 
         this.setState({
             txs:txs,
+            showModalApprove:false,
             showApproveAllModal:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     commitApproveTxs = async ()=>{
         const {txs} = this.state;
         for(let tx of txs){
-           const hash =  await rpc.commitTx(tx,"");
-           await this.waitHash(hash)
-           await this.queryApprove()
+            const hash =  await rpc.commitTx(tx,"");
+            await this.waitHash(hash)
+            await this.queryApprove()
         }
+        return Promise.resolve();
     }
 
     waitHash = async (hash:string)=>{
@@ -415,19 +465,51 @@ class StarGrid extends React.Component<any, State>{
         })
     }
 
-    create = async (type:StarGridType,num:number)=>{
-        const data = await epochStarGridOperator.create(type,num)
+    createConfirm = async (type:StarGridType,num:number)=>{
+        const account = await walletWorker.accountInfo()
+        const rest = await epochStarGridOperator.estimateCreate(type,num,0,account.addresses[chain])
+        console.log("create Confirm",rest)
+        const feeData:any = {
+            "Counter Type" : `EMIT-${StarGridType[type]}`,
+            "Number": `${num}`,
+            "Estimate Cost":`${utils.nFormatter(utils.fromValue(rest[2],18),3)} ${rest[0]}`,
+            "Balance": `${utils.nFormatter(utils.fromValue(rest[1],18),6)} ${rest[0]}`,
+        }
+        this.setState({
+            feeData:feeData,
+            feeCancel:()=>{this.setState({feeData:""})},
+            feeOk:()=>{
+                this.setState({feeData:""})
+                this.setShowLoading(true)
+                this.create(type,num).then(()=>{
+                    this.setShowLoading(false)
+                }).catch((e)=>{
+                    this.setShowLoading(false)
+                    const err = typeof e == "string"?e:e.message;
+                    this.setShowToast(true,err)
+                })
+            }
+        })
+
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    create = async (type:StarGridType,num:number) =>{
+        const depositType = 0 ;
+        const maxCost =0 ;
+        const deadline = 0 ;
+        const data = await epochStarGridOperator.create(type,num,depositType,new BigNumber(0),deadline)
         const tx = await this.genTx(epochStarGridOperator,data);
         this.setState({
             tx:tx,
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     captureConfirm = async (counterId:string,baseAmountIn:BigNumber,attachAmountIn:BigNumber)=>{
-        const {targetHex,counters} = this.state;
+        const {targetHex,counters,defaultPlanet} = this.state;
         const counter = counters.filter((v)=> {
             if(v && v.counterId == counterId){
                 return v
@@ -443,17 +525,30 @@ class StarGrid extends React.Component<any, State>{
         if(targetHex.length == 1){
             coo = targetHex[0].hex
         }
+        const defaultCoo = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
         const hex = toUINT256(coo)
         // @ts-ignore
-        const rest:Array<string> = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmountIn,18),utils.toValue(attachAmountIn,18),account.addresses[ChainType.BSC])
+        const rest:Array<string> = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmountIn,18),utils.toValue(attachAmountIn,18),defaultCoo,account.addresses[ChainType.BSC])
         // const tx = await this.genTx(epochStarGrid,data)
         const base = counter[0].enType == StarGridType.EARTH ? "bDARK":"bLIGHT";
         const attach = counter[0].enType == StarGridType.EARTH ? "WATER":"EARTH"
+        //(baseCost,attachCost,createBaseCost,createAttachCost,feeRate)
+        const baseCost = utils.fromValue(rest[0],18);
+        const attachCost = utils.fromValue(rest[1],18);
+        const createBaseCost = utils.fromValue(rest[2],18);
+        const createAttachCost = utils.fromValue(rest[3],18);
+        const feeRate = utils.fromValue(rest[4],0);
         const feeData:any = {
+            showDesc:true,
             Terms: `7 Periods`,
-            "Every Period": `${baseAmountIn.toString(10)} ${base}, ${attachAmountIn.toString(10)} ${attach}`,
-            Total: `${utils.fromValue(rest[0],18).toString(10)} ${base}, ${utils.fromValue(rest[1],18).toString(10)} ${attach}`,
+            "Burned": `${baseAmountIn.toString(10)} ${base}/period and ${attachAmountIn.toString(10)} ${attach}/period`,
+            "Burned Total":`${baseCost.toString(10)} ${base} and ${attachCost.toString(10)} ${attach}`,
+            "Fee Rate": `${feeRate}%`,
         }
+        if(createBaseCost.toNumber()>0 || createAttachCost.toNumber() >0){
+            feeData["Create Planet Amount"] = `${createBaseCost.toString(10)} ${base}, ${createAttachCost.toString(10)} ${attach}`
+        }
+        feeData["Total"] = `${baseCost.plus(createBaseCost).toString(10)} ${base}, ${attachCost.plus(createAttachCost).toString(10)} ${attach}`
 
         this.setState({
             feeData:feeData,
@@ -461,7 +556,7 @@ class StarGrid extends React.Component<any, State>{
             feeOk:()=>{
                 this.setState({feeData:""})
                 this.setShowLoading(true)
-                this.capture(counterId,baseAmountIn,attachAmountIn).then(()=>{
+                this.capture(counterId,baseAmountIn,attachAmountIn,defaultCoo).then(()=>{
                     this.setShowLoading(false)
                 }).catch((e)=>{
                     this.setShowLoading(false)
@@ -471,22 +566,18 @@ class StarGrid extends React.Component<any, State>{
             }
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
-    capture = async (counterId:string,baseAmount:BigNumber,attachAmount:BigNumber)=>{
+    capture = async (counterId:string,baseAmount:BigNumber,attachAmount:BigNumber,defaultCoo:string = "0")=>{
         const {targetHex} = this.state;
         let coo:Hex|undefined;
         if(targetHex.length == 1){
             coo = targetHex[0].hex
         }
         const hex = toUINT256(coo)
-        // {
-        //     const account = await walletWorker.accountInfo();
-        //     const data = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),account.addresses[ChainType.BSC])
-        // }
         //@ts-ignore
-        const data:string = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmount,18),utils.toValue(attachAmount,18))
+        const data:string = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),defaultCoo)
         const tx = await this.genTx(epochStarGrid,data)
         this.setState({
             tx:tx,
@@ -494,7 +585,7 @@ class StarGrid extends React.Component<any, State>{
             feeData: ""
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     logout = async ()=>{
@@ -506,7 +597,7 @@ class StarGrid extends React.Component<any, State>{
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     settlement = async ()=>{
@@ -517,7 +608,7 @@ class StarGrid extends React.Component<any, State>{
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     moveTo = async (hex:Hex) =>{
@@ -528,90 +619,162 @@ class StarGrid extends React.Component<any, State>{
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
-    move = async ()=>{
-        const {targetHex} = this.state;
-        if(targetHex.length <=1){
+    move = async (setTag:boolean,createPlanet:boolean)=>{
+        const {targetHex,lockedInfo} = this.state;
+        const account = await walletWorker.accountInfo()
+        if(targetHex.length == 0){
             this.setShowToast(true,"No step to move!")
             return
         }
+        if(setTag && createPlanet){
+            this.setShowToast(true,"Can't mark and create planet in one operator !")
+            return
+        }
         const routers:Array<number>=[];
-        for(let i=1;i<targetHex.length;i++){
-            const start = targetHex[i-1].hex;
-            const hex = targetHex[i].hex;
-            if(targetHex[i].counter){
-                // let rd = 0;
-                for(let dir =0;dir<6;dir++){
-                    //@ts-ignore
-                    const neighbor = neighboor(start,dir)
-                    if(neighbor.equalHex(hex)){
-                        routers.push(dir+7)
-                        break
+        if(targetHex.length > 1){
+            for(let i=1;i<targetHex.length;i++){
+                const start = targetHex[i-1].hex;
+                const hex = targetHex[i].hex;
+                if(targetHex[i].counter){
+                    for(let dir =0;dir<6;dir++){
+                        //@ts-ignore
+                        const neighbor = neighboor(start,dir)
+                        if(neighbor.equalHex(hex)){
+                            routers.push(dir+9)
+                            break
+                        }
                     }
-                }
-                // if(rd == 0){
-                //     this.setShowToast(true,"No neighbor attack")
-                //     return
-                // }
-                // routers.push(rd)
-            }else {
-                let rd = 0;
-                for(let dir =0;dir<6;dir++){
-                    //@ts-ignore
-                    const neighbor = neighboor(start,dir)
-                    if(neighbor.equalHex(hex)){
-                        rd = dir+1;
-                        break
+                }else {
+                    let rd = 0;
+                    for(let dir =0;dir<6;dir++){
+                        //@ts-ignore
+                        const neighbor = neighboor(start,dir)
+                        if(neighbor.equalHex(hex)){
+                            rd = dir+3;
+                            break
+                        }
                     }
+                    if(rd == 0){
+                        this.setShowToast(true,"No neighbor")
+                        return
+                    }
+                    routers.push(rd)
                 }
-                if(rd == 0){
-                    this.setShowToast(true,"No neighbor")
-                    return
-                }
-                routers.push(rd)
             }
+        }
+        if(setTag){
+            routers.push(2)
+        }else if(createPlanet){
+            routers.push(1)
         }
         routers.push(0)
         routers.reverse();
-        console.log(routers,toOpCode(routers,5),"toOPCO");
-        //TODO use Buffer instead
-        const data:any = await epochStarGrid.active("0x"+new BigNumber(toOpCode(routers,5),2).toString(16))
+        const opcode = toOpCode(routers,5);
+        console.log(opcode,"OPCODE::")
+        const rest =  await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
+        const baseAmount = utils.fromValue(rest[0],18);
+        const attachAmount = utils.fromValue(rest[1],18);
+        const feeRate = rest[2];
+
+        if(baseAmount.toNumber() == 0 && attachAmount.toNumber() == 0 ){
+            this.setShowLoading(true);
+            this.active(opcode).then(()=>{
+                this.setShowLoading(false)
+            }).catch((e)=>{
+                this.setShowLoading(false)
+                const err = typeof e == "string"?e:e.message;
+                this.setShowToast(true,err)
+            })
+        }else{
+            const eType = enType2Cy(lockedInfo.userInfo.counter.enType)
+            const feeData:any = {
+                "showDesc": true,
+                "Amount": `${baseAmount.toString(10)} ${eType.base}, ${attachAmount.toString(10)} ${eType.attach}`,
+                "Fee Rate": `${feeRate}%`
+            }
+            this.setState({
+                feeData:feeData,
+                feeCancel:()=>{this.setState({feeData:""})},
+                feeOk:()=>{
+                    this.setState({feeData:""})
+                    this.setShowLoading(true)
+                    this.active(opcode).then(()=>{
+                        this.setShowLoading(false)
+                    }).catch((e)=>{
+                        this.setShowLoading(false)
+                        const err = typeof e == "string"?e:e.message;
+                        this.setShowToast(true,err)
+                    })
+                }
+            })
+        }
+
+
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    active = async (opconde:string) =>{
+        const data:any = await epochStarGrid.active("0x"+new BigNumber(opconde,2).toString(16))
         const tx = await this.genTx(epochStarGrid,data);
         this.setState({
             tx:tx,
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
-    prepare = async (terms:number,baseAmount:BigNumber,attachAmount)=>{
-        const data:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms)
+    prepare = async (terms:number,baseAmount:BigNumber,attachAmount:BigNumber)=>{
+        const {defaultPlanet} = this.state;
+        const defaultCoordinate = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
+        const data:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms,defaultCoordinate)
         const tx = await this.genTx(epochStarGrid,data)
         this.setState({
             tx:tx,
             showConfirm:true
         })
 
-
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
-    prepareConfirm = async (terms:number, baseAmount:BigNumber,attachAmount:BigNumber) =>{
-        const {lockedInfo} = this.state;
+    prepareConfirm = async (terms:number, a:BigNumber,b:BigNumber) =>{
+        const {lockedInfo,defaultPlanet} = this.state;
         const account = await walletWorker.accountInfo();
-        //
-        const rest:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms,account.addresses[ChainType.BSC])
+        const baseAmount = new BigNumber(a);
+        const attachAmount = new BigNumber(b)
+        const defaultCoordinate = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
+        const rest:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms,defaultCoordinate,account.addresses[ChainType.BSC])
+        let base;
+        let attach;
+        let availableBase:BigNumber;
+        let availableAttach:BigNumber;
+        if( lockedInfo.userInfo.counter.enType == StarGridType.EARTH){
+            base = "bDARK";
+            attach = "WATER"
+            availableBase = utils.fromValue(lockedInfo.userInfo.darkCanUsed,18);
+            availableAttach = utils.fromValue(lockedInfo.userInfo.waterCanUsed,18);
+        }else if( lockedInfo.userInfo.counter.enType == StarGridType.WATER){
+            base = "bLIGHT";
+            attach = "EARTH"
+            availableBase = utils.fromValue(lockedInfo.userInfo.lightCanUsed,18);
+            availableAttach = utils.fromValue(lockedInfo.userInfo.earthCanUsed,18);
+        }
+        const total1 = utils.fromValue(rest[0],18);
+        const total2 = utils.fromValue(rest[1],18);
 
-        const base = lockedInfo.counter.enType == StarGridType.EARTH ? "bDARK":"bLIGHT";
-        const attach = lockedInfo.counter.enType == StarGridType.EARTH ? "WATER":"EARTH"
 
+        //baseCost,attachCost,feeRate
         const feeData:any = {
-            Terms: `7 Periods`,
-            "Amount per Period": `${baseAmount.toString(10)} ${base}, ${attachAmount.toString(10)} ${attach}`,
-            Total: `${utils.fromValue(rest[0],18).toString(10)} ${base}, ${utils.fromValue(rest[1],18).toString(10)} ${attach}`,
+            showDesc: true,
+            Terms: `${terms} Periods`,
+            Balance: `${utils.nFormatter(availableBase,3)} ${base} and ${utils.nFormatter(availableAttach,3)}`,
+            "Amount per Period": `${baseAmount.toString(10)} ${base} and ${attachAmount.toString(10)} ${attach}`,
+            "Fee Rate":`${rest[2]}%`,
+            // "Fee": `${utils.nFormatter(total1.minus(availableBase).minus(baseAmount.multipliedBy(terms)),3)} ${base} and ${utils.nFormatter(total2.minus(availableAttach).minus(attachAmount.multipliedBy(terms)),3)} ${attach}`,
+            Total: `${total1.toString(10)} ${base}, ${total2.toString(10)} ${attach}`,
         }
 
         this.setState({
@@ -621,14 +784,15 @@ class StarGrid extends React.Component<any, State>{
                 this.prepare(terms,baseAmount,attachAmount).then(()=>{
                     this.setState({feeData:""})
                 }).catch(e=>{
+                    const err = typeof e =="string"?e:e.message;
+                    this.setShowToast(true,err)
                     this.setState({feeData:""})
-                    console.error(e)
                 })
             }
         })
 
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
 
     }
     setApproveToUser = async (addr:string,bool:boolean)=>{
@@ -639,7 +803,48 @@ class StarGrid extends React.Component<any, State>{
             showConfirm:true
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowSelectPlanet = async (f:boolean,methd:string) =>{
+        let {lockedInfo,defaultPlanet,method} = this.state;
+        let enType = 0;
+        if(lockedInfo.userInfo.counter.counterId != "0"){
+            enType = lockedInfo.userInfo.counter.enType;
+        }else if(defaultPlanet && defaultPlanet.capacity != "0"){
+            enType = defaultPlanet.enType;
+        }
+        let arr:Array<Land> = [];
+        if(f){
+            const account = await walletWorker.accountInfo();
+            //TODO pagination
+            arr = await starGridRpc.myPlanet(account.addresses[ChainType.BSC],1,new BigNumber(enType).toNumber(),0,100);
+        }
+        if(methd){
+            method = methd;
+        }
+        const state = {
+            showSelectPlanetModal:f,
+            showLoading:false,
+            myPlanetArr:arr,
+            method:method
+        }
+        if(method == "prepare"){
+            state["showPrepareModal"] = !f;
+        }else if(method == "capture"){
+            state["showCounterList"] = !f;
+        }
+        this.setState(state)
+    }
+    updateCounter = async (opcode:string)=>{
+        const data = await epochStarGrid.updateCounter("0x"+new BigNumber(opcode,2).toString(16))
+        const tx = await this.genTx(epochStarGrid,data)
+        this.setState({
+            tx:tx,
+            showConfirm:true
+        })
+
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     attack = async (opId:string)=>{
@@ -664,7 +869,7 @@ class StarGrid extends React.Component<any, State>{
             hexSize:n
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     handleStart = (e:any,data:any)=>{
@@ -686,8 +891,7 @@ class StarGrid extends React.Component<any, State>{
         })
     }
 
-    arrow=(t:string)=>{
-        let {absoluteHex,dragXY,hexSize} = this.state;
+    moveNeighbor = (t:string,absoluteHex:Hex)=>{
         if("u" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,0),5)// addHex(addHex(absoluteHex,directions[0]),directions[5]);
         }else if ("d" == t){
@@ -697,13 +901,19 @@ class StarGrid extends React.Component<any, State>{
         }else if ("l" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,4),4);
         }
-        selfStorage.setItem("absoluteHex",absoluteHex)
+        return absoluteHex
+    }
+
+    arrow=(t:string)=>{
+        let {absoluteHex,dragXY,hexSize} = this.state;
+        const absHex = this.moveNeighbor(t,absoluteHex)
+        selfStorage.setItem("absoluteHex",absHex)
         this.setState({
-            absoluteHex:absoluteHex,
+            absoluteHex:absHex,
             dragXY:[]
         })
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
     // dark background
@@ -714,7 +924,11 @@ class StarGrid extends React.Component<any, State>{
         const {targetHex,lockedInfo} = this.state;
         const originLen = targetHex.length;
 
-        if(originLen == 1 && (noCounter(targetHex[0]) || lockedInfo && targetHex[0].counter && lockedInfo.counter.counterId != targetHex[0].counter.counterId)){
+        if(originLen == 1 && (
+            noCounter(targetHex[0])
+            || lockedInfo && targetHex[0].counter && lockedInfo.userInfo.counter.counterId != targetHex[0].counter.counterId
+            || distanceBetweenHexes(targetHex[0].hex,h.hex) > 1
+        )){
             if(targetHex[0].hex.equalHex(h.hex)){
                 return [];
             }else{
@@ -738,117 +952,58 @@ class StarGrid extends React.Component<any, State>{
     }
 
     selectTarget = async (f:boolean, hex?:HexInfo,x?:number,y?:number)=>{
-        const {lockedInfo,targetHex,counters,rangeLand} = this.state;
+        let {lockedInfo,targetHex,rangeLand,absoluteHex} = this.state;
         if(hex){
-            const tHex = this.setTarget(hex)
+            const account = await walletWorker.accountInfo();
+            const tHexes = this.setTarget(hex)
             // let ref:any;
             let mp:Map<string,number> = new Map<string, number>()
-            if(lockedInfo && lockedInfo.counter && lockedInfo.counter.counterId !== "0"){
-                // if(hex.counter && lockedInfo.counter.counterId == hex.counter.counterId){
-                    //logout
-                    // ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                    //     <IonButton color="warning" size="small" onClick={()=>{
-                    //         this.setShowLoading(true)
-                    //         this.logout().then(()=>{
-                    //             this.setShowLoading(false)
-                    //         }).catch(e=>{
-                    //             this.setShowLoading(false)
-                    //             const err = typeof e == "string"?e:e.message;
-                    //             this.setShowToast(true,err)
-                    //         })
-                    //     }}>Logout</IonButton>
-                    // </div>
-                // }else{
-                    //move
-                //     if(!hex.counter){
-                //         if(hex.land && hex.land.canCapture){
-                //             ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                //                 <IonButton color="success" size="small" onClick={()=>{
-                //                     this.setShowLoading(true)
-                //                     this.moveTo(hex.hex).then(()=>{
-                //                         this.setShowLoading(false)
-                //                     }).catch(e=>{
-                //                         this.setShowLoading(false)
-                //                         const err = typeof e == "string"?e:e.message;
-                //                         this.setShowToast(true,err)
-                //                     })
-                //                 }}>Move To</IonButton>
-                //             </div>
-                //         }else{
-                //             if(targetHex && targetHex.length>1){
-                //                 ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                //                     <IonButton color="success" size="small" onClick={()=>{
-                //                         this.setShowLoading(true)
-                //                         this.move().then(()=>{
-                //                             this.setShowLoading(false)
-                //                         }).catch(e=>{
-                //                             this.setShowLoading(false)
-                //                             const err = typeof e == "string"?e:e.message;
-                //                             this.setShowToast(true,err)
-                //                         })
-                //                     }}>Move</IonButton>
-                //                 </div>
-                //             }
-                //         }
-                //     }else{
-                //         if(this.isFocusMyCounter() && lockedInfo && hex.counter.counterId != lockedInfo.counter.counterId){
-                //             //attack
-                //             ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                //                 <IonButton color="danger" size="small" onClick={()=>{
-                //                     this.setShowLoading(true)
-                //                     this.move().then(()=>{
-                //                         this.setShowLoading(false)
-                //                     }).catch(e=>{
-                //                         this.setShowLoading(false)
-                //                         const err = typeof e == "string"?e:e.message;
-                //                         this.setShowToast(true,err)
-                //                     })
-                //                 }}>Attack</IonButton>
-                //             </div>
-                //         }
-                //     }
-                // }
-
-                if(rangeLand){
-                    for (let land of rangeLand){
-                        if(targetHex.length>0){
-                            const tHex = targetHex[0];
-                            let power = 1;
-                            // if(absHex && account && absHex.owner && absHex.owner.toLowerCase() == account.addresses[chain].toLowerCase()){
-                            //     power = 0
-                            // }else
-                            if(tHex && tHex.counter && tHex.counter.enType != land.enType){
-                                power = 2;
+            if(lockedInfo && lockedInfo.userInfo.counter && lockedInfo.userInfo.counter.counterId !== "0"){
+                if(tHexes.length>0 && rangeLand){
+                    const tHex = tHexes[0];
+                    const movement = new BigNumber(lockedInfo.userInfo.counter.move).toNumber();
+                    if(tHex && tHex.counter && tHex.counter.counterId != "0"){
+                        for (let land of rangeLand) {
+                            if(distanceBetweenHexes(toAxial(land.coordinate),tHex.hex) > movement){
+                               continue
                             }
-                            // if(land.counter){
-                            //     power = 1e10
-                            // }
-                            mp.set(toAxial(land.coordinate).uKey(),power);
+                            let power = 1;
+                            if (land && land.capacity != "0" && tHex.counter.enType != land.enType) {
+                                if (land.owner == account.addresses[chain] || land.canCapture) {
+                                    power = 1;
+                                } else {
+                                    power = 2 + new BigNumber(land.level).toNumber()
+                                }
+                            }
+                            mp.set(toAxial(land.coordinate).uKey(), power);
                         }
                     }
                 }
-            }else{
-                //capture
-                // if(counters && counters.length>0){
-                //     ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                //         <IonButton color="primary" size="small" onClick={()=>{
-                //             this.setShowCounterList(true)
-                //         }}>Capture</IonButton>
-                //     </div>
-                // }else{
-                //     ref = <div className="btn-div" style={{left:x-20,top:y-80,display:"block"}}>
-                //         <IonButton color="primary" size="small" onClick={()=>{
-                //            this.setShowCounterAdd(true)
-                //         }}>Create</IonButton>
-                //     </div>
-                // }
             }
+            let absHex = absoluteHex;
+            if(x && y){
+                const width = document.documentElement.clientWidth;
+                const height= document.documentElement.clientHeight;
+                if(x < width / 4){
+                    absHex = this.moveNeighbor("l",absoluteHex);
+                }else if(x > width * 3/4){
+                    absHex = this.moveNeighbor("r",absoluteHex);
+                }
+                if(y < height / 4){
+                    absHex = this.moveNeighbor("u",absoluteHex);
+                }
+                if(y > height * 3/4){
+                    absHex = this.moveNeighbor("d",absoluteHex);
+                }
+            }
+            selfStorage.setItem("absoluteHex",absoluteHex)
             this.setState({
                 showInfo:f,
-                targetHex: tHex,
-                // btnRef: tHex &&tHex.length == 0 ?"" : ref,
+                showLoading:false,
+                targetHex: tHexes,
                 mp:mp,
-                dragXY:[x,y]
+                dragXY:[x,y],
+                absoluteHex:absHex
             })
         }else{
             this.setState({
@@ -856,155 +1011,12 @@ class StarGrid extends React.Component<any, State>{
             })
         }
 
-        lastOpTime = Date.now();
+        interVarEpoch.latestOpTime = Date.now();
     }
 
-    setShowModalApprove = (f:boolean)=>{
-        this.setState({
-            showModalApprove:f
-        })
+    calcPlanetMap = ()=>{
 
-        lastOpTime = Date.now();
-    }
-
-    setShowLoading = (f:boolean)=>{
-        this.setState({
-            showLoading:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowConfirm = (f:boolean)=>{
-        this.setState({
-            showConfirm:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowToast(f:boolean,m?:string){
-        this.setState({
-            showToast:f,
-            toastMessage:m
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowPosition=(f:boolean)=>{
-        this.setState({
-            showPosition:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowCounterAdd = (f:boolean) =>{
-        this.setState({
-            showCounterAdd:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowApprovalUserModal = (f:boolean) =>{
-        this.setState({
-            showApprovalUserModal:f
-        })
-        lastOpTime = Date.now();
-    }
-    confirm = async (hash: string) => {
-        let intervalId: any = 0;
-        this.setShowLoading(true);
-        intervalId = setInterval(() => {
-            rpc.getTxInfo(chain, hash).then(rest => {
-                if (rest) {
-                    clearInterval(intervalId)
-
-                    lastOpTime = Date.now();
-                    this.setShowLoading(false);
-                    this.setState({
-                        targetHex:[],
-                        btnRef:""
-                    })
-                }
-            }).catch((e: any) => {
-                this.setShowLoading(false);
-                console.error(e);
-            })
-        }, 1000)
-    }
-
-    convertHex = (hex:Hex):Hex =>{
-        const {absoluteHex} = this.state;
-        return axialCoordinatesToCube(hex.x+absoluteHex.x,hex.z+absoluteHex.z);
-    }
-
-    containHexInfo = (arr:Array<HexInfo>,hex:Hex)=>{
-        for(let h of arr){
-            if(h.hex.equalHex(hex)){
-                return true
-            }
-        }
-        return false
-    }
-
-    setShowCounterList = (f:boolean)=>{
-        this.setState({
-            showCounterList:f,
-            amountTitle2:"",
-            amountTitle1:""
-        })
-        lastOpTime = Date.now();
-    }
-
-    isFocusMyCounter = ():boolean =>{
-        const {targetHex,lockedInfo} = this.state;
-        return targetHex && targetHex.length>0 && targetHex[0].counter && lockedInfo && targetHex[0].counter.counterId == lockedInfo.counter.counterId
-    }
-
-    setShowSettlementModal = (f:boolean) =>{
-        this.setState({
-            showSettlementModal:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowPrepareModal = (f:boolean) =>{
-        this.setState({
-            showPrepareModal:f
-        })
-        lastOpTime = Date.now();
-    }
-
-    setShowPowerDistribution = (f:boolean) =>{
-        this.setState({
-            showPowerDistribution: f
-        })
-        lastOpTime = Date.now();
-    }
-
-    renTitle = (cy:string) =>{
-        return <div><b>Input {cy} amount</b><p>Balance:<IonText color="primary">{this.getBalance(cy)}</IonText></p></div>
-    }
-
-    storeAbsoluteHex = (h:Hex) =>{
-        selfStorage.setItem("absoluteHex",h)
-    }
-    render() {
-        const {hexSize,targetHex,userPositions,btnRef,txs,showApproveAllModal,approvedStarGridState,
-            showPosition,approvedStarGrid,showModalApprove,showLoading,showConfirm,recRange,showCounterAdd,
-            showToast,toastMessage,tx,counters,rangeLand,account,showCounterList,feeData,feeOk,feeCancel,
-            showApprovalUserModal,lockedInfo,showSettlementModal,showPrepareModal,mp,activeBottom,activeLeft,
-            showPowerDistribution,amountTitle1,amountTitle2} = this.state;
-        // const hexagons = gridGenerator.rectangle(recRange[0],recRange[1], true,true );
-        // console.log(hexagons,recRange);
-        const hexagons = gridGenerator.hexagon(recRange[0]>recRange[1]?recRange[0]:recRange[1],true)
-        // let contentStyle = {width:`${1*100}vw`,height:`${1*100}vh`};
-        {
-            // (0,136,207)       (124,0,214)
-            // (47,187,246)      (162,57,255)
-
-        }
-
-        const owner = account && account.addresses[ChainType.BSC];
-
+        const {rangeLand,targetHex,recRange,mp} = this.state;
         let movement = 0;
         if(targetHex && targetHex.length>0){
             const selectedHex = targetHex[0];
@@ -1012,11 +1024,8 @@ class StarGrid extends React.Component<any, State>{
                 movement = new BigNumber(selectedHex.counter.move).toNumber()
             }
         }
-        if (movement>recRange[0]){
-           // movement = Math.floor(recRange[0]/2);
-        }
         const reachHexesGlobal:Array<Hex> = reachableHexes(movement,mp,targetHex,Math.floor(recRange[0]));
-        const reachHexes:Array<Hex> = reachableHexesNeighbor(movement,mp,targetHex);
+        const reachHexes:Array<Hex> = reachableHexesNeighbor(movement,mp,targetHex,rangeLand);
 
         const yellows=[];
         const blues=[];
@@ -1047,6 +1056,283 @@ class StarGrid extends React.Component<any, State>{
             }
         }
 
+        return [reachHexesGlobal,reachHexes,pieceColors,counterMap,blues,yellows]
+
+    }
+
+    setShowModalApprove = (f:boolean)=>{
+        this.setState({
+            showModalApprove:f,
+            showLoading:false,
+        })
+
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowLoading = (f:boolean)=>{
+        this.setState({
+            showLoading:f
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowConfirm = (f:boolean)=>{
+        this.setState({
+            showConfirm:f,
+            showLoading:false,
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowToast(f:boolean,m?:string){
+        this.setState({
+            showToast:f,
+            toastMessage:m,
+            showLoading:false
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowPosition=(f:boolean)=>{
+        this.setState({
+            showPosition:f,
+            showLoading:false,
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowCounterAdd = (f:boolean) =>{
+        this.setState({
+            showCounterAdd:f,
+            showLoading:false,
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowDetailModal = (f:boolean,address?:string) => {
+        if(f && address){
+            this.setShowLoading(true)
+           epochStarGridQuery.lockedInfo(address).then((rest)=>{
+               this.setState({
+                   showLoading:false,
+                   showDetailModal:f,
+                   lockedUserInfo:rest,
+                   lockedUserAddress:address
+               })
+           }).catch(e=>{
+               const err = typeof e == "string"?e:e.message;
+               this.setShowToast(true,err)
+           })
+        }else{
+            this.setState({
+                showDetailModal:false
+            })
+        }
+    }
+
+    setShowPlanetModal = async (f:boolean,type:number = 2) =>{
+        let arr:Array<Land> = [];
+        if(f){
+            const account = await walletWorker.accountInfo();
+            //TODO pagination
+           arr = await starGridRpc.myPlanet(account.addresses[ChainType.BSC],type,0,0,100);
+        }
+        this.setState({
+            showMyPlanetModal:f,
+            showLoading:false,
+            myPlanetArr:arr,
+            planetTab:type == 1 ?"owner":"marker"
+        })
+    }
+    confirm = async (hash: string) => {
+        let intervalId: any = 0;
+        this.setShowLoading(true);
+        intervalId = setInterval(() => {
+            rpc.getTxInfo(chain, hash).then(rest => {
+                if (rest) {
+                    clearInterval(intervalId)
+
+                    interVarEpoch.latestOpTime = Date.now();
+                    this.setShowLoading(false);
+                    this.setState({
+                        targetHex:[],
+                        btnRef:""
+                    })
+                }
+            }).catch((e: any) => {
+                this.setShowLoading(false);
+                console.error(e);
+            })
+        }, 1000)
+    }
+
+    convertHex = (hex:Hex):Hex =>{
+        const {absoluteHex} = this.state;
+        return axialCoordinatesToCube(hex.x+absoluteHex.x,hex.z+absoluteHex.z);
+    }
+
+    containHexInfo = (arr:Array<HexInfo>,hex:Hex)=>{
+        for(let h of arr){
+            if(h.hex.equalHex(hex)){
+                return true
+            }
+        }
+        return false
+    }
+
+    setShowCaptureModal = async (f:boolean)=>{
+        this.setState({
+            showCaptureModal:f,
+            showLoading:false,
+            amountTitle2:"",
+            amountTitle1:""
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    isFocusMyCounter = ():boolean =>{
+        const {targetHex,lockedInfo} = this.state;
+        return targetHex && targetHex.length>0 && targetHex[0].counter && lockedInfo && targetHex[0].counter.counterId == lockedInfo.userInfo.counter.counterId
+    }
+
+    setShowSettlementModal = (f:boolean) =>{
+        this.setState({
+            showSettlementModal:f,
+            showLoading:false
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowPrepareModal = (f:boolean) =>{
+        let {lockedInfo,account} = this.state;
+        const coo = lockedInfo.userInfo.counter.enType == StarGridType.WATER?lockedInfo.userInfo.userDefaultWaterCoordinate: lockedInfo.userInfo.userDefaultEarthCoordinate;
+        if(f && coo!="0"){
+          epochStarGridQuery.planetInfo(coo,account.addresses[chain]).then((v)=>{
+              this.setState({
+                  defaultPlanet:v,
+                  showLoading:false,
+                  showPrepareModal:f
+              })
+          }).catch(e=>{
+              const err = typeof e == "string"?e:e.message;
+              this.setShowToast(true,err);
+          })
+        }else{
+            this.setState({
+                showPrepareModal:f,
+                showLoading:false,
+            })
+        }
+
+
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    setShowPowerDistribution = (f:boolean) =>{
+        this.setState({
+            showPowerDistribution: f,
+            showLoading:false,
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
+    renTitle = (cy:string) =>{
+        return <div><b>Input {cy} amount</b><p>Balance:<IonText color="primary">{this.getBalance(cy)}</IonText></p></div>
+    }
+
+    storeAbsoluteHex = (h:Hex) =>{
+        selfStorage.setItem("absoluteHex",h)
+    }
+
+    setPosition = async (x:number,z:number) =>{
+        const a = axialCoordinatesToCube(x,z);
+        this.storeAbsoluteHex(a)
+        this.setState({
+            absoluteHex:a,
+            showPosition:false,
+            targetHex:[]
+        })
+    }
+
+    setShowApproveList = async (f:boolean) =>{
+        let ret:StarGridTrustInfo|undefined;
+        if(f){
+            const account = await walletWorker.accountInfo();
+            ret =  await starGridRpc.myApproved(account.addresses[chain],0,1000);
+        }
+        this.setState({
+            showApprovedList:f,
+            approvedInfo: ret,
+            showLoading:false,
+        })
+    }
+
+    selectCounter = async (counter:Counter) =>{
+        const {lockedInfo} = this.state;
+        const account = await walletWorker.accountInfo()
+
+        if(counter.enType == StarGridType.EARTH){
+            const planetInfo = lockedInfo.userInfo.userDefaultEarthCoordinate != "0"?
+                await epochStarGridQuery.planetInfo(lockedInfo.userInfo.userDefaultEarthCoordinate,account.addresses[ChainType.BSC]):undefined;
+            console.log("planetInfo:::",planetInfo)
+            this.setState({
+                amountTitle1: this.renTitle("bDARK"),
+                amountTitle2: this.renTitle("WATER"),
+                defaultPlanet:planetInfo
+            })
+        }else if(counter.enType == StarGridType.WATER){
+            const planetInfo = lockedInfo.userInfo.userDefaultWaterCoordinate != "0"?
+                await epochStarGridQuery.planetInfo(lockedInfo.userInfo.userDefaultWaterCoordinate,account.addresses[ChainType.BSC]):undefined;
+
+            this.setState({
+                amountTitle1: this.renTitle("bLIGHT"),
+                amountTitle2: this.renTitle("EARTH"),
+                defaultPlanet:planetInfo
+            })
+        }
+    }
+
+    inRange = (absHex:Hex):boolean =>{
+        const {userPositions} = this.state;
+        if(!userPositions || !userPositions.maxRange){
+            return false
+        }
+        //maxQ: 65545, maxS: -65523
+        return absHex.z <= userPositions.maxRange.maxS && absHex.z >= userPositions.maxRange.minS
+        && absHex.x <= userPositions.maxRange.maxQ && absHex.x >= userPositions.maxRange.minQ
+    }
+
+    isHomeless = (hex:Hex):boolean =>{
+        const {lockedInfo} = this.state;
+        if(lockedInfo && (
+            toAxial(lockedInfo.userInfo.userDefaultEarthCoordinate).equalHex(hex)
+            || toAxial(lockedInfo.userInfo.userDefaultWaterCoordinate).equalHex(hex)
+        )){
+            return true;
+        }
+        return false;
+    }
+
+    render() {
+        const {hexSize,targetHex,userPositions,btnRef,txs,showApproveAllModal,approvedStarGridState,
+            showPosition,approvedStarGrid,showModalApprove,showLoading,showConfirm,recRange,showCounterAdd,
+            showToast,toastMessage,tx,counters,rangeLand,account,showCaptureModal,feeData,feeOk,feeCancel,
+            lockedInfo,showSettlementModal,showPrepareModal,activeBottom,activeLeft,planetTab,
+            showPowerDistribution,amountTitle1,amountTitle2,myPlanetArr,showMyPlanetModal,showApprovedList,approvedInfo,
+        showDetailModal,lockedUserInfo,showSelectPlanetModal,defaultPlanet,lockedUserAddress,enDetails} = this.state;
+        // const hexagons = gridGenerator.rectangle(recRange[0],recRange[1], true,true );
+        // console.log(hexagons,recRange);
+        const hexagons = gridGenerator.hexagon(recRange[0]>recRange[1]?recRange[0]:recRange[1],true)
+        const owner = account && account.addresses[chain];
+
+        const calcPlanetRest = this.calcPlanetMap();
+        const reachHexesGlobal:any = calcPlanetRest[0];
+        const reachHexes:any = calcPlanetRest[1]
+        const pieceColors:any = calcPlanetRest[2]
+        const counterMap:any = calcPlanetRest[3]
+        const blues:any = calcPlanetRest[4]
+        const yellows:any = calcPlanetRest[5]
+
         let totalGas = new BigNumber(0) ;
         for(let tx of txs){
            totalGas = new BigNumber(tx.gas).plus(new BigNumber(totalGas))
@@ -1060,7 +1346,10 @@ class StarGrid extends React.Component<any, State>{
                             <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
                             <IonTitle>Star Grid [{lockedInfo && lockedInfo.currentPeriod}]</IonTitle>
                             <IonLabel slot="end">
-                                {lockedInfo && <CountDown second={utils.toValue(lockedInfo.nextOpTime,0).toNumber()}/>}
+                                <IonIcon src={cashOutline} onClick={()=>{this.setShowSettlementModal(true)}} size="large"/>
+                                {/*<div className="op-time">*/}
+                                {/*    {lockedInfo && <CountDown second={utils.toValue(lockedInfo.nextOpTime,0).plus(60*5).toNumber() * 1000}/>}*/}
+                                {/*</div>*/}
                             </IonLabel>
                         </IonToolbar>
                     </IonHeader>
@@ -1072,22 +1361,37 @@ class StarGrid extends React.Component<any, State>{
                                 <IonIcon icon={addCircleOutline} />
                             </IonFabButton>
                             <IonFabList side="start">
+                                <IonFabButton onClick={()=>this.setShowPlanetModal(true,1)} size="small" color="secondary">
+                                    <IonIcon icon={listOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
+                                    <IonIcon icon={personAddOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
+                                    <IonIcon icon={personAddOutline} />
+                                </IonFabButton>
+                            </IonFabList>
+                            {/*<IonFabList side="top">*/}
+                            {/*    <IonFabButton onClick={()=>{*/}
+                            {/*        this.setShowSettlementModal(true)*/}
+                            {/*    }} size="small" color="secondary">*/}
+                            {/*        <IonIcon icon={cashOutline} />*/}
+                            {/*    </IonFabButton>*/}
+                            {/*</IonFabList>*/}
+                            <IonFabList side="end">
                                 <IonFabButton onClick={()=>this.setShowCounterAdd(true)} size="small" color="secondary">
                                     <IonIcon icon={addCircleOutline} />
                                 </IonFabButton>
-                                <IonFabButton onClick={()=>this.setShowApprovalUserModal(true)} size="small" color="secondary">
-                                    <IonIcon icon={cardOutline} />
-                                </IonFabButton>
-                            </IonFabList>
-                            <IonFabList side="top">
                                 <IonFabButton onClick={()=>{
-                                    this.setShowSettlementModal(true)
-                                }} size="small" color="secondary">
-                                    <IonIcon icon={cashOutline} />
-                                </IonFabButton>
-                            </IonFabList>
-                            <IonFabList side="end">
-                                <IonFabButton onClick={()=>this.logout()} size="small" color="secondary">
+                                    this.setShowLoading(true)
+                                    this.logout().then(()=>{
+                                        this.setShowLoading(false)
+                                    }).catch(e=>{
+                                        this.setShowLoading(false)
+                                        const err = typeof e == "string"?e:e.message;
+                                        this.setShowToast(true,err)
+                                    })
+                                }} size="small" color="danger">
                                     <IonIcon icon={logOut} />
                                 </IonFabButton>
                             </IonFabList>
@@ -1099,7 +1403,6 @@ class StarGrid extends React.Component<any, State>{
                                 <IonIcon icon={expandOutline} />
                             </IonFabButton>
                             <IonFabList side="top">
-
                                 <IonFabButton onClick={()=>{this.arrow("r")}} size="small" color="warning">
                                     <IonIcon icon={arrowForwardCircleOutline} />
                                 </IonFabButton>
@@ -1150,18 +1453,18 @@ class StarGrid extends React.Component<any, State>{
                         {
                             targetHex[0] &&
                             <div className="counter-info">
-                                <HexInfoCard hasCounters={counters && counters.length>0} sourceHexInfo={targetHex[0]}
+                                <HexInfoCard owner={owner} hasCounters={counters && counters.length>0} sourceHexInfo={targetHex[0]}
                                              onCapture={()=>{
                                                  if(counters && counters.length>0){
-                                                     this.setShowCounterList(true)
+                                                     this.setShowCaptureModal(true)
                                                  }else {
                                                      this.setShowCounterAdd(true)
                                                  }
                                              }}
                                  lockedInfo={lockedInfo}
                                  attackHexInfo={targetHex.length>1 && targetHex[targetHex.length-1]}
-                                 onMove={()=>{
-                                    this.move().catch(e=>{
+                                 onMove={(setTag,createPlanet)=>{
+                                    this.move(setTag,createPlanet).catch(e=>{
                                         const err = typeof e == "string"?e:e.message;
                                         this.setShowToast(true,err)
                                     })
@@ -1172,7 +1475,11 @@ class StarGrid extends React.Component<any, State>{
                                     })
                                 }} onShowDistribute={()=>{
                                     this.setShowPowerDistribution(true)
-                                }}/>
+                                }}
+                                //  onShowDetail={(address)=>{
+                                //     this.setShowDetailModal(true,address);
+                                // }}
+                                />
                             </div>
                         }
 
@@ -1227,8 +1534,11 @@ class StarGrid extends React.Component<any, State>{
                                                 let landStyle:string = ""
 
                                                 let marker:boolean|undefined;
+                                                let isOwner:boolean|undefined;
                                                 let approval:boolean|undefined;
                                                 let land:Land|undefined;
+                                                let focusOwner :boolean|undefined;
+
                                                 if(counterMap.has(absHex.uKey())){
                                                     land = counterMap.get(absHex.uKey())
                                                     const i = Math.floor(utils.fromValue(land.capacity,18).toNumber())
@@ -1237,28 +1547,33 @@ class StarGrid extends React.Component<any, State>{
                                                     }else if(land.enType == StarGridType.EARTH){
                                                         landStyle = yellowColors[i]
                                                     }
-                                                    if(land.counter){
+                                                    if(land.counter && land.counter.counterId != "0"){
                                                         // const p = counterMap.get(absHex.uKey());
                                                         const bg = calcCounterRgb(Math.floor(utils.fromValue(land.counter.rate,16).toNumber()),land.counter.enType == StarGridType.EARTH);
                                                         piece = {
                                                             style:land.counter.enType == StarGridType.WATER?"white":"black",
                                                             backgroundColor: [ `rgb(${bg[0]})`,`rgb(${bg[1]})`]
                                                         }
-                                                    }else{
-                                                        if(land && land.marker == owner){
-                                                            marker = true;
-                                                        }else{
-                                                            if(land && land.canCapture){
-                                                                approval = true;
-                                                            }
+                                                        if(new BigNumber(land.counter.level).toNumber()>4){
+                                                            piece.style = land.counter.enType == StarGridType.WATER?"whiteSword":"blackSword";
                                                         }
+                                                        focusOwner = lockedInfo && lockedInfo.userInfo.counter.counterId == land.counter.counterId;
                                                     }
+                                                    if(land && land.marker == owner){
+                                                        marker = true;
+                                                    }
+                                                    if(land && land.canCapture){
+                                                        approval = true;
+                                                    }
+                                                    isOwner = owner && land && owner == land.owner
                                                 }
+                                                const inRg = this.inRange(absHex);
 
                                                 return <Hexagon
                                                     className="field"
                                                     focus={focus}
-                                                    flag={userPositions.get(absHex.uKey())}
+                                                    flag={isOwner}
+                                                    owner={focusOwner}
                                                     block={block&&!absHex.equalHex(targetHex[0].hex)}
                                                     attack={attack} key={i}
                                                     colorStyle={landStyle}
@@ -1266,19 +1581,29 @@ class StarGrid extends React.Component<any, State>{
                                                     counter={piece}
                                                     approval={approval}
                                                     marker={marker}
+                                                    inRange={inRg}
+                                                    isHomeless={this.isHomeless(absHex)}
                                                     onClick={(id, coordinates, e)=>{
-                                                        if(targetHex.length>0 && targetHex[0].land && targetHex[0].land.counter
-                                                            &&( block || absHex.equalHex(targetHex[0].hex) ||attack )
-                                                            || targetHex.length==0
-                                                            // || land && land.canCapture
-                                                            ||
-                                                            targetHex.length==1 && lockedInfo && lockedInfo.counter && targetHex[0].counter &&
-                                                            (
-                                                                targetHex[0].counter.counterId != lockedInfo.counter.counterId
-                                                                ||  targetHex[0].counter.counterId == lockedInfo.counter.counterId && block
+                                                        if((targetHex.length> 0
+                                                            &&(
+                                                                block
+                                                                || absHex.equalHex(targetHex[0].hex) && inRg
+                                                                || attack  && inRg
+                                                                || !targetHex[0].counter && inRg
+                                                                || lockedInfo && lockedInfo.userInfo && targetHex[0] && targetHex[0].counter && targetHex[0].counter.counterId != lockedInfo.userInfo.counter.counterId  && inRg
+                                                                || (targetHex.length == 1 && lockedInfo && lockedInfo.userInfo && targetHex[0] && targetHex[0].counter && targetHex[0].counter.counterId == lockedInfo.userInfo.counter.counterId )  && inRg
                                                             )
-                                                            ||
-                                                            targetHex.length==1 && (!targetHex[0].land || !targetHex[0].land.counter)
+                                                            || targetHex.length==0 && inRg
+                                                            // || targetHex.length==1 && inRg && (
+                                                            //     targetHex.length>0 && lockedInfo && lockedInfo.userInfo &&
+                                                            //     targetHex[0].counter&&targetHex[0].counter.counterId != lockedInfo.userInfo.counter.counterId
+                                                            //     ||
+                                                            //     block
+                                                            //     ||
+                                                            //     absHex.equalHex(targetHex[0].hex)
+                                                            //     ||
+                                                            // )
+                                                        )
                                                         ){
                                                             e.stopPropagation();
                                                             this.selectTarget(true,{hex:this.convertHex(coordinates),land:land,counter:land&&land.counter},e.nativeEvent.offsetX,e.nativeEvent.y).catch(e=>{
@@ -1301,48 +1626,6 @@ class StarGrid extends React.Component<any, State>{
 
                             </div>
                             {/*</Draggable>*/}
-                            {/*<div className="gis-info">*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.setShowCounterAdd(true)*/}
-                            {/*    }}>Create</IonButton>*/}
-
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.logout().catch(e=>{*/}
-                            {/*            const err = typeof e == "string"?e:e.message;*/}
-                            {/*            this.setShowToast(true,err)*/}
-                            {/*            console.error(e)});*/}
-                            {/*    }}>Logout</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.settlement().catch(e=>{*/}
-                            {/*            const err = typeof e == "string"?e:e.message;*/}
-                            {/*            this.setShowToast(true,err)*/}
-                            {/*            console.error(e)})*/}
-                            {/*    }}>Settlement</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.prepare().catch(e=>{*/}
-                            {/*            const err = typeof e == "string"?e:e.message;*/}
-                            {/*            this.setShowToast(true,err)*/}
-                            {/*            console.error(e)})*/}
-                            {/*    }}>Prepare</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.move().catch(e=>{*/}
-                            {/*            const err = typeof e == "string"?e:e.message;*/}
-                            {/*            this.setShowToast(true,err)*/}
-                            {/*            console.error(e)})*/}
-                            {/*    }}>Move</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.attack("").catch(e=>{*/}
-                            {/*            const err = typeof e == "string"?e:e.message;*/}
-                            {/*            this.setShowToast(true,err)*/}
-                            {/*            console.error(e)})*/}
-                            {/*    }}>Attack</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.setShowPosition(true)*/}
-                            {/*    }}>Position</IonButton>*/}
-                            {/*    <IonButton color="primary" size="small" onClick={()=>{*/}
-                            {/*        this.setShowPosition(true)*/}
-                            {/*    }}>Set Approval</IonButton>*/}
-                            {/*</div>*/}
                         </div>
 
                         <IonModal
@@ -1351,74 +1634,115 @@ class StarGrid extends React.Component<any, State>{
                             cssClass='epoch-rank-modal'
                             swipeToClose={true}
                             onDidDismiss={() => this.setShowModalApprove(false)}>
-                            <IonList>
-                                <IonItemDivider>
-                                    <IonLabel>APPROVED TO STAR GRID</IonLabel>
-                                </IonItemDivider>
-                                {
-                                    Object.keys(approvedStarGridState).map((v)=>{
-                                        return <IonItem>
-                                            <IonLabel color="primary">{v}<IonText color="secondary"> [BEP20]</IonText></IonLabel>
-                                            <IonText color="success">{approvedStarGridState[v]?"APPROVED":<IonButton size="small" color="primary" onClick={()=>{
-                                                this.approveToStarGridProxy(v,config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER).catch(e=>{
-                                                    const err = typeof e == "string"?e:e.message;
-                                                    this.setShowToast(true,err)
-                                                    console.error(e)
-                                                })
-                                            }}>Approve</IonButton>}</IonText>
-                                        </IonItem>
-                                    })
-                                }
-                                <IonItem>
-                                    <IonLabel color="primary">COUNTER <IonText color="secondary">[BEP721]</IonText></IonLabel>
-                                    <IonText color="success">{approvedStarGrid?"APPROVED":<IonButton size="small" color="primary" onClick={()=>{
-                                        this.approveToStarGrid().catch(e=>{
+                            <div className="eopch-md">
+                                <IonList>
+                                    <IonItemDivider sticky color="primary">
+                                        <IonLabel>APPROVE TO STAR GRID</IonLabel>
+                                    </IonItemDivider>
+                                    {
+                                        Object.keys(approvedStarGridState).map((v)=>{
+                                            return <IonItem>
+                                                <IonLabel color="primary">{v}<IonText color="secondary"> [BEP20]</IonText></IonLabel>
+                                                <IonText color="success">{approvedStarGridState[v]?"APPROVED":<IonButton size="small" color="primary" onClick={()=>{
+                                                    this.approveToStarGridProxy(v,config.CONTRACT_ADDRESS.EPOCH.BSC.SAFE_HOLDER).catch(e=>{
+                                                        const err = typeof e == "string"?e:e.message;
+                                                        this.setShowToast(true,err)
+                                                        console.error(e)
+                                                    })
+                                                }}>Approve</IonButton>}</IonText>
+                                            </IonItem>
+                                        })
+                                    }
+                                    <IonItem>
+                                        <IonLabel color="primary">COUNTER <IonText color="secondary">[BEP721]</IonText></IonLabel>
+                                        <IonText color="success">{approvedStarGrid?"APPROVED":<IonButton size="small" color="primary" onClick={()=>{
+                                            this.approveToStarGrid().catch(e=>{
+                                                const err = typeof e == "string"?e:e.message;
+                                                this.setShowToast(true,err)
+                                                console.error(e)
+                                            })
+                                        }}>Approve</IonButton>}</IonText>
+                                    </IonItem>
+                                </IonList>
+                            </div>
+                            <IonRow>
+                                <IonCol size="4">
+                                    <IonButton expand="block" fill="outline" onClick={()=>{
+                                        this.setState({
+                                            showModalApprove:false
+                                        })
+                                    }}>Cancel</IonButton>
+                                </IonCol>
+                                <IonCol size="8">
+                                    <IonButton expand="block" onClick={()=>{
+                                        this.approveAll().catch(e=>{
                                             const err = typeof e == "string"?e:e.message;
                                             this.setShowToast(true,err)
-                                            console.error(e)
-                                        })
-                                    }}>Approve</IonButton>}</IonText>
-                                </IonItem>
-                            </IonList>
-                            {/*<IonButton onClick={()=>{*/}
-                            {/*   this.approveAll().catch(e=>{*/}
-                            {/*       const err = typeof e == "string"?e:e.message;*/}
-                            {/*       this.setShowToast(true,err)*/}
-                            {/*       console.log(e)*/}
-                            {/*   });*/}
-                            {/*}}>Approve All</IonButton>*/}
+                                            console.log(e)
+                                        });
+                                    }}>Approve to All</IonButton>
+                                </IonCol>
+                            </IonRow>
                         </IonModal>
 
                         <IonModal
                             mode="ios"
                             isOpen={showPosition}
-                            cssClass='counter-list-modal'
+                            cssClass='coo-list-modal'
                             swipeToClose={true}
                             onDidDismiss={() => this.setShowPosition(false)}>
-                            <IonList>
-                                <IonItemDivider>
-                                    <IonLabel>Set Position</IonLabel>
-                                </IonItemDivider>
-                                <IonItem>
-                                    <IonLabel>X</IonLabel>
-                                    <input ref={this.position.x}/>
-                                </IonItem>
-                                <IonItem>
-                                    <IonLabel>Y</IonLabel>
-                                    <input ref={this.position.z}/>
-                                </IonItem>
-                            </IonList>
-                            <IonButton onClick={()=>{
-                                const x = this.position.x.current.value;
-                                const z = this.position.z.current.value;
-                                const a = axialCoordinatesToCube(parseInt(x),parseInt(z));
+                            <div className="epoch-md">
+                                <IonList>
+                                    <IonListHeader mode="ios">Search Planet</IonListHeader>
+                                    <IonItemDivider  sticky color="primary"/>
+                                    <IonItemDivider sticky color="primary">
+                                        <IonLabel>Recent Coordinate</IonLabel>
+                                    </IonItemDivider>
+                                    <IonItem>
+                                        <IonLabel className="ion-text-wrap">
+                                            {
+                                                userPositions && userPositions.positions && userPositions.positions.map(v=>{
+                                                    const coo = toAxial(v.coordinate)
+                                                    return <IonChip  onClick={()=>{
+                                                        this.setPosition(coo.x,coo.z).then(()=>{
+                                                            this.setTarget({hex:coo})
+                                                        });
+                                                    }}>[{coo.x},{coo.z}]</IonChip>
+                                                })
+                                            }
+                                        </IonLabel>
+                                    </IonItem>
 
-                                this.storeAbsoluteHex(a)
-                                this.setState({
-                                    absoluteHex:a,
-                                    showPosition:false,
-                                    targetHex:[{hex:a}]
-                                })
+                                    <IonItemDivider sticky color="primary">
+                                        <IonLabel>Input Coordinate</IonLabel>
+                                    </IonItemDivider>
+                                    <IonItem lines="none">
+                                        <IonLabel>
+                                            <IonRow>
+                                                <IonCol size="5">
+                                                    <input ref={this.position.x} type="number" placeholder="X" style={{width:"100px"}}/>
+                                                </IonCol>
+                                                <IonCol size="2">
+                                                    ,
+                                                </IonCol>
+                                                <IonCol size="5">
+                                                    <input ref={this.position.y} type="number" placeholder="Y" style={{width:"100px"}}/>
+                                                </IonCol>
+                                            </IonRow>
+                                        </IonLabel>
+                                    </IonItem>
+                                </IonList>
+                            </div>
+                            <IonButton onClick={()=>{
+                                const x = this.position.x && this.position.x.current && this.position.x.current.value;
+                                const z = this.position.z && this.position.z.current && this.position.z.current.value;
+                                if(!x || !z){
+                                    this.setShowToast(true,"Please input coordinate !")
+                                   return
+                                }
+                                this.setPosition(parseInt(x),parseInt(z)).then(()=>{
+                                    this.setTarget({hex:axialCoordinatesToCube(parseInt(x),parseInt(z))})
+                                });
                             }}>OK</IonButton>
                         </IonModal>
 
@@ -1428,49 +1752,77 @@ class StarGrid extends React.Component<any, State>{
                             cssClass='counter-list-modal'
                             swipeToClose={true}
                             onDidDismiss={() => this.setShowPosition(false)}>
-                            {
-                                txs && txs.length>0 &&
-                                <IonList>
-                                    <IonItemDivider>
-                                        <IonLabel>Gas</IonLabel>
-                                    </IonItemDivider>
-                                    {
-                                        txs.map(v=>{
-                                            return <IonItem>
-                                                <IonLabel>{v.to}</IonLabel>
-                                                <IonLabel>{new BigNumber(v.gas).toString(10)}</IonLabel>
-                                            </IonItem>
+                            <div className="epoch-md">
+                                {
+                                    txs && txs.length>0 &&
+                                    <IonList>
+                                        <IonListHeader mode="ios">
+                                            Batch Approve
+                                        </IonListHeader>
+                                        <IonItemDivider mode="md"/>
+                                        <IonItemDivider sticky color="primary">
+                                            <IonLabel>Estimate Gas</IonLabel>
+                                        </IonItemDivider>
+                                        {
+                                            txs.map((v,i)=>{
+                                                return <IonItem>
+                                                    <IonLabel className="ion-text-wrap">
+                                                        <IonRow>
+                                                            <IonCol size="9"><small>Approve to <IonText color="secondary">[{v.to}]</IonText></small></IonCol>
+                                                            <IonCol size="3">{new BigNumber(v.gas).toString(10)}</IonCol>
+                                                        </IonRow>
+                                                    </IonLabel>
+                                                </IonItem>
+                                            })
+                                        }
+
+                                        <IonItemDivider sticky color="primary">
+                                            <IonLabel>Total</IonLabel>
+                                        </IonItemDivider>
+                                        <IonItem>
+                                            <IonLabel>Total Gas</IonLabel>
+                                            <IonLabel>
+                                                {totalGas.toString(10)}
+                                            </IonLabel>
+                                        </IonItem>
+                                        <IonItem>
+                                            <IonLabel>Gas Price</IonLabel>
+                                            <IonLabel>{new BigNumber(txs[0].gasPrice).toString(10)}</IonLabel>
+                                        </IonItem>
+                                        <IonItem>
+                                            <IonLabel>Gas Fee</IonLabel>
+                                            <IonLabel>{utils.fromValue(totalGas.multipliedBy(new BigNumber(txs[0].gasPrice)),18).toString(10)} BNB</IonLabel>
+                                        </IonItem>
+                                    </IonList>
+                                }
+                            </div>
+
+                            <IonRow>
+                                <IonCol size="4">
+                                    <IonButton expand="block" fill="outline" onClick={()=>{
+                                        this.setState({
+                                            showApproveAllModal:false,
+                                            showModalApprove:true
                                         })
-                                    }
-
-                                    <IonItemDivider>
-                                        <IonLabel>Total</IonLabel>
-                                    </IonItemDivider>
-                                    <IonItem>
-                                        <IonLabel>Gas</IonLabel>
-                                        <IonLabel>
-                                            {totalGas.toString(10)}
-                                        </IonLabel>
-                                    </IonItem>
-                                    <IonItem>
-                                        <IonLabel>Gas Price</IonLabel>
-                                        <IonLabel>{new BigNumber(txs[0].gasPrice).toString(10)}</IonLabel>
-                                    </IonItem>
-                                    <IonItem>
-                                        <IonLabel>Amount</IonLabel>
-                                        <IonLabel>{utils.fromValue(totalGas.multipliedBy(new BigNumber(txs[0].gasPrice)),18).toString(10)} BNB</IonLabel>
-                                    </IonItem>
-                                </IonList>
-                            }
-
-                            <IonButton onClick={()=>{
-
-                                this.commitApproveTxs().catch(e=>{
-                                    console.error(e)
-                                    const err = typeof e == "string"?e:e.message;
-                                    this.setShowToast(true,err)
-                                })
-                            }}>Commit</IonButton>
+                                    }}>Cancel</IonButton>
+                                </IonCol>
+                                <IonCol size="8">
+                                    <IonButton expand="block" disabled={showLoading} onClick={()=>{
+                                        this.setShowLoading(true)
+                                        this.commitApproveTxs().then(()=>{
+                                           this.setState({
+                                               showApproveAllModal:false,
+                                               showLoading:false
+                                           })
+                                        }).catch(e=>{
+                                            this.setShowLoading(false)
+                                            console.error(e)
+                                            const err = typeof e == "string"?e:e.message;
+                                            this.setShowToast(true,err)
+                                        })
+                                    }}>Commit</IonButton>
+                                </IonCol>
+                            </IonRow>
                         </IonModal>
 
                         <IonToast
@@ -1497,22 +1849,17 @@ class StarGrid extends React.Component<any, State>{
                         <ConfirmTransaction show={showConfirm} transaction={tx} onProcess={(f) => {
                         }} onCancel={() => this.setShowConfirm(false)} onOK={this.confirm}/>
 
-                        <CounterList title="Capture" show={showCounterList} amountTitle1={amountTitle1}
+                        <CounterList title="Capture" defaultPlanet={defaultPlanet}  onSelectPlanet={()=>{
+                            this.setShowSelectPlanet(true,"capture");
+                        }} show={showCaptureModal} amountTitle1={amountTitle1}
                                      amountTitle2={amountTitle2} onCallback={(counter)=>{
-                            if(counter.enType == StarGridType.EARTH){
-                                this.setState({
-                                    amountTitle1: this.renTitle("bDARK"),
-                                    amountTitle2: this.renTitle("WATER"),
-                                })
-                            }else if(counter.enType == StarGridType.WATER){
-                                this.setState({
-                                    amountTitle1: this.renTitle("bLIGHT"),
-                                    amountTitle2: this.renTitle("EARTH"),
-                                })
-                            }
+                            this.selectCounter(counter).catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            });
                         }}
                                      onOk={(counterId,base,attach)=>{
-                                         if(!counterId){
+                                         if(!counterId||counterId == "0"){
                                              this.setShowToast(true,"Please select a counter!")
                                              return
                                          }
@@ -1528,61 +1875,147 @@ class StarGrid extends React.Component<any, State>{
                                 const err = typeof e == "string"?e:e.message;
                                 this.setShowToast(true,err)
                                 console.error(e)});
-                           this.setShowCounterList(false)
+                           this.setShowCaptureModal(false)
                         }} onCancel={()=>{
-                           this.setShowCounterList(false)
+                           this.setShowCaptureModal(false)
                         }} data={counters}/>
 
                         <CounterAdd show={showCounterAdd} onOk={(type,num)=>{
+                            if(!type){
+                                this.setShowToast(true,"Please select counter type !")
+                               return ;
+                            }
+                            if(!num || num<=0){
+                                this.setShowToast(true,"Please input counter number !")
+                                return
+                            }
                             this.setShowLoading(true);
-                            this.create(type,num).then(()=>{
+                            this.createConfirm(type,num).then(()=>{
                                 this.setShowLoading(false);
                                 this.setShowCounterAdd(false)
                             }).catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
                                 this.setShowLoading(false);
                                 this.setShowCounterAdd(false)
-                                console.error(e)
+                                this.setShowToast(true,err)
                             })
                         }} onCancel={()=>this.setShowCounterAdd(false)} />
-                        <FeeModal show={!!feeData} onOk={()=>{ feeOk() }} onCancel={()=>{ feeCancel() }} data={feeData}/>
+                        <FeeModal show={!!feeData} lockedInfo={lockedInfo} onOk={()=>{ feeOk() }} onCancel={()=>{ feeCancel() }} data={feeData}/>
 
-                        {lockedInfo && <Settlement show={showSettlementModal} lockedInfo={lockedInfo} onPrepare={()=>{
+                        {lockedInfo && <Settlement title="Economy" enDetails={enDetails} show={showSettlementModal} isOwner={true} lockedInfo={lockedInfo} onPrepare={()=>{
                             this.setShowPrepareModal(true);
                             this.setShowSettlementModal(false);
                         }} onCancel={()=>{
                            this.setShowSettlementModal(false)
                         }} onOk={()=>{
-                            this.settlement().catch(e=>{
-                                console.error(e)
+                            this.setShowLoading(true)
+                            this.settlement().then(()=>{
+                                this.setShowSettlementModal(false)
+                            }).catch(e=>{
+                                console.error(e);
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                                this.setShowSettlementModal(false)
                             })
-                            this.setShowSettlementModal(false)
                         }}/>}
 
-                        <ApprovalUsersModal show={showApprovalUserModal} data={["0xd00ed73cd343ceee43c7758021e91c1260cc2407"]} onOk={(address)=>{
-                            this.setApproveToUser(address,true).catch(e=>{
-                                const err = typeof e == "string"?e:e.message;
-                                this.setShowToast(true,err)
-                            })
-                        }} onCancel={()=>{this.setShowApprovalUserModal(false)}} onCancelApprove={(address)=>{
-                            this.setApproveToUser(address,false).catch(e=>{
-                                const err = typeof e == "string"?e:e.message;
-                                this.setShowToast(true,err)
-                            })
-                        }}/>
+                        {lockedUserInfo && <Settlement title={`User Detail`} show={showDetailModal} lockedInfo={lockedUserInfo} isOwner={lockedUserAddress == owner} onCancel={()=>{
+                            this.setShowDetailModal(false)
+                        }}/>}
 
-                        <Prepare lockedInfo={lockedInfo} show={showPrepareModal} onCancel={()=>{}} onOk={(terms, baseAmount,attachAmount)=>{
+                        <Prepare lockedInfo={lockedInfo} defaultPlanet={defaultPlanet} show={showPrepareModal}  onSelectPlanet={()=>{
+                            this.setShowSelectPlanet(true,"prepare");
+                        }} onCancel={()=>{
+                            this.setShowPrepareModal(false)
+                        }} onOk={(terms, baseAmount,attachAmount)=>{
+
+                            if(!(new BigNumber(terms).toNumber()>0 && new BigNumber(baseAmount).toNumber()>0 && new BigNumber(attachAmount).toNumber()>0)){
+                                this.setShowToast(true,"Please input terms and amount !")
+                                return
+                            }
+                            if(new BigNumber(terms).toNumber() > 7){
+                                this.setShowToast(true,"The maximum terms is 7 periods !")
+                                return
+                            }
+                            this.setShowLoading(true)
+
                             this.prepareConfirm(terms,baseAmount,attachAmount).then(()=>{
+                                this.setShowLoading(false)
                                 this.setShowPrepareModal(false);
                             }).catch(e=>{
+                                this.setShowLoading(false)
                                 this.setShowPrepareModal(false);
                                 const err = typeof e == "string"?e:e.message;
                                 this.setShowToast(true,err)
                             })
                         }}/>
 
-                        {lockedInfo && lockedInfo.counter && <PowerDistribution show={showPowerDistribution} counter={lockedInfo.counter} onCancel={()=>{
+                        {lockedInfo && lockedInfo.userInfo.counter && <PowerDistribution show={showPowerDistribution} onOk={(opcode)=>{
+                            this.setShowLoading(true)
+                            this.updateCounter(opcode).then(()=>{
+                                this.setShowLoading(false)
+                                this.setShowPowerDistribution(false)
+                            }).catch(e=>{
+                                this.setShowPowerDistribution(false)
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            })
+                        }} counter={lockedInfo.userInfo.counter} onCancel={()=>{
                             this.setShowPowerDistribution(false)
                         }}/>}
+
+                        <PlanetList title={"My Planet"} lockedInfo={lockedInfo} tab={planetTab} show={showMyPlanetModal} onTabChange={tab=>{
+                            // queryType[0-marker,1-owner,2-maker&owner]
+                            const tp = tab == "owner"?1:0;
+                            this.setShowPlanetModal(true,tp);
+                        }} onCancel={()=>{
+                            this.setShowPlanetModal(false);
+                        }} onOk={(land)=>{
+                            this.setShowPlanetModal(false);
+                            const ax = toAxial(land.coordinate);
+                            this.setPosition(ax.x,ax.z).then(()=>{
+                                this.selectTarget(true,{hex:ax,counter:land.counter,land:land}).catch(e=>{
+                                    console.error(e)
+                                });
+                            });
+                        }} ownerData={myPlanetArr}/>
+
+                        <ApprovedList title="Trusted User" show={showApprovedList} onCancel={()=>{
+                            this.setShowApproveList(false);
+                        }} onCancelApprove={(address)=>{
+                            this.setShowApproveList(false);
+                            this.setShowLoading(true);
+                            this.setApproveToUser(address,false).then(()=>{
+                                this.setShowLoading(false)
+                            }).catch((e)=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                                this.setShowLoading(false)
+                            })
+                        }}  onApprove={(address)=>{
+                            if(!address){
+                                this.setShowToast(true,"Please input BSC address !")
+                                return
+                            }
+                            this.setShowApproveList(false);
+                            this.setShowLoading(true);
+                            this.setApproveToUser(address,true).then(()=>{
+                                this.setShowLoading(false)
+                            }).catch((e)=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                                this.setShowLoading(false)
+                            })
+                        }} data={approvedInfo}/>
+
+                        <PlanetList title={"Select Planet"} lockedInfo={lockedInfo} checkedCoo={defaultPlanet && defaultPlanet.coordinate} show={showSelectPlanetModal} onCancel={()=>{
+                            this.setShowSelectPlanet(false,"");
+                        }} onOk={(land)=>{
+                            this.setShowSelectPlanet(false,"");
+                            this.setState({
+                                defaultPlanet:land
+                            })
+                        }} ownerData={myPlanetArr}/>
                     </IonContent>
                 </IonPage>
             </>

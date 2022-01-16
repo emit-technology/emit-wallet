@@ -80,7 +80,6 @@ class TransactionList extends React.Component<any, any>{
             console.error(e)
             this.setShowLoading(false)
         })
-        rpc.initBalance().catch(e=>console.error(e));
     }
 
     init = async () =>{

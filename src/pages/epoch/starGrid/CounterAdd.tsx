@@ -32,29 +32,31 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
             isOpen={show}
             onDidDismiss={() => onCancel()}
             cssClass="counter-list-modal"
+            swipeToClose={false}
         >
             <IonList  mode="md">
                 <IonListHeader mode="ios">Create Counters</IonListHeader>
                 <IonItemDivider mode="md"/>
+                <IonItemDivider  sticky color="primary">Select Counter Type</IonItemDivider>
                 <IonRadioGroup ref={selectRef} title={"Select counter type"} >
-                    <IonItem>
+                    <IonItem lines="none">
                         <IonAvatar>
                             <img src="./assets/img/epoch/stargrid/piece/white.png"/>
                         </IonAvatar>
-                        <IonLabel>&nbsp;WATER</IonLabel>
+                        <IonLabel>&nbsp;WATER-COUNTER</IonLabel>
                         <IonRadio slot="end" value={StarGridType.WATER} />
                     </IonItem>
-                    <IonItem>
+                    <IonItem lines="none">
                         <IonAvatar>
                             <img src="./assets/img/epoch/stargrid/piece/black.png"/>
                         </IonAvatar>
-                        <IonLabel>&nbsp;EARTH</IonLabel>
+                        <IonLabel>&nbsp;EARTH-COUNTER</IonLabel>
                         <IonRadio slot="end" value={StarGridType.EARTH} />
                     </IonItem>
                 </IonRadioGroup>
+                <IonItemDivider  sticky color="primary">Number</IonItemDivider>
                 <IonItem>
-                    <IonLabel position="stacked">NUMBER</IonLabel>
-                    <IonInput ref={inputRef}/>
+                    <IonInput ref={inputRef} placeholder="0" type="number"/>
                 </IonItem>
             </IonList>
             <IonRow>
@@ -65,7 +67,6 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                     <IonButton mode="ios" expand="block" onClick={() => {
                         const num = inputRef.current.value;
                         const typ = selectRef.current.value;
-                        console.log("type: ",typ)
                         onOk(typ,num)
                     }} color="primary">OK</IonButton>
                 </IonCol>

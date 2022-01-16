@@ -44,6 +44,8 @@ import {Plugins} from "@capacitor/core";
 import rpc from "../rpc";
 import selfStorage from "../utils/storage";
 import BigNumber from "bignumber.js";
+import {epochStarGridQuery} from "../contract/epoch/bsc";
+import starGridRpc from "../rpc/epoch/stargrid";
 
 class Epoch extends React.Component<any, any>{
 
@@ -66,19 +68,25 @@ class Epoch extends React.Component<any, any>{
 
     init = async ()=>{
         const account = await walletWorker.accountInfo()
-        const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
-        const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
-        const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
-        const tips = rest && rest.length>0?rest[0]:null
+
+        const starGridInfo = await starGridRpc.driverInfo(account.addresses[ChainType.BSC]);
+        console.log(starGridInfo,"ss");
         this.setState({
-            altarInfo: altarInfo,
-            chaosInfo: chaosInfo,
-            tips:tips
+            starGridInfo:starGridInfo
         })
+        // const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
+        // const tips = rest && rest.length>0?rest[0]:null
+        // const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
+        // const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
+        // this.setState({
+        //     altarInfo: altarInfo,
+        //     chaosInfo: chaosInfo,
+        //     tips:tips,
+        // })
     }
 
     render() {
-        const {chaosInfo,altarInfo,tips} = this.state;
+        const {chaosInfo,altarInfo,tips,starGridInfo} = this.state;
         return (
             <IonPage>
                 <IonHeader>
@@ -109,6 +117,7 @@ class Epoch extends React.Component<any, any>{
                             }}>
                                 <IonCardContent>
                                     <img src="./assets/img/stargrid.png" style={{width:"100vw"}}/>
+                                    {starGridInfo && starGridInfo.capacity != "0" && <EpochAttribute driver={starGridInfo} showDriver={true} showDevice={false}/>}
                                     {/*<div className="mining">*/}
                                     {/*    <IonBadge color="danger">BETA</IonBadge>*/}
                                     {/*</div>*/}

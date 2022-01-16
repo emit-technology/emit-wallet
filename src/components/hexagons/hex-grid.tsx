@@ -93,6 +93,12 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
             <filter id="thinLine">
                 <feImage href="./assets/img/epoch/stargrid/thinLine.png"/>
             </filter>
+            <filter id="thinLine2">
+                <feImage href="./assets/img/epoch/stargrid/thinLine2.png"/>
+            </filter>
+            <filter id="focalPoint" filterUnits="objectBoundingBox">
+                <feImage href="./assets/img/epoch/stargrid/focalPoint.png"/>
+            </filter>
             <filter id="blackFlag" filterUnits="objectBoundingBox">
                 <feImage href="./assets/img/epoch/stargrid/piece/blackFlag.png" result="ffImg"/>
             </filter>
@@ -116,6 +122,12 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
             </filter>
             <filter id="walk" >
                 <feImage href="./assets/img/epoch/stargrid/walk.png"/>
+            </filter>
+            <filter id="movable" >
+                <feImage href="./assets/img/epoch/stargrid/movable.png"/>
+            </filter>
+            <filter id="homeless" >
+                <feImage href="./assets/img/epoch/stargrid/homeless.png"/>
             </filter>
             <filter id="flag" x="30%" y="15%"  width="50%" height="50%">
                 <feImage href="./assets/img/epoch/stargrid/flag.png"/>

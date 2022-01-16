@@ -121,12 +121,6 @@ class HashRatePool extends React.Component<any, State> {
             console.error(e)
             this.setShowLoading(false)
         })
-
-        // interVar.start(()=>{
-        //     this.init().catch(e=>{
-        //         console.error(e)
-        //     })
-        // },15 * 1000)
     }
 
     init = async () => {

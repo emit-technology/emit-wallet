@@ -6,18 +6,28 @@ class Interval {
 
     interValId: number | undefined
 
+    latestOpTime:number //mills seconds
 
     constructor(key:string) {
         this.interValId = selfStorage.getItem(this.key)
         this.key = key;
     }
 
-    start(fn: Function, t: number) {
+    start(fn: Function, t: number,breakFlag:boolean = false) {
         fn();
         this.stop();
-        this.interValId = window.setInterval(() => {
-            fn()
-        }, t)
+        if(breakFlag){
+            this.latestOpTime = Date.now();
+            this.interValId = window.setInterval(() => {
+                if(this.latestOpTime - Date.now() < 10 * 60 * 100){
+                    fn()
+                }
+            }, t)
+        }else{
+            this.interValId = window.setInterval(() => {
+                fn()
+            }, t)
+        }
         selfStorage.setItem(this.key, this.interValId);
     }
 

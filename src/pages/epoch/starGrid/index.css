@@ -166,9 +166,11 @@ svg path {
 
 .avatar-l .hex-head {
   position: relative;
+  padding: 3px;
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0 0 1px 1px #dddddd;
+  margin-bottom: 2px;
 }
 
 .avatar-l .attr {
@@ -235,10 +237,33 @@ svg path {
   float: right;
 }
 
+.life {
+  height: 15px !important;
+  min-height: 15px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 0 !important;
+}
+
+.life-progress {
+  --background: #754141;
+  --progress-background: red;
+  height: 13px;
+}
+
+.life-value {
+  position: absolute !important;
+  right: -24px !important;
+  top: -2px !important;
+  border: none !important;
+  font-size: 10px !important;
+  text-shadow: none !important;
+  color: #f7f7f7;
+}
+
 .eye {
   position: absolute;
-  right: 4px;
-  bottom: 5px;
+  right: 0;
+  bottom: 0;
 }
 
 .hex-head .coo {
@@ -273,11 +298,19 @@ svg path {
 }
 
 .counter-list-modal {
-  --height: 70vh;
-  --width: 90vw;
-  --max-width: 512px;
-  --border-radius:15px;
+  --width: 90%;
+  --height: 80%;
+  --border-radius: 15px;
+  --background:#fff;
   overflow-y: scroll;
+  --max-width: 512px;
+}
+
+.coo-list-modal {
+  --height: 60vh;
+  --width: 80vw;
+  --max-width: 512px;
+  --border-radius: 15px;
 }
 
 .counter-list-md {
@@ -297,6 +330,10 @@ svg path {
   font-size: 10px;
 }
 
+.settle-modal {
+  --max-width: 900px !important;
+}
+
 .attribution-input {
   width: 50px;
   border: 1px solid;
@@ -306,7 +343,7 @@ svg path {
 }
 
 .counter-list {
-  max-height: 20vh;
+  max-height: 30vh;
   overflow-y: scroll;
   border: 1px solid #ddd;
   padding: 6px;
@@ -315,9 +352,72 @@ svg path {
 }
 
 .operator-btn {
-  position: absolute !important;
   bottom: 0;
   border: none !important;
+}
+
+.op-time .countdown {
+  color: #fff !important;
+}
+
+.settle-box {
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.settle-box-2 {
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  margin-bottom: 12px;
+}
+
+.settle-box .bt {
+  border-bottom: 1px dashed #dddddd;
+  text-align: center;
+}
+
+.counter-id {
+  position: absolute;
+  left: 0;
+  font-size: 12px;
+  top: 0;
+  color: #f1d204;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  border-radius: 50%;
+  padding: 2px;
+  font-weight: 600;
+}
+
+.op-countdown {
+  border: unset !important;
+  margin-left: 24px !important;
+  color: red;
+}
+
+.op-countdown-2 {
+  color: red;
+  text-align: left;
+  font-size: 14px;
+  transform: translateY(1px);
+}
+
+.pd-in {
+  padding-inline-end: unset !important;
+  padding-inline-start: unset !important;
+}
+
+.cap-info .ctime {
+  border: unset !important;
+}
+
+.en-box {
+  min-width: 100px;
+  min-height: 100px;
+  border: 1px solid #1a2952;
+  background: rgba(205, 92, 92, 0.5);
 }
 
 /*# sourceMappingURL=index.css.map */
