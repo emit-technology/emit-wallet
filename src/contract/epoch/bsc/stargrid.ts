@@ -60,7 +60,7 @@ const ABI = [
                 "type": "uint256"
             }
         ],
-        "name": "capture",
+        "name": "login",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -211,7 +211,7 @@ const ABI = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+];
 
 const ABI_QUERY =[
     {
@@ -1431,7 +1431,8 @@ const ABI_OP = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+];
+
 class StarGrid extends EthContract{
 
     constructor(address:string,abi:any) {
@@ -1441,9 +1442,9 @@ class StarGrid extends EthContract{
     // return (baseCost,attachCost,createBaseCost,createAttachCost,feeRate)
     capture = async (operatorId:string,coordinate:string,baseAmountId:BigNumber, attachAmountIn:BigNumber,defaultCoordinate:string,from?:string):Promise<string|Array<string>> =>{
         if(from){
-           return  await this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).call({from:from})
+           return  await this.contract.methods.login(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).call({from:from})
         }
-        return this.contract.methods.capture(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).encodeABI()
+        return this.contract.methods.login(operatorId,coordinate,baseAmountId.toString(10),attachAmountIn.toString(10),defaultCoordinate).encodeABI()
     }
     //hex 0000111 byte32, return (baseCost,attachCost,feeRate)
     active = async (cmd:string,from?:string):Promise<string|Array<string>> =>{
@@ -1505,11 +1506,11 @@ class OperatorFactoryProxy extends EthContract{
     }
 
     //returns(string memory symbol,uint256 cost);
-    withDraw = async (type:StarGridType,counterId:string,minBacked:BigNumber,deadline:number,from?:string) =>{
+    withDraw = async (index:string,counterId:string,minBacked:BigNumber,deadline:number,from?:string) =>{
         if(from){
-            return this.contract.methods.withDraw(type,counterId,minBacked.toString(10),deadline).call({from:from})
+            return this.contract.methods.withDraw(index,counterId,minBacked.toString(10),deadline).call({from:from})
         } else{
-            return this.contract.methods.withDraw(type,counterId,minBacked.toString(10),deadline).encodeABI()
+            return this.contract.methods.withDraw(index,counterId,minBacked.toString(10),deadline).encodeABI()
         }
     }
 

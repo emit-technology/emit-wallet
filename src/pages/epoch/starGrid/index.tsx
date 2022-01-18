@@ -16,7 +16,6 @@ import {
     PathCustom,
     reachableHexes,
     reachableHexesNeighbor,
-    testHexGrids,
     toAxial,
     toOpCode,
     toUINT256
@@ -54,10 +53,10 @@ import {
     arrowUpCircleOutline,
     cashOutline,
     chevronBack,
-    expandOutline,
+    expandOutline, homeOutline,
     listOutline,
     logOut,
-    personAddOutline, planet,
+    personAddOutline, planet, pricetagsOutline,
     remove,
     search,
 } from 'ionicons/icons';
@@ -67,12 +66,12 @@ import walletWorker from "../../../worker/walletWorker";
 import {
     AccountModel,
     ChainType,
-    Counter, ENDetails,
+    Counter, DepositType, ENDetails,
     Land,
     LockedInfo,
     NftInfo, StarGridTrustInfo,
     StarGridType,
-    Transaction,
+    Transaction, UserDeposit,
     UserPosition
 } from "../../../types";
 import url from "../../../utils/url";
@@ -97,6 +96,9 @@ import {PowerDistribution} from "./PowerDistrbution";
 import {PlanetList} from "./PlanetList";
 import {ApprovedList} from "./ApprovedList";
 import {enType2Cy} from "../../../utils/stargrid";
+import {UserDepositModal} from "./UserDeposit";
+import {CounterSelectModal} from "./CounterSelectModal";
+import {isEmptyPlanet} from "./utils";
 
 interface ApproveState{
     bLIGHT:boolean
@@ -162,6 +164,13 @@ interface State{
     method?:string
     enDetails?:ENDetails
     planetTab?:string
+
+    showUserDeposit:boolean
+    userDepositArr?:Array<UserDeposit>
+
+    withdrawUserDeposit?: UserDeposit
+    showCounterSelectModal:boolean
+    counterSelectData:Array<Counter>
 }
 export const yellowColors = ["e8dda7","e8dda6","e8dca5","e7dca4","e7dba3","e7dba2","e6daa1","e6d99f","e5d99e","e5d89c","e4d79b","e4d799","e4d698","e3d696","e3d595","e3d594","e3d593","e3d492","e2d492","e2d391","e2d390","e2d290","e2d290","e2d190","e1d190","e1d090","e0d090","e0cf91","dfcf91","dfce92","decd92","decd93","ddcc93","dccb94","dccb94","dbca95","dac995","d9c896","d9c896","d8c796","d7c696","d7c596","d6c596","d6c496","d5c396","d5c396","d4c296","d4c295","d3c195","d3c194","d3c094","d2c093","d2bf93","d2bf92","d1be92","d1be91","d0bd91","d0bd90","d0bc90","cfbc8f","cfbb8f","cfbb8f","cebb8e","ceba8e","cdba8d","cdb98d","cdb98c","ccb98c","ccb88b","ccb88b","ccb78a","cbb78a","cbb789","cbb689","cbb688","cab588","cab587","cab487","c9b486","c9b386","c8b285","c8b285","c7b184","c7b184","c7b083","c6af82","c6af81","c5ae81","c5ad80","c5ad80","c5ac7f","c5ac7e","c5ab7e","c5ab7d","c5aa7d","c5aa7d","c5a97c","c5a97c","c5a87b","c5a87b","c5a87b","c5a77b","c5a77b","c5a67a","c5a67a","c5a67a","c5a679","c5a579","c5a578","c6a578","c6a578","c7a577","c7a577","c8a576","c8a476","c9a475","c9a475","caa474","caa373","caa373","cba372","cba272","cba271","cba171","cba170","cba06f","cba06e","ca9f6e","ca9e6d","ca9e6c","ca9d6b","c99c6b","c99b6a","c99a69","c89969","c89868","c89767","c79667","c79566","c69465","c59364","c59264","c49163","c39062","c28f61","c18e61","c08c60","be8b5f","bd8a5f","bc895e","bb885d","ba875d","b8855c","b7845c","b6835b","b4825b","b3815a","b1805a","b07f5a","ae7e59","ad7d59","ab7c59","aa7b58","a87a58","a77957","a57857","a37857","a27757","a07657","9e7557","9d7557","9b7457","9a7357","997357","977256","967156","957055","946f55","926f54","916e54","906c53","8f6b53","8e6a52","8c6952","8b6851","8a6750","886650","87654f","86644e","84634e","83624d","82614c","80604c","7f5f4b","7e5e4a","7c5d4a","7b5c49","7a5b48","795a48","785a47","775946","765846","755745","745745","745644","735644","735543","725543","725442","725442","725341","725341","725240","725240","72513f","72513f","73503e","734f3d","734f3d","744e3c","744d3b","754d3a","754c3a","754b39","764a38","764937","764936","764835","764735","764634","754633","754532","744432","734431","724331","714230","704230","6f412f","6e412f","6d402e","6b3f2e","6a3f2d","693e2c","683d2c","673d2b","663c2a","653b2a","653b29","643a28","633a28","633927","623926","623826","613725","613725","613724"];
 export const blueColors = ["c4cadc","c4cadb","c3c9db","c2c9da","c1c8da","c1c8da","c0c7d9","bec7d9","bdc6d9","bcc6d9","bbc5d9","b9c5d9","b8c4d9","b6c4d9","b5c3d9","b3c3d9","b2c2d9","b0c2d9","afc1d9","adc1d9","acc0d9","aac0d9","a9bfd9","a8bed9","a6bed9","a5bdd9","a4bdd9","a3bcd9","a2bbd9","a0bbd9","9fbad9","9ebad9","9dbad9","9bb9d9","9ab9d9","99b8d9","97b8d9","96b8d9","94b7d8","93b7d8","92b7d8","90b7d8","8fb7d8","8eb6d8","8db6d8","8bb5d8","8ab5d8","89b4d8","88b4d8","87b3d8","86b3d8","85b3d8","84b2d8","83b2d8","82b1d8","80b1d8","7fb0d8","7eb0d8","7dafd8","7cafd8","7baed8","7aaed8","78add8","77add8","76add8","74acd8","73acd8","72acd9","71abd9","70abd9","6fabd9","6eabd9","6dabd9","6caad9","6baad9","6aa9d9","69a9d8","69a9d8","68a8d8","67a8d8","66a7d8","65a7d8","65a7d8","64a6d8","63a6d8","62a6d8","61a5d8","60a5d8","5fa5d8","5ea4d8","5ea4d8","5da4d8","5ca4d8","5ca4d8","5ba3d8","5aa3d8","5aa2d8","59a2d8","58a2d8","58a1d8","57a1d8","56a0d8","56a0d8","55a0d8","549fd8","549fd8","539fd8","529ed8","519ed8","519ed8","509ed8","4f9ed8","4f9dd8","4e9dd8","4e9dd8","4d9cd8","4d9cd8","4c9bd8","4c9bd8","4b9bd8","4b9ad8","4b9ad8","4a9ad8","4a99d8","4999d8","4999d8","4998d8","4898d8","4797d8","4797d8","4696d8","4696d8","4596d8","4496d8","4495d8","4395d8","4394d8","4294d8","4293d8","4293d8","4192d8","4191d8","4091d8","3f90d8","3f8fd8","3e8ed8","3e8dd8","3d8cd8","3c8bd8","3c8ad8","3b89d8","3a88d8","3a86d8","3985d8","3884d8","3782d8","3781d8","367fd8","357dd8","357bd8","3479d8","3377d8","3375d8","3273d8","3270d8","316ed8","316cd8","306bd8","2f69d8","2f67d9","2e66d9","2e64d9","2d62d9","2d61d9","2c60d9","2c5fd9","2c5ed9","2b5dd9","2b5cd9","2b5bd9","2b5ad9","2a5ad9","2a59d9","2a58d9","2958d9","2957d9","2957d9","2956d9","2856d9","2856d9","2855d9","2855d8","2754d8","2754d8","2754d8","2753d8","2653d8","2653d8","2652d8","2652d8","2552d8","2551d8","2551d8","2550d8","2450d8","244fd8","244fd8","244ed8","234ed8","234dd8","234dd8","224dd8","224cd8","224cd8","224cd8","214bd8","214bd8","214bd8","214bd8","204ad8","204ad8","204ad8","1f49d8","1f49d8","1e48d8","1e48d8","1d47d8","1d47d8","1c47d8","1c46d8","1b46d8","1b45d8","1b45d8","1a45d8","1a44d8","1944d8","1944d8","1843d8","1843d8","1743d8","1742d8","1642d8","1642d8","1542d8","1542d8","1441d8","1441d8","1341d8","1341d8","1240d8","1140d8","1140d8","1040d8","0f40d8","0f40d8","0e40d8"];
@@ -183,7 +192,7 @@ class StarGrid extends React.Component<any, State>{
         hexSize:defaultHexSize,
         targetHex:[],
         absoluteHex: selfStorage.getItem("absoluteHex")?selfStorage.getItem("absoluteHex"):centerHex,
-        recRange:[(8-defaultHexSize)*3,(8-defaultHexSize)*3],
+        recRange:[(9-defaultHexSize)*3,(9-defaultHexSize)*3],
         rangeLand:[],
         approvedStarGridState:{
             bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LQ":false,"WATER-BUSD-LQ":false
@@ -216,7 +225,10 @@ class StarGrid extends React.Component<any, State>{
         showApprovedList:false,
         showDetailModal:false,
         showSelectPlanetModal:false,
-        planetTab:"owner"
+        planetTab:"owner",
+        showUserDeposit:false,
+        showCounterSelectModal:false,
+        counterSelectData:[]
     }
     componentDidMount() {
         interVarEpoch.start(()=>{
@@ -227,7 +239,7 @@ class StarGrid extends React.Component<any, State>{
     }
 
     init = async ()=>{
-        let {absoluteHex,hexSize,showApproveAllModal,approvedStarGridState,approvedStarGrid} = this.state;
+        let {absoluteHex,hexSize,targetHex,showApproveAllModal,approvedStarGridState,approvedStarGrid} = this.state;
         const account = await walletWorker.accountInfo();
         const owner = account.addresses[chain];
         const userPosition = await starGridRpc.userPositions(owner,10);
@@ -243,7 +255,7 @@ class StarGrid extends React.Component<any, State>{
                 }
             }
         }
-        const rang = [(8-hexSize)*3,(8-hexSize)*3];
+        const rang = [(9-hexSize)*3,(9-hexSize)*3];
         const leftBottom = axialCoordinatesToCube(absoluteHex.x-rang[0],absoluteHex.z+rang[1]);
         const rightTop = axialCoordinatesToCube(absoluteHex.x+rang[0],absoluteHex.z-rang[1]);
 
@@ -253,13 +265,15 @@ class StarGrid extends React.Component<any, State>{
         const enDetailsPromise = epochStarGridQuery.currentENDetails(owner);
         const rest = await Promise.all([rangeLandPromise,lockedInfoPromise,countersPromise,enDetailsPromise])
 
+        console.log();
+
         let approveRest:Array<any> = [approvedStarGrid,approvedStarGridState,false];
         if(!showApproveAllModal){
             approveRest = await this.queryApprove();
         }
 
         const balance = await rpc.getBalance(chain,"");
-        // const rangeLands:Array<Land> = rest[0];
+        const rangeLands:Array<Land> = rest[0];
         // const newTargetHex: Array<HexInfo> = [];
         // if(targetHex && targetHex.length>0 && rangeLands && rangeLands.length>0){
         //     for(let i=0;i<targetHex.length;i++){
@@ -308,8 +322,8 @@ class StarGrid extends React.Component<any, State>{
        return 0
     }
 
-    getCounters = async ()=>{
-        // const account = await walletWorker.accountInfo();
+    getCounters = async (type?:StarGridType)=>{
+        const account = await walletWorker.accountInfo();
         const nfts = await rpc.getTicket(chain,"")
         const counters:Array<Counter> = [];
         if(nfts){
@@ -318,8 +332,8 @@ class StarGrid extends React.Component<any, State>{
                 return counters
             }
             for(let info of infos){
-                const counter = await starGridRpc.counterInfo(info.tokenId);
-                if(!counter){
+                const counter = await starGridRpc.counterInfo(info.tokenId)//await epochStarGridQuery.counterInfo(info.tokenId,account.addresses[chain])
+                if(!counter || type && type != counter.enType){
                     continue
                 }
                     // await epochStarGridQuery.counterInfo(info.tokenId,account.addresses[chain])//await starGridRpc.counterInfo(info.tokenId)
@@ -465,15 +479,16 @@ class StarGrid extends React.Component<any, State>{
         })
     }
 
-    createConfirm = async (type:StarGridType,num:number)=>{
+    createConfirm = async (type:StarGridType,num:number,depositType:DepositType)=>{
         const account = await walletWorker.accountInfo()
-        const rest = await epochStarGridOperator.estimateCreate(type,num,0,account.addresses[chain])
-        console.log("create Confirm",rest)
+        const rest = await epochStarGridOperator.estimateCreate(type,num,depositType,account.addresses[chain])
+        const maxCost = rest[2];
         const feeData:any = {
-            "Counter Type" : `EMIT-${StarGridType[type]}`,
-            "Number": `${num}`,
-            "Estimate Cost":`${utils.nFormatter(utils.fromValue(rest[2],18),3)} ${rest[0]}`,
-            "Balance": `${utils.nFormatter(utils.fromValue(rest[1],18),6)} ${rest[0]}`,
+            "Counter Type" : <b><IonText color="secondary">EMIT-{StarGridType[type]}</IonText></b>,
+            "Deposit Type" : <b><IonText color="secondary">{DepositType[depositType]}</IonText></b>,
+            "Number": <b>{num}</b>,
+            "Balance": <b><IonText>{utils.nFormatter(utils.fromValue(rest[1],18),6)} {rest[0]}</IonText></b>,
+            "Estimate Cost":<b><IonText>{utils.nFormatter(utils.fromValue(maxCost,18),3)} {rest[0]}</IonText></b>,
         }
         this.setState({
             feeData:feeData,
@@ -481,7 +496,7 @@ class StarGrid extends React.Component<any, State>{
             feeOk:()=>{
                 this.setState({feeData:""})
                 this.setShowLoading(true)
-                this.create(type,num).then(()=>{
+                this.create(type,num,depositType,maxCost).then(()=>{
                     this.setShowLoading(false)
                 }).catch((e)=>{
                     this.setShowLoading(false)
@@ -494,11 +509,12 @@ class StarGrid extends React.Component<any, State>{
         interVarEpoch.latestOpTime = Date.now();
     }
 
-    create = async (type:StarGridType,num:number) =>{
-        const depositType = 0 ;
-        const maxCost =0 ;
-        const deadline = 0 ;
-        const data = await epochStarGridOperator.create(type,num,depositType,new BigNumber(0),deadline)
+    deadline = () =>{
+        return  Math.floor((Date.now()+60*60*1000)/1000);
+    }
+
+    create = async (type:StarGridType,num:number,depositType:DepositType,maxCost) =>{
+        const data = await epochStarGridOperator.create(type,num,depositType,new BigNumber(maxCost),this.deadline())
         const tx = await this.genTx(epochStarGridOperator,data);
         this.setState({
             tx:tx,
@@ -525,7 +541,7 @@ class StarGrid extends React.Component<any, State>{
         if(targetHex.length == 1){
             coo = targetHex[0].hex
         }
-        const defaultCoo = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
+        const defaultCoo = !isEmptyPlanet(defaultPlanet) ?defaultPlanet.coordinate:"0"
         const hex = toUINT256(coo)
         // @ts-ignore
         const rest:Array<string> = await epochStarGrid.capture(counterId,hex,utils.toValue(baseAmountIn,18),utils.toValue(attachAmountIn,18),defaultCoo,account.addresses[ChainType.BSC])
@@ -541,15 +557,26 @@ class StarGrid extends React.Component<any, State>{
         const feeData:any = {
             showDesc:true,
             Terms: `7 Periods`,
-            "Burned": `${baseAmountIn.toString(10)} ${base}/period and ${attachAmountIn.toString(10)} ${attach}/period`,
-            "Burned Total":`${baseCost.toString(10)} ${base} and ${attachCost.toString(10)} ${attach}`,
-            "Fee Rate": `${feeRate}%`,
+            "Burned per Period": <>
+                <p><IonText color="secondary"><b>{baseAmountIn.toString(10)}</b></IonText>&nbsp;<small>{base}/period</small></p>
+                <p><IonText color="secondary"><b>{attachAmountIn.toString(10)}</b></IonText>&nbsp;<small>{attach}/period</small></p>
+            </>,
+            "Fee Rate": <><IonText color="secondary">{feeRate.toNumber()}%</IonText></>,
+            "Burned Total": <>
+                <p><IonText color="secondary"><b>{baseCost.toString(10)}</b></IonText>&nbsp;<small>{base}</small></p>
+                <p><IonText color="secondary"><b>{attachCost.toString(10)}</b></IonText>&nbsp;<small>{attach}</small></p>
+            </>,
         }
         if(createBaseCost.toNumber()>0 || createAttachCost.toNumber() >0){
-            feeData["Create Planet Amount"] = `${createBaseCost.toString(10)} ${base}, ${createAttachCost.toString(10)} ${attach}`
+            feeData["Create Planet Cost"] = <>
+                <p><IonText color="secondary"><b>{createBaseCost.toString(10)}</b></IonText>&nbsp;<small>{base}</small></p>
+                <p><IonText color="secondary"><b>{createAttachCost.toString(10)}</b></IonText>&nbsp;<small>{attach}</small></p>
+            </>
         }
-        feeData["Total"] = `${baseCost.plus(createBaseCost).toString(10)} ${base}, ${attachCost.plus(createAttachCost).toString(10)} ${attach}`
-
+        feeData["Total"] =  <>
+            <p><IonText color="secondary"><b>{baseCost.plus(createBaseCost).toString(10)}</b></IonText>&nbsp;<small>{base}</small></p>
+            <p><IonText color="secondary"><b>{attachCost.plus(createAttachCost).toString(10)}</b></IonText>&nbsp;<small>{attach}</small></p>
+        </>
         this.setState({
             feeData:feeData,
             feeCancel:()=>{this.setState({feeData:""})},
@@ -673,7 +700,6 @@ class StarGrid extends React.Component<any, State>{
         routers.push(0)
         routers.reverse();
         const opcode = toOpCode(routers,5);
-        console.log(opcode,"OPCODE::")
         const rest =  await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
         const baseAmount = utils.fromValue(rest[0],18);
         const attachAmount = utils.fromValue(rest[1],18);
@@ -692,8 +718,11 @@ class StarGrid extends React.Component<any, State>{
             const eType = enType2Cy(lockedInfo.userInfo.counter.enType)
             const feeData:any = {
                 "showDesc": true,
-                "Amount": `${baseAmount.toString(10)} ${eType.base}, ${attachAmount.toString(10)} ${eType.attach}`,
-                "Fee Rate": `${feeRate}%`
+                "Fee Rate": <><IonText color="secondary">{feeRate}%</IonText></>,
+                "Amount": <>
+                    <p><IonText color="secondary"><b>{baseAmount.toString(10)}</b></IonText>&nbsp;<small>{eType.base}</small></p>
+                    <p><IonText color="secondary"><b>{attachAmount.toString(10)}</b></IonText>&nbsp;<small>{eType.attach}</small></p>
+                </>
             }
             this.setState({
                 feeData:feeData,
@@ -729,7 +758,7 @@ class StarGrid extends React.Component<any, State>{
 
     prepare = async (terms:number,baseAmount:BigNumber,attachAmount:BigNumber)=>{
         const {defaultPlanet} = this.state;
-        const defaultCoordinate = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
+        const defaultCoordinate = !isEmptyPlanet(defaultPlanet) ?defaultPlanet.coordinate:"0"
         const data:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms,defaultCoordinate)
         const tx = await this.genTx(epochStarGrid,data)
         this.setState({
@@ -745,7 +774,7 @@ class StarGrid extends React.Component<any, State>{
         const account = await walletWorker.accountInfo();
         const baseAmount = new BigNumber(a);
         const attachAmount = new BigNumber(b)
-        const defaultCoordinate = defaultPlanet && defaultPlanet.capacity!="0" ?defaultPlanet.coordinate:"0"
+        const defaultCoordinate = !isEmptyPlanet(defaultPlanet) ?defaultPlanet.coordinate:"0"
         const rest:any = await epochStarGrid.prepare(utils.toValue(baseAmount,18),utils.toValue(attachAmount,18),terms,defaultCoordinate,account.addresses[ChainType.BSC])
         let base;
         let attach;
@@ -769,14 +798,21 @@ class StarGrid extends React.Component<any, State>{
         //baseCost,attachCost,feeRate
         const feeData:any = {
             showDesc: true,
-            Terms: `${terms} Periods`,
-            Balance: `${utils.nFormatter(availableBase,3)} ${base} and ${utils.nFormatter(availableAttach,3)}`,
-            "Amount per Period": `${baseAmount.toString(10)} ${base} and ${attachAmount.toString(10)} ${attach}`,
-            "Fee Rate":`${rest[2]}%`,
-            // "Fee": `${utils.nFormatter(total1.minus(availableBase).minus(baseAmount.multipliedBy(terms)),3)} ${base} and ${utils.nFormatter(total2.minus(availableAttach).minus(attachAmount.multipliedBy(terms)),3)} ${attach}`,
-            Total: `${total1.toString(10)} ${base}, ${total2.toString(10)} ${attach}`,
+            Terms: <p><IonText color="secondary"><b>{terms}</b></IonText>&nbsp;Periods</p>,
+            Balance: <>
+                <p><IonText color="secondary"><b>{utils.nFormatter(availableBase,3)}</b></IonText>&nbsp;<small>{base}</small></p>
+                <p><IonText color="secondary"><b>{utils.nFormatter(availableAttach,3)}</b></IonText>&nbsp;<small>{attach}</small></p>
+            </>,
+            "Amount per Period": <>
+                <p><IonText color="secondary"><b>{baseAmount.toString(10)}</b></IonText>&nbsp;<small>{base}</small></p>
+                <p><IonText color="secondary"><b>{attachAmount.toString(10)}</b></IonText>&nbsp;<small>{attach}</small></p>
+            </>,
+            "Fee Rate":<IonText color="secondary"><b>{rest[2]}</b></IonText>,
+            Total: <>
+            <p><IonText color="secondary"><b>{total1.toString(10)}</b></IonText>&nbsp;<small>{base}</small></p>
+            <p><IonText color="secondary"><b>{total2.toString(10)}</b></IonText>&nbsp;<small>{attach}</small></p>
+        </>,
         }
-
         this.setState({
             feeData:feeData,
             feeCancel:()=>{this.setState({feeData:""})},
@@ -811,7 +847,7 @@ class StarGrid extends React.Component<any, State>{
         let enType = 0;
         if(lockedInfo.userInfo.counter.counterId != "0"){
             enType = lockedInfo.userInfo.counter.enType;
-        }else if(defaultPlanet && defaultPlanet.capacity != "0"){
+        }else if(!isEmptyPlanet(defaultPlanet)){
             enType = defaultPlanet.enType;
         }
         let arr:Array<Land> = [];
@@ -836,6 +872,77 @@ class StarGrid extends React.Component<any, State>{
         }
         this.setState(state)
     }
+
+    setShowCounterSelectModal = async (f:boolean,v?:UserDeposit) =>{
+        if(!v && f){
+            this.setShowToast(true,"Not select withdraw items!")
+            return;
+        }
+        if(f){
+            const arr = await this.getCounters(v.enType)
+            this.setState({
+                showUserDeposit:!f,
+                counterSelectData:arr,
+                showCounterSelectModal:f,
+                showLoading:false,
+                withdrawUserDeposit:v
+            })
+        }else{
+            this.setState({
+                showUserDeposit:!f,
+                showCounterSelectModal:f,
+                showLoading:false,
+            })
+        }
+    }
+
+    confirmWithdrawUserDeposit = async (counterId:string,v?:UserDeposit)=>{
+        const {withdrawUserDeposit} = this.state;
+        if(!v){
+            v = withdrawUserDeposit
+        }
+        const account = await walletWorker.accountInfo();
+        const backedAmount = new BigNumber(v.totalAmount).dividedBy(v.count).multipliedBy(1-0.002).toFixed(0);
+        const deadline = this.deadline();
+        const estimateRest = await epochStarGridOperator.withDraw(v.index,counterId,new BigNumber(backedAmount),deadline,account.addresses[chain])
+        //baseCost,attachCost,feeRate
+        const feeData:any = {
+            showDesc: false,
+            "Deposit Index": <b><IonText color="secondary">{v.index}</IonText></b>,
+            "Estimate Return": <>
+            <p><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(estimateRest[1],18),3)}</b></IonText>&nbsp;{estimateRest[0]}</p>
+            </>,
+        }
+        if(counterId != "0"){
+            feeData["Destroy CounterId"]=<b><IonText color="secondary">{counterId}</IonText></b>;
+        }
+
+        this.setState({
+            showUserDeposit:false,
+            feeData:feeData,
+            feeCancel:()=>{this.setState({feeData:"",showUserDeposit:false})},
+            feeOk:()=>{
+                this.withdrawUserDeposit(v.index,counterId,backedAmount,deadline).then(()=>{
+                    this.setState({feeData:"",showUserDeposit:false})
+                }).catch(e=>{
+                    const err = typeof e =="string"?e:e.message;
+                    this.setShowToast(true,err)
+                    this.setState({feeData:""})
+                })
+            }
+        })
+    }
+
+    withdrawUserDeposit = async (index:string,counterId:string,backedAmount:string,deadline:number)=>{
+        const data = await epochStarGridOperator.withDraw(index,counterId,new BigNumber(backedAmount),deadline)
+        const tx = await this.genTx(epochStarGridOperator,data)
+        this.setState({
+            tx:tx,
+            showConfirm:true
+        })
+        interVarEpoch.latestOpTime = Date.now();
+    }
+
     updateCounter = async (opcode:string)=>{
         const data = await epochStarGrid.updateCounter("0x"+new BigNumber(opcode,2).toString(16))
         const tx = await this.genTx(epochStarGrid,data)
@@ -892,14 +999,27 @@ class StarGrid extends React.Component<any, State>{
     }
 
     moveNeighbor = (t:string,absoluteHex:Hex)=>{
+        const {hexSize} = this.state;
         if("u" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,0),5)// addHex(addHex(absoluteHex,directions[0]),directions[5]);
+            if(hexSize <=1 ){
+                absoluteHex = neighboor(neighboor(absoluteHex,0),5)
+            }
         }else if ("d" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,2),3);
+            if(hexSize <=1 ){
+                absoluteHex =  neighboor(neighboor(absoluteHex,2),3);
+            }
         }else if ("r" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,1),1);// addHex(addHex(absoluteHex,directions[1]),directions[1]);
+            if(hexSize <=1 ){
+                absoluteHex = neighboor(neighboor(absoluteHex,1),1);
+            }
         }else if ("l" == t){
             absoluteHex = neighboor(neighboor(absoluteHex,4),4);
+            if(hexSize <=1 ){
+                absoluteHex = neighboor(neighboor(absoluteHex,4),4);
+            }
         }
         return absoluteHex
     }
@@ -968,11 +1088,14 @@ class StarGrid extends React.Component<any, State>{
                                continue
                             }
                             let power = 1;
-                            if (land && land.capacity != "0" && tHex.counter.enType != land.enType) {
-                                if (land.owner == account.addresses[chain] || land.canCapture) {
-                                    power = 1;
-                                } else {
-                                    power = 2 + new BigNumber(land.level).toNumber()
+                            if(land && land.counter && land.counter.counterId !="0"){
+                            }else{
+                                if (!isEmptyPlanet(land) && tHex.counter.enType != land.enType) {
+                                    if (land.marker == account.addresses[chain]) {
+                                        power = 1;
+                                    } else {
+                                        power = 2 + new BigNumber(land.level).toNumber()
+                                    }
                                 }
                             }
                             mp.set(toAxial(land.coordinate).uKey(), power);
@@ -982,17 +1105,19 @@ class StarGrid extends React.Component<any, State>{
             }
             let absHex = absoluteHex;
             if(x && y){
+                const n = 1/12;
                 const width = document.documentElement.clientWidth;
                 const height= document.documentElement.clientHeight;
-                if(x < width / 4){
+                if(x < width * n){
                     absHex = this.moveNeighbor("l",absoluteHex);
-                }else if(x > width * 3/4){
+                }
+                if(x > width * (1-n)){
                     absHex = this.moveNeighbor("r",absoluteHex);
                 }
-                if(y < height / 4){
+                if(y < height * n){
                     absHex = this.moveNeighbor("u",absoluteHex);
                 }
-                if(y > height * 3/4){
+                if(y > height * (1-n)){
                     absHex = this.moveNeighbor("d",absoluteHex);
                 }
             }
@@ -1045,7 +1170,6 @@ class StarGrid extends React.Component<any, State>{
                     if(yellows.indexOf(yellowColors[i]) == -1){
                         yellows.push(yellowColors[i])
                     }
-
                 }
                 if(l.counter){
                     const rate = Math.floor(utils.fromValue( l.counter.rate,16).toNumber());
@@ -1135,7 +1259,7 @@ class StarGrid extends React.Component<any, State>{
         if(f){
             const account = await walletWorker.accountInfo();
             //TODO pagination
-           arr = await starGridRpc.myPlanet(account.addresses[ChainType.BSC],type,0,0,100);
+            arr = await starGridRpc.myPlanet(account.addresses[ChainType.BSC],type,0,0,100);
         }
         this.setState({
             showMyPlanetModal:f,
@@ -1144,6 +1268,24 @@ class StarGrid extends React.Component<any, State>{
             planetTab:type == 1 ?"owner":"marker"
         })
     }
+
+    setShowUserDeposit = async (f:boolean) =>{
+        if(f){
+            const account = await walletWorker.accountInfo();
+            const arr = await starGridRpc.userDeposit(account.addresses[ChainType.BSC],0,100);
+            this.setState({
+                showLoading:false,
+                showUserDeposit:f,
+                userDepositArr:arr,
+            })
+        }else{
+            this.setState({
+                showLoading:false,
+                showUserDeposit:f,
+            })
+        }
+    }
+
     confirm = async (hash: string) => {
         let intervalId: any = 0;
         this.setShowLoading(true);
@@ -1247,6 +1389,7 @@ class StarGrid extends React.Component<any, State>{
     setPosition = async (x:number,z:number) =>{
         const a = axialCoordinatesToCube(x,z);
         this.storeAbsoluteHex(a)
+
         this.setState({
             absoluteHex:a,
             showPosition:false,
@@ -1274,7 +1417,6 @@ class StarGrid extends React.Component<any, State>{
         if(counter.enType == StarGridType.EARTH){
             const planetInfo = lockedInfo.userInfo.userDefaultEarthCoordinate != "0"?
                 await epochStarGridQuery.planetInfo(lockedInfo.userInfo.userDefaultEarthCoordinate,account.addresses[ChainType.BSC]):undefined;
-            console.log("planetInfo:::",planetInfo)
             this.setState({
                 amountTitle1: this.renTitle("bDARK"),
                 amountTitle2: this.renTitle("WATER"),
@@ -1319,7 +1461,8 @@ class StarGrid extends React.Component<any, State>{
             showToast,toastMessage,tx,counters,rangeLand,account,showCaptureModal,feeData,feeOk,feeCancel,
             lockedInfo,showSettlementModal,showPrepareModal,activeBottom,activeLeft,planetTab,
             showPowerDistribution,amountTitle1,amountTitle2,myPlanetArr,showMyPlanetModal,showApprovedList,approvedInfo,
-        showDetailModal,lockedUserInfo,showSelectPlanetModal,defaultPlanet,lockedUserAddress,enDetails} = this.state;
+        showDetailModal,lockedUserInfo,showSelectPlanetModal,defaultPlanet,lockedUserAddress,enDetails,showUserDeposit,
+        userDepositArr,counterSelectData,showCounterSelectModal,withdrawUserDeposit} = this.state;
         // const hexagons = gridGenerator.rectangle(recRange[0],recRange[1], true,true );
         // console.log(hexagons,recRange);
         const hexagons = gridGenerator.hexagon(recRange[0]>recRange[1]?recRange[0]:recRange[1],true)
@@ -1338,6 +1481,10 @@ class StarGrid extends React.Component<any, State>{
            totalGas = new BigNumber(tx.gas).plus(new BigNumber(totalGas))
         }
 
+        // const levelColr = [];
+        // for(let i=30;i<100;i++){
+        //     levelColr.push(i)
+        // }
         return (
             <>
                 <IonPage>
@@ -1354,6 +1501,18 @@ class StarGrid extends React.Component<any, State>{
                         </IonToolbar>
                     </IonHeader>
                     <IonContent fullscreen >
+                        {/*<div>*/}
+                        {/*    {*/}
+                        {/*        lockedInfo && levelColr.map(v=>{*/}
+                        {/*            const counter:Counter = lockedInfo.userInfo.counter;*/}
+                        {/*            console.log();*/}
+                        {/*            // @ts-ignore*/}
+                        {/*            counter["rate"] = v * 1e16;*/}
+                        {/*            console.log(v,counter);*/}
+                        {/*            return <div style={{width:"200px"}}><HexInfoCard sourceHexInfo={{counter:counter}}/></div>*/}
+                        {/*        })*/}
+                        {/*    }*/}
+                        {/*</div>*/}
                         <IonFab vertical="bottom" horizontal="center" slot="fixed" activated={activeBottom}>
                             <IonFabButton  onClick={()=>{
                                 this.setState({activeBottom:!activeBottom})
@@ -1362,13 +1521,13 @@ class StarGrid extends React.Component<any, State>{
                             </IonFabButton>
                             <IonFabList side="start">
                                 <IonFabButton onClick={()=>this.setShowPlanetModal(true,1)} size="small" color="secondary">
+                                    <IonIcon icon={pricetagsOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
+                                    <IonIcon icon={personAddOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>this.setShowUserDeposit(true)} size="small" color="tertiary">
                                     <IonIcon icon={listOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
-                                    <IonIcon icon={personAddOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
-                                    <IonIcon icon={personAddOutline} />
                                 </IonFabButton>
                             </IonFabList>
                             {/*<IonFabList side="top">*/}
@@ -1423,6 +1582,21 @@ class StarGrid extends React.Component<any, State>{
                                 </IonFabButton>
                                 <IonFabButton onClick={()=>{this.setShowPosition(true)}} color="warning">
                                     <IonIcon icon={search} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>{
+                                    if(lockedInfo && lockedInfo.userInfo.counter.counterId !="0"){
+                                        const hex = toAxial(lockedInfo.userInfo.userCoordinate);
+                                        this.setPosition(hex.x,hex.z).then(()=>{
+                                            this.setTarget({hex:hex,counter:lockedInfo.userInfo.counter})
+                                        }).catch(e=>{
+                                            const err = typeof e =="string"?e:e.message;
+                                            this.setShowToast(true,err);
+                                        })
+                                    }else{
+                                        this.setShowToast(true,"You are no counter in the map.")
+                                    }
+                                }} color="tertiary">
+                                    <IonIcon icon={homeOutline} />
                                 </IonFabButton>
                             </IonFabList>
                         </IonFab>
@@ -1528,7 +1702,7 @@ class StarGrid extends React.Component<any, State>{
                                                 const stop = targetHex && targetHex.length>1 && targetHex[targetHex.length-1] && !!targetHex[targetHex.length-1].counter
                                                 const block = containHex(reachHexes,absHex) && this.isFocusMyCounter() && !stop;
                                                 const attack = targetHex && targetHex.length>0&&this.containHexInfo(targetHex,absHex) && targetHex.length>0 && !absHex.equalHex(targetHex[0].hex ) && this.isFocusMyCounter();
-                                                const movable = containHex(reachHexesGlobal,absHex) && this.isFocusMyCounter() && !stop;;
+                                                const movable = containHex(reachHexesGlobal,absHex) && this.isFocusMyCounter() && !stop && targetHex && targetHex.length>0 && new BigNumber(targetHex[0].counter.force).toNumber()>0;
                                                 const focus = targetHex.length>0&&absHex.equalHex(targetHex[0].hex);
                                                 let piece:any = undefined;
                                                 let landStyle:string = ""
@@ -1554,7 +1728,7 @@ class StarGrid extends React.Component<any, State>{
                                                             style:land.counter.enType == StarGridType.WATER?"white":"black",
                                                             backgroundColor: [ `rgb(${bg[0]})`,`rgb(${bg[1]})`]
                                                         }
-                                                        if(new BigNumber(land.counter.level).toNumber()>4){
+                                                        if(new BigNumber(land.counter.level).toNumber()>3){
                                                             piece.style = land.counter.enType == StarGridType.WATER?"whiteSword":"blackSword";
                                                         }
                                                         focusOwner = lockedInfo && lockedInfo.userInfo.counter.counterId == land.counter.counterId;
@@ -1591,7 +1765,7 @@ class StarGrid extends React.Component<any, State>{
                                                                 || attack  && inRg
                                                                 || !targetHex[0].counter && inRg
                                                                 || lockedInfo && lockedInfo.userInfo && targetHex[0] && targetHex[0].counter && targetHex[0].counter.counterId != lockedInfo.userInfo.counter.counterId  && inRg
-                                                                || (targetHex.length == 1 && lockedInfo && lockedInfo.userInfo && targetHex[0] && targetHex[0].counter && targetHex[0].counter.counterId == lockedInfo.userInfo.counter.counterId )  && inRg
+                                                                || (targetHex.length == 1 && lockedInfo && lockedInfo.userInfo && targetHex[0] && targetHex[0].counter && targetHex[0].counter.counterId == lockedInfo.userInfo.counter.counterId ) && block && inRg
                                                             )
                                                             || targetHex.length==0 && inRg
                                                             // || targetHex.length==1 && inRg && (
@@ -1614,9 +1788,7 @@ class StarGrid extends React.Component<any, State>{
                                                     }} id={i} coordinates={hex}
                                                 >
                                                     <HexText className="hex-text">
-                                                        {/*{hex.x} {hex.y} {hex.z}*/}
-                                                        {/*{hex.x+absoluteHex.x},*/}
-                                                        {/*{absHex.x},{absHex.z}*/}
+                                                        {land && hexSize >=2 && new BigNumber(land.level).toNumber()>0?`V${land.level}`:""}
                                                     </HexText>
                                                 </Hexagon>
                                             } )}
@@ -1880,22 +2052,24 @@ class StarGrid extends React.Component<any, State>{
                            this.setShowCaptureModal(false)
                         }} data={counters}/>
 
-                        <CounterAdd show={showCounterAdd} onOk={(type,num)=>{
+                        <CounterAdd show={showCounterAdd} onOk={(type,num,depositType)=>{
                             if(!type){
                                 this.setShowToast(true,"Please select counter type !")
-                               return ;
+                                return ;
+                            }
+                            if(!depositType && depositType!=0){
+                                this.setShowToast(true,"Please select deposit type !")
+                                return ;
                             }
                             if(!num || num<=0){
                                 this.setShowToast(true,"Please input counter number !")
                                 return
                             }
                             this.setShowLoading(true);
-                            this.createConfirm(type,num).then(()=>{
-                                this.setShowLoading(false);
+                            this.createConfirm(type,num,depositType).then(()=>{
                                 this.setShowCounterAdd(false)
                             }).catch(e=>{
                                 const err = typeof e == "string"?e:e.message;
-                                this.setShowLoading(false);
                                 this.setShowCounterAdd(false)
                                 this.setShowToast(true,err)
                             })
@@ -2009,13 +2183,54 @@ class StarGrid extends React.Component<any, State>{
                         }} data={approvedInfo}/>
 
                         <PlanetList title={"Select Planet"} lockedInfo={lockedInfo} checkedCoo={defaultPlanet && defaultPlanet.coordinate} show={showSelectPlanetModal} onCancel={()=>{
-                            this.setShowSelectPlanet(false,"");
+                            this.setShowSelectPlanet(false,"").catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            });;
                         }} onOk={(land)=>{
-                            this.setShowSelectPlanet(false,"");
+                            this.setShowSelectPlanet(false,"").catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            });;
                             this.setState({
                                 defaultPlanet:land
                             })
                         }} ownerData={myPlanetArr}/>
+
+                        <UserDepositModal title="Staking List" show={showUserDeposit} data={userDepositArr} onCancel={()=>{
+                            this.setShowUserDeposit(false).catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            });
+                        }} onWithdraw={(v)=>{
+                            if(v.canWithDraw){
+                                this.confirmWithdrawUserDeposit("0",v).catch(e=>{
+                                    const err = typeof e == "string"?e:e.message;
+                                    this.setShowToast(true,err)
+                                });
+                            }else{
+                                this.setShowCounterSelectModal(true,v).catch(e=>{
+                                    const err = typeof e == "string"?e:e.message;
+                                    this.setShowToast(true,err)
+                                });
+                            }
+                        }}/>
+
+                        <CounterSelectModal title={withdrawUserDeposit && `Select an EMIT-${StarGridType[withdrawUserDeposit.enType]}`} show={showCounterSelectModal} onCancel={()=>{
+                            this.setShowCounterSelectModal(false).catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err)
+                            });
+                        }} onOk={(counterId)=>{
+                            if(!counterId){
+                                this.setShowToast(true,"Please select a counter!")
+                               return;
+                            }
+                            this.confirmWithdrawUserDeposit(counterId).catch(e=>{
+                                const err = typeof e == "string"?e:e.message;
+                                this.setShowToast(true,err);
+                            })
+                        }} data={counterSelectData}/>
                     </IonContent>
                 </IonPage>
             </>

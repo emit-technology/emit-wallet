@@ -11,6 +11,7 @@ import {
     IonCol, IonRow,IonInput
 } from "@ionic/react"
 import {StarGridTrustInfo} from "../../../types";
+import {fromValue} from "../../../utils";
 interface Props{
     title?:string
     show:boolean
@@ -43,7 +44,7 @@ export const ApprovedList:React.FC<Props> = ({show,title,onCancel,data,onCancelA
                 <IonItemDivider mode="md">
                     You have trusted <IonText color="secondary">&nbsp;{data.approvedCount}&nbsp;</IonText> users,
                     and <IonText color="secondary">&nbsp;{data.beApprovedCount}&nbsp;</IonText> users trusted you,
-                    the trust rate is <IonText color="secondary">&nbsp;{data.trustRate}&nbsp;</IonText>
+                    the trust rate is <IonText color="secondary">&nbsp;{fromValue(data.trustRate,16).toFixed(2)}%&nbsp;</IonText>
                 </IonItemDivider>}
                 {data && data.approved && data.approved.length>0 && <IonItemDivider  sticky color="primary">Trusted User List</IonItemDivider>}
                 {

@@ -5,16 +5,18 @@ import {
     IonItem,
     IonModal,
     IonButton,IonListHeader,
-    IonCol, IonRow, IonAvatar, IonSegment, IonItemDivider,IonText,IonSegmentButton
+    IonCol, IonRow, IonAvatar,IonCheckbox,IonRadio, IonSegment, IonItemDivider,IonText,IonSegmentButton
 } from "@ionic/react"
 import {ENDetails, GlobalInfo, LockedInfo, PeriodUserNE, StarGridType} from "../../../types";
-import CounterSvg from "./counter-svg";
 import * as utils from "../../../utils";
 import {enType2Cy, enType2ProductCy} from "../../../utils/stargrid";
 import {nFormatter} from "../../../utils";
 import {CountDown} from "../../../components/countdown";
 import BigNumber from "bignumber.js";
 import {Converter} from "./Converter";
+import {NoData} from "./NoData";
+import {isEmptyCounter} from "./utils";
+import HexInfoCard from "./hex-info";
 
 interface Props{
     title?:string
@@ -194,15 +196,10 @@ export class Settlement extends React.Component<Props, any> {
                         <IonItemDivider mode="md"/>
                         <IonItemDivider sticky color="primary">Counter Info</IonItemDivider>
                         <IonItem lines="none">
-                            <IonAvatar>
-                                <CounterSvg counter={lockedInfo.userInfo.counter}/>
-                            </IonAvatar>
-                            <IonLabel className="ion-text-wrap">
-                                <p>
-                                    <IonText>
-                                        ID: [{lockedInfo.userInfo.counter.counterId}]
-                                    </IonText>
-                                </p>
+                            <IonLabel>
+                                <div style={{maxWidth:"300px",maxHeight:"150px"}}>
+                                    <HexInfoCard sourceHexInfo={{counter:lockedInfo.userInfo.counter}}/>
+                                </div>
                             </IonLabel>
                         </IonItem>
                         <IonItemDivider sticky color="primary">Planet Capacity</IonItemDivider>
@@ -334,12 +331,7 @@ export class Settlement extends React.Component<Props, any> {
                                                 })
                                             }
                                         </>
-                                        :<div>
-                                            <div style={{textAlign:"center",padding:"12px"}}>
-                                                <img src="./assets/img/common/no-data.png" style={{width:"100px",opacity:"0.1"}}/>
-                                                <div style={{color:"#ddd",marginTop:"12px"}}>No Data</div>
-                                            </div>
-                                        </div>
+                                        :<NoData title={"No Data"} />
                                 }
 
                             </>
@@ -348,7 +340,7 @@ export class Settlement extends React.Component<Props, any> {
                 </div>
 
                 {
-                    onOk && lockedInfo.userInfo.counter.capacity!="0" ? <IonRow>
+                    onOk && !isEmptyCounter(lockedInfo.userInfo.counter)? <IonRow>
                         <IonCol size="4">
                             <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
                         </IonCol>

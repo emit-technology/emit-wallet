@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StarGridType} from "../../../types";
+import {DepositType, StarGridType} from "../../../types";
 import {
     IonList,
     IonLabel,
@@ -18,7 +18,7 @@ import {
 import CounterSvg from "./counter-svg";
 interface Props {
     show: boolean
-    onOk: (type:StarGridType,num: number) => void;
+    onOk: (type:StarGridType,num: number,depositType:DepositType) => void;
     onCancel: () => void;
 }
 
@@ -26,6 +26,7 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
 
     const inputRef:any = React.createRef();
     const selectRef:any = React.createRef();
+    const selectDepositTypeRef:any = React.createRef();
 
     return (<>
         <IonModal
@@ -54,6 +55,17 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                         <IonRadio slot="end" value={StarGridType.EARTH} />
                     </IonItem>
                 </IonRadioGroup>
+                <IonItemDivider  sticky color="primary">Select Deposit Type</IonItemDivider>
+                <IonRadioGroup ref={selectDepositTypeRef} title={"Select counter type"} >
+                    <IonItem lines="none">
+                        <IonLabel>&nbsp;LP-TOKEN</IonLabel>
+                        <IonRadio slot="end" value={DepositType.LP} />
+                    </IonItem>
+                    <IonItem lines="none">
+                        <IonLabel>&nbsp;BUSD</IonLabel>
+                        <IonRadio slot="end" value={DepositType.BUSD} />
+                    </IonItem>
+                </IonRadioGroup>
                 <IonItemDivider  sticky color="primary">Number</IonItemDivider>
                 <IonItem>
                     <IonInput ref={inputRef} placeholder="0" type="number"/>
@@ -67,7 +79,8 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                     <IonButton mode="ios" expand="block" onClick={() => {
                         const num = inputRef.current.value;
                         const typ = selectRef.current.value;
-                        onOk(typ,num)
+                        const depositType = selectDepositTypeRef.current.value;
+                        onOk(typ,num,depositType)
                     }} color="primary">OK</IonButton>
                 </IonCol>
             </IonRow>

@@ -8,6 +8,8 @@ import {Counter, LockedInfo} from "../../../types";
 import BigNumber from "bignumber.js";
 import {CountDown} from "../../../components/countdown";
 import {toAxial} from "../../../components/hexagons/utils";
+import {isEmptyCounter, isEmptyPlanet} from "./utils";
+import {STAR_GRID_DEFAULT_LEVEL} from "../../../config";
 interface Props{
     sourceHexInfo: HexInfo;
     attackHexInfo?: HexInfo;
@@ -30,13 +32,14 @@ class HexInfoCard extends React.Component<Props, any>{
     }
 
     getLevel = (counter:Counter) =>{
-        const accumulate = utils.fromValue(counter.level,0).minus(4).toNumber()
+        const accumulate = utils.fromValue(counter.level,0).minus(STAR_GRID_DEFAULT_LEVEL).toNumber()
         // .minus(new BigNumber(counter.force))
         // .minus(new BigNumber(counter.defense))
         // .minus(new BigNumber(counter.luck))
         // .minus(new BigNumber(counter.move)).toNumber();
         return accumulate>0?accumulate:0
     }
+
     getAccum = (counter:Counter) =>{
         const accumulate = utils.fromValue(counter.level,0)
         .minus(new BigNumber(counter.force))
@@ -62,11 +65,11 @@ class HexInfoCard extends React.Component<Props, any>{
         const {sourceHexInfo,attackHexInfo,onMoveTo,onMove,onShowDistribute,onCapture,lockedInfo,hasCounters,showSimple,owner,
             onShowDetail} = this.props;
         const sourceCounter = sourceHexInfo.counter;
-        const sourceLand = sourceHexInfo.land && sourceHexInfo.land.capacity !="0"?sourceHexInfo.land:undefined;
+        const sourceLand = !isEmptyPlanet(sourceHexInfo.land)?sourceHexInfo.land:undefined;
         const sourceHex = sourceHexInfo.hex;
 
-        const attackCounter = attackHexInfo && attackHexInfo.counter && attackHexInfo.counter.capacity !="0"?attackHexInfo.counter:undefined;
-        const attackLand = attackHexInfo && attackHexInfo.land && attackHexInfo.land.capacity!="0"?attackHexInfo.land:undefined;
+        const attackCounter = attackHexInfo && !isEmptyCounter(attackHexInfo.counter)?attackHexInfo.counter:undefined;
+        const attackLand = attackHexInfo && !isEmptyPlanet(attackHexInfo.land)?attackHexInfo.land:undefined;
         const attackHex = attackHexInfo && attackHexInfo.hex;
 
         const sourceCountdown = sourceCounter ? new BigNumber(sourceCounter.nextOpTime).multipliedBy(1000).toNumber():lockedInfo?
@@ -78,7 +81,6 @@ class HexInfoCard extends React.Component<Props, any>{
         const isOwner = sourceLand && sourceLand.owner == owner;
         const isHome = sourceLand && lockedInfo && (sourceLand.coordinate == lockedInfo.userInfo.userDefaultWaterCoordinate || sourceLand.coordinate == lockedInfo.userInfo.userDefaultEarthCoordinate);
 
-        console.log(isMarker,isOwner,isHome,sourceLand);
         const isMarkerAttack = attackLand && attackLand.marker == owner;
         const isOwnerAttack = attackLand && attackLand.owner == owner;
         const isHomeAttack = attackLand && lockedInfo && (attackLand.coordinate == lockedInfo.userInfo.userDefaultWaterCoordinate || attackLand.coordinate == lockedInfo.userInfo.userDefaultEarthCoordinate);
@@ -116,7 +118,10 @@ class HexInfoCard extends React.Component<Props, any>{
                                 <div><img src="./assets/img/epoch/stargrid/icons/lucky.png" width={20}/></div>
                             </div>
                             <div className="attr">
-                                <div>{sourceCounter.force}</div>
+                                {
+                                    sourceCounter && new BigNumber(sourceCounter.force).toNumber()>0 &&
+                                    <div>{sourceCounter.force}</div>
+                                }
                                 <div>{sourceCounter.defense}</div>
                                 <div>{sourceCounter.move}</div>
                                 <div>{sourceCounter.luck}</div>
@@ -127,7 +132,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                 <div className="life-value">{utils.fromValue(sourceCounter.life,16).dividedBy(new BigNumber(sourceCounter.defense)).toFixed(2)}</div>
                             </div>
                             <div className="capacity">
-                                <img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceCounter.capacity,18).toFixed(2,2)}</span>
+                                <img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.nFormatter(utils.fromValue(sourceCounter.capacity,18),3)}</span>
                             </div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(sourceCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute" onClick={()=>{
@@ -135,14 +140,20 @@ class HexInfoCard extends React.Component<Props, any>{
                                     onShowDistribute()
                                 }
                             }}><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/>
-                                <span>LV{this.getLevel(sourceCounter)}&nbsp;{ isMineCounter && this.getAccum(sourceCounter)>0&&<span><IonText color="secondary">[+{this.getAccum(sourceCounter)}]</IonText></span>}</span>
+                                <span>LV{this.getLevel(sourceCounter)}&nbsp;{ isMineCounter && this.getAccum(sourceCounter)>0&&<small><IonText color="secondary">[+{this.getAccum(sourceCounter)}]</IonText></small>}</span>
                             </div>
                             {ctime}
                             {
-                                sourceLand && sourceLand.capacity!="0" && sourceLand.marker != owner && sourceCounter && lockedInfo && lockedInfo.userInfo &&
+                                onMove && !isEmptyPlanet(sourceLand) && sourceLand.marker != owner && sourceCounter && lockedInfo && lockedInfo.userInfo && (!attackHexInfo || !attackHexInfo.hex) &&
                                 sourceLand.coordinate == lockedInfo.userInfo.userCoordinate &&  <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
                                    onMove(true,false)
                                 }}>Mark</IonButton>
+                            }
+                            {
+                                onMove&&(!sourceLand || sourceLand.capacity == "0") && lockedInfo && sourceCounter.counterId == lockedInfo.userInfo.counter.counterId && (!attackHexInfo || !attackHexInfo.hex) &&
+                                <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
+                                    onMove(false,true)
+                                }}>Create Planet</IonButton>
                             }
                         </div>
                         <div className="eye">
@@ -155,7 +166,7 @@ class HexInfoCard extends React.Component<Props, any>{
                         </div>
                     </div>
                         :
-                        sourceLand&&sourceLand.capacity!="0" && (eyeOff || !sourceCounter || sourceCounter.capacity=="0")?
+                        !isEmptyPlanet(sourceLand) && (eyeOff || !sourceCounter || sourceCounter.capacity=="0")?
                             <div className="owner-info">
                                 <div className="avatar-l">
                                     <div className="hex-head" onClick={()=>{
@@ -167,14 +178,16 @@ class HexInfoCard extends React.Component<Props, any>{
                                         {!showSimple&&sourceHex && <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>}
                                     </div>
                                     {!showSimple && <div className="attr">
+                                        <div><img src="./assets/img/epoch/stargrid/icons/rdefense.png" width={20}/></div>
                                         <div><img src="./assets/img/epoch/stargrid/icons/ldefense.png" width={20}/></div>
                                     </div> }
                                     {!showSimple && <div className="attr">
-                                        <div>-{new BigNumber(sourceLand.level).toNumber()>0?sourceLand.level:new BigNumber(sourceLand.level).plus(1).toNumber()}</div>
+                                        <div>-1</div>
+                                        <div>-{sourceLand && new BigNumber(sourceLand.level).plus(2).toNumber()}</div>
                                     </div> }
                                 </div>
                                 <div className="cap-info">
-                                    <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(sourceLand.capacity,18).toFixed(2,2)}</span></div>
+                                    <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.nFormatter(utils.fromValue(sourceLand.capacity,18),3)}</span></div>
                                     <div className="rate"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/><span>LV{sourceLand.level}</span></div>
                                     {
                                         lockedInfo&&lockedInfo.userInfo.counter.counterId!="0" ? (sourceLand && sourceLand.canCapture||isMarker) && !sourceCounter && onMoveTo && <div className="operator-btn">
@@ -210,8 +223,10 @@ class HexInfoCard extends React.Component<Props, any>{
                                         <CounterSvg/>
                                         {sourceHex && <div className="coo"><small>[{sourceHex.x},{sourceHex.z}]</small></div>}
                                     </div>
-                                    <div className="attr"></div>
-                                    <div className="attr"></div>
+                                    <div className="attr">
+                                        <div><img src="./assets/img/epoch/stargrid/icons/rdefense.png" width={20}/></div>
+                                    </div>
+                                    <div className="attr"><div>-1</div></div>
                                 </div>
                                 <div className="cap-info">
                                     <div style={{border:"none"}}></div>
@@ -260,7 +275,8 @@ class HexInfoCard extends React.Component<Props, any>{
                                     <div><img src="./assets/img/epoch/stargrid/icons/lucky.png" width={20}/></div>
                                 </div>
                                 <div className="attr">
-                                    <div>{attackCounter.force}</div>
+                                    { attackCounter && new BigNumber(attackCounter.force).toNumber()>0 &&
+                                    <div>{attackCounter.force}</div>}
                                     <div>{attackCounter.defense}</div>
                                     <div>{attackCounter.move}</div>
                                     <div>{attackCounter.luck}</div>
@@ -273,7 +289,7 @@ class HexInfoCard extends React.Component<Props, any>{
                             <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackCounter.capacity,18).toFixed(2,2)}</span></div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(attackCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/>
-                                <span>LV{this.getLevel(attackCounter)}&nbsp;<b><IonText color="secondary">[{this.getAccum(attackCounter)}]</IonText></b></span>
+                                <span>LV{this.getLevel(attackCounter)}</span>
                             </div>
                             <div className="operator-btn">
                                 {
@@ -294,7 +310,7 @@ class HexInfoCard extends React.Component<Props, any>{
                             }}/>
                         </div>
                     </div>:
-                        attackLand && attackLand.capacity != "0" && (eyeOffAttack || !attackCounter || attackCounter.capacity=="0") ? <div className="enemy-info">
+                        !isEmptyPlanet(attackLand) && (eyeOffAttack || !attackCounter || attackCounter.capacity=="0") ? <div className="enemy-info">
                             <div className="avatar-l">
                                 <div className="hex-head" onClick={()=>{
                                     if(onShowDetail){
@@ -305,10 +321,12 @@ class HexInfoCard extends React.Component<Props, any>{
                                     {attackHex && <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>}
                                 </div>
                                 {!showSimple && <div className="attr">
+                                    <div><img src="./assets/img/epoch/stargrid/icons/rdefense.png" width={20}/></div>
                                     <div><img src="./assets/img/epoch/stargrid/icons/ldefense.png" width={20}/></div>
                                 </div> }
                                 {!showSimple && <div className="attr">
-                                    <div>-{new BigNumber(attackLand.level).toNumber()>0?sourceLand.level:new BigNumber(attackLand.level).plus(1).toNumber()}</div>
+                                    <div>-1</div>
+                                    <div>-{attackLand && new BigNumber(attackLand.level).plus(2).toNumber()}</div>
                                 </div> }
                             </div>
                             <div className="cap-info">
@@ -321,7 +339,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                                 <IonButton size="small" disabled={sourceCountdown>now} color={attackCounter?"danger":"success"} onClick={()=>{
                                                     onMove(false,false)
                                                 }}>{attackCounter?"ATTACK":"MOVE"}</IonButton>
-                                                {!attackCounter && attackLand && attackLand.capacity!="0" && attackLand.marker != owner &&
+                                                {!attackCounter && !isEmptyPlanet(attackLand) && attackLand.marker != owner &&
                                                 <IonButton size="small" disabled={sourceCountdown>now} color={"secondary"} onClick={()=>{
                                                     onMove(true,false)
                                                 }}>Move&Mark</IonButton>
@@ -348,8 +366,10 @@ class HexInfoCard extends React.Component<Props, any>{
                                         <CounterSvg/>
                                         {attackHex && <div className="coo"><small>[{attackHex.x},{attackHex.z}]</small></div>}
                                     </div>
-                                    <div className="attr"></div>
-                                    <div className="attr"></div>
+                                    <div className="attr">
+                                        <div><img src="./assets/img/epoch/stargrid/icons/rdefense.png" width={20}/></div>
+                                    </div>
+                                    <div className="attr"><div>-1</div></div>
                                 </div>
                                 <div className="cap-info">
                                     <div style={{border:"none"}}></div>
@@ -376,7 +396,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                 </div>
                             </div>:
                             !showSimple &&
-                            <div style={{flex:1}}>
+                            <div style={{flex:1,background:"rgb(108 81 75 / 50%)"}}>
 
                             </div>
                 }

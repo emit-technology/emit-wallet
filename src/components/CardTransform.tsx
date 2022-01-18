@@ -26,9 +26,9 @@ import {arrowForwardOutline, chevronForwardOutline, copyOutline, createOutline,}
 import ModifyName from "./epoch/ModifyName";
 import BigNumber from "bignumber.js";
 import {BRIDGE_NFT} from "../config";
-import {calcCounterRgb} from "./hexagons/utils";
 import CounterAttribute from "./epoch/CounterAttribute";
 import CounterSvg from "../pages/epoch/starGrid/counter-svg";
+import HexInfoCard from "../pages/epoch/starGrid/hex-info";
 
 interface Props {
     info:NftInfo
@@ -317,7 +317,8 @@ class CardTransform extends React.Component<Props, State> {
                                                 :
                                                 counter ?
                                                     <>
-                                                        <CounterAttribute counter={counter}/>
+                                                        {/*<CounterAttribute counter={counter}/>*/}
+                                                        <HexInfoCard sourceHexInfo={{counter:counter}} />
                                                     </>:
                                                 info.meta.description
                                             }

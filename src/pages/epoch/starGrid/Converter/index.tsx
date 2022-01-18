@@ -14,8 +14,11 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
         new BigNumber(enDetail.inputEN).dividedBy(new BigNumber(enDetail.driverCapacity)).toNumber() * 80; ;
     const counterPercent =  new BigNumber(enDetail.driverOutEN).dividedBy(new BigNumber(enDetail.counterCapacity)).toNumber()>1?80:
         new BigNumber(enDetail.driverOutEN).dividedBy(new BigNumber(enDetail.counterCapacity)).toNumber() * 80; ;
-    const powerPercent = new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.planetCapacity)).toNumber()>1?80:
-        new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.planetCapacity)).toNumber() * 80;
+    const powerPercent = new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.totalPower)).toNumber()>1?80:
+        new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.totalPower)).toNumber() * 80;
+
+    const planetPercent = new BigNumber(enDetail.planetCapacity).dividedBy(new BigNumber(enDetail.totalPower)).toNumber()>1?80:
+        new BigNumber(enDetail.planetCapacity).dividedBy(new BigNumber(enDetail.totalPower)).toNumber() * 80;
 
     const outputNe = new BigNumber(enDetail.totalPower).comparedTo(new BigNumber(enDetail.counterOutEN)) == -1?
         new BigNumber(enDetail.totalPower):new BigNumber(enDetail.counterOutEN);
@@ -26,14 +29,14 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                 <div className="boll-box">
                     <div className="convert-title">Driver</div>
                     <div className="ne-input" style={{textAlign:"right",paddingRight:"6px"}}>
-                        {utils.nFormatter(utils.fromValue(enDetail.inputEN,18).toFixed(3,2),3)}
+                        {utils.nFormatter(utils.fromValue(enDetail.inputEN,18),3)}
                         <div className="ne-input-right"></div>
-                        <div className="ne-input-desc" style={{textAlign:"right",paddingRight:"6px"}}>input</div>
+                        <div className="ne-input-desc" style={{textAlign:"right",paddingRight:"6px"}}>EN(B)</div>
                     </div>
                     <div style={{position:"relative"}}>
                         <div className="bundle-boll">
                             <div>
-                                {utils.nFormatter(utils.fromValue(enDetail.driverCapacity,18).toFixed(3,2),3)}
+                                {utils.nFormatter(utils.fromValue(enDetail.driverCapacity,18),3)}
                             </div>
                             <div>
                             </div>
@@ -51,13 +54,13 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
 
                 <div className="boll-box">
                     <div className="convert-title">Counter</div>
-                    <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.driverOutEN,18).toFixed(3,2),3)}
+                    <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.driverOutEN,18),3)}
                         <div className="ne-input-right"></div>
-                        <div className="ne-input-desc">input</div>
+                        <div className="ne-input-desc">EN(D)</div>
                     </div>
                     <div style={{position:"relative"}}>
                         <div className="counter-boll">
-                            <div>{utils.nFormatter(utils.fromValue(enDetail.counterCapacity,18).toFixed(3,2),3)}</div>
+                            <div>{utils.nFormatter(utils.fromValue(enDetail.counterCapacity,18),3)}</div>
                             <div>
                             </div>
                             <div className="counter-boll-before" style={{height:`${Math.floor(counterPercent)}px`}} ></div>
@@ -72,33 +75,28 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                     </div>
                 </div>
 
-                <div className="boll-box">
-                    <div className="convert-title">Planet</div>
-                    <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.counterOutEN,18).toFixed(3,2),3)}
+                <div className="boll-box" style={{minWidth:"200px"}}>
+                    <div className="convert-title">Planet <small>(Capacity: {utils.nFormatter(utils.fromValue(enDetail.planetCapacity,18),3)})</small></div>
+                    <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.counterOutEN,18),3)}
                         <div className="ne-input-right"></div>
-                        <div className="ne-input-desc">input</div>
+                        <div className="ne-input-desc">EN(C)</div>
                     </div>
                     <div style={{position:"relative"}}>
-                        <div className="power-bundle-boll">
-                            <div>{utils.nFormatter(utils.fromValue(enDetail.planetCapacity,18).toFixed(3,2),3)}</div>
+                        <div className="power-bundle-boll" style={{border:"3px solid darkred",background:"darkred"}}>
+                            <div>{utils.nFormatter(utils.fromValue(enDetail.totalPower,18),3)}</div>
                             <div>
                             </div>
                             <div className="power-bundle-boll-before"  style={{height:`${Math.floor(powerPercent)}px`}}></div>
                         </div>
                         <div className="power-bundle-shadow-boll"></div>
-                        <div className="capacity-text"><small>Capacity</small></div>
-                    </div>
-                    <div className="boll-text">|</div>
-                    <div className="rate-boll total-power-boll">
-                        <div>{utils.nFormatter(utils.fromValue(enDetail.totalPower,18).toFixed(3,2),2)}</div>
-                        <div className="rate-text"><small>Power</small></div>
+                        <div className="capacity-text"><small>Power</small></div>
                     </div>
                 </div>
                 <div className="boll-box">
                     <div className="convert-title">Calc</div>
-                    <div className="ne-input">{utils.nFormatter(utils.fromValue(outputNe,18),3)}
+                    <div className="ne-input" style={{width:"150px",left:"-120px"}}>{utils.nFormatter(utils.fromValue(outputNe,18),3)}
                         <div className="ne-input-right"></div>
-                        <div className="ne-input-desc">input</div>
+                        <div className="ne-input-desc">EN(P)</div>
                     </div>
                     <div className="rate-boll en-boll">
                         <div>{
@@ -112,7 +110,7 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                     </div>
                     <div className="boll-text">=</div>
                     <div className="rate-boll outne-boll">
-                        <div><small>{utils.nFormatter(utils.fromValue(enDetail.output,18).toFixed(3,2),3)} {symbol}</small></div>
+                        <div><small>{utils.nFormatter(utils.fromValue(enDetail.output,18),3)} {symbol}</small></div>
                     </div>
                 </div>
             </div>

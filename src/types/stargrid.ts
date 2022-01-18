@@ -186,9 +186,14 @@ export interface UserDeposit{
     index:string
     creator:string;
     enType:StarGridType
-    depositType:number
+    depositType:DepositType
     count:number
     totalAmount:number
     createTime:number
-    canWithdraw:boolean
+    canWithDraw:boolean
+}
+
+export enum DepositType{
+   LP,
+   BUSD,
 }

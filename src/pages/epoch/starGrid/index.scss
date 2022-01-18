@@ -35,7 +35,7 @@ svg g polygon {
 
 svg g text {
   font-size: 1px;
-  fill: #fff;
+  fill: rgba(159, 3, 3, 0.3);;
   //fill-opacity: 0.7;
   //transition: fill-opacity .5s;
 
@@ -122,6 +122,9 @@ svg path {
   .cap-info{
     width: 50% !important;
   }
+  .cap-info div{
+    max-width: 120px !important;
+  }
 }
 @media (min-width: 992px) {
   .counter-info {
@@ -138,7 +141,11 @@ svg path {
     min-width: 100px;
     min-height: 100px;
   }
+  .cap-info div{
+    max-width: 120px !important;
+  }
 }
+
 @media (min-width: 1200px) {
   .counter-info {
     width: 60vw;
@@ -147,6 +154,9 @@ svg path {
   .avatar-l .hex-head{
     min-width: 100px;
     min-height: 100px;
+  }
+  .cap-info div{
+    max-width: 120px !important;
   }
 }
 @media (min-width: 1500px) {
@@ -157,6 +167,9 @@ svg path {
   .avatar-l .hex-head{
     min-width: 100px;
     min-height: 100px;
+  }
+  .cap-info div{
+    max-width: 120px !important;
   }
 }
 
@@ -218,6 +231,7 @@ svg path {
   margin: 0px 12px 3px;
   border-radius: 5px;
   position: relative;
+  max-width: 90px;
 }
 .cap-info div img{
   position: absolute;
@@ -345,6 +359,10 @@ svg path {
   --max-width: 512px;
   --border-radius: 15px;
 }
+.counter-list-half{
+  max-height: 25vh;
+  overflow-y: scroll;
+}
 .counter-list-md{
   max-height: 90%;
   overflow-y: scroll;
@@ -371,18 +389,26 @@ svg path {
   margin: 2px;
   height: 30px;
 }
-.counter-list{
-  max-height: 30vh;
+@mixin counter-select{
   overflow-y: scroll;
   border: 1px solid #ddd;
   padding: 6px;
   margin: 6px 12px 0;
   border-radius: 15px;
 }
+.counter-list{
+  max-height: 30vh;
+  @include counter-select
+}
+.counter-list-select{
+  max-height: 60vh;
+  @include counter-select
+}
 .operator-btn{
   //position: absolute !important;
   bottom: 0;
   border: none !important;
+  overflow: hidden;
   //right: 0;
 }
 

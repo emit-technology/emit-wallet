@@ -3,6 +3,7 @@ import { ORIENTATIONS_CONSTS, OrientationsEnum } from "./orientation";
 import BigNumber from "bignumber.js";
 import BN from "bn.js";
 import {Land} from "../../../types";
+import {isEmptyCounter, isEmptyPlanet} from "../../../pages/epoch/starGrid/utils";
 
 const linearInterpolation = (a: number, b: number, t: number): number => a + ((b - a) * t);
 
@@ -91,29 +92,33 @@ export const reachableHexesNeighbor = (movement:number,powerMap:Map<string,numbe
   if(movement < 0 ){
     return [];
   }
-  if(movement ==0){
+  const info = pathHexes[pathHexes.length-1];
+  const origin = pathHexes[0];
+  const force = origin.counter ? new BigNumber(origin.counter.force).toNumber():0
+  if(info){
     for(let dir =0;dir<6;dir++){
-      const neighbor = neighboor(pathHexes[pathHexes.length-1].hex,dir as Directions)
-      const arr = langArr && langArr.length>0 && langArr.filter(v=> v.coordinate == toUINT256(neighbor) && v.counter && v.counter.capacity!="0")
-      if(arr && arr.length>0){
+      const neighbor = neighboor(info.hex,dir as Directions)
+      const arr = langArr && langArr.length>0 && langArr.filter(v=> v.coordinate == toUINT256(neighbor))
+      if(arr && arr.length>0 && force>0 && !isEmptyCounter(arr[0].counter)){
         visited.push(neighbor)
+      }else {
+        if(!arr || arr.length==0 || isEmptyPlanet(arr[0]) || isEmptyCounter(arr[0].counter)){
+          const power = powerMap.has(neighbor.uKey())?powerMap.get(neighbor.uKey()):1;
+          if(movement>=power){
+            visited.push(neighbor)
+          }
+        }
       }
     }
     return visited
   }
-  // movement += 1;
-  for(let dir =0;dir<6;dir++){
-    const neighbor = neighboor(pathHexes[pathHexes.length-1].hex,dir as Directions)
-    const power = powerMap.has(neighbor.uKey())?powerMap.get(neighbor.uKey()):1;
-    if(movement>=power){
-      visited.push(neighbor)
-    }
-  }
-  return visited;
 }
 
 
 export function containHex(arr:Array<Hex>,hex:Hex){
+  if(!arr){
+   return false;
+  }
   for(let h of arr){
     if(h.equalHex(hex)){
       return true
@@ -182,6 +187,7 @@ export function testHexGrids(){
   const hex2 = toAxial(new BigNumber(5636153).toString(10));
   const hex3 = toAxial(new BigNumber(5636239).toString(10));
   console.log(hex,hex2,hex3,"tessssss",toOpCode([1,2,3,4],4))
+
 }
 
 export const rgbToHex = function(color) {
@@ -223,18 +229,18 @@ export const noCounter = (hex:HexInfo):boolean =>{
 
 export const calcCounterRgb = (rate:number,black:boolean = false)=>{
   if(black){
-    const rgba = [217,122,0];
-    const rgbb = [248,194,31];//7d11ef    f265ff
-    const rgbA = [226,208,0];
-    const rgbB = [229,229,152];
-    const start = convertRgb(rgba,rgbA,rate);
-    const end = convertRgb(rgbb,rgbB,rate)
+    const rgba = [253,254,135];
+    const rgbb = [243,247,207];//7d11ef    f265ff
+    const rgbA = [157,55,0];
+    const rgbB = [248,141,0];
+    const start = convertRgb(rgba,rgbA,rate,true);
+    const end = convertRgb(rgbb,rgbB,rate,true)
     return [start,end]
   }else{
     const rgba = [0,136,207];
     const rgbb = [47,187,246];//7d11ef    f265ff
-    const rgbA = [125,17,239];
-    const rgbB = [242,101,255];
+    const rgbA = [36,5,74];
+    const rgbB = [234,98,252];
 
     const start = convertRgb(rgba,rgbA,rate);
     const end = convertRgb(rgbb,rgbB,rate)
@@ -242,10 +248,10 @@ export const calcCounterRgb = (rate:number,black:boolean = false)=>{
   }
 }
 
-const convertRgb = (rgba:Array<number>,rgbA:Array<number>,rate:number)=>{
+const convertRgb = (rgba:Array<number>,rgbA:Array<number>,rate:number,black?:boolean)=>{
   const arr = [];
   for(let i=0;i<3;i++){
-    arr.push(Math.floor((rgba[i]*rate+rgbA[i]*(100-rate))/100))
+    arr.push(Math.floor((rgba[i]*(100-rate)+rgbA[i]*(rate))/100))
   }
   return arr
 }

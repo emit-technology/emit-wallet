@@ -23,6 +23,7 @@ import CounterSvg from "./counter-svg";
 import HexInfoCard from "./hex-info";
 import {toAxial} from "../../../components/hexagons/utils";
 import * as utils from "../../../utils";
+import {isEmptyPlanet} from "./utils";
 interface Props {
     show: boolean
     onOk?: (terms:number,baseAmount:BigNumber,attachAmount:BigNumber) => void;
@@ -106,7 +107,7 @@ export const Prepare: React.FC<Props> = ({show,lockedInfo, onOk, onCancel,onSele
                             <IonInput ref={attachAmountRef} placeholder="0.00"/>
                         </IonItem>
                         {
-                            defaultPlanet && defaultPlanet.capacity != "0" && <IonItem onClick={()=>{
+                            !isEmptyPlanet(defaultPlanet) && <IonItem onClick={()=>{
                                 onSelectPlanet()
                             }}>
                                 <IonLabel className="ion-text-wrap">

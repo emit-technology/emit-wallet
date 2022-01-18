@@ -5,6 +5,7 @@ import {calculateCoordinates, HexGrid} from "../../../components/hexagons";
 import * as utils from "../../../utils";
 import {blueColors, yellowColors} from "./index";
 import BigNumber from "bignumber.js";
+import {STAR_GRID_DEFAULT_LEVEL} from "../../../config";
 
 interface Props {
     counter?:Counter
@@ -30,7 +31,7 @@ class CounterSvg extends React.Component<Props, any>{
             style:counter && counter.enType == StarGridType.WATER?"white":"black",
             backgroundColor: backgroundColor
         }
-        if(counter && new BigNumber(counter.level).toNumber()>=1){
+        if(counter && new BigNumber(counter.level).toNumber()> STAR_GRID_DEFAULT_LEVEL){
             piece.style = counter.enType == StarGridType.WATER?"whiteSword":"blackSword";
         }
         const cornerCoords = calculateCoordinates(ORIENTATIONS_CONSTS.flat, hexSize*0.8);
@@ -66,8 +67,8 @@ class CounterSvg extends React.Component<Props, any>{
                 orientation={OrientationsEnum.pointy}
                 spacing={1}
                 colorsDefs={{
-                    colorsBlue:[],
-                    colorsYellow:[],
+                    colorsBlue:[landStyle],
+                    colorsYellow:[landStyle],
                     pieceColors:[backgroundColor]
                 }}
             >

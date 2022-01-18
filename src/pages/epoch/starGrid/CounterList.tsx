@@ -19,6 +19,7 @@ import BigNumber from "bignumber.js";
 import HexInfoCard from "./hex-info";
 import {axialCoordinatesToCube, toAxial} from "../../../components/hexagons/utils";
 import {chevronForward} from "ionicons/icons";
+import {isEmptyPlanet} from "./utils";
 interface Props {
     title?: string
     show: boolean
@@ -56,13 +57,11 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                     </IonListHeader>
                 }
                 <IonItemDivider  sticky color="primary">Select Counter</IonItemDivider>
-                <div className="counter-list">
+                <div className="counter-list-half">
                     <IonRadioGroup ref={selectRef} onIonChange={(e)=>{
                         const counters = data.filter(c=> c && c.counterId == e.detail.value);
                         onCallback(counters[0])
                     }}>
-
-
                         {
                             data && data.map(v=>{
                                 if(!v){
@@ -95,7 +94,7 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                     </IonItem>
                 }
                 {
-                    defaultPlanet && defaultPlanet.capacity!="0" && <IonItem detail detailIcon={chevronForward} onClick={()=>{
+                    !isEmptyPlanet(defaultPlanet) && <IonItem detail detailIcon={chevronForward} onClick={()=>{
                         onSelectPlanet()
                     }}><IonLabel>
                         Default Planet
