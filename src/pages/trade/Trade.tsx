@@ -54,49 +54,51 @@ class Trade extends React.Component<any, State>{
                         <IonTitle>{i18n.t("trade")}</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen>
+                <IonContent fullscreen style={{textAlign:"center"}}>
 
-                    <IonList>
-                        <IonItem onClick={()=>{url.tradeTokenSwap()}}>
-                            <IonAvatar slot="start" className="ex-item-avatar" color="primary">
-                                <img src="./assets/img/market/pancake.jpeg" />
-                            </IonAvatar>
-                            <IonLabel className="ion-text-wrap">
-                                <div className="ex-item">
-                                    <div><IonText color="primary">{i18n.t("swap")}</IonText></div>
-                                    {/*<div><IonText color="secondary">Wrapped PancakeSwap</IonText></div>*/}
-                                    <div><IonText color="medium">Wrapped PancakeSwap</IonText></div>
-                                </div>
-                            </IonLabel>
-                        </IonItem>
-                        <IonItem onClick={()=>{url.tradeNftMarket()}}>
-                            <IonAvatar slot="start" className="ex-item-avatar" color="primary">
-                                <img src="./assets/img/market/remain.png" />
-                            </IonAvatar>
-                            <IonLabel className="ion-text-wrap">
-                                <div className="ex-item">
-                                    <div><IonText color="primary">{i18n.t("relics")} {i18n.t("market")}</IonText></div>
-                                    <div><IonText color="medium">NFT free trading market</IonText></div>
-                                </div>
-                                {
-                                    marketVolume &&
-                                    <IonText color="secondary">
-                                        <p style={{lineHeight:"1.5em"}}>
-                                            24H Vol:&nbsp;&nbsp;<IonText color="secondary" className="font-weight-800">{marketVolume.count}</IonText><br/>
-                                            24H Total: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
-                                            return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.amount,18),3)} {v.cy}</IonText>
-                                        })}<br/>
-                                            24H High: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
-                                            return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.high,18),3)} {v.cy}</IonText>
-                                        })}
-                                        </p>
-                                    </IonText>
+                    <div className="nft-tab-box">
+                        <IonList>
+                            <IonItem onClick={()=>{url.tradeTokenSwap()}}>
+                                <IonAvatar slot="start" className="ex-item-avatar" color="primary">
+                                    <img src="./assets/img/market/pancake.jpeg" />
+                                </IonAvatar>
+                                <IonLabel className="ion-text-wrap">
+                                    <div className="ex-item">
+                                        <div><IonText color="primary">{i18n.t("swap")}</IonText></div>
+                                        {/*<div><IonText color="secondary">Wrapped PancakeSwap</IonText></div>*/}
+                                        <div><IonText color="medium">Wrapped PancakeSwap</IonText></div>
+                                    </div>
+                                </IonLabel>
+                            </IonItem>
+                            <IonItem onClick={()=>{url.tradeNftMarket()}}>
+                                <IonAvatar slot="start" className="ex-item-avatar" color="primary">
+                                    <img src="./assets/img/market/remain.png" />
+                                </IonAvatar>
+                                <IonLabel className="ion-text-wrap">
+                                    <div className="ex-item">
+                                        <div><IonText color="primary">{i18n.t("relics")} {i18n.t("market")}</IonText></div>
+                                        <div><IonText color="medium">NFT free trading market</IonText></div>
+                                    </div>
+                                    {
+                                        marketVolume &&
+                                        <IonText color="secondary">
+                                            <p style={{lineHeight:"1.5em"}}>
+                                                24H Vol:&nbsp;&nbsp;<IonText color="secondary" className="font-weight-800">{marketVolume.count}</IonText><br/>
+                                                24H Total: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
+                                                return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.amount,18),3)} {v.cy}</IonText>
+                                            })}<br/>
+                                                24H High: {marketVolume.amounts&&marketVolume.amounts.map(v=>{
+                                                return <IonText color="secondary" className="font-weight-800">&nbsp;&nbsp;{nFormatter(fromValue(v.high,18),3)} {v.cy}</IonText>
+                                            })}
+                                            </p>
+                                        </IonText>
 
-                                }
-                            </IonLabel>
+                                    }
+                                </IonLabel>
 
-                        </IonItem>
-                    </IonList>
+                            </IonItem>
+                        </IonList>
+                    </div>
                 </IonContent>
             </IonPage>
 

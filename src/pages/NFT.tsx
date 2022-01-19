@@ -100,7 +100,6 @@ class NFT extends React.Component<any, any> {
         this.setState({
             ticketMap:tmp
         })
-        console.log(tmp)
         // this.initDriver(v).catch(e=>{
         //     console.log(e)
         // })
@@ -119,41 +118,42 @@ class NFT extends React.Component<any, any> {
                     {/*</IonLabel>*/}
                 </IonToolbar>
             </IonHeader>
-            <IonContent fullscreen >
-                <div style={{padding:"12px 12px 0"}}>
-                    <IonSegment mode="ios"value={tab} onIonChange={e => this.setTab(e.detail.value)}>
-                        {/*<IonSegmentButton mode="ios" value="DRIVER">*/}
-                        {/*    <IonLabel>Driver</IonLabel>*/}
-                        {/*</IonSegmentButton>*/}
-                        <IonSegmentButton value="DEVICES">
-                            <IonLabel>DEVICES</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton value="WRAPPED_DEVICES">
-                            <IonLabel>RELICS</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton mode="ios" value="MEDAL">
-                            <IonLabel>MEDAL</IonLabel>
-                        </IonSegmentButton>
-                        <IonSegmentButton mode="ios" value="COUNTER">
-                            <IonLabel>COUNTER</IonLabel>
-                        </IonSegmentButton>
-                    </IonSegment>
-                </div>
-                {["MEDAL","DEVICES","WRAPPED_DEVICES","COUNTER"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
+            <IonContent fullscreen style={{textAlign:"center"}}>
+                <div  className="nft-tab-box">
+                    <div style={{padding:"12px 12px 0"}}>
+                        <IonSegment mode="ios"value={tab} onIonChange={e => this.setTab(e.detail.value)}>
+                            {/*<IonSegmentButton mode="ios" value="DRIVER">*/}
+                            {/*    <IonLabel>Driver</IonLabel>*/}
+                            {/*</IonSegmentButton>*/}
+                            <IonSegmentButton value="DEVICES">
+                                <IonLabel>DEVICES</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton value="WRAPPED_DEVICES">
+                                <IonLabel>RELICS</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton mode="ios" value="MEDAL">
+                                <IonLabel>MEDAL</IonLabel>
+                            </IonSegmentButton>
+                            <IonSegmentButton mode="ios" value="COUNTER">
+                                <IonLabel>COUNTER</IonLabel>
+                            </IonSegmentButton>
+                        </IonSegment>
+                    </div>
+                    {["MEDAL","DEVICES","WRAPPED_DEVICES","COUNTER"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
                     <div className="card-page">
-                    <div className="card-inset">
-                    {
-                        ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {
-                            //lines={index == data.length-1?"none":"inset"}
-                            // const meta = v.metaData?v.metaData:{};
-                            console.log(v,"nftinfo")
-                            return <CardTransform info={v}/>
-                        })
-                    }
+                        <div className="card-inset">
+                            {
+                                ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {
+                                    //lines={index == data.length-1?"none":"inset"}
+                                    // const meta = v.metaData?v.metaData:{};
+                                    return <CardTransform info={v} key={index}/>
+                                })
+                            }
 
+                        </div>
                     </div>
-                    </div>
-                }
+                    }
+                </div>
             </IonContent>
         </IonPage>;
     }

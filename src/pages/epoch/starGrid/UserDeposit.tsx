@@ -11,6 +11,8 @@ import {
 import {DepositType, StarGridType, UserDeposit} from "../../../types";
 import {formatDate, fromValue, nFormatter} from "../../../utils";
 import {NoData} from "./NoData";
+import i18n from "../../../locales/i18n";
+
 interface Props{
     title?:string
     show:boolean
@@ -19,8 +21,6 @@ interface Props{
     data: Array<UserDeposit>
 }
 export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWithdraw})=>{
-
-    const inputRef:any = React.createRef();
 
     return (<>
         <IonModal
@@ -41,15 +41,15 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
                 <IonItem color="primary">
                     <IonLabel className="ion-text-wrap">
                         <IonRow>
-                            <IonCol size="3"><IonLabel>Index</IonLabel></IonCol>
-                            <IonCol size="6"><IonLabel>Info</IonLabel></IonCol>
-                            <IonCol size="3"><IonLabel>Operator</IonLabel></IonCol>
+                            <IonCol size="3"><IonLabel>{i18n.t("index")}</IonLabel></IonCol>
+                            <IonCol size="6"><IonLabel>{i18n.t("info")}</IonLabel></IonCol>
+                            <IonCol size="3"><IonLabel>{i18n.t("operator")}</IonLabel></IonCol>
                         </IonRow>
                     </IonLabel>
                 </IonItem>
                 {
                     data && data.length>0  ?  data.map((v,i)=>{
-                        return <IonItem>
+                        return <IonItem key={i}>
                             <IonLabel className="ion-text-wrap">
                                 <IonRow>
                                     <IonCol size="3">
@@ -58,18 +58,18 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
                                     </IonCol>
                                     <IonCol size="6">
                                         <p>
-                                               Deposited&nbsp;<b><IonText color="secondary">{nFormatter(fromValue(v.totalAmount,18),3)}</IonText></b>
+                                            {i18n.t("deposited")}&nbsp;<b><IonText color="secondary">{nFormatter(fromValue(v.totalAmount,18),3)}</IonText></b>
                                                &nbsp;<IonText color="primary">{
                                                    DepositType.LP == v.depositType ?`${StarGridType[v.enType]}-BUSD-LQ`:"BUSD"
                                            }</IonText>
                                         </p>
-                                        <p>Created&nbsp;<b><IonText color="secondary">{v.count}</IonText></b>&nbsp;<IonText color="primary">EMIT-{StarGridType[v.enType]}</IonText></p>
-                                        <p>{v.canWithDraw ? <IonBadge color="success">FINISHED</IonBadge>:<IonBadge>STAKING</IonBadge>}</p>
+                                        <p>{i18n.t("created")}&nbsp;<b><IonText color="secondary">{v.count}</IonText></b>&nbsp;<IonText color="primary">EMIT-{StarGridType[v.enType]}</IonText></p>
+                                        <p>{v.canWithDraw ? <IonBadge color="success">{i18n.t("finished")}</IonBadge>:<IonBadge>{i18n.t("staking")}</IonBadge>}</p>
                                     </IonCol>
                                     <IonCol size="3">
                                         <IonButton mode="ios" expand="block" fill="outline" size="small" onClick={()=>{
                                            onWithdraw(v)
-                                        }}>Withdraw</IonButton>
+                                        }}>{i18n.t("withdraw")}</IonButton>
                                     </IonCol>
                                 </IonRow>
                             </IonLabel>
@@ -89,7 +89,7 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
             </div>
             <IonRow>
                 <IonCol size={"12"}>
-                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CLOSE</IonButton>
+                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("close")}</IonButton>
                 </IonCol>
             </IonRow>
         </IonModal>

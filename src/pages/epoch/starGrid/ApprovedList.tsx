@@ -12,6 +12,7 @@ import {
 } from "@ionic/react"
 import {StarGridTrustInfo} from "../../../types";
 import {fromValue} from "../../../utils";
+import i18n from "../../../locales/i18n"
 interface Props{
     title?:string
     show:boolean
@@ -42,14 +43,14 @@ export const ApprovedList:React.FC<Props> = ({show,title,onCancel,data,onCancelA
                 }
                 {data &&
                 <IonItemDivider mode="md">
-                    You have trusted <IonText color="secondary">&nbsp;{data.approvedCount}&nbsp;</IonText> users,
-                    and <IonText color="secondary">&nbsp;{data.beApprovedCount}&nbsp;</IonText> users trusted you,
-                    the trust rate is <IonText color="secondary">&nbsp;{fromValue(data.trustRate,16).toFixed(2)}%&nbsp;</IonText>
+                    To: <IonText color="secondary"><b>&nbsp;{data.approvedCount}&nbsp;</b></IonText> users,
+                    From: <IonText color="secondary"><b>&nbsp;{data.beApprovedCount}&nbsp;</b></IonText> users,
+                    Added: <IonText color="secondary"><b>&nbsp;{fromValue(data.trustRate,16).toFixed(2)}%&nbsp;</b></IonText>
                 </IonItemDivider>}
                 {data && data.approved && data.approved.length>0 && <IonItemDivider  sticky color="primary">Trusted User List</IonItemDivider>}
                 {
                     data && data.approved &&  data.approved.map((v,i)=>{
-                        return <IonItem>
+                        return <IonItem key={i}>
                             <IonLabel className="ion-text-wrap">
                                 <IonRow>
                                     <IonCol size="2">
@@ -61,28 +62,28 @@ export const ApprovedList:React.FC<Props> = ({show,title,onCancel,data,onCancelA
                                     <IonCol size="3">
                                         <IonButton mode="ios" expand="block" fill="outline" size="small" onClick={()=>{
                                             onCancelApprove(v.user)
-                                        }}>Untrust</IonButton>
+                                        }}>{i18n.t("untrust")}</IonButton>
                                     </IonCol>
                                 </IonRow>
                             </IonLabel>
                         </IonItem>
                     })
                 }
-                <IonItemDivider  sticky color="primary">Trust New User</IonItemDivider>
+                <IonItemDivider  sticky color="primary">{i18n.t("trustNewUser")}</IonItemDivider>
                 <IonItem>
-                    <IonLabel position={"stacked"}>BSC Address</IonLabel>
+                    <IonLabel position={"stacked"}>BSC {i18n.t("address")}</IonLabel>
                     <IonInput ref={inputRef} placeholder="0x00000000000000000..."/>
                 </IonItem>
             </IonList>
             </div>
             <IonRow>
                 <IonCol size={"4"}>
-                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("cancel")}</IonButton>
                 </IonCol>
                 <IonCol size={"8"}>
                     <IonButton expand="block" mode="ios" onClick={()=>{
                         onApprove(inputRef.current.value);
-                    }}>Trust</IonButton>
+                    }}>{i18n.t("trust")}</IonButton>
                 </IonCol>
             </IonRow>
         </IonModal>

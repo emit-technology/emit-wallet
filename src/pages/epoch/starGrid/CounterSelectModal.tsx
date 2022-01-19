@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-    IonAvatar, IonButton, IonCol, IonInput,
+    IonButton, IonCol,
     IonItem,
     IonItemDivider,
     IonLabel,
@@ -12,7 +12,7 @@ import {
 import {Counter} from "../../../types";
 import HexInfoCard from "./hex-info";
 import {NoData} from "./NoData";
-
+import i18n from "../../../locales/i18n"
 interface Props{
    title?:string
    show:boolean
@@ -41,18 +41,18 @@ export const CounterSelectModal:React.FC<Props> =({title,show,onOk,onCancel,data
                                 {title}
                             </IonListHeader>
                         }
-                        <IonItemDivider  sticky color="primary">Select Counter</IonItemDivider>
+                        <IonItemDivider  sticky color="primary">{i18n.t("select")} Counter</IonItemDivider>
                         <div className="counter-list-select">
                             {
                                 data && data.length>0 ?
                                     <IonRadioGroup ref={selectRef}>
                                         {
-                                            data && data.map(v=>{
+                                            data && data.map((v,i)=>{
                                                 if(!v){
                                                     return <></>
                                                 }
                                                 return v && <>
-                                                    <IonItem>
+                                                    <IonItem key={i}>
                                                         <IonRadio slot="start" mode="md" value={v.counterId} />
                                                         <IonLabel>
                                                             <HexInfoCard sourceHexInfo={{counter:v}}/>
@@ -69,7 +69,9 @@ export const CounterSelectModal:React.FC<Props> =({title,show,onOk,onCancel,data
                 </div>
                 <IonRow>
                     <IonCol size="4">
-                        <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                        <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">
+                            {i18n.t("cancel")}
+                        </IonButton>
                     </IonCol>
                     <IonCol  size="8">
                         <IonButton mode="ios" expand="block" onClick={() => {
@@ -77,7 +79,7 @@ export const CounterSelectModal:React.FC<Props> =({title,show,onOk,onCancel,data
                                 const counterId = selectRef.current.value;
                                 onOk(counterId)
                             }
-                        }} color="primary">OK</IonButton>
+                        }} color="primary">{i18n.t("ok")}</IonButton>
                     </IonCol>
                 </IonRow>
             </IonModal>

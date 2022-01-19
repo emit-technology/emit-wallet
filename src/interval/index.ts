@@ -19,7 +19,7 @@ class Interval {
         if(breakFlag){
             this.latestOpTime = Date.now();
             this.interValId = window.setInterval(() => {
-                if(this.latestOpTime - Date.now() < 10 * 60 * 100){
+                if(Date.now() - this.latestOpTime  < 10 * 60 * 1000){
                     fn()
                 }
             }, t)

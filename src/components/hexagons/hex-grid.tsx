@@ -9,6 +9,7 @@ export interface HexGridProps extends LayoutProps {
   viewBox?: string;
   children: React.ReactElement;
     colorsDefs:ColorsDefs;
+    single?:boolean
 }
 
 interface ColorsDefs{
@@ -24,6 +25,7 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
       height = 600,
       viewBox = "-50 -50 100 100",
         colorsDefs,
+        single,
       children,
       ...layoutProps
     },
@@ -52,18 +54,18 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
             <filter id="shadow3">
                 <feDropShadow dx="0" dy="0" stdDeviation={0.15} floodColor="#fff"/>
             </filter>
-            {colorsDefs.colorsYellow.map(v=>{
+            {colorsDefs.colorsYellow.map((v,i)=>{
                 const y = new BigNumber(v,16).toNumber()%5 +1;
-                return <filter id={`spotlight_${v}`} filterUnits="objectBoundingBox">
+                return <filter key={i} id={`spotlight${single?"_t":""}_${v}`} filterUnits="objectBoundingBox">
                     <feImage href={`./assets/img/epoch/stargrid/yellow/${y}.png`} result="ffImg"/>
                     <feFlood result="floodFill"  floodColor={`#${v}`} floodOpacity="1" width="100%" height="100%"/>
                     <feBlend in="ffImg" mode="overlay" in2="floodFill" result="fBle"/>
                     <feComposite in2="ffImg" operator="in"/>
                 </filter>
             })}
-            {colorsDefs.colorsBlue.map(v=>{
+            {colorsDefs.colorsBlue.map((v,i)=>{
                 const y = new BigNumber(v,16).toNumber()%5 +1;
-                return <filter id={`spotlight_${v}`} filterUnits="objectBoundingBox">
+                return <filter key={i} id={`spotlight${single?"_t":""}_${v}`} filterUnits="objectBoundingBox">
                     <feImage href={`./assets/img/epoch/stargrid/blue/${y}.png`} result="ffImg"/>
                     <feFlood result="floodFill"  floodColor={`#${v}`} floodOpacity="1" width="100%" height="100%"/>
                     <feBlend in="ffImg" mode="overlay" in2="floodFill" result="fBle"/>
@@ -71,8 +73,8 @@ export const HexGrid = React.forwardRef<SVGSVGElement, HexGridProps>(
                 </filter>
             })}
             {
-                colorsDefs.pieceColors.map(p=>{
-                    return <linearGradient id={`${rgbToHex(p[0])}_${rgbToHex(p[1])}`} gradientTransform="rotate(90)">
+                colorsDefs.pieceColors.map((p,i)=>{
+                    return <linearGradient key={i} id={`${rgbToHex(p[0])}_${rgbToHex(p[1])}`} gradientTransform="rotate(90)">
                         <stop offset="10%"  stopColor={p[0]} />
                         <stop offset="90%" stopColor={p[1]} />
                     </linearGradient>

@@ -5,17 +5,16 @@ import {
     IonLabel,
     IonItem,
     IonItemDivider,
-    IonAvatar,
     IonModal,
-    IonInput,IonText,
+    IonText,
     IonButton,
-    IonRadioGroup,
     IonListHeader,
-    IonRadio,IonCheckbox,IonSegment,IonSegmentButton,
+    IonCheckbox,IonSegment,IonSegmentButton,
     IonCol, IonRow
 } from "@ionic/react"
 import HexInfoCard from "./hex-info";
 import {toAxial} from "../../../components/hexagons/utils";
+import i18n from "../../../locales/i18n"
 interface Props{
     title?:string
     show:boolean
@@ -50,8 +49,8 @@ export const PlanetList:React.FC<Props> = ({show,tab,title,onCancel,ownerData,lo
                         onTabChange &&
                         <IonItemDivider sticky>
                             <IonSegment mode="ios" color="primary" value={tab} onIonChange={(e)=>onTabChange(e.detail.value)}>
-                                <IonSegmentButton value="owner">Owner</IonSegmentButton>
-                                <IonSegmentButton value="marker">Marker</IonSegmentButton>
+                                <IonSegmentButton value="owner">{i18n.t("owned")}</IonSegmentButton>
+                                <IonSegmentButton value="marker">{i18n.t("marked")}</IonSegmentButton>
                             </IonSegment>
                         </IonItemDivider>
                     }
@@ -59,7 +58,7 @@ export const PlanetList:React.FC<Props> = ({show,tab,title,onCancel,ownerData,lo
                     {
                         ownerData && ownerData.map((v, i)=>{
                             const hex = toAxial(v.coordinate);
-                            return <IonItem onClick={()=>{
+                            return <IonItem key={i} onClick={()=>{
                                 onOk(v)
                             }}>
                                 <IonLabel className="ion-text-wrap">
@@ -83,7 +82,7 @@ export const PlanetList:React.FC<Props> = ({show,tab,title,onCancel,ownerData,lo
             </div>
             <IonRow>
                 <IonCol>
-                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CLOSE</IonButton>
+                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("close")}</IonButton>
                 </IonCol>
             </IonRow>
         </IonModal>

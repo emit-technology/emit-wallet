@@ -64,12 +64,12 @@ const ABI = [
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "baseCost",
+                "name": "neBaseCost",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "attachCost",
+                "name": "neAttachCost",
                 "type": "uint256"
             },
             {
@@ -84,7 +84,12 @@ const ABI = [
             },
             {
                 "internalType": "uint256",
-                "name": "feeRate",
+                "name": "neFeeRate",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createFeeRate",
                 "type": "uint256"
             }
         ],
@@ -213,7 +218,7 @@ const ABI = [
     }
 ];
 
-const ABI_QUERY =[
+const ABI_QUERY = [
     {
         "inputs": [
             {
@@ -508,6 +513,11 @@ const ABI_QUERY =[
                         "internalType": "bytes32",
                         "name": "gene",
                         "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "trustRate",
+                        "type": "uint256"
                     }
                 ],
                 "internalType": "struct IStarGridQuery.DriverInfo",
@@ -715,6 +725,11 @@ const ABI_QUERY =[
                             {
                                 "internalType": "uint256",
                                 "name": "user",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "userTemp",
                                 "type": "uint256"
                             },
                             {
@@ -1094,6 +1109,11 @@ const ABI_QUERY =[
                                     {
                                         "internalType": "uint256",
                                         "name": "user",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "userTemp",
                                         "type": "uint256"
                                     },
                                     {

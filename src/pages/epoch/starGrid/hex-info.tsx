@@ -9,7 +9,9 @@ import BigNumber from "bignumber.js";
 import {CountDown} from "../../../components/countdown";
 import {toAxial} from "../../../components/hexagons/utils";
 import {isEmptyCounter, isEmptyPlanet} from "./utils";
+import i18n from "../../../locales/i18n"
 import {STAR_GRID_DEFAULT_LEVEL} from "../../../config";
+import {formatValueString, nFormatter} from "../../../utils";
 interface Props{
     sourceHexInfo: HexInfo;
     attackHexInfo?: HexInfo;
@@ -132,7 +134,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                 <div className="life-value">{utils.fromValue(sourceCounter.life,16).dividedBy(new BigNumber(sourceCounter.defense)).toFixed(2)}</div>
                             </div>
                             <div className="capacity">
-                                <img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.nFormatter(utils.fromValue(sourceCounter.capacity,18),3)}</span>
+                                <img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{formatValueString(sourceCounter.capacity)}</span>
                             </div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(sourceCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute" onClick={()=>{
@@ -147,23 +149,25 @@ class HexInfoCard extends React.Component<Props, any>{
                                 onMove && !isEmptyPlanet(sourceLand) && sourceLand.marker != owner && sourceCounter && lockedInfo && lockedInfo.userInfo && (!attackHexInfo || !attackHexInfo.hex) &&
                                 sourceLand.coordinate == lockedInfo.userInfo.userCoordinate &&  <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
                                    onMove(true,false)
-                                }}>Mark</IonButton>
+                                }}><small>{i18n.t("mark")}</small></IonButton>
                             }
                             {
                                 onMove&&(!sourceLand || sourceLand.capacity == "0") && lockedInfo && sourceCounter.counterId == lockedInfo.userInfo.counter.counterId && (!attackHexInfo || !attackHexInfo.hex) &&
                                 <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
                                     onMove(false,true)
-                                }}>Create Planet</IonButton>
+                                }}><small>{i18n.t("createPlanet")}</small></IonButton>
                             }
                         </div>
-                        <div className="eye">
-                           <IonIcon src={eyeOutline} color="light" onClick={(e)=>{
-                               e.stopPropagation();
-                               this.setState({
-                                   eyeOff:!eyeOff
-                               })
-                           }}/>
-                        </div>
+                        {
+                            sourceLand && <div className="eye">
+                                <IonIcon src={eyeOutline} color="light" onClick={(e)=>{
+                                    e.stopPropagation();
+                                    this.setState({
+                                        eyeOff:!eyeOff
+                                    })
+                                }}/>
+                            </div>
+                        }
                     </div>
                         :
                         !isEmptyPlanet(sourceLand) && (eyeOff || !sourceCounter || sourceCounter.capacity=="0")?
@@ -187,25 +191,25 @@ class HexInfoCard extends React.Component<Props, any>{
                                     </div> }
                                 </div>
                                 <div className="cap-info">
-                                    <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.nFormatter(utils.fromValue(sourceLand.capacity,18),3)}</span></div>
+                                    <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{formatValueString(sourceLand.capacity)}</span></div>
                                     <div className="rate"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/><span>LV{sourceLand.level}</span></div>
                                     {
                                         lockedInfo&&lockedInfo.userInfo.counter.counterId!="0" ? (sourceLand && sourceLand.canCapture||isMarker) && !sourceCounter && onMoveTo && <div className="operator-btn">
                                             <IonButton size="small" color="success" disabled={sourceCountdown>now} onClick={()=>{
                                                 onMoveTo(sourceHex)
-                                            }}>Move</IonButton>
+                                            }}><small>{i18n.t("move")}</small></IonButton>
                                         </div>:
                                             onCapture && hasCounters && (isMarker||sourceLand&&sourceLand.canCapture) &&
                                             <div className="operator-btn">
                                                 <IonButton size="small" color="warning" disabled={sourceCountdown>now} onClick={()=>{
                                                     onCapture()
-                                                }}>Capture</IonButton>
+                                                }}><small>{i18n.t("login")}</small></IonButton>
                                             </div>
                                     }
                                     {ctime}
                                 </div>
                                 {
-                                    !showSimple &&
+                                    !showSimple && sourceLand &&
                                     <div className="eye">
                                         <IonIcon src={eyeOffOutline} color="light"  onClick={(e)=>{
                                             e.stopPropagation();
@@ -236,7 +240,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                         <div className="operator-btn">
                                             <IonButton size="small" disabled={sourceCountdown>now} color="warning" onClick={()=>{
                                                 onCapture()
-                                            }}>Capture</IonButton>
+                                            }}><small>{i18n.t("login")}</small></IonButton>
                                         </div>
                                     }
                                 </div>
@@ -286,7 +290,7 @@ class HexInfoCard extends React.Component<Props, any>{
                             <div className="life"><IonProgressBar className="life-progress" value={utils.fromValue(attackCounter.life,18).dividedBy(new BigNumber(attackCounter.defense)).toNumber()}/>
                             <div className="life-value">{utils.fromValue(attackCounter.life,16).dividedBy(new BigNumber(attackCounter.defense)).toFixed(2)}</div>
                             </div>
-                            <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackCounter.capacity,18).toFixed(2,2)}</span></div>
+                            <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{formatValueString(attackCounter.capacity)}</span></div>
                             <div className="rate"><img src="./assets/img/epoch/stargrid/icons/rate.png" width={20}/><span>{utils.fromValue(attackCounter.rate,16).toFixed(2,2)}%</span></div>
                             <div className="attribute"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/>
                                 <span>LV{this.getLevel(attackCounter)}</span>
@@ -295,7 +299,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                 {
                                     onMove &&sourceCounter && new BigNumber(sourceCounter.move).toNumber()>0 && <IonButton size="small" disabled={sourceCountdown>now} color="danger" onClick={()=>{
                                         onMove(false,false)
-                                    }}>Attack</IonButton>
+                                    }}><small>{i18n.t("attack")}</small></IonButton>
                                 }
                             </div>
                             {attackTime}
@@ -330,7 +334,7 @@ class HexInfoCard extends React.Component<Props, any>{
                                 </div> }
                             </div>
                             <div className="cap-info">
-                                <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{utils.fromValue(attackLand.capacity,18).toFixed(2,2)}</span></div>
+                                <div className="capacity"><img src="./assets/img/epoch/stargrid/icons/level.png" width={20}/><span>{formatValueString(attackLand.capacity)}</span></div>
                                 <div className="rate"><img src="./assets/img/epoch/stargrid/icons/plus.png" width={20}/><span>{attackLand.level}</span></div>
                                 <div className="operator-btn">
                                     {
@@ -338,11 +342,11 @@ class HexInfoCard extends React.Component<Props, any>{
                                             <>
                                                 <IonButton size="small" disabled={sourceCountdown>now} color={attackCounter?"danger":"success"} onClick={()=>{
                                                     onMove(false,false)
-                                                }}>{attackCounter?"ATTACK":"MOVE"}</IonButton>
+                                                }}><small>{attackCounter?i18n.t("attack"):i18n.t("move")}</small></IonButton>
                                                 {!attackCounter && !isEmptyPlanet(attackLand) && attackLand.marker != owner &&
                                                 <IonButton size="small" disabled={sourceCountdown>now} color={"secondary"} onClick={()=>{
                                                     onMove(true,false)
-                                                }}>Move&Mark</IonButton>
+                                                }}><small>{i18n.t("move")}&{i18n.t("mark")}</small></IonButton>
                                                 }
                                         </>
 
@@ -378,10 +382,10 @@ class HexInfoCard extends React.Component<Props, any>{
                                             onMove && (!attackCounter || attackCounter.counterId =="0") && new BigNumber(sourceCounter.move).toNumber()>0 && <>
                                                 <IonButton size="small" disabled={sourceCountdown>now} color="success" onClick={()=>{
                                                     onMove(false,false)
-                                                }}>Move</IonButton>
-                                                <IonButton size="small" disabled={sourceCountdown>now} color="tertiary" onClick={()=>{
+                                                }}><small>{i18n.t("move")}</small></IonButton>
+                                                <IonButton size="small" expand="full" disabled={sourceCountdown>now} color="tertiary" onClick={()=>{
                                                     onMove(false,true)
-                                                }}>Move&Create Planet</IonButton>
+                                                }}><small>{i18n.t("move")}&{i18n.t("createPlanet")}</small></IonButton>
                                             </>
                                         }
                                     </div>

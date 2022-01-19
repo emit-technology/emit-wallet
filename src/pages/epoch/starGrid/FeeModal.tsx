@@ -9,12 +9,15 @@ import {
 } from "@ionic/react"
 import {LockedInfo} from "../../../types";
 import * as utils from "../../../utils";
+import i18n from "../../../locales/i18n"
+import {formatValueString} from "../../../utils";
+
 interface Props{
    show:boolean
    onOk:()=>void;
    onCancel:()=>void;
    data:object
-    lockedInfo?:LockedInfo
+   lockedInfo?:LockedInfo
 }
 export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>{
 
@@ -28,7 +31,7 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
             <div className="epoch-md">
             <IonList mode="ios">
                 <IonListHeader>
-                    Confirm Billing
+                    {i18n.t("confirmBilling")}
                 </IonListHeader>
                 {
                     lockedInfo && data && data["showDesc"] &&
@@ -40,12 +43,12 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
                                         <IonCol size="3"><div style={{display:"flex",alignItems:"center",height:"100%"}}><b>Temporary materials (TM)</b></div></IonCol>
                                         <IonCol size="9">
                                             <IonRow>
-                                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.lightCanUsed,18),3)}</b></IonText><small><IonText color="medium"> bLIGHT</IonText></small></IonCol>
-                                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.darkCanUsed,18),3)}</b></IonText><small><IonText color="medium"> bDARK</IonText></small></IonCol>
+                                                <IonCol><IonText color="secondary"><b>{formatValueString(lockedInfo.userInfo.lightCanUsed)}</b></IonText><small><IonText color="medium"> bLIGHT</IonText></small></IonCol>
+                                                <IonCol><IonText color="secondary"><b>{formatValueString(lockedInfo.userInfo.darkCanUsed)}</b></IonText><small><IonText color="medium"> bDARK</IonText></small></IonCol>
                                             </IonRow>
                                             <IonRow>
-                                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.waterCanUsed,18),3)}</b></IonText><small><IonText color="medium"> WATER</IonText></small></IonCol>
-                                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(lockedInfo.userInfo.earthCanUsed,18),3)}</b></IonText><small><IonText color="medium"> EARTH</IonText></small></IonCol>
+                                                <IonCol><IonText color="secondary"><b>{formatValueString(lockedInfo.userInfo.waterCanUsed)}</b></IonText><small><IonText color="medium"> WATER</IonText></small></IonCol>
+                                                <IonCol><IonText color="secondary"><b>{formatValueString(lockedInfo.userInfo.earthCanUsed)}</b></IonText><small><IonText color="medium"> EARTH</IonText></small></IonCol>
                                             </IonRow>
                                         </IonCol>
                                     </IonRow>
@@ -56,11 +59,11 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
                 }
 
                 {
-                    data && Object.keys(data).map(v=>{
+                    data && Object.keys(data).map((v,i)=>{
                         if(v == "showDesc"){
                             return <></>
                         }
-                        return <IonItem>
+                        return <IonItem key={i}>
                             <IonLabel>
                                 {v}
                             </IonLabel>
@@ -77,9 +80,8 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
                             <div>
                                 <small>
                                     <IonText color="warning">
-                                        <p>1. Capture in the new Planet will cost 10% fee.</p>
-                                        <p>2. The fee only cost from BEP20 contract, eq: bLIGHT,bDARK,WATER and EARTH</p>
-                                        <p>3. The amount cost TM first.</p>
+                                        <p>{i18n.t("starGridDesc1")}</p>
+                                        <p>{i18n.t("starGridDesc2")}</p>
                                     </IonText>
                                 </small>
                             </div>
@@ -91,12 +93,14 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
             </div>
             <IonRow>
                 <IonCol size="4">
-                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">
+                        {i18n.t("cancel")}
+                    </IonButton>
                 </IonCol>
                 <IonCol  size="8">
                     <IonButton mode="ios" expand="block" onClick={() => {
                         onOk()
-                    }} color="primary">OK</IonButton>
+                    }} color="primary"> {i18n.t("ok")}</IonButton>
                 </IonCol>
             </IonRow>
         </IonModal>

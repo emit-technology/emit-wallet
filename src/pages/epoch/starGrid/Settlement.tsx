@@ -10,13 +10,14 @@ import {
 import {ENDetails, GlobalInfo, LockedInfo, PeriodUserNE, StarGridType} from "../../../types";
 import * as utils from "../../../utils";
 import {enType2Cy, enType2ProductCy} from "../../../utils/stargrid";
-import {nFormatter} from "../../../utils";
+import {formatValueString, nFormatter} from "../../../utils";
 import {CountDown} from "../../../components/countdown";
 import BigNumber from "bignumber.js";
 import {Converter} from "./Converter";
 import {NoData} from "./NoData";
 import {isEmptyCounter} from "./utils";
 import HexInfoCard from "./hex-info";
+import i18n from "../../../locales/i18n";
 
 interface Props{
     title?:string
@@ -39,22 +40,22 @@ export class Settlement extends React.Component<Props, any> {
     }
     genPeriodNEItem = (v:PeriodUserNE) =>{
         const cyType = enType2Cy(v.enType)
-        return <IonItem lines="none">
+        return <IonItem lines="none" key={v.period}>
             <IonLabel className="ion-text-wrap">
                 <div className="settle-box">
                     <div className="bt">
                         <IonRow>
-                            <IonCol>Period: <IonText color="tertiary"><b>{v.period}</b></IonText></IonCol>
-                            <IonCol><IonText color="primary"><b>{StarGridType[v.enType]}</b></IonText></IonCol>
+                            <IonCol>{i18n.t("period")}: <IonText color="tertiary"><b>{v.period}</b></IonText></IonCol>
+                            <IonCol><IonText color="primary"><b>EMIT-{StarGridType[v.enType]}</b></IonText></IonCol>
                         </IonRow>
                     </div>
                     <div className="bc">
                         <IonRow>
-                            <IonCol size="3"><IonText color="medium">Burned</IonText></IonCol>
+                            <IonCol size="3"><IonText color="medium">{i18n.t("burned")}</IonText></IonCol>
                             <IonCol size="9">
                                 <IonRow>
-                                    <IonCol><IonText color="medium">Mine NE</IonText></IonCol>
-                                    <IonCol><IonText color="medium">Total NE</IonText></IonCol>
+                                    <IonCol><IonText color="medium">{i18n.t("mine")} NE</IonText></IonCol>
+                                    <IonCol><IonText color="medium">{i18n.t("total")} NE</IonText></IonCol>
                                 </IonRow>
                             </IonCol>
                         </IonRow>
@@ -62,8 +63,8 @@ export class Settlement extends React.Component<Props, any> {
                             <IonCol size="3">{cyType.base}</IonCol>
                             <IonCol size="9">
                                 <IonRow>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.base.userNE,18),3)}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.base.totalNE,18),3)}</IonCol>
+                                    <IonCol><IonText color="secondary">{formatValueString(v.base.userNE)}</IonText></IonCol>
+                                    <IonCol><IonText color="secondary">{formatValueString(v.base.totalNE)}</IonText></IonCol>
                                 </IonRow>
                             </IonCol>
                         </IonRow>
@@ -71,8 +72,8 @@ export class Settlement extends React.Component<Props, any> {
                             <IonCol size="3">{cyType.attach}</IonCol>
                             <IonCol size="9">
                                 <IonRow>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.attach.userNE,18),3)}</IonCol>
-                                    <IonCol>{utils.nFormatter(utils.fromValue(v.attach.totalNE,18),3)}</IonCol>
+                                    <IonCol><IonText color="secondary">{formatValueString(v.attach.userNE)}</IonText></IonCol>
+                                    <IonCol><IonText color="secondary">{formatValueString(v.attach.totalNE)}</IonText></IonCol>
                                 </IonRow>
                             </IonCol>
                         </IonRow>
@@ -105,9 +106,9 @@ export class Settlement extends React.Component<Props, any> {
                 <div className="settle-box">
                     <div className="bt" style={{textAlign:"left"}}>
                         <IonRow>
-                            <IonCol size="3"><b><small>EN Per Day (TPD)</small></b></IonCol>
+                            <IonCol size="3"><b><small>EN Per Day (EPD)</small></b></IonCol>
                             <IonCol size="9">
-                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.totalEN,18),3)}</b></IonText><small><IonText color="medium">&nbsp;EN</IonText></small></IonCol>
+                                <IonCol><IonText color="secondary"><b>{formatValueString(v.totalEN)}</b></IonText><small><IonText color="medium">&nbsp;EN</IonText></small></IonCol>
                             </IonCol>
                         </IonRow>
                         <IonRow>
@@ -120,12 +121,12 @@ export class Settlement extends React.Component<Props, any> {
                     </div>
                     <div className="bt" style={{textAlign:"left"}}>
                         <IonRow>
-                            <IonCol size="3"><div  style={{display:"flex",alignItems:"center",height:"100%",fontWeight:800}}><small>Burned</small></div></IonCol>
+                            <IonCol size="3"><div  style={{display:"flex",alignItems:"center",height:"100%",fontWeight:800}}><small>{i18n.t("burned")}</small></div></IonCol>
                             <IonCol size="9">
                                 <IonRow>
-                                    <IonCol><IonText color="medium"><b>Total</b></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><b>Mine</b></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><b>Percent</b></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><b>{i18n.t("total")}</b></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><b>{i18n.t("mine")}</b></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><b>{i18n.t("percent")}</b></IonText></IonCol>
                                 </IonRow>
                                 <IonRow>
                                     <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedLight,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bLIGHT</IonText></small></IonCol>
@@ -194,7 +195,7 @@ export class Settlement extends React.Component<Props, any> {
                     <IonList>
                         {title && <IonListHeader mode="ios">{title}</IonListHeader>}
                         <IonItemDivider mode="md"/>
-                        <IonItemDivider sticky color="primary">Counter Info</IonItemDivider>
+                        <IonItemDivider sticky color="primary">COUNTER {i18n.t("info")}</IonItemDivider>
                         <IonItem lines="none">
                             <IonLabel>
                                 <div style={{maxWidth:"300px",maxHeight:"150px"}}>
@@ -202,20 +203,22 @@ export class Settlement extends React.Component<Props, any> {
                                 </div>
                             </IonLabel>
                         </IonItem>
-                        <IonItemDivider sticky color="primary">Planet Capacity</IonItemDivider>
+                        <IonItemDivider sticky color="primary">{i18n.t("planet")} {i18n.t("info")}</IonItemDivider>
                         <IonItem lines="none">
                             <IonLabel className="ion-text-wrap">
                                 <IonRow>
-                                    <IonCol><IonText color="medium"><small>Type</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>Total</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>Mine</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>Percent</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>{i18n.t("type")}</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>{i18n.t("total")}</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>{i18n.t("TP")}</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>{i18n.t("mine")}</small></IonText></IonCol>
+                                    <IonCol><IonText color="medium"><small>{i18n.t("percent")}</small></IonText></IonCol>
                                 </IonRow>
                                 {
-                                    lockedInfo.userInfo.resources.map(v=>{
-                                        return <IonRow>
+                                    lockedInfo.userInfo.resources.map((v,i)=>{
+                                        return <IonRow key={i}>
                                             <IonCol><IonText color="primary"><b><small>{StarGridType[v.enType]}</small></b></IonText></IonCol>
                                             <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.total,18),3)}</b></IonText></IonCol>
+                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userTemp,18),3)}</b></IonText></IonCol>
                                             <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.user,18),3)}</b></IonText></IonCol>
                                             <IonCol><IonText color="secondary"><b>{utils.fromValue(v.user,0).dividedBy(utils.fromValue(v.total,0)).multipliedBy(100).toFixed(3)} %</b></IonText></IonCol>
                                         </IonRow>
@@ -252,7 +255,7 @@ export class Settlement extends React.Component<Props, any> {
                                                 {lockedInfo.userInfo.counter.counterId != "0" &&
                                                 <div style={{display:"flex",alignItems:"center",height:"100%"}} >
                                                     <b>
-                                                        Unsettle:&nbsp;
+                                                        {i18n.t("unsettle")}:&nbsp;
                                                         <IonText color="secondary">
                                                             {nFormatter(utils.fromValue(lockedInfo.userInfo.userNEInfo.unsettlement,18),3)}
                                                         </IonText>
@@ -265,7 +268,7 @@ export class Settlement extends React.Component<Props, any> {
                                                     onOk && utils.fromValue(lockedInfo.userInfo.userNEInfo.unsettlement,18).toNumber()>0
                                                     && <IonButton expand="block" fill="outline" size="small" onClick={()=>{
                                                         onOk()
-                                                    }}>Withdraw</IonButton>
+                                                    }}>{i18n.t("withdraw")}</IonButton>
                                                 }
                                             </IonCol>
                                         </IonRow>
@@ -273,12 +276,12 @@ export class Settlement extends React.Component<Props, any> {
                                     <div className="bc">
                                         <IonRow>
                                             <IonCol></IonCol>
-                                            <IonCol><IonText color="primary"><b><small>Last</small></b></IonText></IonCol>
-                                            <IonCol><IonText color="primary"><b><small>Current</small></b></IonText></IonCol>
-                                            <IonCol><IonText color="primary"><b><small>End</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>{i18n.t("last")}</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>{i18n.t("current")}</small></b></IonText></IonCol>
+                                            <IonCol><IonText color="primary"><b><small>{i18n.t("end")}</small></b></IonText></IonCol>
                                         </IonRow>
                                         <IonRow>
-                                            <IonCol><div style={{display:"flex",alignItems:"center"}}><b>Period</b></div></IonCol>
+                                            <IonCol><div style={{display:"flex",alignItems:"center"}}><b>{i18n.t("period")}</b></div></IonCol>
                                             <IonCol><IonText color="secondary"><b>{lockedInfo.userInfo.userNEInfo.nextSettlementPeriod}</b></IonText></IonCol>
                                             <IonCol><IonText color="secondary"><b>{lockedInfo.currentPeriod}</b></IonText></IonCol>
                                             <IonCol> <IonText color="secondary"><b>{lockedInfo.userInfo.userNEInfo.endPeriod}</b></IonText></IonCol>
@@ -290,19 +293,19 @@ export class Settlement extends React.Component<Props, any> {
                             </IonLabel>
                         </IonItem>
 
-                        <IonItemDivider sticky color="primary">Period Info</IonItemDivider>
+                        <IonItemDivider sticky color="primary">{i18n.t("period")} {i18n.t("info")}</IonItemDivider>
                         <IonSegment mode="md" value={tab} onIonChange={e => {
                             e.stopPropagation();
                             this.setState({tab:e.detail.value})
                         }}>
                             <IonSegmentButton value="current">
-                                <IonLabel>Current [{lockedInfo.currentPeriod}]</IonLabel>
+                                <IonLabel>{i18n.t("current")} [{lockedInfo.currentPeriod}]</IonLabel>
                             </IonSegmentButton>
                             <IonSegmentButton value="last">
-                                <IonLabel>Last [{lockedInfo.last.period}]</IonLabel>
+                                <IonLabel>{i18n.t("last")} [{lockedInfo.last.period}]</IonLabel>
                             </IonSegmentButton>
                             <IonSegmentButton value="future">
-                                <IonLabel>Future</IonLabel>
+                                <IonLabel>{i18n.t("future")}</IonLabel>
                             </IonSegmentButton>
                         </IonSegment>
 
@@ -342,18 +345,18 @@ export class Settlement extends React.Component<Props, any> {
                 {
                     onOk && !isEmptyCounter(lockedInfo.userInfo.counter)? <IonRow>
                         <IonCol size="4">
-                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("cancel")}</IonButton>
                         </IonCol>
                         <IonCol  size="8">
                             <IonButton expand="block" onClick={() => {
                                 onPrepare();
-                            }} color="primary">Prepare</IonButton>
+                            }} color="primary">{i18n.t("prepare")}</IonButton>
                         </IonCol>
                     </IonRow>
                         :
                     onCancel && <IonRow>
                         <IonCol size="12">
-                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">Close</IonButton>
+                            <IonButton onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("close")}</IonButton>
                         </IonCol>
                     </IonRow>
                 }

@@ -97,7 +97,7 @@ svg path {
   }
 
   .cap-info div {
-    max-width: 120px !important;
+    max-width: 200px !important;
   }
 }
 @media (min-width: 992px) {
@@ -120,7 +120,7 @@ svg path {
   }
 
   .cap-info div {
-    max-width: 120px !important;
+    max-width: 200px !important;
   }
 }
 @media (min-width: 1200px) {
@@ -135,7 +135,7 @@ svg path {
   }
 
   .cap-info div {
-    max-width: 120px !important;
+    max-width: 200px !important;
   }
 }
 @media (min-width: 1500px) {
@@ -150,7 +150,7 @@ svg path {
   }
 
   .cap-info div {
-    max-width: 120px !important;
+    max-width: 200px !important;
   }
 }
 .counter-info {
@@ -182,7 +182,7 @@ svg path {
 
 .avatar-l .hex-head {
   position: relative;
-  padding: 3px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0 0 1px 1px #dddddd;
@@ -194,7 +194,7 @@ svg path {
 }
 
 .cap-info {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   color: #f1d204;
   text-shadow: 2px 2px 2px #000;
@@ -203,11 +203,12 @@ svg path {
 .cap-info div {
   border: 1px solid #96bf9b;
   min-height: 25px;
-  min-width: 60px;
-  margin: 0px 12px 3px;
+  margin: 0px 0px 3px 6px;
   border-radius: 5px;
   position: relative;
-  max-width: 90px;
+  min-width: 100px;
+  max-width: 120px;
+  padding-top: 2px;
 }
 
 .cap-info div img {
@@ -255,26 +256,31 @@ svg path {
 }
 
 .life {
-  height: 15px !important;
+  height: 20px !important;
   min-height: 15px !important;
   border: 1px solid #ddd !important;
-  border-radius: 0 !important;
+  border-radius: 5px !important;
+  padding: 0 0 2px 0 !important;
 }
 
 .life-progress {
   --background: #754141;
-  --progress-background: red;
-  height: 13px;
+  --progress-background: linear-gradient(#f6041c 30%, #750202);
+  height: 18px;
+  border-radius: 5px !important;
 }
 
 .life-value {
   position: absolute !important;
-  right: -24px !important;
-  top: -2px !important;
+  right: -20px !important;
+  top: -4px !important;
   border: none !important;
   font-size: 10px !important;
   text-shadow: none !important;
-  color: #f7f7f7;
+  color: #f7f7f7 !important;
+  z-index: 100;
+  display: flex;
+  align-items: center;
 }
 
 .eye {
@@ -287,12 +293,12 @@ svg path {
   position: absolute;
   bottom: 0;
   width: 100%;
-  color: #000000;
+  color: #fff;
   font-size: 10px;
   text-align: center;
   font-weight: 800;
-  background: #f7f7f7;
-  opacity: 0.7;
+  background-color: rgba(0, 0, 0, 0.6);
+  left: 0;
 }
 
 .bg-select {
@@ -357,11 +363,13 @@ svg path {
 }
 
 .attribution-input {
-  width: 50px;
+  width: 60px;
   border: 1px solid;
   border-radius: 5px;
   margin: 2px;
   height: 30px;
+  text-align: center;
+  font-weight: 600;
 }
 
 .counter-list {

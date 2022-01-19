@@ -14,12 +14,13 @@ import {
     IonRadio,
     IonCol, IonRow
 } from "@ionic/react"
-import CounterSvg from "./counter-svg";
 import BigNumber from "bignumber.js";
 import HexInfoCard from "./hex-info";
-import {axialCoordinatesToCube, toAxial} from "../../../components/hexagons/utils";
+import {toAxial} from "../../../components/hexagons/utils";
 import {chevronForward} from "ionicons/icons";
 import {isEmptyPlanet} from "./utils";
+import i18n from "../../../locales/i18n"
+
 interface Props {
     title?: string
     show: boolean
@@ -56,19 +57,19 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                         {title}
                     </IonListHeader>
                 }
-                <IonItemDivider  sticky color="primary">Select Counter</IonItemDivider>
+                <IonItemDivider  sticky color="primary">{i18n.t("select")} Counter</IonItemDivider>
                 <div className="counter-list-half">
                     <IonRadioGroup ref={selectRef} onIonChange={(e)=>{
                         const counters = data.filter(c=> c && c.counterId == e.detail.value);
                         onCallback(counters[0])
                     }}>
                         {
-                            data && data.map(v=>{
+                            data && data.map((v,i)=>{
                                 if(!v){
                                     return <></>
                                 }
                                 return v && <>
-                                    <IonItem>
+                                    <IonItem key={i}>
                                         <IonRadio slot="start" mode="md" value={v.counterId} />
                                         <IonLabel>
                                             <HexInfoCard sourceHexInfo={{counter:v}}/>
@@ -97,7 +98,7 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                     !isEmptyPlanet(defaultPlanet) && <IonItem detail detailIcon={chevronForward} onClick={()=>{
                         onSelectPlanet()
                     }}><IonLabel>
-                        Default Planet
+                        {i18n.t("defaultPlanet")}
                     </IonLabel>
                         <IonLabel>
                             <HexInfoCard sourceHexInfo={{hex:toAxial(defaultPlanet.coordinate),land:defaultPlanet}}/>
@@ -108,7 +109,9 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
             </div>
             <IonRow>
                 <IonCol size="4">
-                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                    <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">
+                        {i18n.t("cancel")}
+                    </IonButton>
                 </IonCol>
                 <IonCol  size="8">
                     <IonButton mode="ios" expand="block" onClick={() => {
@@ -118,7 +121,7 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                             const attachAmount = attachAmountRef.current.value;
                             onOk(counterId,baseAmount,attachAmount)
                         }
-                    }} color="primary">OK</IonButton>
+                    }} color="primary">{i18n.t("ok")}</IonButton>
                 </IonCol>
             </IonRow>
         </IonModal>

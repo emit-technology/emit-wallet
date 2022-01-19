@@ -20,6 +20,7 @@ interface UserENInfo {
 interface ResourceInfo {
     enType: StarGridType;
     user: string;
+    userTemp:string;
     total: string
 }
 

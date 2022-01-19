@@ -127,7 +127,7 @@ class App extends React.Component<any, State> {
             rpc.initBalance().catch(e=>{
                 console.error(e)
             })
-        },10 * 1000,true)
+        },15 * 1000,true)
     }
 
     init = async () => {

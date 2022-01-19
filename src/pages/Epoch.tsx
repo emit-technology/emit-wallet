@@ -94,9 +94,9 @@ class Epoch extends React.Component<any, any>{
                         <IonTitle>Epoch</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <IonContent fullscreen>
+                <IonContent fullscreen style={{textAlign:"center"}}>
                     <div style={{padding:"12px 15px 5px"}}>
-                        <div style={{fontSize:"24px",fontWeight:500}}>ORIGIN</div>
+                        <div style={{fontSize:"24px",fontWeight:500,textAlign:"left"}}>ORIGIN</div>
                     </div>
                     <div className="epoch-box">
                         <div  className="epoch-origin">

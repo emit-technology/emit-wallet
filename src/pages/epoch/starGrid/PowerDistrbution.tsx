@@ -5,20 +5,16 @@ import {
     IonLabel,
     IonItem,
     IonModal,
-    IonText,
     IonButton,
-    IonInput,
-    IonGrid,
     IonRow,
     IonCol,
-    IonSelect,
-    IonSelectOption,
     IonIcon
 } from "@ionic/react"
 import * as utils from "../../../utils"
 import {addCircleOutline, removeCircleOutline} from "ionicons/icons";
 import BigNumber from "bignumber.js";
 import {toOpCode} from "../../../components/hexagons/utils";
+import i18n from "../../../locales/i18n"
 interface Props {
     show: boolean
     onOk?: (opcode:string) => void;
@@ -83,13 +79,13 @@ export class PowerDistribution extends React.Component<Props, State>{
             >
                 <IonList>
                     <IonItem>
-                        <IonLabel>Accumulated</IonLabel>
+                        <IonLabel>{i18n.t("points")}</IonLabel>
                         <IonLabel slot="end">
                             <input id="accumulateId" defaultValue={aRefValue} readOnly ref={accumulatedRef} className="attribution-input"/>
                         </IonLabel>
                     </IonItem>
                     <IonItem>
-                        <IonLabel>Force</IonLabel>
+                        <IonLabel>{i18n.t("force")}</IonLabel>
                         <IonLabel slot="end">
                             <IonIcon src={removeCircleOutline} color={
                                 forceRef && forceRef.current && new BigNumber(forceRef.current.value).minus(new BigNumber(counter.force)).toNumber() > 0 ?
@@ -120,7 +116,7 @@ export class PowerDistribution extends React.Component<Props, State>{
                         </IonLabel>
                     </IonItem>
                     <IonItem>
-                        <IonLabel>Defense</IonLabel>
+                        <IonLabel>{i18n.t("defense")}</IonLabel>
                         <IonLabel slot="end">
                             <IonIcon src={removeCircleOutline} size="small" color={
                                 defenseRef && defenseRef.current && new BigNumber(defenseRef.current.value).minus(new BigNumber(counter.defense)).toNumber() > 0?
@@ -149,7 +145,7 @@ export class PowerDistribution extends React.Component<Props, State>{
                         </IonLabel>
                     </IonItem>
                     <IonItem>
-                        <IonLabel>Move</IonLabel>
+                        <IonLabel>{i18n.t("move")}</IonLabel>
                         <IonLabel slot="end">
                             <IonIcon src={removeCircleOutline} size="small" color={
                                 moveRef && moveRef.current && new BigNumber(moveRef.current.value).minus(new BigNumber(counter.move)).toNumber() > 0?
@@ -178,7 +174,7 @@ export class PowerDistribution extends React.Component<Props, State>{
                         </IonLabel>
                     </IonItem>
                     <IonItem>
-                        <IonLabel>Lucky</IonLabel>
+                        <IonLabel>{i18n.t("luck")}</IonLabel>
                         <IonLabel slot="end">
                             <IonIcon src={removeCircleOutline} size="small" color={
                                 luckyRef && luckyRef.current && new BigNumber(luckyRef.current.value).minus(new BigNumber(counter.luck)).toNumber() > 0?
@@ -209,7 +205,7 @@ export class PowerDistribution extends React.Component<Props, State>{
                 </IonList>
                 <IonRow>
                     <IonCol size="4">
-                        <IonButton onClick={() => onCancel()} mode="ios" expand="block" fill="outline" color="secondary">CANCEL</IonButton>
+                        <IonButton onClick={() => onCancel()} mode="ios" expand="block" fill="outline" color="secondary">{i18n.t("cancel")}</IonButton>
                     </IonCol>
                     <IonCol  size="8">
                         <IonButton expand="block" mode="ios" onClick={() => {
@@ -230,7 +226,7 @@ export class PowerDistribution extends React.Component<Props, State>{
                                 // 0000111 byte32 16 bytes,  1 move, 2 defense, 3 attack , 4 luck
                                 onOk(toOpCode(arr,6))
                             }
-                        }} color="primary">OK</IonButton>
+                        }} color="primary">{i18n.t("ok")}</IonButton>
                     </IonCol>
                 </IonRow>
             </IonModal>

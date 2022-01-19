@@ -3,6 +3,7 @@ import "./index.css";
 import {ENDetails} from "../../../../types";
 import * as utils from "../../../../utils";
 import BigNumber from "bignumber.js";
+import i18n from "../../../../locales/i18n";
 
 
 interface Props {
@@ -10,10 +11,13 @@ interface Props {
     symbol:string
 }
 export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
+
     const driverPercent =  new BigNumber(enDetail.inputEN).dividedBy(new BigNumber(enDetail.driverCapacity)).toNumber()>1?80:
-        new BigNumber(enDetail.inputEN).dividedBy(new BigNumber(enDetail.driverCapacity)).toNumber() * 80; ;
+        new BigNumber(enDetail.inputEN).dividedBy(new BigNumber(enDetail.driverCapacity)).toNumber() * 80;
+
     const counterPercent =  new BigNumber(enDetail.driverOutEN).dividedBy(new BigNumber(enDetail.counterCapacity)).toNumber()>1?80:
-        new BigNumber(enDetail.driverOutEN).dividedBy(new BigNumber(enDetail.counterCapacity)).toNumber() * 80; ;
+        new BigNumber(enDetail.driverOutEN).dividedBy(new BigNumber(enDetail.counterCapacity)).toNumber() * 80;
+
     const powerPercent = new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.totalPower)).toNumber()>1?80:
         new BigNumber(enDetail.counterOutEN).dividedBy(new BigNumber(enDetail.totalPower)).toNumber() * 80;
 
@@ -22,12 +26,13 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
 
     const outputNe = new BigNumber(enDetail.totalPower).comparedTo(new BigNumber(enDetail.counterOutEN)) == -1?
         new BigNumber(enDetail.totalPower):new BigNumber(enDetail.counterOutEN);
+
     return (<>
 
         <div>
             <div className="power-boll">
                 <div className="boll-box">
-                    <div className="convert-title">Driver</div>
+                    <div className="convert-title">DRIVER</div>
                     <div className="ne-input" style={{textAlign:"right",paddingRight:"6px"}}>
                         {utils.nFormatter(utils.fromValue(enDetail.inputEN,18),3)}
                         <div className="ne-input-right"></div>
@@ -43,17 +48,17 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                             <div className="bundle-boll-before" style={{height:`${Math.floor(driverPercent)}px`}} ></div>
                         </div>
                         <div className="shadow-boll"></div>
-                        <div className="capacity-text"><small>Capacity</small></div>
+                        <div className="capacity-text"><small>{i18n.t("capacity")}</small></div>
                     </div>
                     <div className="boll-text">X</div>
                     <div className="rate-boll">
                         <div>{utils.fromValue(enDetail.driverRate,16).toFixed(2,2)}%</div>
-                        <div className="rate-text"><small>Rate</small></div>
+                        <div className="rate-text"><small>{i18n.t("rate")}</small></div>
                     </div>
                 </div>
 
                 <div className="boll-box">
-                    <div className="convert-title">Counter</div>
+                    <div className="convert-title">COUNTER</div>
                     <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.driverOutEN,18),3)}
                         <div className="ne-input-right"></div>
                         <div className="ne-input-desc">EN(D)</div>
@@ -66,7 +71,7 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                             <div className="counter-boll-before" style={{height:`${Math.floor(counterPercent)}px`}} ></div>
                         </div>
                         <div className="counter-shadow-boll"></div>
-                        <div className="capacity-text"><small>Capacity</small></div>
+                        <div className="capacity-text"><small>{i18n.t("capacity")}</small></div>
                     </div>
                     <div className="boll-text">X</div>
                     <div className="rate-boll">
@@ -76,7 +81,7 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                 </div>
 
                 <div className="boll-box" style={{minWidth:"200px"}}>
-                    <div className="convert-title">Planet <small>(Capacity: {utils.nFormatter(utils.fromValue(enDetail.planetCapacity,18),3)})</small></div>
+                    <div className="convert-title">PLANET <small>({i18n.t("capacity")}: {utils.nFormatter(utils.fromValue(enDetail.planetCapacity,18),3)})</small></div>
                     <div className="ne-input">{utils.nFormatter(utils.fromValue(enDetail.counterOutEN,18),3)}
                         <div className="ne-input-right"></div>
                         <div className="ne-input-desc">EN(C)</div>
@@ -89,11 +94,11 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                             <div className="power-bundle-boll-before"  style={{height:`${Math.floor(powerPercent)}px`}}></div>
                         </div>
                         <div className="power-bundle-shadow-boll"></div>
-                        <div className="capacity-text"><small>Power</small></div>
+                        <div className="capacity-text"><small>{i18n.t("power")}</small></div>
                     </div>
                 </div>
                 <div className="boll-box">
-                    <div className="convert-title">Calc</div>
+                    <div className="convert-title">CALC</div>
                     <div className="ne-input" style={{width:"150px",left:"-120px"}}>{utils.nFormatter(utils.fromValue(outputNe,18),3)}
                         <div className="ne-input-right"></div>
                         <div className="ne-input-desc">EN(P)</div>
@@ -102,7 +107,7 @@ export const Converter:React.FC<Props> = ({enDetail,symbol})=>{
                         <div>{
                             utils.nFormatter(utils.fromValue(outputNe,18),3)
                         }</div>
-                        <div className="rate-text"><small>Output</small></div>
+                        <div className="rate-text"><small>{i18n.t("output")}</small></div>
                     </div>
                     <div className="boll-text">x</div>
                     <div className="rate-boll epe-boll">

@@ -68,6 +68,12 @@ export function arrayToObject(arr: Array<any>) {
     return ret
 }
 
+export function formatValueString(value:string|BigNumber|number|undefined,fix:number = 3):string {
+    if(!value){
+        return "0"
+    }
+    return nFormatter(fromValue(value,18),fix)
+}
 export function fromValue(value: string | BigNumber | number | undefined, decimal: number): BigNumber {
     if (!value) {
         return new BigNumber(0)

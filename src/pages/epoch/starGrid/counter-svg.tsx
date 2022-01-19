@@ -44,12 +44,16 @@ class CounterSvg extends React.Component<Props, any>{
             .join(" ");
 
         let landStyle = ""
+        let blues = [];
+        let yellows = [];
         if(land){
             const i = Math.floor(utils.fromValue(land.capacity,18).toNumber())
             if(land.enType == StarGridType.WATER){
                 landStyle = blueColors[i]
+                blues.push(landStyle)
             }else if(land.enType == StarGridType.EARTH){
                 landStyle = yellowColors[i]
+                yellows.push(landStyle)
             }
         }
 
@@ -57,18 +61,18 @@ class CounterSvg extends React.Component<Props, any>{
         const pointLand = cornerCoordsLand
             .map((point) => `${point.x},${point.y}`)
             .join(" ");
-
         return (
             <HexGrid
                 width="100%"
                 height="100%"
                 hexSize={1}
+                single
                 origin={{ x: 0, y: 0}}
                 orientation={OrientationsEnum.pointy}
                 spacing={1}
                 colorsDefs={{
-                    colorsBlue:[landStyle],
-                    colorsYellow:[landStyle],
+                    colorsBlue:blues,
+                    colorsYellow:yellows,
                     pieceColors:[backgroundColor]
                 }}
             >
@@ -76,7 +80,7 @@ class CounterSvg extends React.Component<Props, any>{
                     <g className="hexagon">
                         {
                             land?<>
-                                <polygon points={pointLand} style={{filter:`url(#spotlight_${landStyle})`}} />
+                                <polygon points={pointLand} style={{filter:`url(#spotlight_t_${landStyle})`}} />
                                 <polygon points={pointLand} style={{filter:'url(#line)'}} />
                                 {isHomeless &&<polygon points={pointsWalk} style={{filter:'url(#homeless)'}} />}
                             </>: !counter && <>
