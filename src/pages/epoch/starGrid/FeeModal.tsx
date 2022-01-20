@@ -82,6 +82,7 @@ export const FeeModal:React.FC<Props> = ({show,onOk,onCancel,data,lockedInfo})=>
                                     <IonText color="warning">
                                         <p>{i18n.t("starGridDesc1")}</p>
                                         <p>{i18n.t("starGridDesc2")}</p>
+                                        <p>{i18n.t("starGridDesc3")}</p>
                                     </IonText>
                                 </small>
                             </div>

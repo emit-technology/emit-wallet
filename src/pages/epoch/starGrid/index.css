@@ -169,6 +169,7 @@ svg path {
   position: relative;
   text-align: left;
   display: flex;
+  padding: 6px;
 }
 
 .owner-info .cap-info {
@@ -229,6 +230,7 @@ svg path {
   flex: 1;
   background: linear-gradient(#560817, #674750);
   display: flex;
+  padding: 6px;
 }
 
 .enemy-info .avatar-l {
@@ -337,7 +339,7 @@ svg path {
 }
 
 .counter-list-half {
-  max-height: 25vh;
+  max-height: 30vh;
   overflow-y: scroll;
 }
 

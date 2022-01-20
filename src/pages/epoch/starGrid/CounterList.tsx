@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Counter, Land, StarGridType} from "../../../types";
+import {Counter, DriverStarGrid, Land, LockedInfo, StarGridType} from "../../../types";
 import {
     IonList,
     IonLabel,
@@ -20,6 +20,7 @@ import {toAxial} from "../../../components/hexagons/utils";
 import {chevronForward} from "ionicons/icons";
 import {isEmptyPlanet} from "./utils";
 import i18n from "../../../locales/i18n"
+import * as utils from "../../../utils";
 
 interface Props {
     title?: string
@@ -32,8 +33,10 @@ interface Props {
     amountTitle2: any;
     defaultPlanet?: Land
     onSelectPlanet: () => void;
+    driverInfo?:DriverStarGrid;
+    lockedInfo?:LockedInfo;
 }
-export const CounterList:React.FC<Props> = ({show,onOk,title,onCancel,data,
+export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedInfo,onCancel,data,
 onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
 
     const selectRef:any = React.createRef();
@@ -84,14 +87,57 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
                     amountTitle1 &&
                     <IonItem>
                         <IonLabel position="stacked">{amountTitle1}</IonLabel>
-                        <IonInput ref={baseAmountRef} type="number" placeholder="0.000"/>
+                        <IonInput ref={baseAmountRef} type="number" placeholder="0.000" id="baseAmountId"/>
+                        {
+                            driverInfo && lockedInfo &&
+                            <IonButton mode="ios" size="small" fill="outline" slot="end" onClick={() => {
+                                {
+                                    /**
+                                     * bLight：0.12*10^18
+                                     bDark: 0.04*10^18
+                                     Water: 0.1*10^18
+                                     Earth: 208.3*10^18
+                                     */
+                                    let cyValue = lockedInfo.last.burnedLight;
+                                    let min = new BigNumber(0.012);
+                                    if (lockedInfo.userInfo.counter.enType == StarGridType.EARTH) {
+                                        cyValue = lockedInfo.last.burnedDark;
+                                        min = new BigNumber(0.004);
+                                    }
+                                    let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                                        utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5)
+                                    )
+                                    if (value.toNumber() < min.toNumber()) {
+                                        value = min
+                                    }
+                                    //@ts-ignore
+                                    document.getElementById("baseAmountId").value = value.toFixed(3);
+                                }
+                                {
+                                    let min = new BigNumber(20.83);
+                                    let cyValue = lockedInfo.last.burnedEarth;
+                                    if (lockedInfo.userInfo.counter.enType == StarGridType.EARTH) {
+                                        cyValue = lockedInfo.last.burnedWater;
+                                        min = new BigNumber(0.01)
+                                    }
+                                    let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                                        utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5)
+                                    )
+                                    if (value.toNumber() < min.toNumber()) {
+                                        value = min
+                                    }
+                                    //@ts-ignore
+                                    document.getElementById("attachAmountId").value = value.toFixed(3);
+                                }
+                            }}>{i18n.t("recommend")}</IonButton>
+                        }
                     </IonItem>
                 }
                 {
                     amountTitle2 &&
                     <IonItem>
                         <IonLabel position="stacked">{amountTitle2}</IonLabel>
-                        <IonInput ref={attachAmountRef} type="number" placeholder="0.000"/>
+                        <IonInput ref={attachAmountRef} type="number" placeholder="0.000" id="attachAmountId"/>
                     </IonItem>
                 }
                 {

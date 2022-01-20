@@ -68,21 +68,20 @@ class Epoch extends React.Component<any, any>{
 
     init = async ()=>{
         const account = await walletWorker.accountInfo()
+        const tipsPromise = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
+        const altarInfoPromise = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
+        const chaosInfoPromise = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
+        const starGridInfoPromise = await starGridRpc.driverInfo(account.addresses[ChainType.BSC]);
 
-        const starGridInfo = await starGridRpc.driverInfo(account.addresses[ChainType.BSC]);
-        console.log(starGridInfo,"ss");
+        const restAll = await Promise.all([tipsPromise,altarInfoPromise,chaosInfoPromise,starGridInfoPromise])
+        const rest:any = restAll[0]
+        const tips = rest && rest.length>0?rest[0]:null
         this.setState({
-            starGridInfo:starGridInfo
+            altarInfo: restAll[1],
+            chaosInfo:  restAll[2],
+            tips:tips,
+            starGridInfo: restAll[3],
         })
-        // const rest:any = await rpc.post("eth_getAppVersion", ["epoch_tips_latest",""],ChainType.ETH)
-        // const tips = rest && rest.length>0?rest[0]:null
-        // const altarInfo = await epochService.userInfo(MinerScenes.altar, account.addresses[ChainType.SERO])
-        // const chaosInfo = await epochService.userInfo(MinerScenes.chaos, account.addresses[ChainType.SERO])
-        // this.setState({
-        //     altarInfo: altarInfo,
-        //     chaosInfo: chaosInfo,
-        //     tips:tips,
-        // })
     }
 
     render() {

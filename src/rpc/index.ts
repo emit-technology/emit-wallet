@@ -181,7 +181,6 @@ class RPC {
             const category = await contract.symbol()
 
             const tokenArr: Array<NftInfo> = [];
-            console.log(balance,"ticketBSC")
             for (let i = 0; i < balance; i++) {
                 const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
                 const uri = await contract.tokenURI(tokenId)
@@ -207,7 +206,7 @@ class RPC {
 
                 tokenArr.push({
                     chain:ChainType.BSC,
-                    symbol: category,
+                    symbol: symbol,
                     tokenId: tokenId,
                     meta: meta,
                     category:category

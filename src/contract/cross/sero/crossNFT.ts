@@ -1,6 +1,4 @@
-import BigNumber from "bignumber.js";
 import SeroContract from "../../SeroContract";
-
 
 const ABI = [
     {

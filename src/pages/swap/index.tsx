@@ -43,6 +43,7 @@ import {type} from "os";
 import interVar, {interVarSwap} from "../../interval";
 import {createRef} from "react";
 import i18n from "../../locales/i18n";
+import {Plugins} from "@capacitor/core";
 
 interface State {
     balance: any
@@ -74,6 +75,8 @@ interface State {
     priceSwap:boolean
 }
 const reg =  /^[1-9]\d*\.\d*|0\.\d*[0-9]\d*$/;
+
+const crossToSero = ["bLIGHT"];
 
 class Swap extends React.Component<any, State> {
 
@@ -194,9 +197,10 @@ class Swap extends React.Component<any, State> {
         const path = router.getPath(fromToken, toToken);
         const crossReceipt = this.getCrossReceipt();
         const out:any = await pancakeSwap.estimatSwapCross(amount,path,crossReceipt,false)
+        console.log("out::",out);
         const amounts:Array<string> = out[0]
 
-        if(toToken != "BNB"){
+        if(crossToSero.indexOf(toToken)>-1){
             const rest = await pancakeSwap.crossLimit(router.getTokenAddress(toToken))
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
             if(utils.fromValue(amounts[1],decimalTo).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
@@ -207,7 +211,7 @@ class Swap extends React.Component<any, State> {
         }
 
         this.setState({
-            toAmount:utils.fromValue(amounts[1],decimalTo).toFixed(5,1),
+            toAmount:utils.fromValue(amounts[amounts.length-1],decimalTo).toFixed(5,1),
             checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
             crossLimit: crossLimit
@@ -218,7 +222,7 @@ class Swap extends React.Component<any, State> {
 
     getCrossReceipt = ()=>{
         const {checked,account,toToken} = this.state;
-        return checked && toToken != "BNB" ? utils.bs58ToHex(account.addresses[ChainType.SERO]):"0x"
+        return checked && crossToSero.indexOf(toToken)>-1 ? utils.bs58ToHex(account.addresses[ChainType.SERO]):"0x"
     }
 
     setToAmount = async (v: any,fromT?:string,toT?:string) => {
@@ -244,7 +248,7 @@ class Swap extends React.Component<any, State> {
         const out = await pancakeSwap.estimatSwapCross(amount,path,crossReceipt,true)
         const amounts:Array<string> = out[0]
 
-        if(toToken != "BNB"){
+        if(crossToSero.indexOf(toToken)>-1){
             const rest = await pancakeSwap.crossLimit(router.getTokenAddress(toToken))
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
             if(new BigNumber(v).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
@@ -326,6 +330,7 @@ class Swap extends React.Component<any, State> {
         // crossReceipt = utils.bs58ToHex(account.addresses[ChainType.SERO])
         if(exact == "from"){
             const inMin = new BigNumber(amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100))).toFixed(0));
+            console.log(inMin.toString(),amountTo.toString())
             if (fromToken == "BNB") {
                 tx.data = await pancakeSwap.swapExactETHForTokens(amountTo,path , sendTo , crossReceipt,deadline )
                 tx.value = utils.toHex(amountFrom);
@@ -350,6 +355,7 @@ class Swap extends React.Component<any, State> {
                 tx.amount = utils.toHex(amountFrom);
             }
         }
+        console.log(tx,"TX::")
         tx.gas = await pancakeSwap.estimateGas(tx)
         this.setState({
             tx:tx,
@@ -473,7 +479,7 @@ class Swap extends React.Component<any, State> {
                 fromAmount:toAmount,
                 toAmount:fromAmount,
                 fromToken: toToken,
-                toToken: fromToken,
+                toToken: router.getToTokens(toToken)[0],
                 exact:"to",
                 focus:"to"
             })
@@ -484,11 +490,24 @@ class Swap extends React.Component<any, State> {
                 toAmount:fromAmount,
                 fromAmount:toAmount,
                 fromToken: toToken,
-                toToken: fromToken,
+                toToken: router.getToTokens(fromToken)[0],
                 exact:"from",
                 focus:"from"
             })
             await this.setFromAmount(toAmount,toToken,fromToken)
+        }
+    }
+
+    setToken = async (e:any)=>{
+        const {fromAmount,toAmount,focus,fromToken} = this.state;
+        this.setState({
+            toToken: e.detail.value
+        })
+
+        if(focus == "from"){
+            await this.setFromAmount(fromAmount,fromToken,e.detail.value)
+        }else if(focus == "to"){
+            await this.setToAmount(toAmount,fromToken,e.detail.value)
         }
     }
 
@@ -510,6 +529,7 @@ class Swap extends React.Component<any, State> {
                     <IonIcon slot="end" src={statsChartOutline} style={{fontSize: "24px", marginRight: "15px"}}
                              onClick={() => {
                                  url.chart("LIGHT_BNB")
+                                 // Plugins.Browser.open({url:"https://www.dextools.io/app/bsc/pair-explorer/0x2e650c27320911abd7de4131a61120f6efee4fea",presentationStyle:"popover"})
                              }}/>
                 </IonToolbar>
 
@@ -581,9 +601,10 @@ class Swap extends React.Component<any, State> {
                                         <IonCol size="12" style={{textAlign: "right"}}>
                                             <IonSelect title="Select a token" mode="ios" value={fromToken}
                                                        onIonChange={(e) => {
+                                                           const fromToken = e.detail.value;
                                                            this.setState({
-                                                               toToken:fromToken,
-                                                               fromToken: e.detail.value,
+                                                               toToken: router.getToTokens(fromToken)[0],
+                                                               fromToken: fromToken,
                                                            })
                                                        }}>
                                                 {
@@ -640,13 +661,10 @@ class Swap extends React.Component<any, State> {
                                         <IonCol size="12" style={{textAlign: "right"}}>
                                             <IonSelect title="Select a token" mode="ios" value={toToken}
                                                        onIonChange={(e) => {
-                                                           this.setState({
-                                                               fromToken:toToken,
-                                                               toToken: e.detail.value
-                                                           })
+                                                           this.setToken(e)
                                                        }}>
                                                 {
-                                                    router.getTokens().map(v=>{
+                                                    router.getToTokens(fromToken).map(v=>{
                                                         return <IonSelectOption value={v}>{v}</IonSelectOption>
                                                     })
                                                 }
@@ -658,7 +676,7 @@ class Swap extends React.Component<any, State> {
                         </div>
 
                         {
-                            toToken != "BNB" && <div className="swap-item-cross">
+                            crossToSero.indexOf(toToken)>-1 && <div className="swap-item-cross">
                                 <IonItem lines="none">
                                     <IonLabel color="primary"><small>{i18n.t("cross")} {toToken} {i18n.t("to")} SERO {i18n.t("chain")}</small></IonLabel>
                                     <IonCheckbox checked={checked} disabled={!toAmount || new BigNumber(toAmount).toNumber()<new BigNumber(crossLimit[0]).toNumber()} mode="ios" slot="start" onIonChange={e => this.setChecked(e.detail.checked)} />
@@ -744,7 +762,7 @@ class Swap extends React.Component<any, State> {
                         </IonRow>
 
                         {
-                            toAmount && toToken != "BNB" && checked && <>
+                            toAmount && crossToSero.indexOf(toToken)>-1 && checked && <>
                                 <IonRow>
                                     <IonCol size="4">{i18n.t("crossLimit")}</IonCol>
                                     <IonCol size="8">

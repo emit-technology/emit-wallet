@@ -318,6 +318,7 @@ export function getCategoryBySymbol(symbol: string, chain: string): string {
 }
 
 export function crossAbleBySymbol(symbol: string): boolean {
+    console.log(symbol)
     return CONTRACT_ADDRESS.ERC721[symbol]["CROSS_ABLE"];
 }
 
@@ -771,6 +772,9 @@ export const reIcon = (v:string)=>{
 
 export function metaAttributesToWrappedDevice(attributes:Array<Attribute>):WrappedDevice{
     function getAttr(trait:string){
+        if(!attributes){
+            return;
+        }
         for (let attr of attributes){
             if(attr.trait_type == trait){
                 return attr.value

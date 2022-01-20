@@ -101,14 +101,16 @@ import {CounterSelectModal} from "./CounterSelectModal";
 import {isEmptyPlanet} from "./utils";
 import i18n from "../../../locales/i18n";
 import {DriverInfo} from "../../../contract/epoch/sero/types";
+import {CONTRACT_ADDRESS} from "../../../config";
 
 interface ApproveState{
     bLIGHT:boolean
     WATER:boolean
     EARTH:boolean
     bDARK:boolean
-    "EARTH-BUSD-LQ":boolean
-    "WATER-BUSD-LQ":boolean
+    "EARTH-BUSD-LP":boolean
+    "WATER-BUSD-LP":boolean
+    BUSD:boolean
 }
 
 interface State{
@@ -199,10 +201,10 @@ class StarGrid extends React.Component<any, State>{
         recRange:[(9-defaultHexSize)*3,(9-defaultHexSize)*3],
         rangeLand:[],
         approvedStarGridState:{
-            bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LQ":false,"WATER-BUSD-LQ":false
+            bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LP":false,"WATER-BUSD-LP":false,BUSD:false,
         },
         approvedOperatorState:{
-            bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LQ":false,"WATER-BUSD-LQ":false
+            bLIGHT:false,WATER:false,EARTH:false,bDARK:false,"EARTH-BUSD-LP":false,"WATER-BUSD-LP":false,BUSD:false
         },
         approvedStarGrid:false,
         showConfirm:false,
@@ -296,7 +298,7 @@ class StarGrid extends React.Component<any, State>{
         //     }
         // }
         this.setState({
-            absoluteHex:absoluteHex,
+            // absoluteHex:absoluteHex,
             rangeLand:rest[0],
             userPositions:userPosition,
             account:account,
@@ -325,12 +327,12 @@ class StarGrid extends React.Component<any, State>{
         const nfts = await rpc.getTicket(chain,"")
         const counters:Array<Counter> = [];
         if(nfts){
-            const infos:Array<NftInfo> = nfts["COUNTER"];
+            const infos:Array<NftInfo> = nfts[CONTRACT_ADDRESS.ERC721.COUNTER.SYMBOL.BSC];
             if(!infos || infos.length==0){
                 return counters
             }
             for(let info of infos){
-                const counter = await starGridRpc.counterInfo(info.tokenId)//await epochStarGridQuery.counterInfo(info.tokenId,account.addresses[chain])
+                const counter = await epochStarGridQuery.counterInfo(info.tokenId,account.addresses[chain]);//await starGridRpc.counterInfo(info.tokenId)
                 if(!counter || type && type != counter.enType){
                     continue
                 }
@@ -469,7 +471,7 @@ class StarGrid extends React.Component<any, State>{
                         const err = typeof e == "string"?e:e.message;
                         return Promise.reject(err)
                     });
-                },1*1000)
+                },2*1000)
             }
         }).catch((e: any) => {
             const err = typeof e == "string"?e:e.message;
@@ -483,7 +485,7 @@ class StarGrid extends React.Component<any, State>{
         const maxCost = rest[2];
         const feeData:any = {
             "Counter Type": <b><IonText color="primary">EMIT-{StarGridType[type]}</IonText></b>,
-            "Deposit Type" : <b><IonText color="primary">{DepositType[depositType]}</IonText></b>,
+            "Staking Type" : <b><IonText color="primary">{DepositType[depositType]}</IonText></b>,
             "Number": <b><IonText color="secondary">{num}</IonText></b>,
             "Balance": <b><IonText color="secondary">{utils.nFormatter(utils.fromValue(rest[1],18),6)}</IonText><small><IonText color="primary">{rest[0]}</IonText></small></b>,
             "Estimate Cost":<b><IonText color="secondary">{utils.nFormatter(utils.fromValue(maxCost,18),3)}</IonText><small><IonText color="primary">{rest[0]}</IonText></small></b>,
@@ -898,19 +900,20 @@ class StarGrid extends React.Component<any, State>{
 
     confirmWithdrawUserDeposit = async (counterId:string,v?:UserDeposit)=>{
         const {withdrawUserDeposit} = this.state;
-        if(!v){
-            v = withdrawUserDeposit
-        }
+        // if(!v){
+        //     v = withdrawUserDeposit
+        // }
         const account = await walletWorker.accountInfo();
-        const backedAmount = new BigNumber(v.totalAmount).dividedBy(v.count).multipliedBy(1-0.002).toFixed(0);
         const deadline = this.deadline();
-        const estimateRest = await epochStarGridOperator.withDraw(v.index,counterId,new BigNumber(backedAmount),deadline,account.addresses[chain])
+        const estimateRest = await epochStarGridOperator.withDraw(v.index,counterId,new BigNumber(0),deadline,account.addresses[chain])
+        const backedAmount = new BigNumber(estimateRest[1]).multipliedBy(1-0.005).toFixed(0);
+
         //baseCost,attachCost,feeRate
         const feeData:any = {
             showDesc: false,
-            "Deposit Index": <b><IonText color="secondary">{v.index}</IonText></b>,
-            "Estimate Return": <>
-            <p><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(estimateRest[1],18),3)}</b></IonText>&nbsp;{estimateRest[0]}</p>
+            "Staking Index": <b><IonText color="secondary">{v.index}</IonText></b>,
+            "Estimate Min Return": <>
+            <p><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(backedAmount,18),6)}</b></IonText>&nbsp;{estimateRest[0]}</p>
             </>,
         }
         if(counterId != "0"){
@@ -1323,12 +1326,18 @@ class StarGrid extends React.Component<any, State>{
     }
 
     setShowCaptureModal = async (f:boolean)=>{
-        this.setState({
+        const state:any = {
             showCaptureModal:f,
             showLoading:false,
             amountTitle2:"",
-            amountTitle1:""
-        })
+            amountTitle1:"",
+        };
+        if(f){
+            const account = await walletWorker.accountInfo();
+            const driver = await starGridRpc.driverInfo(account.addresses[chain])
+            state["driver"] = driver;
+        }
+        this.setState(state)
         interVarEpoch.latestOpTime = Date.now();
     }
 
@@ -1568,7 +1577,7 @@ class StarGrid extends React.Component<any, State>{
                                             this.setShowToast(true,err);
                                         })
                                     }else{
-                                        this.setShowToast(true,"You are no counter in the map.")
+                                        this.setShowToast(true,"Your counter is not on the map.")
                                     }
                                 }} color="tertiary">
                                     <IonIcon icon={homeOutline} />
@@ -1960,7 +1969,7 @@ class StarGrid extends React.Component<any, State>{
                         <ConfirmTransaction show={showConfirm} transaction={tx} onProcess={(f) => {
                         }} onCancel={() => this.setShowConfirm(false)} onOK={this.confirm}/>
 
-                        <CounterList title={i18n.t("login")} defaultPlanet={defaultPlanet}  onSelectPlanet={()=>{
+                        <CounterList title={i18n.t("login")} driverInfo={driver} lockedInfo={lockedInfo} defaultPlanet={defaultPlanet}  onSelectPlanet={()=>{
                             this.setShowSelectPlanet(true,"capture");
                         }} show={showCaptureModal} amountTitle1={amountTitle1}
                                      amountTitle2={amountTitle2} onCallback={(counter)=>{

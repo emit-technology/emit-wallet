@@ -18,14 +18,21 @@ class Router {
                         path.push(tokens[t].ADDRESS)
                     }
                 }
+                path.push(tokens[toToken].ADDRESS)
             }
         }
+        console.log("getRouters:: ",fromToken,toToken,path);
         return path
     }
 
     getTokenAddress = (token:string)=>{
         const tokens:any = PANCAKE_SWAP_CONFIG.TOKENS;
         return tokens[token].ADDRESS;
+    }
+
+    getToTokens = (fromToken:string):Array<string> =>{
+        const tokens:any = PANCAKE_SWAP_CONFIG.TOKENS;
+        return tokens[fromToken].TO;
     }
 
     getTokens = () =>{

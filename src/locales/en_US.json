@@ -258,7 +258,8 @@
   "include": "Include",
   "recommend": "Recommend",
   "starGridDesc1": "1. Login in the blank grid will create the planet.",
-  "starGridDesc2": "2. Additional 10% fee for creating a planet.",
+  "starGridDesc2": "2. Creating a planet requires burning a certain number of both associated tokens.",
+  "starGridDesc3": "3. Additional 10% fee for creating a planet.",
   "count": "Count",
   "owned": "Owned",
   "marked": "Marked"

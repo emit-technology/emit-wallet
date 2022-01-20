@@ -27,7 +27,7 @@ class Chart extends React.Component<any, any>{
     render() {
         // const browserUrl = decodeURIComponent(this.props.match.params.url)
         let symbol = this.props.match.params.symbol
-        let browserUrl = [CHART_URL,"symbol","=",symbol,"&t=",Date.now()].join("")
+        let browserUrl = "https://www.dextools.io/app/bsc/pair-explorer/0x2e650c27320911abd7de4131a61120f6efee4fea"//[CHART_URL,"symbol","=",symbol,"&t=",Date.now()].join("")
         const {symbolIn,useDollar} = this.state;
         if(symbolIn){
             symbol = symbolIn;
