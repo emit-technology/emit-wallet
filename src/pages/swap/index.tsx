@@ -332,7 +332,7 @@ class Swap extends React.Component<any, State> {
             const inMin = new BigNumber(amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100))).toFixed(0));
             console.log(inMin.toString(),amountTo.toString())
             if (fromToken == "BNB") {
-                tx.data = await pancakeSwap.swapExactETHForTokens(amountTo,path , sendTo , crossReceipt,deadline )
+                tx.data = await pancakeSwap.swapExactETHForTokens(inMin,path , sendTo , crossReceipt,deadline )
                 tx.value = utils.toHex(amountFrom);
             } else if (toToken == "BNB") {
                 tx.data = await pancakeSwap.swapExactTokensForETH(amountFrom,inMin,path,sendTo,deadline)
