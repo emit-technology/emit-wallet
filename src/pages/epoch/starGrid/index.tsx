@@ -244,10 +244,27 @@ class StarGrid extends React.Component<any, State>{
                 console.error(e)
             })
         },5*1000,true)
+
+        this.enterInit().catch(e=>{
+            console.error(e)
+        })
+    }
+
+    enterInit = async ()=>{
+        const {showApproveAllModal,approvedStarGridState,approvedStarGrid} = this.state;
+        let approveRest:Array<any> = [approvedStarGrid,approvedStarGridState,false];
+        if(!showApproveAllModal){
+            approveRest = await this.queryApprove();
+        }
+        this.setState({
+            approvedStarGrid:approveRest[0],
+            approvedStarGridState:approveRest[1],
+            showModalApprove:approveRest[2],
+        })
     }
 
     init = async ()=>{
-        let {absoluteHex,hexSize,targetHex,showApproveAllModal,approvedStarGridState,approvedStarGrid} = this.state;
+        let {absoluteHex,hexSize} = this.state;
         const account = await walletWorker.accountInfo();
         const owner = account.addresses[chain];
         const userPosition = await starGridRpc.userPositions(owner,10);
@@ -270,10 +287,7 @@ class StarGrid extends React.Component<any, State>{
         const countersPromise =  this.getCounters()
         const enDetailsPromise = epochStarGridQuery.currentENDetails(owner);
         const rest = await Promise.all([rangeLandPromise,lockedInfoPromise,countersPromise,enDetailsPromise])
-        let approveRest:Array<any> = [approvedStarGrid,approvedStarGridState,false];
-        if(!showApproveAllModal){
-            approveRest = await this.queryApprove();
-        }
+
         const balance = await rpc.getBalance(chain,"");
         // const rangeLands:Array<Land> = rest[0];
         // const newTargetHex: Array<HexInfo> = [];
@@ -304,9 +318,6 @@ class StarGrid extends React.Component<any, State>{
             userPositions:userPosition,
             account:account,
             counters:rest[2],
-            approvedStarGrid:approveRest[0],
-            approvedStarGridState:approveRest[1],
-            showModalApprove:approveRest[2],
             lockedInfo:rest[1],
             recRange:rang,
             balanceMap:balance,
