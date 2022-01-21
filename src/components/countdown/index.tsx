@@ -6,11 +6,12 @@ import Countdown from "react-countdown";
 interface CountdownProps {
     time: number;
     className?:string
+    showDay?:boolean
 }
 
-export const CountDown: React.FC<CountdownProps> = ({time,className}) => {
+export const CountDown: React.FC<CountdownProps> = ({time,showDay,className}) => {
 
-    const renderer = ({hours, minutes, seconds, completed}) => {
+    let renderer = ({days,hours, minutes, seconds, completed}) => {
         if (completed) {
             return <span></span>
         }
@@ -24,7 +25,7 @@ export const CountDown: React.FC<CountdownProps> = ({time,className}) => {
         if (new BigNumber(seconds).toNumber() <= 9) {
             s = "0" + seconds;
         }
-        return <div className={className?className:"countdown"}>{h}:{m}:{s}</div>;
+        return <div className={className?className:"countdown"}>{days>0?`${days} days`:""} {h}:{m}:{s}</div>;
     };
 
     return <Countdown date={time} renderer={renderer} className={className}/>

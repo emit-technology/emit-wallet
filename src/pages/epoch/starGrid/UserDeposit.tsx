@@ -12,6 +12,8 @@ import {DepositType, StarGridType, UserDeposit} from "../../../types";
 import {formatDate, fromValue, nFormatter} from "../../../utils";
 import {NoData} from "./NoData";
 import i18n from "../../../locales/i18n";
+import BigNumber from "bignumber.js";
+import {CountDown} from "../../../components/countdown";
 
 interface Props{
     title?:string
@@ -49,12 +51,14 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
                 </IonItem>
                 {
                     data && data.length>0  ?  data.map((v,i)=>{
+                        const countdown = new BigNumber(v.createTime).plus(90*24*60*60).multipliedBy(1000)
                         return <IonItem key={i}>
                             <IonLabel className="ion-text-wrap">
                                 <IonRow>
                                     <IonCol size="3">
                                         <b><IonText color="primary">{v.index}</IonText></b><br/>
-                                        <small><IonText color="medium">{formatDate(v.createTime*1000)}</IonText></small>
+                                        <small><IonText color="medium">{formatDate(v.createTime*1000)}</IonText></small><br/>
+
                                     </IonCol>
                                     <IonCol size="6">
                                         <p>
@@ -64,7 +68,13 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
                                            }</IonText>
                                         </p>
                                         <p>{i18n.t("created")}&nbsp;<b><IonText color="secondary">{v.count}</IonText></b>&nbsp;<IonText color="primary">EMIT-{StarGridType[v.enType]}</IonText></p>
-                                        <p>{v.canWithDraw ? <IonBadge color="success">{i18n.t("finished")}</IonBadge>:<IonBadge>{i18n.t("staking")}</IonBadge>}</p>
+                                        <p>{v.canWithDraw ? <>
+                                            <IonBadge color="success">{i18n.t("finished")}</IonBadge></>:<>
+                                                <IonBadge>{i18n.t("staking")}</IonBadge>
+                                                <IonBadge color="tertiary"><CountDown time={countdown.toNumber()} className="wthdown"/></IonBadge>
+                                            </>
+                                        }</p>
+
                                     </IonCol>
                                     <IonCol size="3">
                                         <IonButton mode="ios" expand="block" fill="outline" size="small" onClick={()=>{

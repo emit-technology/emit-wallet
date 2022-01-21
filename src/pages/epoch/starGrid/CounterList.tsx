@@ -37,7 +37,7 @@ interface Props {
     lockedInfo?:LockedInfo;
 }
 export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedInfo,onCancel,data,
-onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
+                                                onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
 
     const selectRef:any = React.createRef();
     const baseAmountRef:any = React.createRef();
@@ -53,105 +53,120 @@ onCallback,amountTitle1,amountTitle2,defaultPlanet,onSelectPlanet})=>{
         >
             <div className="epoch-md">
 
-            <IonList mode="md">
-                {
-                    title &&
-                    <IonListHeader mode="ios">
-                        {title}
-                    </IonListHeader>
-                }
-                <IonItemDivider  sticky color="primary">{i18n.t("select")} Counter</IonItemDivider>
-                <div className="counter-list-half">
-                    <IonRadioGroup ref={selectRef} onIonChange={(e)=>{
-                        const counters = data.filter(c=> c && c.counterId == e.detail.value);
-                        onCallback(counters[0])
-                    }}>
-                        {
-                            data && data.map((v,i)=>{
-                                if(!v){
-                                    return <></>
-                                }
-                                return v && <>
-                                    <IonItem key={i}>
-                                        <IonRadio slot="start" mode="md" value={v.counterId} />
-                                        <IonLabel>
-                                            <HexInfoCard sourceHexInfo={{counter:v}}/>
-                                        </IonLabel>
-                                    </IonItem>
-                                </>
-                            })
-                        }
-                    </IonRadioGroup>
-                </div>
-                {
-                    amountTitle1 &&
-                    <IonItem>
-                        <IonLabel position="stacked">{amountTitle1}</IonLabel>
-                        <IonInput ref={baseAmountRef} type="number" placeholder="0.000" id="baseAmountId"/>
-                        {
-                            driverInfo && lockedInfo &&
-                            <IonButton mode="ios" size="small" fill="outline" slot="end" onClick={() => {
-                                {
-                                    /**
-                                     * bLight：0.12*10^18
-                                     bDark: 0.04*10^18
-                                     Water: 0.1*10^18
-                                     Earth: 208.3*10^18
-                                     */
-                                    let cyValue = lockedInfo.last.burnedLight;
-                                    let min = new BigNumber(0.012);
-                                    if (lockedInfo.userInfo.counter.enType == StarGridType.EARTH) {
-                                        cyValue = lockedInfo.last.burnedDark;
-                                        min = new BigNumber(0.004);
+                <IonList mode="md">
+                    {
+                        title &&
+                        <IonListHeader mode="ios">
+                            {title}
+                        </IonListHeader>
+                    }
+                    <IonItemDivider  sticky color="primary">{i18n.t("select")} Counter</IonItemDivider>
+                    <div className="counter-list-half">
+                        <IonRadioGroup ref={selectRef} onIonChange={(e)=>{
+                            const counters = data.filter(c=> c && c.counterId == e.detail.value);
+                            onCallback(counters[0])
+                        }}>
+                            {
+                                data && data.map((v,i)=>{
+                                    if(!v){
+                                        return <></>
                                     }
-                                    let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                        utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5)
-                                    )
-                                    if (value.toNumber() < min.toNumber()) {
-                                        value = min
+                                    return v && <>
+                                        <IonItem key={i}>
+                                            <IonRadio slot="start" mode="md" value={v.counterId} />
+                                            <IonLabel>
+                                                <HexInfoCard sourceHexInfo={{counter:v}}/>
+                                            </IonLabel>
+                                        </IonItem>
+                                    </>
+                                })
+                            }
+                        </IonRadioGroup>
+                    </div>
+                    {
+                        amountTitle1 &&
+                        <IonItem>
+                            <IonLabel position="stacked">{amountTitle1}</IonLabel>
+                            <IonInput ref={baseAmountRef} type="number" placeholder="0.000" id="baseAmountId"/>
+                            {
+                                lockedInfo &&
+                                <IonButton mode="ios" size="small" fill="outline" slot="end" onClick={() => {
+                                    const counterId = selectRef.current.value;
+                                    const counters = data.filter(c=> c && c.counterId == counterId);
+                                    const counter = counters[0];
+                                    {
+                                        /**
+                                         * bLight：0.12*10^18
+                                         bDark: 0.04*10^18
+                                         Water: 0.1*10^18
+                                         Earth: 208.3*10^18
+                                         */
+                                        let cyValue = lockedInfo.last.burnedLight;
+                                        let min = new BigNumber(0.012);
+                                        if(counter){
+                                            if (counter.enType == StarGridType.EARTH) {
+                                                cyValue = lockedInfo.last.burnedDark;
+                                                min = new BigNumber(0.004);
+                                            }
+                                            let value = new BigNumber(0);
+                                            if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
+                                                value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5):15
+                                                )
+                                            }
+                                            if (value.toNumber() < min.toNumber()) {
+                                                value = min
+                                            }
+                                            console.log(value.toNumber(),cyValue,counter)
+                                            //@ts-ignore
+                                            document.getElementById("baseAmountId").value = value.toFixed(3);
+                                        }
+
                                     }
-                                    //@ts-ignore
-                                    document.getElementById("baseAmountId").value = value.toFixed(3);
-                                }
-                                {
-                                    let min = new BigNumber(20.83);
-                                    let cyValue = lockedInfo.last.burnedEarth;
-                                    if (lockedInfo.userInfo.counter.enType == StarGridType.EARTH) {
-                                        cyValue = lockedInfo.last.burnedWater;
-                                        min = new BigNumber(0.01)
+                                    {
+                                        if(counter){
+                                            let min = new BigNumber(20.83);
+                                            let cyValue = lockedInfo.last.burnedEarth;
+                                            if (counter.enType == StarGridType.EARTH) {
+                                                cyValue = lockedInfo.last.burnedWater;
+                                                min = new BigNumber(0.01)
+                                            }
+                                            let value = new BigNumber(0);
+                                            if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
+                                                value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5):15
+                                                )
+                                            }
+                                            if (value.toNumber() < min.toNumber()) {
+                                                value = min
+                                            }
+                                            //@ts-ignore
+                                            document.getElementById("attachAmountId").value = value.toFixed(3);
+                                        }
                                     }
-                                    let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                        utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5)
-                                    )
-                                    if (value.toNumber() < min.toNumber()) {
-                                        value = min
-                                    }
-                                    //@ts-ignore
-                                    document.getElementById("attachAmountId").value = value.toFixed(3);
-                                }
-                            }}>{i18n.t("recommend")}</IonButton>
-                        }
-                    </IonItem>
-                }
-                {
-                    amountTitle2 &&
-                    <IonItem>
-                        <IonLabel position="stacked">{amountTitle2}</IonLabel>
-                        <IonInput ref={attachAmountRef} type="number" placeholder="0.000" id="attachAmountId"/>
-                    </IonItem>
-                }
-                {
-                    !isEmptyPlanet(defaultPlanet) && <IonItem detail detailIcon={chevronForward} onClick={()=>{
-                        onSelectPlanet()
-                    }}><IonLabel>
-                        {i18n.t("defaultPlanet")}
-                    </IonLabel>
-                        <IonLabel>
-                            <HexInfoCard sourceHexInfo={{hex:toAxial(defaultPlanet.coordinate),land:defaultPlanet}}/>
+                                }}>{i18n.t("recommend")}</IonButton>
+                            }
+                        </IonItem>
+                    }
+                    {
+                        amountTitle2 &&
+                        <IonItem>
+                            <IonLabel position="stacked">{amountTitle2}</IonLabel>
+                            <IonInput ref={attachAmountRef} type="number" placeholder="0.000" id="attachAmountId"/>
+                        </IonItem>
+                    }
+                    {
+                        !isEmptyPlanet(defaultPlanet) && <IonItem detail detailIcon={chevronForward} onClick={()=>{
+                            onSelectPlanet()
+                        }}><IonLabel>
+                            {i18n.t("defaultPlanet")}
                         </IonLabel>
-                    </IonItem>
-                }
-            </IonList>
+                            <IonLabel>
+                                <HexInfoCard sourceHexInfo={{hex:toAxial(defaultPlanet.coordinate),land:defaultPlanet}}/>
+                            </IonLabel>
+                        </IonItem>
+                    }
+                </IonList>
             </div>
             <IonRow>
                 <IonCol size="4">

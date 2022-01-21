@@ -433,10 +433,29 @@ svg path {
   font-weight: 600;
 }
 
+.wthdown {
+  font-size: 12px;
+}
+
 .op-countdown {
   border: unset !important;
   margin-left: 24px !important;
   color: red;
+}
+
+.period-countdown {
+  color: #dddddd;
+  font-size: 12px;
+}
+
+.period-countdown2 {
+  color: #dddddd;
+  font-size: 14px;
+}
+
+.p-cd-r {
+  position: absolute;
+  right: 24px;
 }
 
 .op-countdown-2 {

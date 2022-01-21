@@ -184,6 +184,7 @@ class RPC {
             for (let i = 0; i < balance; i++) {
                 const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
                 const uri = await contract.tokenURI(tokenId)
+                console.log("uri:",uri);
                 const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
                 if(uri){
                     const metadata:Meta = await rpc.get(`${uri}/all`)

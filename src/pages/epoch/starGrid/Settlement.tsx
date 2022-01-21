@@ -182,7 +182,7 @@ export class Settlement extends React.Component<Props, any> {
                 <IonCol className="pd-in"><CountDown time={countdown} className="op-countdown-2"/></IonCol>
             </IonRow>
         </div>;
-
+        const periodCountdown = lockedInfo ?(1642681800 + (new BigNumber(lockedInfo.currentPeriod).multipliedBy(24*60*60).toNumber()) )*1000:0
         return  (<>
             <IonModal
                 isOpen={show}
@@ -293,7 +293,10 @@ export class Settlement extends React.Component<Props, any> {
                             </IonLabel>
                         </IonItem>
 
-                        <IonItemDivider sticky color="primary">{i18n.t("period")} {i18n.t("info")}</IonItemDivider>
+                        <IonItemDivider sticky color="primary">
+                            {i18n.t("period")} {i18n.t("info")}
+                            <div className="p-cd-r">{periodCountdown>0 && <CountDown time={periodCountdown} className="period-countdown2"/>}</div>
+                        </IonItemDivider>
                         <IonSegment mode="md" value={tab} onIonChange={e => {
                             e.stopPropagation();
                             this.setState({tab:e.detail.value})

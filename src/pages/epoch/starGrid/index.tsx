@@ -102,6 +102,7 @@ import {isEmptyPlanet} from "./utils";
 import i18n from "../../../locales/i18n";
 import {DriverInfo} from "../../../contract/epoch/sero/types";
 import {CONTRACT_ADDRESS} from "../../../config";
+import {CountDown} from "../../../components/countdown";
 
 interface ApproveState{
     bLIGHT:boolean
@@ -251,16 +252,16 @@ class StarGrid extends React.Component<any, State>{
         const owner = account.addresses[chain];
         const userPosition = await starGridRpc.userPositions(owner,10);
         // const uMap:Map<string,boolean> = new Map<string, boolean>()
-        if(userPosition ){
-            if(centerHex.equalHex(absoluteHex)){
-                absoluteHex = axialCoordinatesToCube(userPosition.recommendation.maxQ,userPosition.recommendation.maxS)
-            }
-            if(userPosition.positions && userPosition.positions.length>0){
-                if(centerHex.equalHex(absoluteHex)){
-                    absoluteHex = toAxial(userPosition.positions[0].coordinate)
-                }
-            }
-        }
+        // if(userPosition ){
+        //     if(centerHex.equalHex(absoluteHex)){
+        //         absoluteHex = axialCoordinatesToCube(userPosition.recommendation.maxQ,userPosition.recommendation.maxS)
+        //     }
+        //     if(userPosition.positions && userPosition.positions.length>0){
+        //         if(centerHex.equalHex(absoluteHex)){
+        //             absoluteHex = toAxial(userPosition.positions[0].coordinate)
+        //         }
+        //     }
+        // }
         const rang = [(9-hexSize)*3,(9-hexSize)*3];
         const leftBottom = axialCoordinatesToCube(absoluteHex.x-rang[0],absoluteHex.z+rang[1]);
         const rightTop = axialCoordinatesToCube(absoluteHex.x+rang[0],absoluteHex.z-rang[1]);
@@ -332,7 +333,7 @@ class StarGrid extends React.Component<any, State>{
                 return counters
             }
             for(let info of infos){
-                const counter = await epochStarGridQuery.counterInfo(info.tokenId,account.addresses[chain]);//await starGridRpc.counterInfo(info.tokenId)
+                const counter = await starGridRpc.counterInfo(info.tokenId)
                 if(!counter || type && type != counter.enType){
                     continue
                 }
@@ -900,9 +901,9 @@ class StarGrid extends React.Component<any, State>{
 
     confirmWithdrawUserDeposit = async (counterId:string,v?:UserDeposit)=>{
         const {withdrawUserDeposit} = this.state;
-        // if(!v){
-        //     v = withdrawUserDeposit
-        // }
+        if(!v){
+            v = withdrawUserDeposit
+        }
         const account = await walletWorker.accountInfo();
         const deadline = this.deadline();
         const estimateRest = await epochStarGridOperator.withDraw(v.index,counterId,new BigNumber(0),deadline,account.addresses[chain])
@@ -1487,18 +1488,19 @@ class StarGrid extends React.Component<any, State>{
         for(let tx of txs){
            totalGas = new BigNumber(tx.gas).plus(new BigNumber(totalGas))
         }
+        const periodCountdown = lockedInfo ?(1642681800 + (new BigNumber(lockedInfo.currentPeriod).multipliedBy(24*60*60).toNumber()) )*1000:0
         return (
             <>
                 <IonPage>
                     <IonHeader mode="ios">
                         <IonToolbar mode="ios" color="primary">
                             <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
-                            <IonTitle>STAR GRID [{lockedInfo && lockedInfo.currentPeriod}]</IonTitle>
+                            <IonTitle>
+                                <IonLabel>STAR GRID [{lockedInfo && lockedInfo.currentPeriod}]</IonLabel>
+                                <div>{periodCountdown>0 && <CountDown time={periodCountdown} className="period-countdown"/>}</div>
+                            </IonTitle>
                             <IonLabel slot="end">
                                 <IonIcon src={cashOutline} onClick={()=>{this.setShowSettlementModal(true)}} size="large"/>
-                                {/*<div className="op-time">*/}
-                                {/*    {lockedInfo && <CountDown second={utils.toValue(lockedInfo.nextOpTime,0).plus(60*5).toNumber() * 1000}/>}*/}
-                                {/*</div>*/}
                             </IonLabel>
                         </IonToolbar>
                     </IonHeader>
