@@ -7,7 +7,7 @@ import {
     IonModal,
     IonText,
     IonButton,
-    IonListHeader,
+    IonListHeader,IonBadge,
     IonCol, IonRow,IonInput
 } from "@ionic/react"
 import {StarGridTrustInfo} from "../../../types";
@@ -20,8 +20,9 @@ interface Props{
     onCancelApprove:(address:string)=>void;
     onApprove:(address:string)=>void;
     data: StarGridTrustInfo
+    owner:string
 }
-export const ApprovedList:React.FC<Props> = ({show,title,onCancel,data,onCancelApprove,onApprove})=>{
+export const ApprovedList:React.FC<Props> = ({show,title,owner,onCancel,data,onCancelApprove,onApprove})=>{
 
     const inputRef:any = React.createRef();
 
@@ -47,28 +48,32 @@ export const ApprovedList:React.FC<Props> = ({show,title,onCancel,data,onCancelA
                     From: <IonText color="secondary"><b>&nbsp;{data.beApprovedCount}&nbsp;</b></IonText> users,
                     Added: <IonText color="secondary"><b>&nbsp;{fromValue(data.trustRate,16).toFixed(2)}%&nbsp;</b></IonText>
                 </IonItemDivider>}
-                {data && data.approved && data.approved.length>0 && <IonItemDivider  sticky color="primary">Trusted User List</IonItemDivider>}
-                {
-                    data && data.approved &&  data.approved.map((v,i)=>{
-                        return <IonItem key={i}>
-                            <IonLabel className="ion-text-wrap">
-                                <IonRow>
-                                    <IonCol size="2">
-                                        <small>{i+1}</small>
-                                    </IonCol>
-                                    <IonCol size="7">
-                                        <small>{v.user}</small>
-                                    </IonCol>
-                                    <IonCol size="3">
-                                        <IonButton mode="ios" expand="block" fill="outline" size="small" onClick={()=>{
-                                            onCancelApprove(v.user)
-                                        }}>{i18n.t("untrust")}</IonButton>
-                                    </IonCol>
-                                </IonRow>
-                            </IonLabel>
-                        </IonItem>
-                    })
-                }
+                <div  className="counter-list-half">
+                    {data && data.approved && data.approved.length>0 && <IonItemDivider  sticky color="primary">Trusted User List</IonItemDivider>}
+                    {
+                        data && data.approved &&  data.approved.map((v,i)=>{
+                            return <>
+                                <IonItem key={i}>
+                                    <IonLabel className="ion-text-wrap">
+                                        <IonRow>
+                                            <IonCol size="2">
+                                                <IonBadge color="secondary">{v.user == owner?"To":"From"}</IonBadge>
+                                            </IonCol>
+                                            <IonCol size="7">
+                                                <small>{v.user == owner?v.operator:v.user}</small>
+                                            </IonCol>
+                                            <IonCol size="3">
+                                                {v.user == owner ?<IonBadge color="success">Trusted</IonBadge>:<IonButton mode="ios" expand="block" fill="outline" size="small" onClick={()=>{
+                                                    onCancelApprove(v.user)
+                                                }}>{i18n.t("untrust")}</IonButton>}
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonLabel>
+                                </IonItem>
+                            </>
+                        })
+                    }
+                </div>
                 <IonItemDivider  sticky color="primary">{i18n.t("trustNewUser")}</IonItemDivider>
                 <IonItem>
                     <IonLabel position={"stacked"}>BSC {i18n.t("address")}</IonLabel>
