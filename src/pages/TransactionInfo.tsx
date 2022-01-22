@@ -159,7 +159,7 @@ class TransactionInfo extends React.Component<any, any> {
                 }
             }else if(chain == ChainType.ETH || chain == ChainType.BSC){
                 const rest:any = await this.getTransactionByHash(txHash,chain);
-                if(utils.isNFTAddress(rest.to,ChainType[chain])){
+                if(rest.to && utils.isNFTAddress(rest.to,ChainType[chain])){
                     const contact = new ERC721(rest.to,chain);
                     const decodeResult = await contact.decodeTransferFromParams(rest.input);
                     if(decodeResult){

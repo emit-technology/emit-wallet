@@ -342,8 +342,7 @@ export function isNFTAddress(add: string, chain: string): boolean {
     const keys = Object.keys(CONTRACT_ADDRESS.ERC721);
     for (let k of keys) {
         const address = CONTRACT_ADDRESS.ERC721[k]["ADDRESS"];
-        // const symbol = CONTRACT_ADDRESS.ERC721[k]["SYMBOL"];
-        if (address[chain].toLowerCase() == add.toLowerCase()) {
+        if (address[chain] && address[chain].toLowerCase() == add.toLowerCase()) {
             return true
         }
     }

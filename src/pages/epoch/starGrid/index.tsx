@@ -1523,19 +1523,19 @@ class StarGrid extends React.Component<any, State>{
                                 <IonIcon icon={addCircleOutline} />
                             </IonFabButton>
                             <IonFabList side="start">
-                                <IonFabButton onClick={()=>this.setShowPlanetModal(true,1)} size="small" color="secondary">
-                                    <IonIcon icon={pricetagsOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
-                                    <IonIcon icon={personAddOutline} />
+                                <IonFabButton onClick={()=>this.setShowCounterAdd(true)} size="small" color="secondary">
+                                    <IonIcon icon={addCircleOutline} />
                                 </IonFabButton>
                                 <IonFabButton onClick={()=>this.setShowUserDeposit(true)} size="small" color="tertiary">
                                     <IonIcon icon={listOutline} />
                                 </IonFabButton>
+                                <IonFabButton onClick={()=>this.setShowApproveList(true)} size="small" color="warning">
+                                    <IonIcon icon={personAddOutline} />
+                                </IonFabButton>
                             </IonFabList>
                             <IonFabList side="end">
-                                <IonFabButton onClick={()=>this.setShowCounterAdd(true)} size="small" color="secondary">
-                                    <IonIcon icon={addCircleOutline} />
+                                <IonFabButton onClick={()=>this.setShowPlanetModal(true,1)} size="small" color="secondary">
+                                    <IonIcon icon={pricetagsOutline} />
                                 </IonFabButton>
                                 <IonFabButton onClick={()=>{
                                     this.setShowLoading(true)
