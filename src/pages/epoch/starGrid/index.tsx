@@ -2121,7 +2121,7 @@ class StarGrid extends React.Component<any, State>{
                             });
                         }} ownerData={myPlanetArr}/>
 
-                        <ApprovedList owner={owner} title={i18n.t("trustedUser")} show={showApprovedList} onCancel={()=>{
+                        <ApprovedList title={i18n.t("trustedUser")} show={showApprovedList} onCancel={()=>{
                             this.setShowApproveList(false);
                         }} onCancelApprove={(address)=>{
                             this.setShowApproveList(false);
