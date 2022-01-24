@@ -110,7 +110,7 @@ class Swap extends React.Component<any, State> {
         allowance:"",
         slippageTolerance:selfStorage.getItem("swap:slippageTolerance") || "1",
         deadline:selfStorage.getItem("swap:deadline") || "20",
-        checked:true,
+        checked:false,
         crossFee:"",
         crossLimit:["0","0"],
         priceSwap: false
@@ -197,7 +197,6 @@ class Swap extends React.Component<any, State> {
         const path = router.getPath(fromToken, toToken);
         const crossReceipt = this.getCrossReceipt();
         const out:any = await pancakeSwap.estimatSwapCross(amount,path,crossReceipt,false)
-        console.log("out::",out);
         const amounts:Array<string> = out[0]
 
         if(crossToSero.indexOf(toToken)>-1){
@@ -352,10 +351,9 @@ class Swap extends React.Component<any, State> {
                 tx.amount = utils.toHex(amountFrom);
             } else {
                 tx.data = await pancakeSwap.swapTokensForExactTokens(amountTo,outMax,path,sendTo,crossReceipt,deadline)
-                tx.amount = utils.toHex(amountFrom);
+                tx.amount = utils.toHex(outMax);
             }
         }
-        console.log(tx,"TX::")
         tx.gas = await pancakeSwap.estimateGas(tx)
         this.setState({
             tx:tx,
