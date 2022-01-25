@@ -18,14 +18,16 @@ interface Props {
     show: boolean
     onOk: (type:StarGridType,num: number,depositType:DepositType) => void;
     onCancel: () => void;
+    amountTitle1?: any;
+    amountTitle2?: any;
+    onCallback: (counterType:StarGridType,depositType:DepositType,num:number) => void;
 }
 
-export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
+export const CounterAdd: React.FC<Props> = ({show,amountTitle1,amountTitle2, onOk, onCancel,onCallback}) => {
 
     const inputRef:any = React.createRef();
     const selectRef:any = React.createRef();
     const selectDepositTypeRef:any = React.createRef();
-
     return (<>
         <IonModal
             isOpen={show}
@@ -37,7 +39,14 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                 <IonListHeader mode="ios">{i18n.t("create")} Counters</IonListHeader>
                 <IonItemDivider mode="md"/>
                 <IonItemDivider  sticky color="primary">{i18n.t("select")} Counter {i18n.t("type")}</IonItemDivider>
-                <IonRadioGroup ref={selectRef} title={"Select counter type"} >
+                <IonRadioGroup ref={selectRef} title={"Select counter type"} onIonChange={(e)=>{
+                    if(selectDepositTypeRef.current && inputRef.current &&inputRef.current.value){
+                        const counterType = e.detail.value;
+                        const depositType = selectDepositTypeRef.current.value;
+                        const num = inputRef.current &&inputRef.current.value?inputRef.current.value:1;
+                        onCallback(counterType,depositType,num)
+                    }
+                }} >
                     <IonItem lines="none">
                         <IonAvatar>
                             <img src="./assets/img/epoch/stargrid/piece/white.png"/>
@@ -54,7 +63,14 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                     </IonItem>
                 </IonRadioGroup>
                 <IonItemDivider  sticky color="primary">{i18n.t("staking")} {i18n.t("type")}</IonItemDivider>
-                <IonRadioGroup ref={selectDepositTypeRef} title={"Select counter type"} >
+                <IonRadioGroup ref={selectDepositTypeRef} title={"Select deposit type"} onIonChange={(e)=>{
+                    if(selectRef.current && inputRef.current &&inputRef.current.value ){
+                        const depositType = e.detail.value;
+                        const counterType = selectRef.current.value;
+                        const num = inputRef.current && inputRef.current.value?inputRef.current.value:1;
+                        onCallback(counterType,depositType,num)
+                    }
+                }} >
                     <IonItem lines="none">
                         <IonLabel>&nbsp;LP-TOKEN</IonLabel>
                         <IonRadio slot="end" value={DepositType.LP} />
@@ -66,8 +82,29 @@ export const CounterAdd: React.FC<Props> = ({show, onOk, onCancel}) => {
                 </IonRadioGroup>
                 <IonItemDivider  sticky color="primary">{i18n.t("count")}</IonItemDivider>
                 <IonItem>
-                    <IonInput ref={inputRef} placeholder="0" type="number"/>
+                    <IonInput ref={inputRef} placeholder="0" type="number" onIonChange={(e)=>{
+                        if(selectRef.current && selectDepositTypeRef.current){
+                            const depositType = selectDepositTypeRef.current.value;
+                            const counterType = selectRef.current.value;
+                            const num:any = e.detail.value;
+                            onCallback(counterType,depositType,num)
+                        }
+                    }}/>
                 </IonItem>
+                {
+                    amountTitle1 && amountTitle2 &&
+                    <>
+                        <IonItemDivider sticky color="primary">Estimate Cost</IonItemDivider>
+                        <IonItem>
+                            <IonLabel>Balance</IonLabel>
+                            <IonItem>{amountTitle1}</IonItem>
+                        </IonItem>
+                        <IonItem>
+                            <IonLabel>Estimate</IonLabel>
+                            <IonItem>{amountTitle2}</IonItem>
+                        </IonItem>
+                    </>
+                }
             </IonList>
             <IonRow>
                 <IonCol size="4">

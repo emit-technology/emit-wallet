@@ -3,7 +3,8 @@ import {createRef} from "react";
 import {
     axialCoordinatesToCube,
     calcCounterRgb,
-    containHex, distanceBetweenHexes,
+    containHex,
+    distanceBetweenHexes,
     gridGenerator,
     Hex,
     Hexagon,
@@ -53,10 +54,12 @@ import {
     arrowUpCircleOutline,
     cashOutline,
     chevronBack,
-    expandOutline, homeOutline,
+    expandOutline,
+    homeOutline,
     listOutline,
     logOut,
-    personAddOutline, planet, pricetagsOutline,
+    personAddOutline,
+    pricetagsOutline,
     remove,
     search,
 } from 'ionicons/icons';
@@ -66,17 +69,23 @@ import walletWorker from "../../../worker/walletWorker";
 import {
     AccountModel,
     ChainType,
-    Counter, DepositType, DriverStarGrid, ENDetails,
+    Counter,
+    DepositType,
+    DriverStarGrid,
+    ENDetails,
     Land,
     LockedInfo,
-    NftInfo, StarGridTrustInfo,
+    NftInfo,
+    StarGridTrustInfo,
     StarGridType,
-    Transaction, UserDeposit,
+    Transaction,
+    UserDeposit,
     UserPosition
 } from "../../../types";
 import url from "../../../utils/url";
 import EthToken from "../../../contract/erc20/eth";
 import * as config from "../../../config";
+import {CONTRACT_ADDRESS} from "../../../config";
 import * as utils from "../../../utils";
 import ConfirmTransaction from "../../../components/ConfirmTransaction";
 import Erc721 from "../../../contract/erc721/meta/eth";
@@ -100,8 +109,6 @@ import {UserDepositModal} from "./UserDeposit";
 import {CounterSelectModal} from "./CounterSelectModal";
 import {isEmptyPlanet} from "./utils";
 import i18n from "../../../locales/i18n";
-import {DriverInfo} from "../../../contract/epoch/sero/types";
-import {CONTRACT_ADDRESS} from "../../../config";
 import {CountDown} from "../../../components/countdown";
 
 interface ApproveState{
@@ -504,9 +511,9 @@ class StarGrid extends React.Component<any, State>{
         }
         this.setState({
             feeData:feeData,
-            feeCancel:()=>{this.setState({feeData:""})},
+            feeCancel:()=>{this.setState({feeData:"",amountTitle1:"",amountTitle2:""})},
             feeOk:()=>{
-                this.setState({feeData:""})
+                this.setState({feeData:"",amountTitle1:"",amountTitle2:""})
                 this.setShowLoading(true)
                 this.create(type,num,depositType,maxCost).then(()=>{
                     this.setShowLoading(false)
@@ -519,6 +526,16 @@ class StarGrid extends React.Component<any, State>{
         })
 
         interVarEpoch.latestOpTime = Date.now();
+    }
+
+    createEstimate = async (type:StarGridType,depositType:DepositType,num:number)=>{
+        const account = await walletWorker.accountInfo()
+        const rest = await epochStarGridOperator.estimateCreate(type,num,depositType,account.addresses[chain])
+        const maxCost = rest[2];
+        this.setState({
+           amountTitle1: <b><IonText color="secondary">{utils.nFormatter(utils.fromValue(rest[1],18),6)}</IonText>&nbsp;<small><IonText color="primary">{rest[0]}</IonText></small></b>,
+           amountTitle2: <b><IonText color="secondary">{utils.nFormatter(utils.fromValue(maxCost,18),3)}</IonText>&nbsp;<small><IonText color="primary">{rest[0]}</IonText></small></b>,
+        })
     }
 
     deadline = () =>{
@@ -675,6 +692,7 @@ class StarGrid extends React.Component<any, State>{
             return
         }
         const routers:Array<number>=[];
+        let isAttack = false;
         if(targetHex.length > 1){
             for(let i=1;i<targetHex.length;i++){
                 const start = targetHex[i-1].hex;
@@ -688,6 +706,7 @@ class StarGrid extends React.Component<any, State>{
                             break
                         }
                     }
+                    isAttack = true;
                 }else {
                     let rd = 0;
                     for(let dir =0;dir<6;dir++){
@@ -718,10 +737,13 @@ class StarGrid extends React.Component<any, State>{
         const baseAmount = utils.fromValue(rest[0],18);
         const attachAmount = utils.fromValue(rest[1],18);
         const feeRate = rest[2];
-
+        let attackAddress:string|undefined = undefined;
+        if(isAttack){
+            attackAddress = await epochStarGrid.userOfCounter(targetHex[targetHex.length-1].counter.counterId,account.addresses[chain])
+        }
         if(baseAmount.toNumber() == 0 && attachAmount.toNumber() == 0 ){
             this.setShowLoading(true);
-            this.active(opcode).then(()=>{
+            this.active(opcode,isAttack,attackAddress).then(()=>{
                 this.setShowLoading(false)
             }).catch((e)=>{
                 this.setShowLoading(false)
@@ -759,9 +781,16 @@ class StarGrid extends React.Component<any, State>{
         interVarEpoch.latestOpTime = Date.now();
     }
 
-    active = async (opconde:string) =>{
+    active = async (opconde:string,isAttack?:boolean,attackAddress?:string) =>{
         const data:any = await epochStarGrid.active("0x"+new BigNumber(opconde,2).toString(16))
         const tx = await this.genTx(epochStarGrid,data);
+        if(isAttack && attackAddress){
+            const logoutGas = await epochStarGrid.logout(attackAddress)
+            if(new BigNumber(tx.gas).comparedTo(new BigNumber(logoutGas)) < 0){
+                tx.gas = "0x" + new BigNumber(tx.gas).plus(new BigNumber(logoutGas)).toString(16)
+            }
+        }
+
         this.setState({
             tx:tx,
             showConfirm:true
@@ -807,7 +836,6 @@ class StarGrid extends React.Component<any, State>{
         }
         const total1 = utils.fromValue(rest[0],18);
         const total2 = utils.fromValue(rest[1],18);
-
 
         //baseCost,attachCost,feeRate
         const feeData:any = {
@@ -1189,7 +1217,11 @@ class StarGrid extends React.Component<any, State>{
                 if(l.counter){
                     const rate = Math.floor(utils.fromValue( l.counter.rate,16).toNumber());
                     const bg = calcCounterRgb(rate,l.counter.enType == StarGridType.EARTH);
-                    pieceColors.push([ `rgb(${bg[0]})`,`rgb(${bg[1]})`])
+                    const bg1 = `rgb(${bg[0]})`;
+                    const bg2 = `rgb(${bg[1]})`;
+                    if(pieceColors.find(v=>{return v[0]==bg1 && v[1]==bg2}) == undefined){
+                        pieceColors.push([ bg1,bg2])
+                    }
                 }
                 counterMap.set(coo.uKey(),l)
             }
@@ -1475,9 +1507,9 @@ class StarGrid extends React.Component<any, State>{
     }
 
     render() {
-        const {hexSize,targetHex,userPositions,btnRef,txs,showApproveAllModal,approvedStarGridState,driver,
+        const {hexSize,targetHex,userPositions,txs,showApproveAllModal,approvedStarGridState,driver,
             showPosition,approvedStarGrid,showModalApprove,showLoading,showConfirm,recRange,showCounterAdd,
-            showToast,toastMessage,tx,counters,rangeLand,account,showCaptureModal,feeData,feeOk,feeCancel,
+            showToast,toastMessage,tx,counters,account,showCaptureModal,feeData,feeOk,feeCancel,
             lockedInfo,showSettlementModal,showPrepareModal,activeBottom,activeLeft,planetTab,
             showPowerDistribution,amountTitle1,amountTitle2,myPlanetArr,showMyPlanetModal,showApprovedList,approvedInfo,
         showDetailModal,lockedUserInfo,showSelectPlanetModal,defaultPlanet,lockedUserAddress,enDetails,showUserDeposit,
@@ -1600,7 +1632,7 @@ class StarGrid extends React.Component<any, State>{
                         {
                             targetHex[0] &&
                             <div className="counter-info">
-                                <HexInfoCard owner={owner} hasCounters={counters && counters.length>0} sourceHexInfo={targetHex[0]}
+                                <HexInfoCard  owner={owner} hasCounters={counters && counters.length>0} sourceHexInfo={targetHex[0]}
                                              onCapture={()=>{
                                                  if(counters && counters.length>0){
                                                      this.setShowCaptureModal(true)
@@ -1716,7 +1748,7 @@ class StarGrid extends React.Component<any, State>{
                                                     flag={isOwner}
                                                     owner={focusOwner}
                                                     block={block&&!absHex.equalHex(targetHex[0].hex)}
-                                                    attack={attack} key={i}
+                                                    attack={attack} key={land && land.counter && land.counter.counterId !="0"? land.counter.counterId:land?land.coordinate:toUINT256(absHex)}
                                                     colorStyle={landStyle}
                                                     movable={movable}
                                                     counter={piece}
@@ -2034,7 +2066,11 @@ class StarGrid extends React.Component<any, State>{
                                 this.setShowCounterAdd(false)
                                 this.setShowToast(true,err)
                             })
-                        }} onCancel={()=>this.setShowCounterAdd(false)} />
+                        }} onCancel={()=>this.setShowCounterAdd(false)} onCallback={(counterType,depositType,num)=>{
+                            this.createEstimate(counterType,depositType,num).catch(e=>{
+                                console.error(e)
+                            });
+                        }} amountTitle1={amountTitle1} amountTitle2={amountTitle2}/>
                         <FeeModal show={!!feeData} lockedInfo={lockedInfo} onOk={()=>{ feeOk() }} onCancel={()=>{ feeCancel() }} data={feeData}/>
 
                         {lockedInfo && <Settlement title="Economy" enDetails={enDetails} show={showSettlementModal} isOwner={true} lockedInfo={lockedInfo} onPrepare={()=>{

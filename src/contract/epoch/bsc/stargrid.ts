@@ -215,6 +215,25 @@ const ABI = [
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "counterId_",
+                "type": "uint256"
+            }
+        ],
+        "name": "userOfCounter",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ];
 
@@ -1500,13 +1519,20 @@ class StarGrid extends EthContract{
         return this.contract.methods.settlement().encodeABI()
     }
 
-    logout = async () =>{
+    logout = async (from?:string) =>{
+        if(from){
+            return await this.contract.methods.logout().estimateGas({from:from})
+        }
         return this.contract.methods.logout().encodeABI()
     }
 
     //for user setting default coo
     setDefaultCoordiante = (waterCoo:string,earthCoo:string) =>{
         return this.contract.methods.setDefaultCoordiante(waterCoo,earthCoo).encodeABI();
+    }
+
+    userOfCounter = async (counterId:string,from:string):Promise<string> => {
+        return this.contract.methods.userOfCounter(counterId).call({from:from})
     }
 
 }
