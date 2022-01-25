@@ -111,7 +111,7 @@ export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedIn
                                             let value = new BigNumber(0);
                                             if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
                                                 value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5):15
+                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
                                                 )
                                             }
                                             if (value.toNumber() < min.toNumber()) {
@@ -134,7 +134,7 @@ export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedIn
                                             let value = new BigNumber(0);
                                             if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
                                                 value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(1.5):15
+                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
                                                 )
                                             }
                                             if (value.toNumber() < min.toNumber()) {

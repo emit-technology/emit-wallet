@@ -117,7 +117,7 @@ export const Prepare: React.FC<Props> = ({show,lockedInfo, onOk,driverInfo, onCa
                                             min = new BigNumber(0.004);
                                         }
                                         let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(1.5)
+                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(3)
                                         )
                                         if(value.toNumber() < min.toNumber()){
                                             value = min
@@ -133,7 +133,7 @@ export const Prepare: React.FC<Props> = ({show,lockedInfo, onOk,driverInfo, onCa
                                             min = new BigNumber(0.01)
                                         }
                                         let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(1.5)
+                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(3)
                                         )
                                         if(value.toNumber() < min.toNumber()){
                                             value = min
