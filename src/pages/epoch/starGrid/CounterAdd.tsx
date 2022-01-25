@@ -35,6 +35,7 @@ export const CounterAdd: React.FC<Props> = ({show,amountTitle1,amountTitle2, onO
             cssClass="counter-list-modal"
             swipeToClose={false}
         >
+            <div className="epoch-md">
             <IonList  mode="md">
                 <IonListHeader mode="ios">{i18n.t("create")} Counters</IonListHeader>
                 <IonItemDivider mode="md"/>
@@ -106,6 +107,7 @@ export const CounterAdd: React.FC<Props> = ({show,amountTitle1,amountTitle2, onO
                     </>
                 }
             </IonList>
+            </div>
             <IonRow>
                 <IonCol size="4">
                     <IonButton mode="ios" onClick={() => onCancel()} expand="block" fill="outline" color="secondary">{i18n.t("cancel")}</IonButton>

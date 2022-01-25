@@ -96,6 +96,24 @@ class CounterSvg extends React.Component<Props, any>{
                             <stop offset="90%" stopColor={piece.backgroundColor[1]} />
                         </linearGradient>
                     }
+                    <filter id="blackFlag" filterUnits="objectBoundingBox">
+                        <feImage href="./assets/img/epoch/stargrid/piece/blackFlag.png" result="ffImg"/>
+                    </filter>
+                    <filter id="blackSword" >
+                        <feImage href="./assets/img/epoch/stargrid/piece/blackSword.png"/>
+                    </filter>
+                    <filter id="whiteFlag" >
+                        <feImage href="./assets/img/epoch/stargrid/piece/whiteFlag.png"/>
+                    </filter>
+                    <filter id="whiteSword" >
+                        <feImage href="./assets/img/epoch/stargrid/piece/whiteSword.png"/>
+                    </filter>
+                    <filter id="black" >
+                        <feImage href="./assets/img/epoch/stargrid/piece/black.png"/>
+                    </filter>
+                    <filter id="white" >
+                        <feImage href="./assets/img/epoch/stargrid/piece/white.png"/>
+                    </filter>
                 </defs>
 
                 <g>
