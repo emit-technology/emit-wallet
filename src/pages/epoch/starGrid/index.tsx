@@ -54,7 +54,7 @@ import {
     arrowUpCircleOutline,
     cashOutline,
     chevronBack,
-    expandOutline,
+    expandOutline, helpCircleOutline,
     homeOutline,
     listOutline,
     logOut,
@@ -110,6 +110,7 @@ import {CounterSelectModal} from "./CounterSelectModal";
 import {isEmptyPlanet} from "./utils";
 import i18n from "../../../locales/i18n";
 import {CountDown} from "../../../components/countdown";
+import {Plugins} from "@capacitor/core";
 
 interface ApproveState{
     bLIGHT:boolean
@@ -733,7 +734,7 @@ class StarGrid extends React.Component<any, State>{
         routers.push(0)
         routers.reverse();
         const opcode = toOpCode(routers,5);
-        const rest =  await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
+        const rest =  await epochStarGridQuery.estimateCreateCost(account.addresses[chain],lockedInfo.userInfo.counter.enType)// await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
         const baseAmount = utils.fromValue(rest[0],18);
         const attachAmount = utils.fromValue(rest[1],18);
         const feeRate = rest[2];
@@ -741,6 +742,7 @@ class StarGrid extends React.Component<any, State>{
         if(isAttack){
             attackAddress = await epochStarGrid.userOfCounter(targetHex[targetHex.length-1].counter.counterId,account.addresses[chain])
         }
+
         if(baseAmount.toNumber() == 0 && attachAmount.toNumber() == 0 ){
             this.setShowLoading(true);
             this.active(opcode,isAttack,attackAddress).then(()=>{
@@ -758,6 +760,10 @@ class StarGrid extends React.Component<any, State>{
                 "Amount": <>
                     <p><IonText color="secondary"><b>{baseAmount.toString(10)}</b></IonText>&nbsp;<small>{eType.base}</small></p>
                     <p><IonText color="secondary"><b>{attachAmount.toString(10)}</b></IonText>&nbsp;<small>{eType.attach}</small></p>
+                </>,
+                "Balance": <>
+                    <p><IonText color="secondary"><b>{this.getBalance(eType.base)}</b></IonText>&nbsp;<small>{eType.base}</small></p>
+                    <p><IonText color="secondary"><b>{this.getBalance(eType.attach)}</b></IonText>&nbsp;<small>{eType.attach}</small></p>
                 </>
             }
             this.setState({
@@ -1583,25 +1589,13 @@ class StarGrid extends React.Component<any, State>{
                                 </IonFabButton>
                             </IonFabList>
                         </IonFab>
-                        <IonFab vertical="bottom" horizontal="end" slot="fixed" activated={activeLeft}>
+                        <IonFab vertical="center" horizontal="end" slot="fixed" activated={activeLeft}>
                             <IonFabButton size="small"  onClick={()=>{
                                 this.setState({activeLeft:!activeLeft})
                             }}>
                                 <IonIcon icon={expandOutline} />
                             </IonFabButton>
                             <IonFabList side="top">
-                                <IonFabButton onClick={()=>{this.arrow("r")}} size="small" color="warning">
-                                    <IonIcon icon={arrowForwardCircleOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>{this.arrow("l")}} size="small" color="warning">
-                                    <IonIcon icon={arrowBackCircleOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>{this.arrow("d")}} size="small" color="warning">
-                                    <IonIcon icon={arrowDownCircleOutline} />
-                                </IonFabButton>
-                                <IonFabButton onClick={()=>{this.arrow("u")}} size="small" color="warning">
-                                    <IonIcon icon={arrowUpCircleOutline} />
-                                </IonFabButton>
                                 <IonFabButton color="secondary" onClick={()=>this.setHexSize(hexSize-1)} size="small">
                                     <IonIcon icon={remove} />
                                 </IonFabButton>
@@ -1628,6 +1622,27 @@ class StarGrid extends React.Component<any, State>{
                                     <IonIcon icon={homeOutline} />
                                 </IonFabButton>
                             </IonFabList>
+                            <IonFabList side="bottom">
+                                <IonFabButton onClick={()=>{this.arrow("u")}} size="small" color="warning">
+                                    <IonIcon icon={arrowUpCircleOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>{this.arrow("d")}} size="small" color="warning">
+                                    <IonIcon icon={arrowDownCircleOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>{this.arrow("l")}} size="small" color="warning">
+                                    <IonIcon icon={arrowBackCircleOutline} />
+                                </IonFabButton>
+                                <IonFabButton onClick={()=>{this.arrow("r")}} size="small" color="warning">
+                                    <IonIcon icon={arrowForwardCircleOutline} />
+                                </IonFabButton>
+                            </IonFabList>
+                        </IonFab>
+                        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+                            <IonFabButton size="small" onClick={()=>{
+                                Plugins.Browser.open({url:"https://docs.emit.technology/emit-documents/emit-epoch/origin-universe/stargrid-scene/user-manual-of-stargrid"})
+                            }}>
+                                <IonIcon icon={helpCircleOutline} />
+                            </IonFabButton>
                         </IonFab>
                         {
                             targetHex[0] &&

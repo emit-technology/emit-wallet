@@ -553,6 +553,40 @@ const ABI_QUERY = [
                 "internalType": "address",
                 "name": "user_",
                 "type": "address"
+            },
+            {
+                "internalType": "uint8",
+                "name": "enType_",
+                "type": "uint8"
+            }
+        ],
+        "name": "estimateCreateCost",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "baseCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "attachCost",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "feeRate",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user_",
+                "type": "address"
             }
         ],
         "name": "getUserInfo",
@@ -1345,8 +1379,7 @@ const ABI_QUERY = [
         "stateMutability": "view",
         "type": "function"
     }
-];
-
+]
 const ABI_OP = [
     {
         "inputs": [
@@ -1595,6 +1628,11 @@ class StarGridQuery extends EthContract{
 
     currentENDetails = async (from:string):Promise<ENDetails> =>{
         return await this.contract.methods.currentENDetails(from).call({from:from});
+    }
+
+    // function estimateCreateCost(address user_,uint8 enType_) external view  returns(uint256 baseCost,uint256 attachCost,uint256 feeRate);
+    estimateCreateCost = async (user:string,enType:StarGridType) =>{
+        return await this.contract.methods.estimateCreateCost(user,enType).call({from:user})
     }
 
 }

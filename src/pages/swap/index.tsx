@@ -202,16 +202,16 @@ class Swap extends React.Component<any, State> {
         if(crossToSero.indexOf(toToken)>-1){
             const rest = await pancakeSwap.crossLimit(router.getTokenAddress(toToken))
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
-            if(utils.fromValue(amounts[1],decimalTo).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
-                checked = false
-            }else{
-                checked = true
-            }
+            // if(utils.fromValue(amounts[1],decimalTo).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
+            //     checked = false
+            // }else{
+            //     checked = true
+            // }
         }
 
         this.setState({
             toAmount:utils.fromValue(amounts[amounts.length-1],decimalTo).toFixed(5,1),
-            checked:checked,
+            // checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
             crossLimit: crossLimit
         })
@@ -250,16 +250,16 @@ class Swap extends React.Component<any, State> {
         if(crossToSero.indexOf(toToken)>-1){
             const rest = await pancakeSwap.crossLimit(router.getTokenAddress(toToken))
             crossLimit = [utils.fromValue(rest[0],decimalTo).toString(),utils.fromValue(rest[1],decimalTo).toString()]
-            if(new BigNumber(v).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
-                checked = false
-            }else{
-                checked = true
-            }
+            // if(new BigNumber(v).toNumber()<new BigNumber(crossLimit[0]).toNumber()){
+            //     checked = false
+            // }else{
+            //     checked = true
+            // }
         }
         this.setState({
             fromAmount:utils.fromValue(amounts[0],decimalFrom).toFixed(5,1),
             exact:"to",
-            checked:checked,
+            // checked:checked,
             // crossFee:utils.fromValue(out[1],decimalTo).toFixed(5,1),
             crossLimit: crossLimit
         })
@@ -355,6 +355,7 @@ class Swap extends React.Component<any, State> {
             }
         }
         tx.gas = await pancakeSwap.estimateGas(tx)
+        console.log(tx,"TX")
         this.setState({
             tx:tx,
             showAlert:true

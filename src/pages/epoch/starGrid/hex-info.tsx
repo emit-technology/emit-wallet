@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as utils from "../../../utils";
 import CounterSvg from "./counter-svg";
 import {Hex, HexInfo} from "../../../components/hexagons/models";
-import {IonIcon,IonButton,IonProgressBar,IonText} from "@ionic/react";
+import {IonIcon,IonButton,IonProgressBar,IonText,IonBadge} from "@ionic/react";
 import {eyeOffOutline, eyeOutline} from "ionicons/icons";
 import {Counter, LockedInfo} from "../../../types";
 import BigNumber from "bignumber.js";
@@ -151,12 +151,16 @@ class HexInfoCard extends React.Component<Props, any>{
                                    onMove(true,false)
                                 }}><small>{i18n.t("mark")}</small></IonButton>
                             }
-                            {
-                                onMove&&(!sourceLand || sourceLand.capacity == "0") && lockedInfo && sourceCounter.counterId == lockedInfo.userInfo.counter.counterId && (!attackHexInfo || !attackHexInfo.hex) &&
-                                <IonButton size="small" color="secondary" disabled={sourceCountdown>now} onClick={()=>{
-                                    onMove(false,true)
-                                }}><small>{i18n.t("createPlanet")}</small></IonButton>
-                            }
+                            <div style={{border:"unset"}}>
+                                {
+                                    onMove&&(!sourceLand || sourceLand.capacity == "0") && lockedInfo && sourceCounter.counterId == lockedInfo.userInfo.counter.counterId && (!attackHexInfo || !attackHexInfo.hex) &&
+                                    <IonBadge mode="md" color={sourceCountdown>now?"medium":"secondary"} onClick={()=>{
+                                        if(sourceCountdown<=now){
+                                            onMove(false,true)
+                                        }
+                                    }}><small>{i18n.t("createPlanet")}</small></IonBadge>
+                                }
+                            </div>
                         </div>
                         {
                             sourceLand && <div className="eye">
@@ -383,9 +387,12 @@ class HexInfoCard extends React.Component<Props, any>{
                                                 <IonButton size="small" disabled={sourceCountdown>now} color="success" onClick={()=>{
                                                     onMove(false,false)
                                                 }}><small>{i18n.t("move")}</small></IonButton>
-                                                <IonButton size="small" expand="full" disabled={sourceCountdown>now} color="tertiary" onClick={()=>{
-                                                    onMove(false,true)
-                                                }}><small>{i18n.t("move")}&{i18n.t("createPlanet")}</small></IonButton>
+                                                <br/>
+                                                <IonBadge mode="md" color={sourceCountdown>now?"medium":"tertiary"} onClick={()=>{
+                                                    if(sourceCountdown<=now){
+                                                        onMove(false,true)
+                                                    }
+                                                }}><small>{i18n.t("move")}&{i18n.t("createPlanet")}</small></IonBadge>
                                             </>
                                         }
                                     </div>

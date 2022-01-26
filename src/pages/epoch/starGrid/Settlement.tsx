@@ -106,47 +106,49 @@ export class Settlement extends React.Component<Props, any> {
                 <div className="settle-box">
                     <div className="bt" style={{textAlign:"left"}}>
                         <IonRow>
-                            <IonCol size="3"><b><small>EN Per Day (EPD)</small></b></IonCol>
-                            <IonCol size="9">
+                            <IonCol size="4"><b><small>EN Per Day (EPD)</small></b></IonCol>
+                            <IonCol size="8">
                                 <IonCol><IonText color="secondary"><b>{formatValueString(v.totalEN)}</b></IonText><small><IonText color="medium">&nbsp;EN</IonText></small></IonCol>
                             </IonCol>
                         </IonRow>
                         <IonRow>
-                            <IonCol size="3"><b><small>Element Per EN (EPE)</small></b></IonCol>
-                            <IonCol size="9">
-                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.waterOutput,23),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
-                                <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.earthOutput,23),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
+                            <IonCol size="4"><b><small>Element Per EN (EPE)</small></b></IonCol>
+                            <IonCol size="8">
+                                <IonRow>
+                                    <IonCol size="6"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.waterOutput,23),3)}</b></IonText><br/><small><IonText color="medium">WATER</IonText></small></IonCol>
+                                    <IonCol size="6"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.earthOutput,23),3)}</b></IonText><br/><small><IonText color="medium">EARTH</IonText></small></IonCol>
+                                </IonRow>
                             </IonCol>
                         </IonRow>
                     </div>
-                    <div className="bt" style={{textAlign:"left"}}>
+                    <div className="bt" style={{textAlign:"center"}}>
                         <IonRow>
-                            <IonCol size="3"><div  style={{display:"flex",alignItems:"center",height:"100%",fontWeight:800}}><small>{i18n.t("burned")}</small></div></IonCol>
-                            <IonCol size="9">
+                            <IonCol size="2"><div  style={{display:"flex",alignItems:"center",height:"100%",fontWeight:800}}><small>{i18n.t("burned")}</small></div></IonCol>
+                            <IonCol size="10">
                                 <IonRow>
-                                    <IonCol><IonText color="medium"><b>{i18n.t("total")}</b></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><b>{i18n.t("mine")}</b></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><b>{i18n.t("percent")}</b></IonText></IonCol>
+                                    <IonCol size="4"><IonText color="medium"><b>{i18n.t("total")}</b></IonText></IonCol>
+                                    <IonCol size="4"><IonText color="medium"><b>{i18n.t("mine")}</b></IonText></IonCol>
+                                    <IonCol size="4"><IonText color="medium"><b>{i18n.t("percent")}</b></IonText></IonCol>
                                 </IonRow>
                                 <IonRow>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedLight,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bLIGHT</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bLIGHT</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,0).dividedBy(utils.fromValue(v.burnedLight,0).toNumber()>0?utils.fromValue(v.burnedLight,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedLight,18),3)}</b></IonText><br/><small><IonText color="medium">bLIGHT</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,18),3)}</b></IonText><br/><small><IonText color="medium">bLIGHT</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedLight,0).dividedBy(utils.fromValue(v.burnedLight,0).toNumber()>0?utils.fromValue(v.burnedLight,0):1).multipliedBy(100),3)}</b></IonText><small><IonText color="medium">%</IonText></small></IonCol>
                                 </IonRow>
                                 <IonRow>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedDark,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bDARK</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">bDARK</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,0).dividedBy(utils.fromValue(v.burnedDark,0).toNumber()>0?utils.fromValue(v.burnedDark,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedDark,18),3)}</b></IonText><br/><small><IonText color="medium">bDARK</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,18),3)}</b></IonText><br/><small><IonText color="medium">bDARK</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedDark,0).dividedBy(utils.fromValue(v.burnedDark,0).toNumber()>0?utils.fromValue(v.burnedDark,0):1).multipliedBy(100),3)}</b></IonText><small><IonText color="medium">%</IonText></small></IonCol>
                                 </IonRow>
                                 <IonRow>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedWater,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">WATER</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,0).dividedBy(utils.fromValue(v.burnedWater,0).toNumber()>0?utils.fromValue(v.burnedWater,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedWater,18),3)}</b></IonText><br/><small><IonText color="medium">WATER</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,18),3)}</b></IonText><br/><small><IonText color="medium">WATER</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedWater,0).dividedBy(utils.fromValue(v.burnedWater,0).toNumber()>0?utils.fromValue(v.burnedWater,0):1).multipliedBy(100),3)}</b></IonText><small><IonText color="medium">%</IonText></small></IonCol>
                                 </IonRow>
                                 <IonRow>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedEarth,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,18),3)}</b></IonText>&nbsp;<small><IonText color="medium">EARTH</IonText></small></IonCol>
-                                    <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,0).dividedBy(utils.fromValue(v.burnedEarth,0).toNumber()>0?utils.fromValue(v.burnedEarth,0):1).multipliedBy(100),3)}</b></IonText>&nbsp;<small><IonText color="medium">%</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.burnedEarth,18),3)}</b></IonText><br/><small><IonText color="medium">EARTH</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,18),3)}</b></IonText><br/><small><IonText color="medium">EARTH</IonText></small></IonCol>
+                                    <IonCol size="4"><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userBurnedEarth,0).dividedBy(utils.fromValue(v.burnedEarth,0).toNumber()>0?utils.fromValue(v.burnedEarth,0):1).multipliedBy(100),3)}</b></IonText><small><IonText color="medium">%</IonText></small></IonCol>
                                 </IonRow>
                             </IonCol>
                         </IonRow>
@@ -207,20 +209,20 @@ export class Settlement extends React.Component<Props, any> {
                         <IonItem lines="none">
                             <IonLabel className="ion-text-wrap">
                                 <IonRow>
-                                    <IonCol><IonText color="medium"><small>{i18n.t("type")}</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>{i18n.t("total")}</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>{i18n.t("TP")}</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>{i18n.t("mine")}</small></IonText></IonCol>
-                                    <IonCol><IonText color="medium"><small>{i18n.t("percent")}</small></IonText></IonCol>
+                                    <IonCol size="2"><IonText color="medium"><small>{i18n.t("type")}</small></IonText></IonCol>
+                                    <IonCol size="3"><IonText color="medium"><small>{i18n.t("total")}</small></IonText></IonCol>
+                                    <IonCol size="2"><IonText color="medium"><small>{i18n.t("TP")}</small></IonText></IonCol>
+                                    <IonCol size="2"><IonText color="medium"><small>{i18n.t("mine")}</small></IonText></IonCol>
+                                    <IonCol size="3"><IonText color="medium"><small>{i18n.t("percent")}</small></IonText></IonCol>
                                 </IonRow>
                                 {
                                     lockedInfo.userInfo.resources.map((v,i)=>{
                                         return <IonRow key={i}>
-                                            <IonCol><IonText color="primary"><b><small>{StarGridType[v.enType]}</small></b></IonText></IonCol>
-                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.total,18),3)}</b></IonText></IonCol>
-                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.userTemp,18),3)}</b></IonText></IonCol>
-                                            <IonCol><IonText color="secondary"><b>{utils.nFormatter(utils.fromValue(v.user,18),3)}</b></IonText></IonCol>
-                                            <IonCol><IonText color="secondary"><b>{utils.fromValue(v.user,0).dividedBy(utils.fromValue(v.total,0)).multipliedBy(100).toFixed(3)} %</b></IonText></IonCol>
+                                            <IonCol size="2"><IonText color="primary"><small>{StarGridType[v.enType]}</small></IonText></IonCol>
+                                            <IonCol size="3"><IonText color="secondary"><b><small>{utils.nFormatter(utils.fromValue(v.total,18),3)}</small></b></IonText></IonCol>
+                                            <IonCol size="2"><IonText color="secondary"><b><small>{utils.nFormatter(utils.fromValue(v.userTemp,18),3)}</small></b></IonText></IonCol>
+                                            <IonCol size="2"><IonText color="secondary"><b><small>{utils.nFormatter(utils.fromValue(v.user,18),3)}</small></b></IonText></IonCol>
+                                            <IonCol size="3"><IonText color="secondary"><b><small>{utils.fromValue(v.user,0).dividedBy(utils.fromValue(v.total,0)).multipliedBy(100).toFixed(3)}%</small></b></IonText></IonCol>
                                         </IonRow>
                                     })
                                 }
