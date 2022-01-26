@@ -18,6 +18,7 @@
 
 import axios from "axios";
 import {
+    BSC_HOST,
     CHAIN_PARAMS,
     CHAIN_PARAMS_BSC,
     CONTRACT_ADDRESS,
@@ -80,6 +81,27 @@ class RPC {
                 }
             }).catch((e: any) => {
                 console.error("rpc post err: ", e)
+                reject(e)
+            })
+        })
+    }
+
+    async postWithHost(method: any, params: any,host:string) {
+        const data: any = {
+            id: this.messageId++,
+            jsonrpc: '2.0',
+            method: method,
+            params: params,
+        };
+        return new Promise((resolve, reject) => {
+            axios.post(host, data, {
+            }).then((resp: any) => {
+                if (resp.data.error) {
+                    reject(typeof resp.data.error === "string" ? resp.data.error : resp.data.error.message);
+                } else {
+                    resolve(resp.data.result);
+                }
+            }).catch((e: any) => {
                 reject(e)
             })
         })
@@ -184,7 +206,6 @@ class RPC {
             for (let i = 0; i < balance; i++) {
                 const tokenId = await contract.tokenOfOwnerByIndex(owner, i)
                 const uri = await contract.tokenURI(tokenId)
-                console.log("uri:",uri);
                 const meta: any =JSON.parse(JSON.stringify(META_TEMP[symbol]));
                 if(uri){
                     const metadata:Meta = await rpc.get(`${uri}/all`)

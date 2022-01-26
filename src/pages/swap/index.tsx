@@ -329,7 +329,7 @@ class Swap extends React.Component<any, State> {
         // crossReceipt = utils.bs58ToHex(account.addresses[ChainType.SERO])
         if(exact == "from"){
             const inMin = new BigNumber(amountTo.multipliedBy(new BigNumber(1).minus(new BigNumber(slippageTolerance).div(100))).toFixed(0));
-            console.log(inMin.toString(),amountTo.toString())
+            console.log(inMin.toString(),amountTo.toString(),crossReceipt)
             if (fromToken == "BNB") {
                 tx.data = await pancakeSwap.swapExactETHForTokens(inMin,path , sendTo , crossReceipt,deadline )
                 tx.value = utils.toHex(amountFrom);
@@ -355,7 +355,7 @@ class Swap extends React.Component<any, State> {
             }
         }
         tx.gas = await pancakeSwap.estimateGas(tx)
-        console.log(tx,"TX")
+        tx.gas = utils.toHex(new BigNumber(tx.gas).multipliedBy(1.5).toFixed(0))
         this.setState({
             tx:tx,
             showAlert:true

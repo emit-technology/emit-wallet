@@ -17,9 +17,9 @@
  */
 
 import rpc from "../rpc";
-
-import {EMIT_HOST} from "../config"
 import {ChainType} from "../types";
+import {BSC_HOST, EMIT_HOST} from "../config";
+
 const Contract = require('web3-eth-contract');
 
 class EthContract{
@@ -32,7 +32,11 @@ class EthContract{
     constructor(address:string,abi:any,chain:ChainType) {
         this.address = address;
         this.abi = abi;
-        Contract.setProvider([EMIT_HOST,"?chain=",chain].join(""));
+        if (chain == ChainType.BSC){
+            Contract.setProvider(BSC_HOST);
+        }else{
+            Contract.setProvider([EMIT_HOST,"?chain=",chain].join(""));
+        }
         this.contract = new Contract(abi,address);
         this.chain = chain;
     }
