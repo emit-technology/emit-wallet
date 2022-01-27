@@ -734,7 +734,12 @@ class StarGrid extends React.Component<any, State>{
         routers.push(0)
         routers.reverse();
         const opcode = toOpCode(routers,5);
-        const rest =  await epochStarGridQuery.estimateCreateCost(account.addresses[chain],lockedInfo.userInfo.counter.enType)// await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
+        let rest;
+        if(createPlanet){
+            rest = await epochStarGridQuery.estimateCreateCost(account.addresses[chain],lockedInfo.userInfo.counter.enType);
+        }else{
+            rest = await epochStarGrid.active("0x"+new BigNumber(opcode,2).toString(16),account.addresses[chain])
+        }
         const baseAmount = utils.fromValue(rest[0],18);
         const attachAmount = utils.fromValue(rest[1],18);
         const feeRate = rest[2];
