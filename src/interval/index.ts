@@ -43,9 +43,10 @@ class Interval {
 const interVar = new Interval("homeIntervalId");
 const interVarSwap = new Interval("swapIntervalId");
 const interVarEpoch = new Interval("interVarEpochId");
+const interVarBalance = new Interval("interVarBalance");
 
 export default interVar
 
 export {
-    interVarSwap,interVarEpoch
+    interVarSwap,interVarEpoch,interVarBalance
 }

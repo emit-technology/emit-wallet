@@ -69,7 +69,7 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
 import WETH from "../contract/weth";
 import tron from "../rpc/tron";
-import interVar from "../interval";
+import interVar, {interVarBalance} from "../interval";
 
 const {StatusBar,Device} = Plugins;
 
@@ -151,8 +151,13 @@ class Wallet extends React.Component<State, any> {
             })
         })
 
-        this.init().then(() => {
-        }).catch()
+        interVarBalance.start(()=>{
+            console.log("render balance");
+            this.init().then(() => {
+            }).catch(e=>{
+                console.error(e)
+            })
+        },1000 * 5)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
