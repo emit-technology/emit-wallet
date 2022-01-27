@@ -65,7 +65,8 @@ class TransactionInfo extends React.Component<any, any> {
         events: {},
         showToast: false,
         showActionSheet: false,
-        showLoading:false
+        showLoading:false,
+        txReceipt:{}
     }
 
     componentDidMount() {
@@ -84,6 +85,10 @@ class TransactionInfo extends React.Component<any, any> {
 
         const address = account.addresses[chain];
         const rest: any = await rpc.getTxInfo(chain, txHash)
+        let txReceipt = {};
+        if(chain == ChainType.BSC || chain == ChainType.SERO || chain == ChainType.ETH){
+            txReceipt = await rpc.getTransactionReceipt(chain,txHash);
+        }
         let info: any = {};
         if (chain == ChainType.TRON) {
             let record = JSON.parse(tmpRecord);
@@ -137,7 +142,8 @@ class TransactionInfo extends React.Component<any, any> {
             chain: chain,
             info: info,
             tokens: tokens,
-            events: events
+            events: events,
+            txReceipt:txReceipt
         })
 
         const nft:any = {};
@@ -327,7 +333,7 @@ class TransactionInfo extends React.Component<any, any> {
     }
 
     render() {
-        const {info, tokens,nft, chain, tx, toastColor, toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert,showLoading} = this.state;
+        const {info, tokens,nft, chain, tx, toastColor, txReceipt,toastMsg, showProgress, showActionSheet, gasPrice, events, showModal, showToast, showSpeedAlert,showLoading} = this.state;
         return <IonPage>
             <IonHeader>
                 <IonToolbar mode="ios" color="primary">
@@ -366,6 +372,15 @@ class TransactionInfo extends React.Component<any, any> {
                         <div className="text-small-x2 word-break text-padding-normal">
                             {info.num > 0 ? <IonBadge color="success">{i18n.t("success")}</IonBadge> :
                                 <IonBadge color="warning">{i18n.t("pending")}</IonBadge>}
+                            {
+                                txReceipt && txReceipt["status"] && <>
+                                    {
+                                        txReceipt["status"]=="0x1"?
+                                            <IonBadge color="secondary">Execution Success</IonBadge>:
+                                            <IonBadge color="danger">Execution Failed</IonBadge>
+                                    }
+                                </>
+                            }
                         </div>
                         <div slot="end">
                             {
@@ -373,11 +388,9 @@ class TransactionInfo extends React.Component<any, any> {
                                 <>
                                     <IonButton size="small" fill="outline" slot="end" onClick={() => {
                                         this.setShowActionSheet(true,"speedup");
-
                                     }}>{i18n.t("speedUp")}</IonButton>
                                     <IonButton size="small" color="danger" fill="outline" slot="end" onClick={() => {
                                         this.setShowActionSheet(true,"cancel");
-
                                     }}>{i18n.t("cancel")}</IonButton>
                                 </>
                             }
@@ -458,6 +471,39 @@ class TransactionInfo extends React.Component<any, any> {
                         </IonItem>
                     }
                     {
+                        (ChainType.ETH == chain || ChainType.BSC == chain) && <IonItem mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">Nonce:</IonLabel>
+                            <IonText>{
+                                <IonBadge color="light">
+                                    {info.nonce}
+                                </IonBadge>
+                            }</IonText>
+                        </IonItem>
+                    }
+                    {
+                        (ChainType.ETH == chain || ChainType.BSC == chain  || ChainType.SERO == chain) && <IonItem mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">Gas Used:</IonLabel>
+                            <IonText>{
+                                <IonBadge color="light">
+                                    {utils.fromValue(txReceipt && txReceipt["gasUsed"]?txReceipt["gasUsed"]: (info.gasUsed ? info.gasUsed : info.gas),0).toString(10)}
+                                    ({utils.fromValue(txReceipt && txReceipt["gasUsed"]?txReceipt["gasUsed"]: (info.gasUsed ? info.gasUsed : info.gas),0).dividedBy(
+                                    utils.fromValue(info.gas,0)
+                                ).multipliedBy(100).toFixed(2)}%)
+                                </IonBadge>
+                            }</IonText>
+                        </IonItem>
+                    }
+                    {
+                        (ChainType.ETH == chain || ChainType.BSC == chain  || ChainType.SERO == chain) && <IonItem mode="ios">
+                            <IonLabel color="dark" className="info-label" position="stacked">Gas Limit:</IonLabel>
+                            <IonText>{
+                                <IonBadge color="light">
+                                    {new BigNumber(info.gas).toString(10)}
+                                </IonBadge>
+                            }</IonText>
+                        </IonItem>
+                    }
+                    {
                         // info.energy_usage=rest.energy_usage;
                         // info.energy_usage_total=rest.energy_usage_total;
                         // info.net_usage=rest.net_usage;
@@ -475,26 +521,19 @@ class TransactionInfo extends React.Component<any, any> {
                                 <IonLabel color="dark" className="info-label"
                                           position="stacked">{i18n.t("transactionFee")}:</IonLabel>
                                 <IonText className={"text-small"}>
-                                    {info.fee && utils.fromValue(info.fee, utils.getCyDecimal(info.feeCy, ChainType[chain])).toString(10)} {info.feeCy}
+                                    {
+                                        txReceipt && txReceipt["gasUsed"]?utils.fromValue(txReceipt["gasUsed"],0).multipliedBy(utils.fromValue(info.gasPrice, 0)).dividedBy(1e18).toString(10):
+                                            info.fee && utils.fromValue(info.fee, utils.getCyDecimal(info.feeCy, ChainType[chain])).toString(10)
+                                    }&nbsp;
+                                   {info.feeCy}
                                     <div>
                                         <IonText
-                                            color="medium">{utils.fromValue(info.gasUsed ? info.gasUsed : info.gas, 0).toString(10)}({i18n.t("gas")})
+                                            color="medium">{utils.fromValue(txReceipt && txReceipt["gasUsed"]?txReceipt["gasUsed"]: (info.gasUsed ? info.gasUsed : info.gas), 0).toString(10)}({i18n.t("gas")})
                                             * {utils.fromValue(info.gasPrice, 9).toString(10)} {utils.gasUnit(chain)}</IonText>
                                     </div>
                                 </IonText>
                             </IonItem>
                     }
-                    {
-                        ChainType.ETH == chain && <IonItem mode="ios">
-                            <IonLabel color="dark" className="info-label" position="stacked">Nonce:</IonLabel>
-                            <IonText>{
-                                <IonBadge color="light">
-                                    {info.nonce}
-                                </IonBadge>
-                            }</IonText>
-                        </IonItem>
-                    }
-
                 </IonList>
 
                 <IonModal isOpen={showModal} mode="ios" cssClass="tx-info-modal" onDidDismiss={()=>this.setShowModal(false)} swipeToClose={true}>

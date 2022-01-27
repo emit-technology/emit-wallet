@@ -373,6 +373,12 @@ class RPC {
         return rest;
     }
 
+    getTransactionReceipt = async (chain: ChainType, hash: string) => {
+        let prefix = utils.getPrefix(chain)
+        const rest: any = await this.post([prefix,"getTransactionReceipt"].join("_"), [hash], chain)
+        return rest;
+    }
+
     getTxInfo = async (chain: ChainType, txHash: string) => {
         const prefix = utils.getPrefix(chain)
         const rest: any = await this.post([prefix, "getTxInfo"].join("_"), [txHash], chain)
