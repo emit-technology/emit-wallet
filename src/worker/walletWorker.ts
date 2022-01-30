@@ -163,6 +163,9 @@ class WalletWorker {
                     if(selfStorage.getItem("eth_address")){
                         data.addresses[ChainType.ETH]=selfStorage.getItem("eth_address")
                     }
+                    if(selfStorage.getItem("tron_address")){
+                        data.addresses[ChainType.TRON]=selfStorage.getItem("tron_address")
+                    }
 
                     resolve(data);
                 }

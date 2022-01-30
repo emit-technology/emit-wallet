@@ -439,6 +439,7 @@ class RPC {
                 hash = await this.post("eth_commitTx", ["0x" + signEthRet, tx], tx.chain)
             } else if (tx.chain == ChainType.TRON) {
                 const signEthRet = await walletWorker.signTx(accountId, password, ChainType.TRON, tx.data)
+
                 const rest: any = await this.post("tron_commitTx", [signEthRet, tx], tx.chain)
                 hash = rest.txid;
             }
