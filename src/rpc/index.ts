@@ -110,15 +110,15 @@ class RPC {
     getTicket = async (chain: ChainType, address: string): Promise<any> => {
         const tKey = utils.ticketKey(chain);
         const item = selfStorage.getItem(tKey);
-        if (chain == ChainType.SERO) {
-            this.getTicketSero(address).catch(e => {
-                console.error("getTicketSero err:", e)
-            })
-        } else if (chain == ChainType.ETH) {
-            this.getTicketEth(address).catch(e => {
-                console.error("getTicketEth err:", e)
-            })
-        }
+        // if (chain == ChainType.SERO) {
+        //     this.getTicketSero(address).catch(e => {
+        //         console.error("getTicketSero err:", e)
+        //     })
+        // } else if (chain == ChainType.ETH) {
+        //     this.getTicketEth(address).catch(e => {
+        //         console.error("getTicketEth err:", e)
+        //     })
+        // }
         return item
     }
 
