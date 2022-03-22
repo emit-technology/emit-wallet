@@ -16,9 +16,10 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 
-import service from 'walletService/src/index';
+import service from 'walletService';
 import {AccountModel, ChainType} from "../types";
 import selfStorage from "../utils/storage";
+import url from "../utils/url";
 
 class WalletWorker {
 
@@ -131,8 +132,12 @@ class WalletWorker {
         return new Promise((resolve, reject) => {
             service.accountInfo(accountId,function (data:any){
                 if(data.error){
-                    reject(data.error);
-                    console.log (data.error)
+                    if(data.error.indexOf("unlock")>-1){
+                        url.accountUnlock();
+                        return;
+                    }else{
+                        reject(data.error);
+                    }
                 }else{
                     const tmp:any = data.result;
                     tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
@@ -141,6 +146,7 @@ class WalletWorker {
                 }
             })
         })
+
     }
 
     async accountInfo(accountId?:any):Promise<AccountModel>{
@@ -170,15 +176,8 @@ class WalletWorker {
                     resolve(data);
                 }
 
-                service.accountInfo(accountId,function (data:any){
-                    if(data.error){
-                        reject(data.error);
-                    }else{
-                        const tmp:any = data.result;
-                        tmp.addresses[ChainType.BSC] = tmp.addresses[ChainType.ETH]
-                        selfStorage.setItem(accountId,tmp)
-                        resolve(tmp);
-                    }
+                walletWorker.accountInfoAsync().catch(e=>{
+                    console.error(e)
                 })
             }else{
                 service.accounts(function (accounts:Array<AccountModel>){
@@ -217,12 +216,15 @@ class WalletWorker {
     }
 
     async unlockWallet(password:string){
-        const account:any = await this.accountInfo()
+        const accountId = selfStorage.getItem("accountId");
         return new Promise((resolve, reject) =>{
-            service.unlockWallet(account.accountId,password,function (data:any){
+            service.unlockWallet(accountId,password,function (data:any){
                 if(data.error){
                     reject(data.error);
                 }else{
+                    walletWorker.accountInfoAsync().catch(e=>{
+                        console.log(e);
+                    })
                     resolve(data.result);
                 }
             })

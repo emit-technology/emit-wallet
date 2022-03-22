@@ -17,9 +17,7 @@
  */
 
 import {MinerScenes, MintData} from "../pages/epoch/miner";
-import altarService from 'walletService/src/mint/altar/index';
-import chaosService from 'walletService/src/mint/chaos/index';
-import poolService from 'walletService/src/mint/pool/index';
+import {altarService,chaosService,poolService} from 'walletService';
 
 class MintWorker {
 
