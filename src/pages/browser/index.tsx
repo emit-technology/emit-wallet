@@ -8,7 +8,6 @@ class Browser extends React.Component<any, any>{
 
     componentDidMount() {
 
-
     }
 
     render() {

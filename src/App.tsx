@@ -97,6 +97,7 @@ import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 import rpc from "./rpc";
 import StarGrid from "./pages/epoch/starGrid";
 import interVar from "./interval";
+import TabBrowser from "./pages/TabBrowser";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -202,6 +203,7 @@ class App extends React.Component<any, State> {
 
                         <Route path="/epoch/style" component={EpochStyle} exact={true}/>
                         <Route path="/epoch/starGrid" component={StarGrid} exact={true}/>
+                        <Route path="/epoch" component={Epoch} exact={true}/>
 
                         <Route path="/browser/:url" component={Browser} exact={true}/>
                         <Route path="/chart/:symbol" component={Chart} exact={true}/>
@@ -247,7 +249,7 @@ class App extends React.Component<any, State> {
                                     <IonRouterOutlet>
                                         <Switch>
                                             <Route path="/tabs/wallet" component={Wallet} exact={true}/>
-                                            <Route path="/tabs/epoch" component={Epoch} exact={true}/>
+                                            <Route path="/tabs/browser" component={TabBrowser} exact={true}/>
                                             <Route path="/tabs/settings" component={Settings} exact={true}/>
                                             <Route path="/tabs/nft" component={NFT} exact={true}/>
                                             <Route path="/tabs/trade" component={Trade} exact={true}/>
@@ -265,7 +267,7 @@ class App extends React.Component<any, State> {
                                         </IonTabButton>
                                         {
                                             !utils.isEmbedPopup() &&
-                                            <IonTabButton tab="epoch" href="/tabs/epoch">
+                                            <IonTabButton tab="epoch" href="/tabs/browser">
                                                 <IonImg src={epoch} className="toolbar-icon"/>
                                                 <IonLabel className="text-small-x2">{i18n.t("epoch")}</IonLabel>
                                             </IonTabButton>

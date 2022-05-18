@@ -24,7 +24,7 @@ const AccountsModal:React.FC<Props> = ({isOpen,onCancel,onSelect,accounts,accoun
                 <IonItemDivider sticky color="primary" mode="ios">{i18n.t("selectAn")} {i18n.t("account")}</IonItemDivider>
                 {
                     accounts && accounts.map((v,i)=>{
-                        return <IonItem disabled={account && account.accountId == v.accountId} onClick={()=>{
+                        return <IonItem color={account && account.accountId == v.accountId?"primary":"white"} onClick={()=>{
                             if(!(account && account.accountId == v.accountId)){
                                 onSelect(v)
                             }
@@ -33,12 +33,12 @@ const AccountsModal:React.FC<Props> = ({isOpen,onCancel,onSelect,accounts,accoun
                                 <Avatar name={v.name} size="30" round={true} />
                             </IonAvatar>
                             <IonLabel className="ion-text-wrap">
-                                <h2><b><IonText color="primary">{v.name}</IonText></b></h2>
+                                <h2><b>{v.name}</b></h2>
                                 <p>{utils.ellipsisStr(v.addresses[ChainType.ETH],8)}</p>
                             </IonLabel>
                             {
                                 account && account.accountId == v.accountId &&
-                                    <IonCheckbox checked/>
+                                    <IonCheckbox checked color="success"/>
                             }
                         </IonItem>
                     })
