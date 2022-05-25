@@ -63,7 +63,7 @@ class NFTMarketStatics extends React.Component<any, State> {
         })
     }
     init = async ()=>{
-        const marketItems = await epochMarketRpc.marketTopExchange(50)
+        const marketItems = await epochMarketRpc.marketTopExchange(100)
         const account = await walletWorker.accountInfo();
         this.setState({
             marketItems:marketItems,
