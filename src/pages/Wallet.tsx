@@ -152,12 +152,11 @@ class Wallet extends React.Component<State, any> {
         })
 
         interVarBalance.start(()=>{
-            console.log("render balance");
             this.init().then(() => {
             }).catch(e=>{
                 console.error(e)
             })
-        },1000 * 5)
+        },1000*3)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{

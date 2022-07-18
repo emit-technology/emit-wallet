@@ -796,3 +796,7 @@ export function metaAttributesToWrappedDevice(attributes:Array<Attribute>):Wrapp
     }
     return wrpDivice;
 }
+
+export function calcLandRate(landLevel:string){
+    return Math.ceil(new BigNumber(landLevel).multipliedBy(256).dividedBy(25).toNumber())
+}
