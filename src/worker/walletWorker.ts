@@ -16,7 +16,7 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 
-import service from 'walletService';
+import service from 'walletService/lib';
 import {AccountModel, ChainType} from "../types";
 import selfStorage from "../utils/storage";
 
