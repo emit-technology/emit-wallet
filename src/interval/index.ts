@@ -44,9 +44,10 @@ const interVar = new Interval("homeIntervalId");
 const interVarSwap = new Interval("swapIntervalId");
 const interVarEpoch = new Interval("interVarEpochId");
 const interVarBalance = new Interval("interVarBalance");
+const interVarNFT = new Interval("interVarNFT");
 
 export default interVar
 
 export {
-    interVarSwap,interVarEpoch,interVarBalance
+    interVarSwap,interVarEpoch,interVarBalance,interVarNFT
 }

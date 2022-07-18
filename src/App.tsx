@@ -96,7 +96,7 @@ import EpochStyle from "./pages/epoch/style";
 import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 import rpc from "./rpc";
 import StarGrid from "./pages/epoch/starGrid";
-import interVar from "./interval";
+import interVar, {interVarNFT} from "./interval";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -120,10 +120,13 @@ class App extends React.Component<any, State> {
             console.log(e)
         })
 
-        interVar.start(()=>{
+        interVarNFT.start(()=>{
             rpc.initNFT().catch(e=>{
                 console.error(e);
             })
+        },40 * 1000,true)
+
+        interVar.start(()=>{
             rpc.initBalance().catch(e=>{
                 console.error(e)
             })
