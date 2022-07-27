@@ -64,7 +64,8 @@ export const UserDepositModal:React.FC<Props> = ({show,title,onCancel,data,onWit
                                         <p>
                                             {i18n.t("deposited")}&nbsp;<b><IonText color="secondary">{nFormatter(fromValue(v.totalAmount,18),3)}</IonText></b>
                                                &nbsp;<IonText color="primary">{
-                                                   DepositType.LP == v.depositType ?`${StarGridType[v.enType]}-BUSD-LQ`:"BUSD"
+                                            `${StarGridType[v.enType]}-BUSD-LQ`
+                                                   // DepositType.LP == v.depositType ?`${StarGridType[v.enType]}-BUSD-LQ`:"BUSD"
                                            }</IonText>
                                         </p>
                                         <p>{i18n.t("created")}&nbsp;<b><IonText color="secondary">{v.count}</IonText></b>&nbsp;<IonText color="primary">EMIT-{StarGridType[v.enType]}</IonText></p>
