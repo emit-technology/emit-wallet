@@ -30,7 +30,8 @@ import poolRpc, {PoolPayment, PoolShare} from "../../../rpc/pool";
 import epochPoolService from "../../../contract/epoch/sero/pool";
 import {PoolTask} from "../../../contract/epoch/sero/types";
 import * as utils from "../../../utils"
-import {AccountModel, ChainType, Transaction} from "../../../types";
+import {Transaction} from "../../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../../../worker/walletWorker";
 import PoolMiner from "../miner/pool";
 import {interVarEpoch as interVar} from "../../../interval";

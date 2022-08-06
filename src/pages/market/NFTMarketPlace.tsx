@@ -40,7 +40,8 @@ import {
 import epochMarketRpc, {MarketItem, MarketItemQuery} from "../../rpc/epoch/market";
 import CardTransform from "../../components/CardTransform";
 import * as utils from "../../utils"
-import {AccountModel, ChainType, NftInfo, Transaction} from "../../types";
+import {NftInfo, Transaction} from "../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import rpc from "../../rpc";
 import epochMarketService from "../../contract/epoch/sero/market";
 import walletWorker from "../../worker/walletWorker";

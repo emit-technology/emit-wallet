@@ -1,5 +1,6 @@
 import EthContract from "../../EthContract";
-import {ChainType, Counter, ENDetails, Land, LockedInfo, StarGridType, UserInfo} from "../../../types";
+import {Counter, ENDetails, Land, LockedInfo, StarGridType, UserInfo} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import {CONTRACT_ADDRESS} from "../../../config"
 import BigNumber from "bignumber.js";
 const ABI = [

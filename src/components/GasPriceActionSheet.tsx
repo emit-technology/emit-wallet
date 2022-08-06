@@ -30,7 +30,8 @@ import {
 import i18n from "../locales/i18n";
 import BigNumber from "bignumber.js";
 import rpc from "../rpc";
-import {ChainType, GasPriceLevel} from "../types";
+import {GasPriceLevel} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import './gasPrice.css'
 
 interface State {

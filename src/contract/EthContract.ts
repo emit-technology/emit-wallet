@@ -17,7 +17,7 @@
  */
 
 import rpc from "../rpc";
-import {ChainType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import {BSC_HOST, EMIT_HOST} from "../config";
 
 const Contract = require('web3-eth-contract');

@@ -54,7 +54,7 @@ import * as utils from "../utils";
 import './Transaction.css'
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
-import {ChainType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import BigNumber from "bignumber.js";
 import url from "../utils/url";
 import i18n from "../locales/i18n"
@@ -181,7 +181,6 @@ class TransactionList extends React.Component<any, any>{
                             const color = record.num == 0 && chain != ChainType.TRON?"warning":value.toNumber()>0 ?"primary":"secondary";
                             const icon = record.num == 0 && chain != ChainType.TRON? reloadCircleOutline:value.toNumber()>0 ?arrowRedoOutline:arrowUndoOutline;
                             const prefix = value.toNumber()>0?"+":"";
-                            console.debug("record>>",record)
                             return <IonItem mode="ios" onClick={()=>{
                                 // window.location.href = `#/transaction/info/${chain}/${record.txHash}`
                                 // Use temp storage

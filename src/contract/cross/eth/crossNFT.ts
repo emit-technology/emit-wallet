@@ -1,8 +1,7 @@
 import EthContract from "../../EthContract";
 import BigNumber from "bignumber.js";
 import {EMIT_HOST} from "../../../config";
-import {ChainType} from "../../../types";
-
+import {ChainType} from "@emit-technology/emit-lib";
 const Web3 = require('web3');
 const web3 = new Web3(EMIT_HOST);
 

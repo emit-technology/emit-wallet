@@ -16,7 +16,8 @@ import {
 
 import "./CardTransform.scss"
 import url from "../utils/url";
-import {ChainType, Counter, NftInfo, StarGridType} from "../types";
+import {Counter, NftInfo, StarGridType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import * as utils from "../utils"
 import {DeviceInfo, WrappedDevice} from "../contract/epoch/sero/types";
 import EpochAttribute from "./EpochAttribute";

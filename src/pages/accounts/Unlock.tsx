@@ -12,7 +12,6 @@ import {
 } from "@ionic/react";
 import i18n from "../../locales/i18n";
 import url from "../../utils/url";
-import {type} from "os";
 import walletWorker from "../../worker/walletWorker";
 import {Plugins} from "@capacitor/core";
 

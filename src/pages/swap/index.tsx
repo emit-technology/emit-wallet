@@ -28,22 +28,20 @@ import {
 } from "ionicons/icons";
 import url from "../../utils/url";
 import rpc from "../../rpc";
-import {ChainType, Transaction} from "../../types";
+import {Transaction} from "../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../../worker/walletWorker";
 import * as utils from '../../utils';
 import pancakeSwap from "../../contract/swap/bsc";
 import BigNumber from "bignumber.js";
 import router from "./router";
 import ConfirmTransaction from "../../components/ConfirmTransaction";
-import GasPriceActionSheet from "../../components/GasPriceActionSheet";
 import * as config from "../../config";
 import EthToken from "../../contract/erc20/eth";
 import selfStorage from "../../utils/storage";
-import {type} from "os";
-import interVar, {interVarSwap} from "../../interval";
+import {interVarSwap} from "../../interval";
 import {createRef} from "react";
 import i18n from "../../locales/i18n";
-import {Plugins} from "@capacitor/core";
 
 interface State {
     balance: any

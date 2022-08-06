@@ -59,7 +59,7 @@ import {
 import {BRIDGE_CURRENCY, TOKEN_DESC} from "../config"
 
 import walletWorker from "../worker/walletWorker";
-import {AccountModel, ChainType} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import rpc from "../rpc";
 import selfStorage from "../utils/storage";
 import url from "../utils/url";
@@ -155,7 +155,7 @@ class Wallet extends React.Component<State, any> {
             }).catch(e=>{
                 console.error(e)
             })
-        },1000 * 5)
+        },1000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
@@ -194,7 +194,7 @@ class Wallet extends React.Component<State, any> {
         const accounts = await walletWorker.accounts();
         const assets: any = {};
         const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);
-        if (account && account.addresses && account.addresses[2]) {
+        if (account && account.addresses && account.addresses[ChainType.ETH]) {
             const allBalance = await Promise.all([
                 rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO]),
                 rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH]),
@@ -529,7 +529,9 @@ class Wallet extends React.Component<State, any> {
             account:act,
             showAccounts:false,
         })
-        url.accountUnlock();
+        this.init().catch(e=>{
+            console.error(e)
+        })
     }
     render() {
         const {account,scanText,showLoading, accounts,showAccounts,showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain,lockedWallet} = this.state;

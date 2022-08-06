@@ -1,5 +1,5 @@
 import rpcEventSero from "../../../rpc/event-sero";
-import {ChainType} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import {MinerScenes} from "../../../pages/epoch/miner";
 import {DeviceInfoRank, DriverInfoRank, PositionDriverInfoRank,PositionDeviceInfoRank} from "./types";
 

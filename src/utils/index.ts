@@ -29,7 +29,8 @@ import {
     META_TEMP,
     NOT_CROSS_TOKEN
 } from "../config"
-import {Attribute, ChainId, ChainType, DeviceMode, GasPriceLevel, MetaInfo, NftInfo} from "../types";
+import {Attribute, ChainId, DeviceMode, GasPriceLevel, MetaInfo, NftInfo} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import rpc from "../rpc";
 import * as utils from "../utils"
 import selfStorage from "./storage";
@@ -37,7 +38,7 @@ import {DeviceCategory, DeviceStyle} from "./device-style";
 import {DeviceInfo, DeviceInfoRank, WrappedDevice} from "../contract/epoch/sero/types";
 import {MarketItem} from "../rpc/epoch/market";
 import {bookmarkOutline, colorWandOutline, constructOutline, ellipseOutline, ribbonOutline} from "ionicons/icons";
-
+const format = require('date-format');
 const utf8 = require("utf8");
 
 const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -795,4 +796,8 @@ export function metaAttributesToWrappedDevice(attributes:Array<Attribute>):Wrapp
         srcTkt:getAttr("srcTkt"),
     }
     return wrpDivice;
+}
+
+export function dateFormat(date: Date) {
+    return format("dd/MM/yyyy hh:mm:ss", date);
 }

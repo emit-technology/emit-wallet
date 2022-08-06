@@ -180,19 +180,19 @@ class Settings extends React.Component<any, any>{
         }
     }
 
-    exportPrivateKey = async (password:string)=>{
-        const account = await walletWorker.accountInfo();
-        if(account.accountId){
-            const privateKey:any = await walletWorker.exportPrivateKey(account.accountId,password)
-            if(privateKey){
-                this.setShowLoading(false);
-                this.setState({
-                    privateKey:privateKey
-                })
-                this.setShowPasswordAlert2(true);
-            }
-        }
-    }
+    // exportPrivateKey = async (password:string)=>{
+    //     const account = await walletWorker.accountInfo();
+    //     if(account.accountId){
+    //         const privateKey:any = await walletWorker.exportPrivateKey(account.accountId,password)
+    //         if(privateKey){
+    //             this.setShowLoading(false);
+    //             this.setState({
+    //                 privateKey:privateKey
+    //             })
+    //             this.setShowPasswordAlert2(true);
+    //         }
+    //     }
+    // }
 
     setShowPasswordAlert = (f:boolean)=>{
         this.setState({
@@ -228,22 +228,13 @@ class Settings extends React.Component<any, any>{
     }
 
     exportConfirm = (password:string)=>{
-        const {exportType} = this.state;
-        if(exportType == "mnemonic"){
-            this.setShowLoading(true);
-            this.exportMnemonic(password).then().catch((e:any)=>{
-                this.setShowLoading(false);
-                const err = typeof e === "string"?e:e.message;
-                this.setShowToast(true,"danger",err)
-            });
-        }else{
-            this.setShowLoading(true);
-            this.exportPrivateKey(password).then().catch((e:any)=>{
-                this.setShowLoading(false);
-                const err = typeof e === "string"?e:e.message;
-                this.setShowToast(true,"danger",err)
-            });
-        }
+        // const {exportType} = this.state;
+        this.setShowLoading(true);
+        this.exportMnemonic(password).then().catch((e:any)=>{
+            this.setShowLoading(false);
+            const err = typeof e === "string"?e:e.message;
+            this.setShowToast(true,"danger",err)
+        });
 
     }
 

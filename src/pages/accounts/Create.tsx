@@ -30,22 +30,21 @@ import {
 } from "@ionic/react";
 import './style.css';
 import walletWorker from "../../worker/walletWorker";
-import {AccountModel} from "../../types";
+import {AccountModel} from "@emit-technology/emit-lib";
 import url from "../../utils/url";
-import {Plugins} from "@capacitor/core";
 import i18n from "../../locales/i18n";
-import selfStorage from "../../utils/storage";
 import {chevronBack} from "ionicons/icons";
+import {config} from "../../config";
 
 interface State {
     name: string;
     password: string;
     rePassword: string;
     tips: string;
-    showToast:boolean;
-    toastMessage?:string
-    showProgress:boolean
-    showPasswordTips:boolean
+    showToast: boolean;
+    toastMessage?: string
+    showProgress: boolean
+    showPasswordTips: boolean
 }
 
 class CreateAccount extends React.Component<any, State> {
@@ -55,83 +54,73 @@ class CreateAccount extends React.Component<any, State> {
         password: "",
         rePassword: "",
         tips: "",
-        showToast:false,
-        toastMessage:"",
-        showProgress:false,
-        showPasswordTips:false
+        showToast: false,
+        toastMessage: "",
+        showProgress: false,
+        showPasswordTips: false
     }
 
     componentDidMount() {
-        const { StatusBar,Camera } = Plugins;
-        StatusBar.setBackgroundColor({
-            color:"#194381"
-        })
+
     }
 
-    confirm = ()=>{
-        const {name,password,rePassword,tips} = this.state;
-        if(!name){
-            this.setShowToast(true,"Please Input Name!");
+    confirm = async () => {
+        const {name, password, rePassword, tips} = this.state;
+        if (!name) {
+            this.setShowToast(true, "Please Input Name!");
             return;
         }
-        if(!password){
-            this.setShowToast(true,"Please Input Password!");
-            return;
-        }else{
-            if(password.length<8){
-                this.setShowToast(true,i18n.t("passwordTip"));
+        const accountId = localStorage.getItem("accountId");
+        if (!accountId) {
+            if (!password) {
+                this.setShowToast(true, "Please Input Password!");
+                return;
+            } else {
+                if (password.length < 8) {
+                    this.setShowToast(true, i18n.t("passwordTip"));
+                    return;
+                }
+            }
+            if (!rePassword) {
+                this.setShowToast(true, "Please Input Repeat Password!");
+                return;
+            }
+            if (password != rePassword) {
+                this.setShowToast(true, "Password do not match");
                 return;
             }
         }
-        if(!rePassword){
-            this.setShowToast(true,"Please Input Repeat Password!");
-            return;
-        }
-        if(password != rePassword){
-            this.setShowToast(true,"Password do not match");
-            return;
-        }
-        this.setState({
-            showProgress:true
-        })
-        const tmp:AccountModel = {name:name,password:password,hint:tips}
-        sessionStorage.setItem("tmpAccount",JSON.stringify(tmp))
-        walletWorker.generateMnemonic().then((rest:any)=>{
-            sessionStorage.setItem("tmpMnemonic",rest)
-            setTimeout(()=>{
-                // window.location.href = "/#/account/backup";
-                url.accountBackup();
-            },1000)
-        })
-
+        const tmpAccount: AccountModel = {name: name, password: password, passwordHint: tips}
+        const rest:any = await walletWorker.generateMnemonic()
+        config.TMP.MNEMONIC = rest;
+        config.TMP.Account = tmpAccount;
     }
 
-    setShowToast = (f:boolean,m?:string) =>{
+    setShowToast = (f: boolean, m?: string) => {
         this.setState({
-            showToast:f,
-            toastMessage:m
+            showToast: f,
+            toastMessage: m
         })
     }
 
     render() {
-        const {name,password,rePassword,tips,showToast,toastMessage,showProgress,showPasswordTips} = this.state;
-
+        const {name, password, rePassword, tips, showToast, toastMessage, showProgress, showPasswordTips} = this.state;
+        const accountId = localStorage.getItem("accountId");
         return <>
             <IonPage>
                 <IonContent fullscreen>
-                    <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
+                    <IonHeader >
+                        <IonToolbar mode="ios">
                             {
-                                selfStorage.getItem("accountId") && <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                                accountId &&
+                                <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
                                     url.back()
                                 }}/>
                             }
                             <IonTitle>
                                 <IonText>{i18n.t("create")} {i18n.t("wallet")}</IonText>
                             </IonTitle>
-                            {/*<IonIcon slot="end" src={downloadOutline} color="primary" size="large"/>*/}
-                            <IonButton fill="outline" color="warning" size="small" slot="end" onClick={()=>{
-                                // window.location.href="/#/account/import"
+                            <IonButton fill="outline" size="small" slot="end" onClick={() => {
                                 url.accountImport();
                             }}>{i18n.t("import")}</IonButton>
                         </IonToolbar>
@@ -139,49 +128,70 @@ class CreateAccount extends React.Component<any, State> {
                     </IonHeader>
                     <IonList>
                         <IonItem mode="ios">
-                            <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
-                            <IonInput mode="ios" value={name} autocomplete="off"  onIonChange={(e:any) => {
+                            <IonLabel position="stacked"><IonText
+                                color="medium">{i18n.t("wallet")} {i18n.t("name")}</IonText></IonLabel>
+                            <IonInput mode="ios" placeholder="Input wallet name" value={name} autocomplete="off" onIonChange={(e: any) => {
                                 this.setState({
-                                    name:e.target.value!
+                                    name: e.target.value!
                                 })
                             }}/>
                         </IonItem>
-                        <IonItem mode="ios">
-                            <IonLabel position="stacked"><IonText color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
-                            <IonInput mode="ios" autocomplete="new-password" type="password" value={password} onIonChange={(e: any) => {
-                                this.setState({
-                                    password:e.target.value!
-                                })
-                            }} onIonFocus={()=>{
-                                this.setState({showPasswordTips:true})
-                            }} onIonBlur={()=>{
-                                this.setState({showPasswordTips:false})
-                            }}/>
-                        </IonItem>
-                        {showPasswordTips && <div className="password-tips">
-                            {i18n.t("passwordTip")}
-                        </div>}
-                        <IonItem mode="ios">
-                            <IonLabel position="stacked"><IonText color="medium"> {i18n.t("repeat")}  {i18n.t("password")}</IonText></IonLabel>
-                            <IonInput mode="ios" type="password" autocomplete="new-password"  value={rePassword} onIonChange={(e: any) => {
-                                this.setState({
-                                    rePassword:e.target.value!
-                                })
-                            }}/>
-                        </IonItem>
-                        <IonItem mode="ios">
-                            <IonLabel position="stacked"><IonText color="medium"> {i18n.t("password")}  {i18n.t("hint")}( {i18n.t("optional")})</IonText></IonLabel>
-                            <IonInput mode="ios" value={tips} onIonChange={(e: any) => {
-                                this.setState({
-                                    tips:e.target.value!
-                                })
-                            }}/>
-                        </IonItem>
+                        {
+                            !accountId && <>
+                                <IonItem mode="ios">
+                                    <IonLabel position="stacked"><IonText
+                                        color="medium">{i18n.t("wallet")} {i18n.t("password")}</IonText></IonLabel>
+                                    <IonInput mode="ios" autocomplete="new-password" type="password" value={password}
+                                              onIonChange={(e: any) => {
+                                                  this.setState({
+                                                      password: e.target.value!
+                                                  })
+                                              }} onIonFocus={() => {
+                                        this.setState({showPasswordTips: true})
+                                    }} onIonBlur={() => {
+                                        this.setState({showPasswordTips: false})
+                                    }}/>
+                                </IonItem>
+                                {showPasswordTips && <div className="password-tips">
+                                    {i18n.t("passwordTip")}
+                                </div>}
+                                <IonItem mode="ios">
+                                    <IonLabel position="stacked"><IonText
+                                        color="medium"> {i18n.t("repeat")} {i18n.t("password")}</IonText></IonLabel>
+                                    <IonInput mode="ios" type="password" autocomplete="new-password" value={rePassword}
+                                              onIonChange={(e: any) => {
+                                                  this.setState({
+                                                      rePassword: e.target.value!
+                                                  })
+                                              }}/>
+                                </IonItem>
+                                <IonItem mode="ios">
+                                    <IonLabel position="stacked"><IonText
+                                        color="medium"> {i18n.t("password")} {i18n.t("hint")}( {i18n.t("optional")})</IonText></IonLabel>
+                                    <IonInput mode="ios" value={tips} onIonChange={(e: any) => {
+                                        this.setState({
+                                            tips: e.target.value!
+                                        })
+                                    }}/>
+                                </IonItem>
+                            </>
+                        }
                     </IonList>
                     <div className="button-bottom">
-                        <IonButton mode="ios" expand="block" disabled={!name || !password || !rePassword || showProgress} onClick={()=>{
-                            this.confirm();
-                        }}>{showProgress&&<IonSpinner name="bubbles" />}{i18n.t("next")}</IonButton>
+                        <IonButton mode="ios" expand="block"
+                                   disabled={!name || ((!password || !rePassword) && !accountId) || showProgress} onClick={() => {
+                            this.setState({
+                                showProgress: true
+                            })
+                            this.confirm().then(() => {
+                                this.setState({name:"",password:"",rePassword:"",tips:"",showProgress:false})
+                                url.accountBackup();
+                            }).catch(e => {
+                                this.setState({
+                                    showProgress: false
+                                })
+                            });
+                        }}>{showProgress && <IonSpinner name="bubbles"/>}{i18n.t("next")}</IonButton>
                     </div>
 
                     <IonToast

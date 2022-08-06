@@ -18,7 +18,8 @@
 
 import axios from "axios";
 import {CHAIN_PARAMS, CHAIN_PARAMS_BSC, CONTRACT_ADDRESS, EMIT_HOST, EVENT_HOST_SERO} from "../config"
-import {ChainType, Transaction} from "../types";
+import { Transaction} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
 import tron from "./tron";

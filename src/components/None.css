@@ -1,0 +1,15 @@
+.data-none {
+    width: 100%;
+    text-align: center;
+}
+
+.data-none img {
+    opacity: 0.1;
+    width: 40%;
+    max-width: 200px;
+}
+
+.data-none div {
+    font-size: 24px;
+    color: #dddddd;
+}

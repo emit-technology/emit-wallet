@@ -1,8 +1,7 @@
 import {Erc20, ABI} from "../index";
 import BigNumber from "bignumber.js";
-import {EMIT_HOST} from "../../../config"
 import EthContract from "../../EthContract";
-import {ChainType} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 
 class Eth extends EthContract implements Erc20 {
 

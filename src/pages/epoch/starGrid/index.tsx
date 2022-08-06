@@ -67,8 +67,6 @@ import './index.scss';
 import starGridRpc from "../../../rpc/epoch/stargrid";
 import walletWorker from "../../../worker/walletWorker";
 import {
-    AccountModel,
-    ChainType,
     Counter,
     DepositType,
     DriverStarGrid,
@@ -82,6 +80,7 @@ import {
     UserDeposit,
     UserPosition
 } from "../../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import url from "../../../utils/url";
 import EthToken from "../../../contract/erc20/eth";
 import * as config from "../../../config";

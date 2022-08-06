@@ -118,11 +118,13 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.16.0",
     "@capacitor/cli": "2.4.3",
+    "@emit-technology/emit-lib": "file:../emit-core/emit-lib",
     "axios": "^0.21.0",
     "base-x": "^3.0.8",
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.2.0",
     "copy-to-clipboard": "^3.3.1",
+    "date-format": "^4.0.13",
     "history": "4.10.1",
     "node-sass": "^4.14.1",
     "qrcode.react": "^1.0.0",

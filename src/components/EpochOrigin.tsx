@@ -27,7 +27,8 @@ import {
 import ConfirmTransaction from "./ConfirmTransaction";
 import epochService from "../contract/epoch/sero";
 import {MinerScenes, MintData} from "../pages/epoch/miner";
-import {AccountModel, ChainType, NftInfo, Transaction} from "../types";
+import {NftInfo, Transaction} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import BigNumber from "bignumber.js";
 import * as utils from "../utils";
 import {nFormatter} from "../utils";

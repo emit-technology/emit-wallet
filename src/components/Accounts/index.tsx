@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {IonModal,IonItem,IonLabel,IonAvatar,IonRow,IonCol,IonButton,IonItemDivider,IonCheckbox,IonText} from '@ionic/react'
-import {AccountModel, ChainType} from "../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import i18n from "../../locales/i18n";
 import Avatar from 'react-avatar';
 import * as utils from "../../utils";

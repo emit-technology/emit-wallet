@@ -27,7 +27,8 @@ import {
     EPOCH_WRAPPED_DEVICE_CATEGORY,
     META_TEMP
 } from "../config"
-import {ChainType, Counter, Meta, NftInfo, StarGridType, Transaction} from "../types";
+import {Counter, Meta, NftInfo, StarGridType, Transaction} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../worker/walletWorker";
 import selfStorage from "../utils/storage";
 import tron from "./tron";

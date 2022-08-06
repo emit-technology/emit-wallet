@@ -37,7 +37,7 @@ import url from "../utils/url";
 import EpochAttribute from "../components/EpochAttribute";
 import epochService from "../contract/epoch/sero";
 import walletWorker from "../worker/walletWorker";
-import {ChainType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import {MinerScenes} from "./epoch/miner";
 import {chevronForwardOutline, helpCircleOutline, statsChartOutline} from "ionicons/icons";
 import {Plugins} from "@capacitor/core";

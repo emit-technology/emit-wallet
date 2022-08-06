@@ -25,7 +25,8 @@ import {
 import epochMarketRpc, {MarketItem} from "../../rpc/epoch/market";
 import CardTransform from "../../components/CardTransform";
 import * as utils from "../../utils"
-import {AccountModel, ChainType, NftInfo} from "../../types";
+import {NftInfo} from "../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../../worker/walletWorker";
 import i18n from "../../locales/i18n"
 import {nFormatter} from "../../utils";
