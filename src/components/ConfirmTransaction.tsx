@@ -16,7 +16,8 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 import * as React from "react";
-import {ChainType, Transaction} from "../types";
+import {Transaction} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {
     IonAlert,
     IonButton,

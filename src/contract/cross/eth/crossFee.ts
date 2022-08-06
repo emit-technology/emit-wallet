@@ -1,6 +1,6 @@
 import EthContract from "../../EthContract";
 import BigNumber from "bignumber.js";
-import {ChainType} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 
 const ABI_FEE = [
     {

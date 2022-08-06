@@ -18,8 +18,7 @@ import DriverRank from "../../../components/epoch/DriverRank";
 import {DriverInfoRank, PositionDriverInfoRank} from "../../../contract/epoch/sero/types";
 import epochRankService from "../../../contract/epoch/sero/rank";
 import walletWorker from "../../../worker/walletWorker";
-import {ChainType} from "../../../types";
-
+import {ChainType} from "@emit-technology/emit-lib";
 interface State{
     scenes:string
     drivers:Array<DriverInfoRank>

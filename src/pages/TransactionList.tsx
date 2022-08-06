@@ -54,7 +54,7 @@ import * as utils from "../utils";
 import './Transaction.css'
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
-import {ChainType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import BigNumber from "bignumber.js";
 import url from "../utils/url";
 import i18n from "../locales/i18n"

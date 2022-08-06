@@ -25,11 +25,6 @@ import { Plugins,StatusBarStyle } from '@capacitor/core';
 import url from "./utils/url";
 import selfStorage from "./utils/storage";
 
-const accountId = selfStorage.getItem("accountId");
-if(accountId){
-    url.accountUnlock()
-}
-
 setTimeout(()=>{
     Plugins.SplashScreen.hide().then(()=>{
         console.log("App started , hide splash!")

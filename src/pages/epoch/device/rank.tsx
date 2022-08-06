@@ -10,7 +10,7 @@ import epochRankService from "../../../contract/epoch/sero/rank";
 import {DeviceInfoRank} from "../../../contract/epoch/sero/types";
 import selfStorage from "../../../utils/storage";
 import * as utils from "../../../utils"
-import {ChainType} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import {MinerScenes} from "../miner";
 
 interface State {

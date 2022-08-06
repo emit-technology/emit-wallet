@@ -37,7 +37,8 @@ import {
     IonToolbar, IonLoading
 } from '@ionic/react';
 import './Tunnel.css';
-import {ChainId, ChainType, Transaction} from "../types";
+import {ChainId, Transaction} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import * as config from '../config';
 import {CONTRACT_ADDRESS, META_TEMP, TOKEN_DESC} from '../config';
 import walletWorker from "../worker/walletWorker";

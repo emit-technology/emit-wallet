@@ -1,6 +1,5 @@
 import axios from "axios";
-import {ChainType} from "../types";
-
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 class Base {
     messageId: number;
     host: string;

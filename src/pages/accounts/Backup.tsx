@@ -21,48 +21,159 @@ import {
     IonContent,
     IonHeader,
     IonPage,
-    IonTitle,
+    IonTitle, IonLabel,
     IonToolbar,
     IonList,
-    IonItem,IonText, IonButton, IonGrid, IonRow, IonCol, IonIcon
+    IonItem, IonText, IonChip, IonButton, IonGrid, IonRow, IonCol, IonIcon, IonProgressBar, IonModal, IonToast
 } from "@ionic/react";
 import './style.css';
 import url from "../../utils/url";
-import {chevronBack} from "ionicons/icons";
+import {chevronBack, close} from "ionicons/icons";
 import i18n from "../../locales/i18n"
+import {config} from "../../config";
+import walletWorker from "../../worker/walletWorker";
+import selfStorage from "../../utils/storage";
+import {AccountModel} from "@emit-technology/emit-lib";
 
 interface State {
-    mnemonic: Array<string>;
+    // mnemonic: Array<string>;
+    showProgress: boolean
+    showBackupModal: boolean;
+    tempMnemonic: Array<string>;
+    rIndex: number,
+    showToast: boolean;
+    toastMessage: string
 }
 
 class Backup extends React.Component<any, State> {
 
     state: State = {
-        mnemonic: [],
+        // mnemonic: [],
+        showProgress: false,
+        showBackupModal: false,
+        tempMnemonic: [],
+        rIndex: 0,
+        showToast: false,
+        toastMessage: ""
     }
 
     componentDidMount() {
-        const tmpMnemonic:any = sessionStorage.getItem("tmpMnemonic")
-        if(!tmpMnemonic){
+        const tmpMnemonic: any = config.TMP.MNEMONIC;
+        if (!tmpMnemonic) {
             // window.location.href = "/#/account/create";
             url.accountCreate();
             return
         }
+        // this.setState({
+        //     mnemonic: tmpMnemonic.split(" ")
+        // })
+    }
+
+    create = async () => {
+        const account: AccountModel = config.TMP.Account; //sessionStorage.getItem("tmpAccount")
+        if (account) {
+            const accountId:any = await walletWorker.importMnemonic(config.TMP.MNEMONIC, account.name, account.password ? account.password : "", account.passwordHint, "");
+            if (accountId) {
+                await walletWorker.setBackedUp(accountId)
+                sessionStorage.removeItem("tmpMnemonic");
+                config.TMP.MNEMONIC = ""
+                config.TMP.Account = {}
+                sessionStorage.removeItem("tmpAccount");
+                selfStorage.setItem("accountId", accountId)
+                // window.location.href = "/#/"
+                // window.location.reload();
+                selfStorage.setItem("viewedSlide", true);
+                url.home();
+            }
+            // window.location.reload();
+        }
+    }
+
+    preBackup = async () => {
+        const oMnemonic = config.TMP.MNEMONIC.split(" ");
+
+        const mnemonic:any = await walletWorker.generateMnemonic();
+        const rIndex = Math.floor(Math.random() * 12);
+        const wordstr = oMnemonic[rIndex];
+        const tmp = mnemonic.split(" ");
+
+        const genMen:Array<string> = [];
+        for (let word of tmp) {
+            if(genMen.length == 2){
+                break;
+            }
+            if (word != wordstr) {
+                genMen.push(word);
+            }
+        }
+        genMen.push(wordstr);
+        genMen.sort(this.sortWord)
         this.setState({
-            mnemonic:tmpMnemonic.split(" ")
+            tempMnemonic: genMen,
+            rIndex: rIndex,
+            showBackupModal: true
+        })
+    }
+
+    sortWord = (a:string,b:string)=>{
+        return a.localeCompare(b)
+    }
+
+    confirmBackup = async (v)=>{
+        const oMnemonic = config.TMP.MNEMONIC.split(" ");
+        const {rIndex} = this.state;
+        if(v == oMnemonic[rIndex]){
+            await this.confirm();
+        }else{
+            await this.preBackup()
+            return Promise.reject(i18n.t("notMatch"))
+        }
+    }
+
+    confirm = async () => {
+        const account: any = config.TMP.Account;//sessionStorage.getItem("tmpAccount")
+        if(account && account.name){
+            await this.create()
+        }else{
+            const accountId = selfStorage.getItem("accountId");
+            await walletWorker.setBackedUp(accountId)
+            sessionStorage.removeItem("tmpMnemonic");
+            config.TMP.MNEMONIC = "";
+            url.home();
+        }
+    }
+
+    setShowToast = (f:boolean,msg?:string) =>{
+        this.setState({
+            showToast: f,
+            toastMessage: msg
         })
     }
 
     render() {
-        const {mnemonic} = this.state;
+        const {showProgress, showBackupModal,showToast,toastMessage, tempMnemonic, rIndex} = this.state;
+        let mnemonic = config.TMP.MNEMONIC.split(" ");
+
+        const isMnemonic = mnemonic && mnemonic.length == 12;
+        if(showBackupModal && isMnemonic){
+            mnemonic = [];
+            for(let i=0;i<12;i++){
+                mnemonic.push("***")
+            }
+        }
+
         return <>
             <IonPage>
                 <IonContent fullscreen>
                     <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
-                            <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
+                        <IonToolbar mode="ios">
+                            <IonIcon src={chevronBack} slot="start" size="large" onClick={() => {
+                                config.TMP.MNEMONIC = ""
+                                url.back()
+                            }}/>
                             <IonTitle>{i18n.t("backupMnemonic")}</IonTitle>
                         </IonToolbar>
+                        {showProgress && <IonProgressBar type="indeterminate"/>}
                     </IonHeader>
                     <IonList>
                         <IonItem lines="none">
@@ -143,11 +254,104 @@ class Backup extends React.Component<any, State> {
 
                     </IonList>
                     <div className="button-bottom">
-                        <IonButton mode="ios" expand="block" onClick={()=>{
-                            // window.location.href = "/#/account/confirm"
-                            url.accountConfirm();
-                        }}> {i18n.t("confirmBackup")}</IonButton>
+                        <IonRow>
+                            <IonCol size="5">
+                                <IonButton disabled={showProgress} mode="ios" fill="outline" expand="block"
+                                           onClick={() => {
+                                               if (config.TMP.Account["name"]) {
+                                                   this.setState({
+                                                       showProgress: true,
+                                                   })
+                                                   this.create().then(() => {
+                                                       this.setState({
+                                                           showProgress: false,
+                                                       })
+                                                   }).catch(e => {
+                                                       console.error(e)
+                                                       const err = typeof e == 'string' ? e : e.message;
+                                                       this.setState({
+                                                           showProgress: false,
+                                                       })
+                                                   })
+                                               } else {
+                                                   config.TMP.MNEMONIC = "";
+                                                   url.back();
+                                               }
+                                           }}>{i18n.t("laterBackup")}</IonButton>
+                            </IonCol>
+                            <IonCol size="7">
+                                <IonButton disabled={showProgress} mode="ios" expand="block" onClick={() => {
+                                    // window.location.href = "/#/account/confirm"
+                                    // url.accountConfirm();
+                                    this.preBackup().catch(e=>console.error(e));
+                                }}> {i18n.t("confirmBackup")}</IonButton>
+                            </IonCol>
+                        </IonRow>
                     </div>
+
+                    <IonModal
+                        mode="ios"
+                        isOpen={showBackupModal}
+                        swipeToClose={true}
+                        onDidDismiss={() => {
+                            this.setState({showBackupModal: false})
+                        }}>
+                        <IonPage>
+                            <IonHeader>
+                                <IonToolbar color="white">
+                                    <IonTitle>
+                                        {i18n.t("backupAccount")}
+                                        <div className="powered-by">
+                                            <img src="./assets/icon/icon.png"/>
+                                            <small>{i18n.t("poweredByEmit")}</small>
+                                        </div>
+                                    </IonTitle>
+                                    <IonIcon slot="end" icon={close} size="large" onClick={() => {
+                                        this.setState({showBackupModal: false})
+                                    }}/>
+                                </IonToolbar>
+                            </IonHeader>
+                            <IonContent scrollY>
+                                <IonItem>
+                                    <IonLabel className="ion-text-wrap">
+                                        {i18n.t("pleaseSelect")} <b><IonText color="secondary">#{rIndex+1}th</IonText></b> {i18n.t("pleaseSelect2")}
+                                    </IonLabel>
+                                </IonItem>
+                                <IonItem>
+                                    <IonLabel className="ion-text-wrap">
+                                        <IonRow>
+                                        {
+                                            tempMnemonic && tempMnemonic.map((v,i)=>{
+                                                return <IonChip color="primary" outline key={i} onClick={()=>{
+                                                    this.setState({showProgress:true})
+                                                    this.confirmBackup(v).then(()=>{
+                                                        this.setState({showProgress: false,showBackupModal:false})
+                                                    }).catch(e=>{
+                                                        this.setState({showProgress: false})
+                                                        const err = typeof e == "string"?e:e.message;
+                                                        this.setShowToast(true,err);
+                                                        console.error(e)
+                                                    })
+                                                }}>{v}</IonChip>
+                                            })
+                                        }
+                                        </IonRow>
+                                    </IonLabel>
+                                </IonItem>
+                            </IonContent>
+                        </IonPage>
+                    </IonModal>
+
+                    <IonToast
+                        mode="ios"
+                        isOpen={showToast}
+                        color="primary"
+                        position="top"
+                        onDidDismiss={() => this.setShowToast(false)}
+                        message={toastMessage}
+                        duration={1500}
+                    />
+
                 </IonContent>
             </IonPage>
         </>

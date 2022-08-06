@@ -16,10 +16,9 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {ChainType} from "../types";
 import {MinerScenes} from "../pages/epoch/miner";
-import walletWorker from "../worker/walletWorker";
 import interVar from "../interval";
+import {ChainType} from "@emit-technology/emit-lib";
 
 class Url {
     private base = "#"
@@ -154,11 +153,11 @@ class Url {
     }
 
     accountUnlock() {
-        if (process.env.NODE_ENV == "development"){
-            walletWorker.unlockWallet("12345678")
-        }else{
+        // if (process.env.NODE_ENV == "development"){
+        //     walletWorker.unlockWallet("12345678")
+        // }else{
             this.goTo([this.base, this.account.unlock].join("/"), "");
-        }
+        // }
     }
 
     receive(address: string,chain:ChainType) {

@@ -38,7 +38,8 @@ import {
 import {chevronBack, chevronForwardOutline} from "ionicons/icons";
 import url from "../utils/url";
 import i18n from "../locales/i18n";
-import {ChainType, Transaction} from "../types";
+import {Transaction} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
 import * as utils from "../utils"

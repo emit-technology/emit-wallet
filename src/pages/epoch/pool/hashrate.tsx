@@ -35,7 +35,8 @@ import {MinerScenes} from "../miner";
 import "./hashrate.scss"
 import {PoolTask} from "../../../contract/epoch/sero/types";
 import poolRpc from "../../../rpc/pool";
-import {AccountModel, ChainType, Transaction} from "../../../types";
+import {Transaction} from "../../../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import walletWorker from "../../../worker/walletWorker";
 import * as utils from "../../../utils"
 import epochPoolService from "../../../contract/epoch/sero/pool";

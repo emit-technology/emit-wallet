@@ -47,7 +47,7 @@ import {
 import * as utils from '../utils';
 import './Wallet.css';
 import {
-    arrowForwardOutline,
+    arrowForwardOutline, chevronDown,
     chevronDownOutline,
     chevronForwardOutline,
     chevronUpOutline, close,
@@ -59,7 +59,7 @@ import {
 import {BRIDGE_CURRENCY, TOKEN_DESC} from "../config"
 
 import walletWorker from "../worker/walletWorker";
-import {AccountModel, ChainType} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import rpc from "../rpc";
 import selfStorage from "../utils/storage";
 import url from "../utils/url";
@@ -69,7 +69,8 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import i18n from '../locales/i18n'
 import WETH from "../contract/weth";
 import tron from "../rpc/tron";
-import interVar, {interVarBalance} from "../interval";
+import {interVarBalance} from "../interval";
+import AccountsModal from "../components/Accounts";
 
 const {StatusBar,Device} = Plugins;
 
@@ -94,7 +95,9 @@ interface State {
     crossMode:Array<string>,
     popoverState:any,
     showSelectChain:boolean,
-    lockedWallet:boolean
+    lockedWallet:boolean,
+    accounts:Array<AccountModel>,
+    showAccounts:boolean
 }
 
 class Wallet extends React.Component<State, any> {
@@ -120,7 +123,9 @@ class Wallet extends React.Component<State, any> {
         crossMode:[],
         popoverState:{},
         showSelectChain:false,
-        lockedWallet:false
+        lockedWallet:false,
+        accounts:[],
+        showAccounts:false,
     }
 
     componentDidMount() {
@@ -135,13 +140,6 @@ class Wallet extends React.Component<State, any> {
                 const chains = Object.keys(BRIDGE_CURRENCY[cy]);
                 assets[cy] = {}
                 for (let chain of chains) {
-                    // if (chain === "SERO") {
-                    //     assets[cy][chain] = "0";
-                    // } else if (chain === "ETH") {
-                    //     assets[cy][chain] = "0";
-                    // } else if (chain === "TRON") {
-                    //     assets[cy][chain] = "0";
-                    // }
                     assets[cy][chain] = "0";
                 }
             }
@@ -156,7 +154,7 @@ class Wallet extends React.Component<State, any> {
             }).catch(e=>{
                 console.error(e)
             })
-        },1000*3)
+        },1000)
 
         setTimeout(()=>{
             this.checkVersion().catch(e=>{
@@ -192,9 +190,10 @@ class Wallet extends React.Component<State, any> {
     init = async () => {
         const account = await walletWorker.accountInfo();
         const lockedWallet = await walletWorker.isLocked();
+        const accounts = await walletWorker.accounts();
         const assets: any = {};
         const currencies: Array<string> = Object.keys(BRIDGE_CURRENCY);
-        if (account && account.addresses && account.addresses[2]) {
+        if (account && account.addresses && account.addresses[ChainType.ETH]) {
             const allBalance = await Promise.all([
                 rpc.getBalance(ChainType.SERO, account.addresses[ChainType.SERO]),
                 rpc.getBalance(ChainType.ETH, account.addresses[ChainType.ETH]),
@@ -231,7 +230,9 @@ class Wallet extends React.Component<State, any> {
 
         this.setState({
             assets: assets,
-            lockedWallet:lockedWallet
+            lockedWallet:lockedWallet,
+            accounts:accounts,
+            account:account
         })
     }
 
@@ -289,7 +290,7 @@ class Wallet extends React.Component<State, any> {
     }
 
     renderAssets = () => {
-        const {assets, coinShow,account,popoverState} = this.state;
+        const {assets, coinShow,account,popoverState,accounts} = this.state;
         const assetsKeys = Object.keys(assets);
         const itemGroup: Array<any> = [];
 
@@ -516,8 +517,23 @@ class Wallet extends React.Component<State, any> {
         })
     }
 
+    setShowAccountsModal = (f:boolean) =>{
+        this.setState({
+            showAccounts:f
+        })
+    }
+    selectAccount = (act:AccountModel)=>{
+        selfStorage.setItem("accountId",act.accountId);
+        this.setState({
+            account:act,
+            showAccounts:false,
+        })
+        this.init().catch(e=>{
+            console.error(e)
+        })
+    }
     render() {
-        const {account,scanText,showLoading, showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain,lockedWallet} = this.state;
+        const {account,scanText,showLoading, accounts,showAccounts,showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain,lockedWallet} = this.state;
 
         return (
             <IonPage>
@@ -532,7 +548,9 @@ class Wallet extends React.Component<State, any> {
                                 })
                             }
                         }}><IonIcon size="small" src={lockedWallet?lockClosedOutline:lockOpenOutline} color="light"/> {lockedWallet?i18n.t("unlock"):i18n.t("Lock")}</IonButton>
-                        <IonTitle>{i18n.t("wallet")}</IonTitle>
+                        <IonTitle onClick={()=>{
+                            this.setShowAccountsModal(true);
+                        }}>{i18n.t("wallet")}&nbsp;<IonIcon src={chevronDown} style={{transform: "translateY(3px)"}}/></IonTitle>
                         {
                             utils.IsAPP() &&
                             <IonIcon onClick={() => {
@@ -544,7 +562,8 @@ class Wallet extends React.Component<State, any> {
                 <IonContent fullscreen color="light">
                     <IonList color="light">
                         <IonListHeader color="light" mode="ios">
-                            <IonLabel><IonText color="medium">{i18n.t("hello")} </IonText>{account.name} </IonLabel>
+                            <IonLabel><IonText color="medium">{i18n.t("hello")} </IonText>
+                                {account.name} </IonLabel>
                         </IonListHeader>
                         <IonItem mode="ios" lines="none" onClick={() => {
                             url.receive(account.addresses[ChainType.ETH],ChainType.ETH)
@@ -719,6 +738,13 @@ class Wallet extends React.Component<State, any> {
                     }]}
                 >
                 </IonActionSheet>
+
+
+                <AccountsModal isOpen={showAccounts} onSelect={
+                    (act)=>{
+                        this.selectAccount(act);
+                    }
+                } onCancel={()=>this.setShowAccountsModal(false)} accounts={accounts} account={account}/>
             </IonPage>
         );
     }

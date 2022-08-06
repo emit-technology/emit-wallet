@@ -17,9 +17,7 @@
  */
 
 import rpc from "../rpc";
-import {ChainType} from "../types";
-import BigNumber from "bignumber.js";
-
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 const serojs = require('serojs');
 
 class SeroContract{

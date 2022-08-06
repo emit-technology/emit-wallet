@@ -1,5 +1,5 @@
 import EthContract from "../../EthContract";
-import {ChainType} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import BigNumber from "bignumber.js";
 import * as utils from '../../../utils';
 import {PANCAKE_SWAP_CONFIG} from "../../../config";

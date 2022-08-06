@@ -11,7 +11,8 @@ import {
     IonToolbar,IonBadge
 } from "@ionic/react";
 import i18n from "../../../locales/i18n";
-import {ChainType, NftInfo, Transaction} from "../../../types";
+import {NftInfo, Transaction} from "../../../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import rpc from "../../../rpc";
 import * as utils from "../../../utils";
 import epochRemainsService from "../../../contract/epoch/sero/remains";

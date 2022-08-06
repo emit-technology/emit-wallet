@@ -16,29 +16,32 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface AccountModel {
-    accountId?: string
-    name: string
-    password?: string
-    avatar?: string
-    hint?: string
-    addresses?: any
-}
+import {ChainType} from '@emit-technology/emit-lib'
 
-export enum ChainType {
-    _,
-    SERO,
-    ETH,
-    TRON,
-    BSC
-}
+// export interface AccountModel {
+//     accountId?: string
+//     name: string
+//     password?: string
+//     avatar?: string
+//     hint?: string
+//     addresses?: any
+// }
+
+// export enum ChainType {
+//     _,
+//     SERO,
+//     ETH,
+//     TRON,
+//     BSC
+// }
 
 export enum ChainId {
     _,
     ETH,
     SERO,
     TRON,
-    BSC
+    BSC,
+    EMIT
 }
 
 export interface Transaction {

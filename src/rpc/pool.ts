@@ -1,4 +1,4 @@
-import {ChainType} from "../types";
+import {ChainType} from "@emit-technology/emit-lib";
 import Base from "./base";
 import {EPOCH_POOL_HOST} from "../config";
 import {PoolTask} from "../contract/epoch/sero/types";

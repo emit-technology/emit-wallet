@@ -1,9 +1,8 @@
 import {CONTRACT_ADDRESS, TRON_API_HOST} from "../config";
 import BigNumber from "bignumber.js";
-import {ChainType} from "../types";
 import selfStorage from "../utils/storage";
 import rpc from "./index";
-
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 /**
  * Copyright 2020 EMIT Foundation.
  This file is part of E.M.I.T. .

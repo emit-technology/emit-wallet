@@ -11,7 +11,8 @@ import {
 } from "@ionic/react";
 import rpc from "../rpc";
 import walletWorker from "../worker/walletWorker";
-import {ChainType, NftInfo} from "../types";
+import {NftInfo} from "../types";
+import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import i18n from "../locales/i18n";

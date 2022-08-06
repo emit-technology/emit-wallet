@@ -31,10 +31,10 @@ import {
 import './style.css';
 import {chevronBack, closeCircle} from 'ionicons/icons'
 import walletWorker from "../../worker/walletWorker";
-import {AccountModel} from "../../types";
 import selfStorage from "../../utils/storage";
 import url from "../../utils/url";
 import i18n from "../../locales/i18n";
+import {config} from "../../config";
 
 interface State {
     origin: Array<string>
@@ -63,7 +63,7 @@ class Confirm extends React.Component<any, State> {
     }
 
     componentDidMount() {
-        const tmpMnemonic: any = sessionStorage.getItem("tmpMnemonic")
+        const tmpMnemonic: any =  config.TMP.MNEMONIC;// sessionStorage.getItem("tmpMnemonic")
         if (!tmpMnemonic) {
             // window.location.href = "/#/account/create";
             url.accountCreate();
@@ -76,23 +76,27 @@ class Confirm extends React.Component<any, State> {
     }
 
     confirm = () => {
-        const tmpMnemonic: any = sessionStorage.getItem("tmpMnemonic")
-        const tmpAccount: any = sessionStorage.getItem("tmpAccount")
-        if(tmpAccount){
-            const account: AccountModel = JSON.parse(tmpAccount);
+        const tmpMnemonic: any =  config.TMP.MNEMONIC; //sessionStorage.getItem("tmpMnemonic")
+        const account: any = config.TMP.Account;//sessionStorage.getItem("tmpAccount")
+        if(account && account.name){
             this.setState({
                 showProgress:true,
                 showButton:false
             })
             walletWorker.importMnemonic(tmpMnemonic, account.name, account.password ? account.password : "", account.hint ? account.hint : "", "").then(((accountId:any) => {
                 if(accountId){
-                    sessionStorage.removeItem("tmpMnemonic");
-                    sessionStorage.removeItem("tmpAccount");
-                    selfStorage.setItem("accountId",accountId)
-                    // window.location.href = "/#/"
-                    // window.location.reload();
-                    selfStorage.setItem("viewedSlide",true);
-                    url.home();
+                    walletWorker.setBackedUp(accountId).then(()=>{
+                        sessionStorage.removeItem("tmpMnemonic");
+                        config.TMP.MNEMONIC = ""
+                        config.TMP.Account = {}
+                        sessionStorage.removeItem("tmpAccount");
+                        selfStorage.setItem("accountId",accountId)
+                        // window.location.href = "/#/"
+                        // window.location.reload();
+                        selfStorage.setItem("viewedSlide",true);
+                        url.home();
+                        // window.location.reload();
+                    })
                 }
             })).catch(()=>{
                 this.setState({
@@ -100,8 +104,12 @@ class Confirm extends React.Component<any, State> {
                 })
             })
         }else{
-            sessionStorage.removeItem("tmpMnemonic");
-            url.goTo(url.path_settings(),"")
+            const accountId = selfStorage.getItem("accountId");
+            walletWorker.setBackedUp(accountId).then(()=>{
+                sessionStorage.removeItem("tmpMnemonic");
+                config.TMP.MNEMONIC = "";
+                url.home();
+            }).catch(e=>console.error(e))
         }
     }
 
@@ -144,7 +152,7 @@ class Confirm extends React.Component<any, State> {
             <IonPage>
                 <IonContent fullscreen>
                     <IonHeader>
-                        <IonToolbar mode="ios" color="primary">
+                        <IonToolbar mode="ios">
                             <IonIcon src={chevronBack} slot="start" size="large" onClick={()=>{url.back()}}/>
                             <IonTitle><IonText>{i18n.t("confirm")}</IonText></IonTitle>
                         </IonToolbar>

@@ -25,11 +25,12 @@ import {
     IonRouterOutlet,
     IonTabBar,
     IonTabButton,
-    IonTabs, IonSplitPane
+    IonTabs,
+    setupConfig
 } from '@ionic/react';
 import {IonReactHashRouter} from '@ionic/react-router';
 import {
-    appsOutline, swapHorizontalOutline,
+    swapHorizontalOutline,
 } from 'ionicons/icons';
 import Wallet from './pages/Wallet';
 import Epoch from './pages/Epoch';
@@ -87,7 +88,6 @@ import Chart from "./pages/browser/chart";
 import HashRatePool from "./pages/epoch/pool/hashrate";
 import PoolInfo from "./pages/epoch/pool/info";
 import NFTMarketPlace from "./pages/market/NFTMarketPlace";
-import MenuNFT from "./components/menus/NFT";
 import Trade from "./pages/trade/Trade";
 import Freeze from "./pages/epoch/remains/freeze";
 import Unfreeze from "./pages/epoch/remains/unfreeze";
@@ -97,6 +97,8 @@ import NFTMarketStatics from "./pages/market/NFTMarketStatics";
 import rpc from "./rpc";
 import StarGrid from "./pages/epoch/starGrid";
 import interVar, {interVarNFT} from "./interval";
+import TabBrowser from "./pages/TabBrowser";
+import {AccountList} from "./pages/accounts/AccountList";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -107,6 +109,10 @@ interface State {
     deviceInfo?: DeviceInfo
     selected: string
 }
+
+setupConfig({
+    mode: "ios"
+})
 
 class App extends React.Component<any, State> {
 
@@ -184,6 +190,8 @@ class App extends React.Component<any, State> {
                         <Route path="/account/confirm" component={Confirm} exact={true}/>
                         <Route path="/account/import" component={ImportAccount} exact={true}/>
                         <Route path="/account/unlock" component={Unlock} exact={true}/>
+                        <Route path="/account/list" component={AccountList} exact={true}/>
+
                         <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
                         <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>
                         <Route path="/transfer-nft/:category/:chain/:value" component={TransferNFT} exact={true}/>
@@ -205,6 +213,7 @@ class App extends React.Component<any, State> {
 
                         <Route path="/epoch/style" component={EpochStyle} exact={true}/>
                         <Route path="/epoch/starGrid" component={StarGrid} exact={true}/>
+                        <Route path="/epoch" component={Epoch} exact={true}/>
 
                         <Route path="/browser/:url" component={Browser} exact={true}/>
                         <Route path="/chart/:symbol" component={Chart} exact={true}/>
@@ -250,6 +259,7 @@ class App extends React.Component<any, State> {
                                     <IonRouterOutlet>
                                         <Switch>
                                             <Route path="/tabs/wallet" component={Wallet} exact={true}/>
+                                            <Route path="/tabs/browser" component={TabBrowser} exact={true}/>
                                             <Route path="/tabs/epoch" component={Epoch} exact={true}/>
                                             <Route path="/tabs/settings" component={Settings} exact={true}/>
                                             <Route path="/tabs/nft" component={NFT} exact={true}/>
