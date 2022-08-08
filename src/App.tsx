@@ -255,6 +255,7 @@ class App extends React.Component<any, State> {
                                 <IonTabs onIonTabsDidChange={v => {
                                     this.resetIcon(v.detail.tab);
                                     interVar.latestOpTime = Date.now();
+                                    interVarNFT.latestOpTime = Date.now();
                                 }}>
                                     <IonRouterOutlet>
                                         <Switch>

@@ -30,7 +30,8 @@ class Url {
         import: "account/import",
         export: "account/export",
         receive: "account/receive",
-        unlock: "account/unlock"
+        unlock: "account/unlock",
+        list: "account/list"
     }
 
     private transaction = {
@@ -81,6 +82,10 @@ class Url {
 
     path_settings = () => {
         return [this.base, this.settings.setting].join("/")
+    }
+
+    path_settings_accounts = () => {
+        return [this.base, this.account.list].join("/")
     }
     /**
      * go to page
@@ -149,7 +154,7 @@ class Url {
     }
 
     accountExport() {
-        this.goTo([this.base, this.account.export].join("/"), [this.base, this.settings].join("/"));
+        this.goTo([this.base, this.account.export].join("/"), [this.base, this.settings.setting].join("/"));
     }
 
     accountUnlock() {
@@ -158,6 +163,10 @@ class Url {
         // }else{
             this.goTo([this.base, this.account.unlock].join("/"), "");
         // }
+    }
+
+    accountList(){
+        this.goTo([this.base, this.account.list].join("/"), [this.base, this.settings.setting].join("/"));
     }
 
     receive(address: string,chain:ChainType) {

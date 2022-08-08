@@ -303,13 +303,14 @@ class Wallet extends React.Component<State, any> {
             if(!(account.addresses && account.addresses[ChainType.TRON]) && ["TRX","TUSDT"].indexOf(cy)>-1){
                 continue;
             }
+            let i=0;
             for (let chain of tokenKeys) {
                 const value = new BigNumber(tokens[chain]);
                 const currency = utils.getCyName(cy, chain);
                 total = new BigNumber(value).plus(total)
 
                 item.push(
-                    <IonItem mode="ios" lines="none" style={{marginBottom:"5px"}} >
+                    <IonItem key={`${cy}_${chain}_${i++}`} mode="ios" lines="none" style={{marginBottom:"5px"}} >
                         <IonAvatar slot="start" onClick={(e:any) => {
                             // window.location.href = `#/transaction/list/${chain}/${cy}`
                             e.stopPropagation();
@@ -342,7 +343,7 @@ class Wallet extends React.Component<State, any> {
                 )
                 if(currency == "WETH"){
                     item.push(
-                        <IonItem mode="ios">
+                        <IonItem mode="ios" key={`${cy}_${chain}_${i++}`}>
                             <IonRow style={{textAlign:"center",width:"100%"}}>
                                 <IonCol size="6">
                                     <IonButton size="small" expand="block" fill="outline" onClick={(e:any)=>{
@@ -362,7 +363,7 @@ class Wallet extends React.Component<State, any> {
                 }
                 if(currency == "TRX"){
                     item.push(
-                        <IonItem mode="ios" lines="none">
+                        <IonItem mode="ios" key={`${cy}_${chain}_${i++}`} lines="none">
                             <IonRow style={{textAlign:"center",width:"100%"}}>
                                 <IonCol size="6">
                                     <IonText className="text-small-x2">{i18n.t("available")}</IonText>
@@ -383,7 +384,7 @@ class Wallet extends React.Component<State, any> {
             }
 
 
-            itemGroup.push(<IonCard mode="ios"   onClick={(e) => {
+            itemGroup.push(<IonCard key={`${cy}_${i++}`} mode="ios"   onClick={(e) => {
                 e.persist();
                 coinShow[cy] = !coinShow[cy];
                 this.setState({
@@ -414,8 +415,8 @@ class Wallet extends React.Component<State, any> {
                         >
                             <IonList>
                                 {
-                                    utils.getCrossChainByCy(cy).map((v:any) => {
-                                        return <IonItem onClick={()=>{
+                                    utils.getCrossChainByCy(cy).map((v:any,i) => {
+                                        return <IonItem key={`assets_${cy}_${i++}`} onClick={()=>{
                                             url.tunnel(cy,v.from,v.to)
                                         }}>
                                             <IonText>{utils.getCyDisplayName(v.from)}</IonText>
@@ -523,14 +524,17 @@ class Wallet extends React.Component<State, any> {
         })
     }
     selectAccount = (act:AccountModel)=>{
-        selfStorage.setItem("accountId",act.accountId);
-        this.setState({
-            account:act,
-            showAccounts:false,
-        })
-        this.init().catch(e=>{
-            console.error(e)
-        })
+        const {account}  = this.state
+        if(account && account.accountId != act.accountId){
+            selfStorage.setItem("accountId",act.accountId);
+            this.setState({
+                account:act,
+                showAccounts:false,
+            })
+            rpc.initBalance().catch(e=>{
+                console.error(e)
+            })
+        }
     }
     render() {
         const {account,scanText,showLoading, accounts,showAccounts,showAlert, chain,showVersionAlert,version,deviceInfo,toastColor,toastMsg,showToast,showSelectChain,lockedWallet} = this.state;

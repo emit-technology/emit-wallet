@@ -70,7 +70,7 @@ export const AccountDetail :React.FC<Props> = ({account,onExportPrivateKey,onClo
 
         </div>
         <IonToast
-            color="warning"
+            color="primary"
             position="top"
             isOpen={showToast}
             onDidDismiss={() => setShowToast(false)}

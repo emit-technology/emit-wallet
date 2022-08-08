@@ -669,3 +669,35 @@ export const SERO_GAS_MUL = 2;
 export const NODE_ACCOUNTS:any = ["qnU5ZRxiqqkbTo91QyvYR1TsMFeWuUAcQya9k8ddAXPbJMsZdsivmbzrkndJYQoFKFfZbyVSc1zt2e2rodDQmN3gtRUTm7VFfrphvfSCdhpT2YiBnh4bphbHoYSb3qSxYzP","Moq9wjSDos7ouqeFMPvFetsmzJdgqTkk6opTKixwsNT7hxtqbuAtwJLdnqzSismV51WkY1DKyJXzC7uL1qAvMvfdMmuqjKiZdGfr9BZ6ACV4LrcLdgYivritBypZBwqU1p1","E35AY6bY9RtpEQ8JjthK2Qdk7UNeVrfUDqL6ieHjTFevnkhkEEUbBrCpd2SL5n3uDrFJd5PfzikAfTuz8wvTK3ev3UCcWZG5tQtAumpa4USMyoorm9NrGQ3w24VGnUHaKB4","4qrLfGTmg6FrSYPHBUichjySLaxGHeQzxAuANRfucPJ4pwsGaa1v2YQoyeUYoxbQjyMCr6BDfXAdV7Kr1SAqkbg5yiSGG9sMahGmkZrqcDwHZJzXbkXRNto87fJLwVpZ356","Pv75E6fDpFzrUzDdFga6DPFEEJphYha8zocE94tcMCm7rLkEC5zghrLUdpFdqTjt4bgaQtzmR1yEramjXa61VHRZt63FAKo8BUik2kVF9sXKEPh5zT91pZWD7XUzRGisyia"]
 
 export const STAR_GRID_DEFAULT_LEVEL = 3;
+
+
+export const config = {
+    CHAIN_DESCRIPTION:{
+        SERO: "Super Zero",
+        BSC: "Balance Smart Chain",
+        ETH: "Ethereum Network",
+        TRON: "Tron Network",
+        EMIT: "EMIT Protocol"
+    },
+    VIEW_WEBSITE:{
+        SERO: "explorer.sero.cash",
+        BSC: "bscscan.com",
+        ETH: "etherscan.com",
+        TRON: "tronscan.io",
+        EMIT: "explorer.emit.technology"
+    },
+    EXPLORER: {
+        ADDRESS: {
+            SERO: "https://explorer.sero.cash/accountInfo.html?hash=",
+            ETH: "https://etherscan.com/address/",
+            TRON: "https://tronscan.io/#/address/",
+            BSC: "https://bscscan.com/address/",
+            EMIT: "https://etherscan.com/address/"
+        }
+    },
+    TMP: {
+        MNEMONIC: "",
+        Account: {}
+    },
+    ACCOUNT_NODE: "https://node-account.emit.technology"
+}

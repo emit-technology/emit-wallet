@@ -24,7 +24,7 @@ const AccountsModal:React.FC<Props> = ({isOpen,onCancel,onSelect,accounts,accoun
                 <IonItemDivider sticky color="primary" mode="ios">{i18n.t("selectAn")} {i18n.t("account")}</IonItemDivider>
                 {
                     accounts && accounts.map((v,i)=>{
-                        return <IonItem color={account && account.accountId == v.accountId?"primary":"white"} onClick={()=>{
+                        return <IonItem key={`account_${i}`} color={account && account.accountId == v.accountId?"primary":"white"} onClick={()=>{
                             if(!(account && account.accountId == v.accountId)){
                                 onSelect(v)
                             }

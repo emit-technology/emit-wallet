@@ -258,19 +258,19 @@ class Settings extends React.Component<any, any>{
                     </div>
 
                     <IonList>
-                        <IonItem mode="ios" onClick={()=>{
-                            account.createType == 1 ?this.setShowPasswordAlert(true):this.setShowActionSheet(true)
-                        }}>
-                            <IonIcon src={shieldCheckmarkOutline} slot="start"/>
-                            <IonLabel>{i18n.t("backupWallet")}</IonLabel>
-                            <IonIcon src={chevronForward} slot="end"  color="medium"/>
-                        </IonItem>
+                        {/*<IonItem mode="ios" onClick={()=>{*/}
+                        {/*    this.setShowPasswordAlert(true)*/}
+                        {/*}}>*/}
+                        {/*    <IonIcon src={shieldCheckmarkOutline} slot="start"/>*/}
+                        {/*    <IonLabel>{i18n.t("backupWallet")}</IonLabel>*/}
+                        {/*    <IonIcon src={chevronForward} slot="end"  color="medium"/>*/}
+                        {/*</IonItem>*/}
 
                         <IonItem mode="ios" onClick={()=>{
-                            url.accountCreate(url.path_settings());
+                            url.accountList();
                         }}>
-                            <IonIcon src={swapHorizontalOutline} slot="start"/>
-                            <IonLabel>{i18n.t("switchAccount")}</IonLabel>
+                            <IonIcon src={shieldCheckmarkOutline} slot="start"/>
+                            <IonLabel>{i18n.t("accounts")}</IonLabel>
                             <IonIcon src={chevronForward} slot="end"  color="medium"/>
                         </IonItem>
 

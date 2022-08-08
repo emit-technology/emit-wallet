@@ -23,8 +23,15 @@ import * as serviceWorker from './serviceWorker';
 import './index.css';
 import { Plugins,StatusBarStyle } from '@capacitor/core';
 import url from "./utils/url";
-import selfStorage from "./utils/storage";
+import walletWorker from "./worker/walletWorker";
 
+walletWorker.isLocked().then((rest)=>{
+   if(rest){
+       url.accountUnlock()
+   }
+}).catch(e=>{
+   console.error(e)
+})
 setTimeout(()=>{
     Plugins.SplashScreen.hide().then(()=>{
         console.log("App started , hide splash!")

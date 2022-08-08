@@ -3,7 +3,7 @@ import {
     IonAlert,
     IonAvatar,
     IonButton,
-    IonCard,IonText,
+    IonCard,
     IonCardContent,
     IonCardHeader,
     IonCardSubtitle,
@@ -17,6 +17,7 @@ import {
     IonModal,
     IonPage,
     IonRow,
+    IonText,
     IonTitle,
     IonToast,
     IonToolbar
@@ -111,19 +112,19 @@ export class AccountList extends React.Component<Props, State> {
             <IonPage>
                 <IonHeader>
                     <IonToolbar>
-                        <IonIcon slot="start" icon={arrowBackOutline} size="large" onClick={()=>{
+                        <IonIcon color="primary" slot="start" icon={arrowBackOutline} size="large" onClick={()=>{
                            url.back();
                         }}/>
                         <IonTitle>{i18n.t("accounts")}</IonTitle>
                         <IonIcon slot="end" style={{marginRight: "12px"}} icon={personAddOutline} size="large" onClick={()=>{
-                            url.accountCreate();
+                            url.accountCreate(url.path_settings_accounts());
                         }}/>
                     </IonToolbar>
                 </IonHeader>
                 <IonContent fullscreen scrollY>
                     {
                         accounts.map((v,i)=>{
-                            const chains = [ChainType.EMIT,ChainType.ETH,ChainType.BSC];
+                            const chains = [ChainType.EMIT,ChainType.ETH,ChainType.BSC,ChainType.TRON,ChainType.SERO];
                             return <IonCard key={i}>
                                 <IonCardHeader>
                                     <IonCardTitle>
@@ -296,7 +297,7 @@ export class AccountList extends React.Component<Props, State> {
                                         walletWorker.exportMnemonic(accountId, d["password"]).then((rest: any) => {
                                             if(rest && rest.split(" ").length == 12){
                                                 config.TMP.MNEMONIC = rest;
-                                                url.accountBackup()
+                                                url.accountBackup(url.path_settings_accounts())
                                             }else {
                                                 this.setState({showCopyAlert:true,privateKey: rest})
                                             }

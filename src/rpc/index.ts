@@ -323,8 +323,12 @@ class RPC {
         selfStorage.setItem(tKey, ret)
     }
 
+    _balanceKey = (chain:ChainType,address:string)=>{
+        return ["balance", chain,address.slice(0,7)].join("_")
+    }
+
     getBalance = async (chain: ChainType, address: string, localOnly?: boolean) => {
-        const key = ["balance", chain].join("_");
+        const key = this._balanceKey(chain,address);
         let rest: any = selfStorage.getItem(key);
         if (!rest && address) {
             return await this.getBalanceFromServer(address,chain)
@@ -340,7 +344,7 @@ class RPC {
 
     getBalanceFromServer = async (address:string,chain:ChainType)=>{
         const prefix = utils.getPrefix(chain)
-        const key = ["balance", chain].join("_");
+        const key = this._balanceKey(chain,address);
         if (chain == ChainType.TRON) {
             const balance = await tron.getBalance(address);
             selfStorage.setItem(key, balance);
