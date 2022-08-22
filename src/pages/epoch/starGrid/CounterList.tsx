@@ -43,6 +43,62 @@ export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedIn
     const baseAmountRef:any = React.createRef();
     const attachAmountRef:any = React.createRef();
 
+    const calcAmount = (percent:number )=>{
+        const counterId = selectRef.current.value;
+        const counters = data.filter(c=> c && c.counterId == counterId);
+        const counter = counters[0];
+        {
+            /**
+             * bLight：0.12*10^18
+             bDark: 0.04*10^18
+             Water: 0.1*10^18
+             Earth: 208.3*10^18
+             */
+            let cyValue = lockedInfo.last.burnedLight;
+            let min = new BigNumber(0.012);
+            if(counter){
+                if (counter.enType == StarGridType.EARTH) {
+                    cyValue = lockedInfo.last.burnedDark;
+                    min = new BigNumber(0.004);
+                }
+                let value = new BigNumber(0);
+                if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
+                    value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                        driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
+                    )
+                }
+                if (value.toNumber() < min.toNumber()) {
+                    value = min
+                }
+                console.log(value.toNumber(),cyValue,counter)
+                //@ts-ignore
+                document.getElementById("baseAmountId").value = value.toFixed(3);
+            }
+
+        }
+        {
+            if(counter){
+                let min = new BigNumber(20.83);
+                let cyValue = lockedInfo.last.burnedEarth;
+                if (counter.enType == StarGridType.EARTH) {
+                    cyValue = lockedInfo.last.burnedWater;
+                    min = new BigNumber(0.01)
+                }
+                let value = new BigNumber(0);
+                if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
+                    value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                        driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
+                    )
+                }
+                if (value.toNumber() < min.toNumber()) {
+                    value = min
+                }
+                //@ts-ignore
+                document.getElementById("attachAmountId").value = value.toFixed(3);
+            }
+        }
+    }
+
     return (<>
         <IonModal
             isOpen={show}
@@ -84,6 +140,24 @@ export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedIn
                         </IonRadioGroup>
                     </div>
                     {
+                        // t>0 && lockedInfo && baseAmountRef && baseAmountRef.current && baseAmountRef.current.value &&
+                        amountTitle1 && lockedInfo &&
+                        <IonRow style={{textAlign: "right"}}>
+                            <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                calcAmount(1.20)
+                            }}>120%</IonButton></IonCol>
+                            <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                calcAmount(1.50)
+                            }}>150%</IonButton></IonCol>
+                            <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                calcAmount(2.00)
+                            }}>200%</IonButton></IonCol>
+                            <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                calcAmount(3.00)
+                            }}>300%</IonButton></IonCol>
+                        </IonRow>
+                    }
+                    {
                         amountTitle1 &&
                         <IonItem>
                             <IonLabel position="stacked">{amountTitle1}</IonLabel>
@@ -91,59 +165,7 @@ export const CounterList:React.FC<Props> = ({show,onOk,title,driverInfo,lockedIn
                             {
                                 lockedInfo &&
                                 <IonButton mode="ios" size="small" fill="outline" slot="end" onClick={() => {
-                                    const counterId = selectRef.current.value;
-                                    const counters = data.filter(c=> c && c.counterId == counterId);
-                                    const counter = counters[0];
-                                    {
-                                        /**
-                                         * bLight：0.12*10^18
-                                         bDark: 0.04*10^18
-                                         Water: 0.1*10^18
-                                         Earth: 208.3*10^18
-                                         */
-                                        let cyValue = lockedInfo.last.burnedLight;
-                                        let min = new BigNumber(0.012);
-                                        if(counter){
-                                            if (counter.enType == StarGridType.EARTH) {
-                                                cyValue = lockedInfo.last.burnedDark;
-                                                min = new BigNumber(0.004);
-                                            }
-                                            let value = new BigNumber(0);
-                                            if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
-                                                value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
-                                                )
-                                            }
-                                            if (value.toNumber() < min.toNumber()) {
-                                                value = min
-                                            }
-                                            console.log(value.toNumber(),cyValue,counter)
-                                            //@ts-ignore
-                                            document.getElementById("baseAmountId").value = value.toFixed(3);
-                                        }
-
-                                    }
-                                    {
-                                        if(counter){
-                                            let min = new BigNumber(20.83);
-                                            let cyValue = lockedInfo.last.burnedEarth;
-                                            if (counter.enType == StarGridType.EARTH) {
-                                                cyValue = lockedInfo.last.burnedWater;
-                                                min = new BigNumber(0.01)
-                                            }
-                                            let value = new BigNumber(0);
-                                            if(new BigNumber(lockedInfo.last.totalEN).toNumber()>0){
-                                                value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                                    driverInfo?utils.fromValue(driverInfo.capacity, 18).multipliedBy(3):30
-                                                )
-                                            }
-                                            if (value.toNumber() < min.toNumber()) {
-                                                value = min
-                                            }
-                                            //@ts-ignore
-                                            document.getElementById("attachAmountId").value = value.toFixed(3);
-                                        }
-                                    }
+                                    calcAmount(1)
                                 }}>{i18n.t("recommend")}</IonButton>
                             }
                         </IonItem>

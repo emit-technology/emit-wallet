@@ -16,8 +16,8 @@ import {AccountModel, ChainType} from "@emit-technology/emit-lib";
 import {CONTRACT_ADDRESS} from "../config"
 import "./NFT.css";
 import i18n from "../locales/i18n";
-import CardTransform from "../components/CardTransform";
 import {Plugins} from "@capacitor/core";
+import {NFTListVirtual} from "../components/NFTListVirtual";
 
 class NFT extends React.Component<any, any> {
 
@@ -108,6 +108,7 @@ class NFT extends React.Component<any, any> {
 
     render() {
         const {ticketMap,tab,drivers} = this.state;
+        const data:Array<NftInfo> = ticketMap && ticketMap.has(tab) ? ticketMap.get(tab):[];
         return <IonPage>
             <IonHeader mode="ios">
                 <IonToolbar color="primary" mode="ios">
@@ -143,14 +144,15 @@ class NFT extends React.Component<any, any> {
                     {["MEDAL","DEVICES","WRAPPED_DEVICES","COUNTER"].indexOf(tab)>-1 && ticketMap && ticketMap.has(tab) &&
                     <div className="card-page">
                         <div className="card-inset">
-                            {
-                                ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {
-                                    //lines={index == data.length-1?"none":"inset"}
-                                    // const meta = v.metaData?v.metaData:{};
-                                    return <CardTransform info={v} key={index}/>
-                                })
-                            }
+                            {/*{*/}
+                            {/*    ticketMap.has(tab) && ticketMap.get(tab).map((v: NftInfo,index:number) => {*/}
+                            {/*        //lines={index == data.length-1?"none":"inset"}*/}
+                            {/*        // const meta = v.metaData?v.metaData:{};*/}
+                            {/*        return <CardTransform info={v} key={index}/>*/}
+                            {/*    })*/}
+                            {/*}*/}
 
+                            <NFTListVirtual data={data}/>
                         </div>
                     </div>
                     }

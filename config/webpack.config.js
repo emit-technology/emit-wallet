@@ -407,7 +407,7 @@ module.exports = function(webpackEnv) {
                     { helpers: true },
                   ],
                   {
-                    'plugins': ['@babel/plugin-proposal-class-properties']
+                    'plugins': ['@babel/plugin-proposal-class-properties',"@babel/plugin-syntax-bigint"]
                   }
                 ],
                 cacheDirectory: true,

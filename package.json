@@ -105,9 +105,11 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
     ],
     "development": [
       "last 1 chrome version",
@@ -120,6 +122,7 @@
     "@capacitor/cli": "2.4.3",
     "@emit-technology/emit-lib": "file:../emit-core/emit-lib",
     "axios": "^0.21.0",
+    "babel-plugin-transform-bigint": "^1.0.23",
     "base-x": "^3.0.8",
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.2.0",
@@ -128,6 +131,7 @@
     "history": "4.10.1",
     "node-sass": "^4.14.1",
     "qrcode.react": "^1.0.0",
+    "react-cool-virtual": "^0.7.0",
     "react-countdown": "^2.3.1",
     "safe-buffer": "^5.2.1",
     "sero-pp": "^1.0.8",

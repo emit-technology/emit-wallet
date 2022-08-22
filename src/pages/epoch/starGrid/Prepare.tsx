@@ -40,6 +40,46 @@ export const Prepare: React.FC<Props> = ({show,lockedInfo, onOk,driverInfo, onCa
     const baseAmountRef:any = React.createRef();
     const attachAmountRef:any = React.createRef();
 
+    const calcAmount = (percent:number) =>{
+        {
+            /**
+             * bLight：0.12*10^18
+             bDark: 0.04*10^18
+             Water: 0.1*10^18
+             Earth: 208.3*10^18
+             */
+            let cyValue = lockedInfo.last.burnedLight;
+            let min = new BigNumber(0.012);
+            if(lockedInfo.userInfo.counter.enType == StarGridType.EARTH){
+                cyValue = lockedInfo.last.burnedDark;
+                min = new BigNumber(0.004);
+            }
+            let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                utils.fromValue(driverInfo.capacity,18).multipliedBy(percent)
+            )
+            if(value.toNumber() < min.toNumber()){
+                value = min
+            }
+            //@ts-ignore
+            document.getElementById("baseAmountId").value = value.toFixed(3);
+        }
+        {
+            let min = new BigNumber(20.83);
+            let cyValue = lockedInfo.last.burnedEarth;
+            if(lockedInfo.userInfo.counter.enType == StarGridType.EARTH){
+                cyValue = lockedInfo.last.burnedWater;
+                min = new BigNumber(0.01)
+            }
+            let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
+                utils.fromValue(driverInfo.capacity,18).multipliedBy(percent)
+            )
+            if(value.toNumber() < min.toNumber()){
+                value = min
+            }
+            //@ts-ignore
+            document.getElementById("attachAmountId").value = value.toFixed(3);
+        }
+    }
     const eType = lockedInfo && lockedInfo.userInfo.counter&& lockedInfo.userInfo.counter.counterId!="0" ? enType2Cy(lockedInfo.userInfo.counter.enType):{base:"",attach:""}
     return (<>
         <IonModal
@@ -98,49 +138,28 @@ export const Prepare: React.FC<Props> = ({show,lockedInfo, onOk,driverInfo, onCa
                             <IonLabel position="stacked">{i18n.t("numberOfPeriod")}</IonLabel>
                             <IonInput ref={termsRef} placeholder="0.00"/>
                         </IonItem>
+                        {
+                            driverInfo && <IonRow style={{textAlign: "right"}}>
+                                <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                    calcAmount(1.20)
+                                }}>120%</IonButton></IonCol>
+                                <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                    calcAmount(1.50)
+                                }}>150%</IonButton></IonCol>
+                                <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                    calcAmount(2.00)
+                                }}>200%</IonButton></IonCol>
+                                <IonCol size="2"><IonButton size="small" mode="ios" fill="outline" onClick={()=>{
+                                    calcAmount(3.00)
+                                }}>300%</IonButton></IonCol>
+                            </IonRow>
+                        }
                         <IonItem>
                             <IonLabel position={"stacked"}>{eType.base}/<small>{i18n.t("period")}</small></IonLabel>
                             <IonInput ref={baseAmountRef} placeholder="0.00" id="baseAmountId"/>
                             {
                                 driverInfo && <IonButton mode="ios" size="small" fill="outline" slot="end" onClick={()=>{
-                                    {
-                                        /**
-                                         * bLight：0.12*10^18
-                                         bDark: 0.04*10^18
-                                         Water: 0.1*10^18
-                                         Earth: 208.3*10^18
-                                         */
-                                        let cyValue = lockedInfo.last.burnedLight;
-                                        let min = new BigNumber(0.012);
-                                        if(lockedInfo.userInfo.counter.enType == StarGridType.EARTH){
-                                            cyValue = lockedInfo.last.burnedDark;
-                                            min = new BigNumber(0.004);
-                                        }
-                                        let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(3)
-                                        )
-                                        if(value.toNumber() < min.toNumber()){
-                                            value = min
-                                        }
-                                        //@ts-ignore
-                                        document.getElementById("baseAmountId").value = value.toFixed(3);
-                                    }
-                                    {
-                                        let min = new BigNumber(20.83);
-                                        let cyValue = lockedInfo.last.burnedEarth;
-                                        if(lockedInfo.userInfo.counter.enType == StarGridType.EARTH){
-                                            cyValue = lockedInfo.last.burnedWater;
-                                            min = new BigNumber(0.01)
-                                        }
-                                        let value = new BigNumber(cyValue).dividedBy(new BigNumber(lockedInfo.last.totalEN)).multipliedBy(
-                                            utils.fromValue(driverInfo.capacity,18).multipliedBy(3)
-                                        )
-                                        if(value.toNumber() < min.toNumber()){
-                                            value = min
-                                        }
-                                        //@ts-ignore
-                                        document.getElementById("attachAmountId").value = value.toFixed(3);
-                                    }
+                                   calcAmount(1)
                                 }}>{i18n.t("recommend")}</IonButton>
                             }
                         </IonItem>
