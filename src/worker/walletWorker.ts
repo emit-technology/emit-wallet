@@ -167,7 +167,9 @@ class WalletWorker {
             accountId = selfStorage.getItem("accountId");
         }
         if(!accountId){
-            url.accountCreate()
+            // if( window.location.hash.indexOf("account/import") == -1){
+            //     url.accountCreate()
+            // }
             return;
         }
         return new Promise((resolve, reject)=>{

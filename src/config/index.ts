@@ -149,7 +149,7 @@ export const CHAIN_PARAMS: any = {
         networkId: 1,
         chainId: 1,
     },
-    hardfork: "byzantium"
+    hardfork: "istanbul"
 }
 
 export const CHAIN_PARAMS_BSC: any = {
@@ -158,7 +158,7 @@ export const CHAIN_PARAMS_BSC: any = {
         networkId: 56,
         chainId: 56,
     },
-    hardfork: "byzantium"
+    hardfork: "istanbul"
 }
 
 export const GAS_DEFAULT: any = {

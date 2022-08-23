@@ -24,6 +24,12 @@ import './index.css';
 import { Plugins,StatusBarStyle } from '@capacitor/core';
 import url from "./utils/url";
 import walletWorker from "./worker/walletWorker";
+import selfStorage from "./utils/storage";
+
+const accountId = selfStorage.getItem("accountId");
+if(!accountId){
+    url.accountCreate()
+}
 
 walletWorker.isLocked().then((rest)=>{
    if(rest){
