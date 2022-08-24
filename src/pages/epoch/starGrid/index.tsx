@@ -295,7 +295,7 @@ class StarGrid extends React.Component<any, State>{
         const enDetailsPromise = epochStarGridQuery.currentENDetails(owner);
         const rest = await Promise.all([rangeLandPromise,lockedInfoPromise,countersPromise,enDetailsPromise])
 
-        const balance = await rpc.getBalance(chain,"");
+        const balance = await rpc.getBalance(chain,owner);
         // const rangeLands:Array<Land> = rest[0];
         // const newTargetHex: Array<HexInfo> = [];
         // if(targetHex && targetHex.length>0 && rangeLands && rangeLands.length>0){
