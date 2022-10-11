@@ -335,7 +335,7 @@ class StarGrid extends React.Component<any, State>{
 
     getBalance = (cy:string,fix:number = 3) => {
        const {balanceMap} = this.state;
-       if(balanceMap[cy]){
+       if(balanceMap && balanceMap[cy]){
           return utils.fromValue(balanceMap[cy],18).toFixed(fix)
        }
        return 0

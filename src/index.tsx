@@ -72,6 +72,11 @@ Plugins.App.addListener("backButton",()=>{
     }
 })
 
+Plugins.App.addListener("appUrlOpen",(appUrlOpen)=>{
+    alert("app url open")
+    alert(JSON.stringify(appUrlOpen))
+})
+
 document.addEventListener('ionBackButton', (ev:any) => {
     ev.detail.register(10, () => {
         console.log('Handler was called!');
