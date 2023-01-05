@@ -99,6 +99,7 @@ import StarGrid from "./pages/epoch/starGrid";
 import interVar, {interVarNFT} from "./interval";
 import TabBrowser from "./pages/TabBrowser";
 import {AccountList} from "./pages/accounts/AccountList";
+import ResetAccount from "./pages/accounts/Reset";
 
 let element = require("./img/icon/element_selected.png")
 let nft = require("./img/icon/NFT.png")
@@ -191,6 +192,7 @@ class App extends React.Component<any, State> {
                         <Route path="/account/import" component={ImportAccount} exact={true}/>
                         <Route path="/account/unlock" component={Unlock} exact={true}/>
                         <Route path="/account/list" component={AccountList} exact={true}/>
+                        <Route path="/account/reset" component={ResetAccount} exact={true}/>
 
                         <Route path="/transfer/:cy/:chain/:to" component={Transfer} exact={true}/>
                         <Route path="/transfer/:cy/:chain" component={Transfer} exact={true}/>

@@ -31,7 +31,9 @@ class Url {
         export: "account/export",
         receive: "account/receive",
         unlock: "account/unlock",
-        list: "account/list"
+        list: "account/list",
+
+        reset: "account/reset",
     }
 
     private transaction = {
@@ -282,6 +284,10 @@ class Url {
 
     starGrid(){
         this.goTo([this.base,this.epoch.stargrid].join("/"),window.location.hash)
+    }
+
+    accountReset() {
+        this.goTo([this.base, this.account.reset].join("/"), [this.base, this.account.unlock].join("/"));
     }
 }
 

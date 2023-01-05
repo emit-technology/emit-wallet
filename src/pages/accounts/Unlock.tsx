@@ -114,6 +114,9 @@ class Unlock extends React.Component<any, State>{
                             });
                         }}>{showProgress&&<IonSpinner name="bubbles" />}{i18n.t("unlock")}</IonButton>
                     </div>
+                    <div style={{textAlign: "center",fontWeight:700, padding: '12px',cursor:"pointer" }} onClick={()=>{
+                        url.accountReset()
+                    }}><IonText color="tertiary">Forgot password?</IonText></div>
                     <IonToast
                         mode="ios"
                         isOpen={showToast}
