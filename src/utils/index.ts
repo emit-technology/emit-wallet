@@ -799,7 +799,8 @@ export function metaAttributesToWrappedDevice(attributes:Array<Attribute>):Wrapp
 }
 
 export function calcLandRate(landLevel:string){
-    return Math.ceil(new BigNumber(landLevel).multipliedBy(256).dividedBy(25).toNumber())
+    const l = Math.ceil(new BigNumber(landLevel).multipliedBy(256).dividedBy(25).toNumber())
+    return l > 255?255:l
 }
 
 export function dateFormat(date: Date) {
