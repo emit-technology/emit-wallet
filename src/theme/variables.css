@@ -1,6 +1,10 @@
 /* Ionic Variables and Theming. For more info, please see:
 http://ionicframework.com/docs/theming/ */
 
+ion-popover [popover]:not(:popover-open):not(dialog[open]) {
+  display: contents;
+}
+
 /** Ionic CSS Variables **/
 :root {
   /** primary **/
